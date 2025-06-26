@@ -82,112 +82,174 @@ function Login({ onLogin }) {
     }, 1000);
   };
 
-  const userTypeIcons = {
-    Admin: "bi-shield-check",
-    Manager: "bi-person-gear",
-    Conductor: "bi-bus-front"
+  const userTypeInfo = {
+    Admin: { 
+      icon: "bi-shield-check", 
+      color: "danger",
+      description: "Full System Access" 
+    },
+    Manager: { 
+      icon: "bi-person-gear", 
+      color: "warning",
+      description: "Management Operations" 
+    },
+    Conductor: { 
+      icon: "bi-bus-front", 
+      color: "success",
+      description: "Field Operations" 
+    }
   };
 
   return (
-    <div className="login-container">
-      <div className="login-background">
-        <div className="container-fluid d-flex align-items-center justify-content-center min-vh-100">
-          <div className="row w-100 justify-content-center">
-            <div className="col-12 col-md-6 col-lg-5 col-xl-4">
-              <div className="login-card">
-                <div className="login-header">
-                  <div className="logo-section">
-                    <i className="bi bi-speedometer2 logo-icon"></i>
-                    <h2>AC SUKOON</h2>
-                    <p>Transport Management System</p>
+    <div className="login-wrapper">
+      <div className="container-fluid vh-100">
+        <div className="row h-100 g-0">
+          {/* Left Side - Brand Section */}
+          <div className="col-lg-6 d-none d-lg-flex">
+            <div className="brand-section">
+              <div className="brand-content">
+                <div className="brand-logo mb-4">
+                  <i className="bi bi-speedometer2"></i>
+                </div>
+                <h1 className="brand-title">AC SUKOON</h1>
+                <h4 className="brand-subtitle">Transport Management System</h4>
+                <p className="brand-description">
+                  Streamline your transport operations with our comprehensive management solution.
+                  Track expenses, manage fares, and monitor your fleet efficiently.
+                </p>
+                <div className="features-list">
+                  <div className="feature-item">
+                    <i className="bi bi-check-circle-fill"></i>
+                    <span>Real-time Analytics</span>
+                  </div>
+                  <div className="feature-item">
+                    <i className="bi bi-check-circle-fill"></i>
+                    <span>Expense Tracking</span>
+                  </div>
+                  <div className="feature-item">
+                    <i className="bi bi-check-circle-fill"></i>
+                    <span>Fleet Management</span>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
 
-                <div className="login-body">
-                  <form onSubmit={handleSubmit}>
-                    {/* User Type Selection */}
-                    <div className="mb-4">
-                      <label className="form-label">Select User Type</label>
-                      <div className="user-type-selection">
-                        {["Admin", "Manager", "Conductor"].map((type) => (
-                          <div
-                            key={type}
-                            className={`user-type-card ${formData.userType === type ? 'selected' : ''}`}
-                            onClick={() => setFormData(prev => ({ ...prev, userType: type }))}
-                          >
-                            <i className={`bi ${userTypeIcons[type]}`}></i>
-                            <span>{type}</span>
-                          </div>
-                        ))}
+          {/* Right Side - Login Form */}
+          <div className="col-lg-6 col-12">
+            <div className="login-section">
+              <div className="login-container">
+                {/* Mobile Brand Header */}
+                <div className="mobile-brand d-lg-none text-center mb-4">
+                  <i className="bi bi-speedometer2 brand-icon"></i>
+                  <h3>AC SUKOON</h3>
+                  <p className="text-muted">Transport Management</p>
+                </div>
+
+                <div className="login-card">
+                  <div className="card-header text-center">
+                    <h4 className="card-title">Welcome Back</h4>
+                    <p className="text-muted">Sign in to your account</p>
+                  </div>
+
+                  <div className="card-body">
+                    <form onSubmit={handleSubmit}>
+                      {/* User Type Selection */}
+                      <div className="mb-4">
+                        <label className="form-label fw-semibold">Select User Type</label>
+                        <div className="user-type-grid">
+                          {Object.entries(userTypeInfo).map(([type, info]) => (
+                            <div
+                              key={type}
+                              className={`user-type-option ${formData.userType === type ? 'active' : ''}`}
+                              onClick={() => setFormData(prev => ({ ...prev, userType: type }))}
+                            >
+                              <div className="d-flex align-items-center">
+                                <div className={`type-icon bg-${info.color} bg-opacity-10 text-${info.color}`}>
+                                  <i className={`bi ${info.icon}`}></i>
+                                </div>
+                                <div className="type-info">
+                                  <div className="type-name">{type}</div>
+                                  <small className="type-desc text-muted">{info.description}</small>
+                                </div>
+                                <div className="type-check">
+                                  {formData.userType === type && (
+                                    <i className={`bi bi-check-circle-fill text-${info.color}`}></i>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Username Field */}
+                      <div className="mb-3">
+                        <label className="form-label fw-semibold">
+                          <i className="bi bi-person me-2"></i>Username
+                        </label>
+                        <input
+                          type="text"
+                          name="username"
+                          className={`form-control form-control-lg ${errors.username ? 'is-invalid' : ''}`}
+                          value={formData.username}
+                          onChange={handleInputChange}
+                          placeholder="Enter your username"
+                          disabled={isLoading}
+                        />
+                        {errors.username && (
+                          <div className="invalid-feedback">{errors.username}</div>
+                        )}
+                      </div>
+
+                      {/* Password Field */}
+                      <div className="mb-4">
+                        <label className="form-label fw-semibold">
+                          <i className="bi bi-lock me-2"></i>Password
+                        </label>
+                        <input
+                          type="password"
+                          name="password"
+                          className={`form-control form-control-lg ${errors.password ? 'is-invalid' : ''}`}
+                          value={formData.password}
+                          onChange={handleInputChange}
+                          placeholder="Enter your password"
+                          disabled={isLoading}
+                        />
+                        {errors.password && (
+                          <div className="invalid-feedback">{errors.password}</div>
+                        )}
+                      </div>
+
+                      {/* Login Button */}
+                      <button
+                        type="submit"
+                        className="btn btn-primary btn-lg w-100 login-btn"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2"></span>
+                            Signing In...
+                          </>
+                        ) : (
+                          <>
+                            <i className="bi bi-box-arrow-in-right me-2"></i>
+                            Sign In as {formData.userType}
+                          </>
+                        )}
+                      </button>
+                    </form>
+
+                    {/* Demo Credentials */}
+                    <div className="demo-info mt-4">
+                      <div className="alert alert-info py-2">
+                        <i className="bi bi-info-circle me-2"></i>
+                        <small>
+                          <strong>Demo Credentials:</strong> admin/1234, manager/1234, conductor/1234
+                        </small>
                       </div>
                     </div>
-
-                    {/* Username Input */}
-                    <div className="mb-3">
-                      <label className="form-label">
-                        <i className="bi bi-person me-2"></i>
-                        Username
-                      </label>
-                      <input
-                        type="text"
-                        className={`form-control login-input ${errors.username ? 'is-invalid' : ''}`}
-                        name="username"
-                        value={formData.username}
-                        onChange={handleInputChange}
-                        placeholder="Enter your username"
-                        disabled={isLoading}
-                      />
-                      {errors.username && (
-                        <div className="invalid-feedback">{errors.username}</div>
-                      )}
-                    </div>
-
-                    {/* Password Input */}
-                    <div className="mb-4">
-                      <label className="form-label">
-                        <i className="bi bi-lock me-2"></i>
-                        Password
-                      </label>
-                      <input
-                        type="password"
-                        className={`form-control login-input ${errors.password ? 'is-invalid' : ''}`}
-                        name="password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        placeholder="Enter your password"
-                        disabled={isLoading}
-                      />
-                      {errors.password && (
-                        <div className="invalid-feedback">{errors.password}</div>
-                      )}
-                    </div>
-
-                    {/* Login Button */}
-                    <button
-                      type="submit"
-                      className="btn login-btn w-100"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <>
-                          <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                          Signing In...
-                        </>
-                      ) : (
-                        <>
-                          <i className="bi bi-box-arrow-in-right me-2"></i>
-                          Sign In as {formData.userType}
-                        </>
-                      )}
-                    </button>
-                  </form>
-
-                  {/* Demo Credentials */}
-                  <div className="demo-credentials">
-                    <small className="text-muted">
-                      <i className="bi bi-info-circle me-1"></i>
-                      Demo Credentials: admin/1234, manager/1234, conductor/1234
-                    </small>
                   </div>
                 </div>
               </div>
