@@ -12,7 +12,6 @@ import {
   ArcElement,
 } from "chart.js";
 import { Line, Doughnut } from "react-chartjs-2";
-import "./Dashboard.css";
 
 ChartJS.register(
   CategoryScale,

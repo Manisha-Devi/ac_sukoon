@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 
 function FareEntry({ fareData, setFareData, setTotalEarnings }) {
@@ -36,7 +37,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
     const cashAmount = parseInt(dailyFareData.cashAmount) || 0;
     const bankAmount = parseInt(dailyFareData.bankAmount) || 0;
     const totalAmount = cashAmount + bankAmount;
-
+    
     const newEntry = {
       id: Date.now(),
       type: "daily",
@@ -46,7 +47,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
       totalAmount: totalAmount,
       date: dailyFareData.date,
     };
-
+    
     setFareData([...fareData, newEntry]);
     setTotalEarnings((prev) => prev + totalAmount);
     setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
@@ -57,7 +58,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
     const cashAmount = parseInt(bookingData.cashAmount) || 0;
     const bankAmount = parseInt(bookingData.bankAmount) || 0;
     const totalAmount = cashAmount + bankAmount;
-
+    
     const newEntry = {
       id: Date.now(),
       type: "booking",
@@ -68,7 +69,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
       dateFrom: bookingData.dateFrom,
       dateTo: bookingData.dateTo,
     };
-
+    
     setFareData([...fareData, newEntry]);
     setTotalEarnings((prev) => prev + totalAmount);
     setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
@@ -93,7 +94,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
     switch (activeCase) {
       case "daily":
         return (
-          <div className="fare-form-card">
+          <div className="form-card">
             <h3>Case 1: Daily Fare Collection</h3>
             <p className="text-muted mb-3">Daily basis route fare collection with cash and bank amounts</p>
             <form onSubmit={handleDailySubmit}>
@@ -178,7 +179,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                 <div className="col-12">
                   <button 
                     type="submit" 
-                    className="btn btn-primary fare-entry-btn"
+                    className="btn btn-primary"
                     disabled={!dailyFareData.route || !dailyFareData.date || 
                              ((parseInt(dailyFareData.cashAmount) || 0) + (parseInt(dailyFareData.bankAmount) || 0)) === 0}
                   >
@@ -193,7 +194,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
 
       case "booking":
         return (
-          <div className="fare-form-card">
+          <div className="form-card">
             <h3>Case 2: Booking Fare Collection</h3>
             <p className="text-muted mb-3">Booking details with cash and bank amounts and date range</p>
             <form onSubmit={handleBookingSubmit}>
@@ -286,7 +287,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                 <div className="col-12">
                   <button 
                     type="submit" 
-                    className="btn btn-primary fare-entry-btn"
+                    className="btn btn-primary"
                     disabled={!bookingData.bookingDetails || !bookingData.dateFrom || !bookingData.dateTo ||
                              ((parseInt(bookingData.cashAmount) || 0) + (parseInt(bookingData.bankAmount) || 0)) === 0}
                   >
@@ -301,7 +302,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
 
       case "off":
         return (
-          <div className="fare-form-card">
+          <div className="form-card">
             <h3>Case 3: Off Day Entry</h3>
             <p className="text-muted mb-3">Mark a day as off when no work is done</p>
             <form onSubmit={handleOffDaySubmit}>
