@@ -206,23 +206,25 @@ function App() {
             </button>
           </div>
 
-          <div className="menu-section">
-            <h6>AUTOMATION</h6>
-            <button
-              className={`menu-item ${activeTab === "cash-book" ? "active" : ""}`}
-              onClick={() => handleMenuClick("cash-book")}
-            >
-              <i className="bi bi-book"></i>
-              Cash Book (Double Column)
-            </button>
-            <button
-              className={`menu-item ${activeTab === "bonus-calc" ? "active" : ""}`}
-              onClick={() => handleMenuClick("bonus-calc")}
-            >
-              <i className="bi bi-calculator"></i>
-              Bonus Calculator
-            </button>
-          </div>
+          {(user.userType === "Manager" || user.userType === "Admin") && (
+            <div className="menu-section">
+              <h6>AUTOMATION</h6>
+              <button
+                className={`menu-item ${activeTab === "cash-book" ? "active" : ""}`}
+                onClick={() => handleMenuClick("cash-book")}
+              >
+                <i className="bi bi-book"></i>
+                Cash Book (Double Column)
+              </button>
+              <button
+                className={`menu-item ${activeTab === "bonus-calc" ? "active" : ""}`}
+                onClick={() => handleMenuClick("bonus-calc")}
+              >
+                <i className="bi bi-calculator"></i>
+                Bonus Calculator
+              </button>
+            </div>
+          )}
 
           <div className="menu-section">
             <h6>APPROVAL</h6>
