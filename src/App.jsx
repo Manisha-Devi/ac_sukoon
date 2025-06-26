@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import "./App.css";
 
@@ -15,151 +14,148 @@ import Analytics from "./components/jsx/Analytics";
 import CashBook from "./components/jsx/CashBook";
 import Approval from "./components/jsx/Approval";
 
+
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
-
-  // Global data states
-  const [fareData, setFareData] = useState([]);
   const [expenseData, setExpenseData] = useState([]);
+  const [fareData, setFareData] = useState([]);
+  const [totalExpenses, setTotalExpenses] = useState(0);
+  const [totalEarnings, setTotalEarnings] = useState(0);
   const [cashBookEntries, setCashBookEntries] = useState([]);
-
-  // Load data from localStorage on app start
-  useEffect(() => {
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-      setIsLoggedIn(true);
-    }
-
-    const savedFareData = localStorage.getItem('fareData');
-    if (savedFareData) {
-      setFareData(JSON.parse(savedFareData));
-    }
-
-    const savedExpenseData = localStorage.getItem('expenseData');
-    if (savedExpenseData) {
-      setExpenseData(JSON.parse(savedExpenseData));
-    }
-
-    const savedCashBookEntries = localStorage.getItem('cashBookEntries');
-    if (savedCashBookEntries) {
-      setCashBookEntries(JSON.parse(savedCashBookEntries));
-    }
-  }, []);
-
-  // Save data to localStorage whenever data changes
-  useEffect(() => {
-    localStorage.setItem('fareData', JSON.stringify(fareData));
-  }, [fareData]);
-
-  useEffect(() => {
-    localStorage.setItem('expenseData', JSON.stringify(expenseData));
-  }, [expenseData]);
-
-  useEffect(() => {
-    localStorage.setItem('cashBookEntries', JSON.stringify(cashBookEntries));
-  }, [cashBookEntries]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = useState(null);
 
   const handleLogin = (userData) => {
     setUser(userData);
-    setIsLoggedIn(true);
-    localStorage.setItem('currentUser', JSON.stringify(userData));
   };
 
   const handleLogout = () => {
     setUser(null);
-    setIsLoggedIn(false);
     setActiveTab("dashboard");
-    localStorage.removeItem('currentUser');
   };
 
-  const handleMenuClick = (tabName) => {
-    setActiveTab(tabName);
-  };
-
-  // Handle adding fare receipt data
-  const handleAddFareData = (data) => {
-    const newEntry = {
-      ...data,
-      id: Date.now(),
-      timestamp: new Date().toISOString()
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 992) {
+        // Don't automatically set sidebar state on desktop
+        // Let user control it with toggle button
+      } else {
+        setSidebarOpen(false);
+      }
     };
-    
-    setFareData(prev => [...prev, newEntry]);
-    
-    // Add to cash book
-    const cashBookEntry = {
-      id: Date.now() + Math.random(),
-      type: 'dr',
-      date: data.date,
-      particulars: `${data.passengerName || 'Passenger'} - ${data.fromLocation} to ${data.toLocation}`,
-      jfNo: `FR${newEntry.id}`,
-      cashAmount: parseFloat(data.cashAmount) || 0,
-      bankAmount: parseFloat(data.bankAmount) || 0,
-      source: 'fare-receipt',
-      timestamp: new Date().toISOString()
-    };
-    
-    setCashBookEntries(prev => [...prev, cashBookEntry]);
-  };
 
-  // Handle adding expense data
-  const handleAddExpenseData = (data) => {
-    const newEntry = {
-      ...data,
-      id: Date.now(),
-      timestamp: new Date().toISOString()
-    };
-    
-    setExpenseData(prev => [...prev, newEntry]);
-    
-    // Add to cash book
-    const cashBookEntry = {
-      id: Date.now() + Math.random(),
-      type: 'cr',
-      date: data.date,
-      particulars: data.description || data.serviceType || data.paymentDetails || 'Payment',
-      jfNo: `${data.type?.toUpperCase() || 'EXP'}${newEntry.id}`,
-      cashAmount: parseFloat(data.cashAmount) || 0,
-      bankAmount: parseFloat(data.bankAmount) || 0,
-      source: `${data.type}-payment`,
-      timestamp: new Date().toISOString()
-    };
-    
-    setCashBookEntries(prev => [...prev, cashBookEntry]);
-  };
+    // Set initial state based on screen size
+    if (window.innerWidth >= 992) {
+      setSidebarOpen(true); // Default open on desktop
+    }
 
-  // Handle direct cash book entries
-  const handleAddCashBookEntry = (entry) => {
-    setCashBookEntries(prev => [...prev, entry]);
-  };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-  if (!isLoggedIn) {
+  // If user is not logged in, show login component
+  if (!user) {
     return <Login onLogin={handleLogin} />;
   }
 
+  // Calculate profit/loss
+  const profit = totalEarnings - totalExpenses;
+  const profitPercentage = ((profit / totalExpenses) * 100).toFixed(1);
+
+  // Handle menu item click
+  const handleMenuClick = (tab) => {
+    setActiveTab(tab);
+    // Only close sidebar on mobile view
+    if (window.innerWidth < 992) {
+      setSidebarOpen(false);
+    }
+  };
+
   return (
     <div className="app">
-      <div className="sidebar">
-        <div className="sidebar-header">
-          <h3>
-            <i className="bi bi-truck-front"></i>
-            AC Sukoon Transport
-          </h3>
-          <div className="user-info">
-            <div className="user-avatar">
-              <i className="bi bi-person-circle"></i>
+      {/* Bootstrap Navbar */}
+      <nav className="navbar navbar-expand-lg custom-navbar">
+        <div className="container-fluid">
+          {/* Mobile Menu Button - Left Side */}
+          <button 
+            className="btn btn-link text-white p-2 d-lg-none" 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setSidebarOpen(!sidebarOpen);
+            }}
+            aria-label="Toggle sidebar"
+            type="button"
+          >
+            <i className={`bi ${sidebarOpen ? 'bi-x-lg' : 'bi-list'} fs-4`}></i>
+          </button>
+
+          {/* Brand - Center on Mobile, Left on Desktop */}
+          <a className="navbar-brand mx-auto mx-lg-0" href="#">
+            <i className="bi bi-speedometer2 me-2"></i>
+            <span className="d-none d-md-inline">AC SUKOON Dashboard System</span>
+            <span className="d-md-none">AC SUKOON</span>
+          </a>
+
+          {/* Search Bar - Hidden on Small Screens */}
+          <div className="navbar-search d-none d-md-block">
+            <i className="bi bi-search"></i>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search..."
+            />
+          </div>
+
+          {/* Right Side Controls */}
+          <div className="d-flex align-items-center">
+            {/* Desktop Toggle and User Info */}
+            <div className="d-none d-lg-flex align-items-center">
+              <button 
+                className="btn btn-link text-white p-2 me-3" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setSidebarOpen(!sidebarOpen);
+                }}
+                title="Toggle Sidebar"
+                type="button"
+              >
+                <i className="bi bi-layout-sidebar-inset fs-5"></i>
+              </button>
+              <span className="text-white">
+                <i className="bi bi-person-circle me-2"></i>
+                 {user.username} ({user.userType})
+              </span>
+              <button
+                  className="btn btn-outline-danger btn-sm ms-2"
+                  onClick={handleLogout}
+                  title="Logout"
+                >
+                  <i className="bi bi-box-arrow-right"></i>
+                </button>
             </div>
-            <div className="user-details">
-              <span className="user-name">{user.username}</span>
-              <span className="user-role">{user.userType}</span>
+
+            {/* Mobile User Icon */}
+            <div className="d-lg-none">
+              <span className="text-white">
+                <i className="bi bi-person-circle fs-5"></i>
+              </span>
             </div>
           </div>
         </div>
+      </nav>
 
-        <div className="menu">
+      {/* Sidebar Overlay - Only for mobile */}
+      <div
+        className={`sidebar-overlay ${sidebarOpen && window.innerWidth < 992 ? "show" : ""}`}
+        onClick={() => setSidebarOpen(false)}
+      ></div>
+
+      {/* Sidebar */}
+      <div className={`sidebar ${sidebarOpen ? "show" : ""}`}>
+        <div className="sidebar-menu">
           <div className="menu-section">
             <h6>MAIN</h6>
             <button
@@ -184,21 +180,21 @@ function App() {
               className={`menu-item ${activeTab === "fuel-entry" ? "active" : ""}`}
               onClick={() => handleMenuClick("fuel-entry")}
             >
-              <i className="bi bi-fuel-pump"></i>
+              <i className="bi bi-credit-card"></i>
               Fuel Payment
             </button>
             <button
               className={`menu-item ${activeTab === "adda-fees" ? "active" : ""}`}
               onClick={() => handleMenuClick("adda-fees")}
             >
-              <i className="bi bi-building"></i>
+              <i className="bi bi-credit-card"></i>
               Adda Payment
             </button>
             <button
-              className={`menu-item ${activeTab === "service-payment" ? "active" : ""}`}
-              onClick={() => handleMenuClick("service-payment")}
+              className={`menu-item ${activeTab === "service-entry" ? "active" : ""}`}
+              onClick={() => handleMenuClick("service-entry")}
             >
-              <i className="bi bi-tools"></i>
+              <i className="bi bi-credit-card"></i>
               Service Payment
             </button>
             <button
@@ -242,7 +238,7 @@ function App() {
           </div>
 
           <div className="menu-section">
-            <h6>ANALYTICS</h6>
+            <h6>REPORTS</h6>
             <button
               className={`menu-item ${activeTab === "analytics" ? "active" : ""}`}
               onClick={() => handleMenuClick("analytics")}
@@ -252,74 +248,75 @@ function App() {
             </button>
           </div>
         </div>
-
-        <div className="sidebar-footer">
-          <button className="logout-btn" onClick={handleLogout}>
-            <i className="bi bi-box-arrow-right"></i>
-            Logout
-          </button>
-        </div>
       </div>
 
+      {/* Main Content */}
       <div className="main-content">
-        {activeTab === "dashboard" && (
-          <Dashboard 
-            fareData={fareData}
-            expenseData={expenseData}
-            cashBookEntries={cashBookEntries}
-          />
-        )}
-        {activeTab === "fare-entry" && (
-          <FareEntry 
-            onAddFare={handleAddFareData}
-            existingData={fareData}
-          />
-        )}
-        {activeTab === "fuel-entry" && (
-          <FuelEntry 
-            onAddExpense={handleAddExpenseData}
-            existingData={expenseData.filter(item => item.type === 'fuel')}
-          />
-        )}
-        {activeTab === "adda-fees" && (
-          <AddaFeesEntry 
-            onAddExpense={handleAddExpenseData}
-            existingData={expenseData.filter(item => item.type === 'fees')}
-          />
-        )}
-        {activeTab === "service-payment" && (
-          <ServiceEntry 
-            onAddExpense={handleAddExpenseData}
-            existingData={expenseData.filter(item => item.type === 'service')}
-          />
-        )}
-        {activeTab === "other-payment" && (
-          <OtherPayment 
-            onAddExpense={handleAddExpenseData}
-            existingData={expenseData.filter(item => item.type === 'other')}
-          />
-        )}
-        {activeTab === "cash-book" && (
-          <CashBook 
-            entries={cashBookEntries}
-            onAddEntry={handleAddCashBookEntry}
-          />
-        )}
-        {activeTab === "bonus-calc" && <BonusCalculator />}
-        {activeTab === "approval" && (
-          <Approval 
-            fareData={fareData}
-            expenseData={expenseData}
-            cashBookEntries={cashBookEntries}
-          />
-        )}
-        {activeTab === "analytics" && (
-          <Analytics 
-            fareData={fareData}
-            expenseData={expenseData}
-            cashBookEntries={cashBookEntries}
-          />
-        )}
+        <div className="container-fluid">
+          {activeTab === "dashboard" && (
+            <Dashboard
+              totalEarnings={totalEarnings}
+              totalExpenses={totalExpenses}
+              profit={profit}
+              profitPercentage={profitPercentage}
+            />
+          )}
+          {activeTab === "fare-entry" && (
+            <FareEntry
+              fareData={fareData}
+              setFareData={setFareData}
+              setTotalEarnings={setTotalEarnings}
+              setCashBookEntries={setCashBookEntries}
+            />
+          )}
+          {activeTab === "fuel-entry" && (
+            <FuelEntry
+              expenseData={expenseData}
+              setExpenseData={setExpenseData}
+              setTotalExpenses={setTotalExpenses}
+              setCashBookEntries={setCashBookEntries}
+            />
+          )}
+          {activeTab === "adda-fees" && (
+            <AddaFeesEntry
+              expenseData={expenseData}
+              setExpenseData={setExpenseData}
+              setTotalExpenses={setTotalExpenses}
+              setCashBookEntries={setCashBookEntries}
+            />
+          )}
+          {activeTab === "service-entry" && (
+            <ServiceEntry
+              expenseData={expenseData}
+              setExpenseData={setExpenseData}
+              setTotalExpenses={setTotalExpenses}
+              setCashBookEntries={setCashBookEntries}
+            />
+          )}
+          {activeTab === "other-payment" && (
+            <OtherPayment
+              expenseData={expenseData}
+              setExpenseData={setExpenseData}
+              setTotalExpenses={setTotalExpenses}
+              setCashBookEntries={setCashBookEntries}
+            />
+          )}
+          {activeTab === "bonus-calc" && <BonusCalculator />}
+          {activeTab === "analytics" && <Analytics />}
+          {activeTab === "cash-book" && (
+            <CashBook
+              cashBookEntries={cashBookEntries}
+              setCashBookEntries={setCashBookEntries}
+            />
+          )}
+          {activeTab === "approval" && (
+            <Approval
+              fareData={fareData}
+              expenseData={expenseData}
+              cashBookEntries={cashBookEntries}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
