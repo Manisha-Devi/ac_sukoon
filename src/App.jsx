@@ -4,11 +4,11 @@ import "./App.css";
 // Import all components
 import Login from "./components/jsx/Login";
 import Dashboard from "./components/jsx/Dashboard";
-import FareEntry from "./components/jsx/FareRecipt.jsx";
-import FuelEntry from "./components/jsx/FuelPayment.jsx";
-import AddaFeesEntry from "./components/jsx/FeesPayment.jsx";
-import ServiceEntry from "./components/jsx/ServicePayment.jsx";
-import OtherPayment from "./components/jsx/OtherPayment.jsx";
+import FareEntry from "./components/jsx/FareRecipt";
+import FuelEntry from "./components/jsx/FuelPayment";
+import AddaFeesEntry from "./components/jsx/FeesPayment";
+import ServiceEntry from "./components/jsx/ServicePayment";
+import OtherPayment from "./components/jsx/OtherPayment";
 import BonusCalculator from "./components/jsx/BonusCalculator";
 import Analytics from "./components/jsx/Analytics";
 import CashBook from "./components/jsx/CashBook";
@@ -270,7 +270,7 @@ function App() {
             />
           )}
           {activeTab === "fuel-entry" && (
-            <FuelEntry 
+            <FuelEntry
               expenseData={expenseData}
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
@@ -278,7 +278,7 @@ function App() {
             />
           )}
           {activeTab === "adda-fees" && (
-            <AddaFeesEntry 
+            <AddaFeesEntry
               expenseData={expenseData}
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
@@ -286,7 +286,7 @@ function App() {
             />
           )}
           {activeTab === "service-entry" && (
-            <ServiceEntry 
+            <ServiceEntry
               expenseData={expenseData}
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
@@ -294,7 +294,7 @@ function App() {
             />
           )}
           {activeTab === "other-payment" && (
-            <OtherPayment 
+            <OtherPayment
               expenseData={expenseData}
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
