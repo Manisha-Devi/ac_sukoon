@@ -30,7 +30,6 @@ body {
   left: 0;
   right: 0;
   z-index: 1050;
-  width: 100%;
 }
 
 .navbar-brand {
@@ -113,14 +112,6 @@ body {
   transform: translateX(0);
 }
 
-/* Desktop sidebar always visible */
-@media (min-width: 992px) {
-  .sidebar {
-    transform: translateX(0);
-    position: fixed;
-  }
-}
-
 .sidebar-menu {
   padding: 1.5rem 0;
 }
@@ -198,13 +189,6 @@ body {
   padding: 2rem;
   transition: margin-left 0.3s ease;
   min-height: calc(100vh - var(--navbar-height));
-}
-
-/* Desktop main content with sidebar space */
-@media (min-width: 992px) {
-  .main-content {
-    margin-left: var(--sidebar-width);
-  }
 }
 
 /* Sidebar overlay for mobile */
@@ -419,6 +403,20 @@ body {
 }
 
 /* Responsive Design */
+@media (min-width: 992px) {
+  .sidebar.show {
+    transform: translateX(0);
+    position: fixed;
+  }
+
+  .main-content {
+    transition: margin-left 0.3s ease;
+  }
+
+  .sidebar.show + .main-content {
+    margin-left: var(--sidebar-width);
+  }
+}
 
 @media (max-width: 991.98px) {
   .sidebar {
