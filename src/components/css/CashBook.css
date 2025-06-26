@@ -89,19 +89,6 @@
   cursor: pointer;
 }
 
-.date-input::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  background: transparent;
-  padding: 0;
-  color: transparent;
-  opacity: 1;
-}
-
-.date-input:focus {
-  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-  border-color: #667eea;
-}
-
 /* Button */
 .cash-entry-btn {
   background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
@@ -167,40 +154,56 @@
   font-size: 1.5rem;
 }
 
-.debit-card {
+.dr-cash-card {
   border-left: 4px solid #28a745;
 }
 
-.debit-card h4 {
+.dr-cash-card h4 {
   color: #28a745;
 }
 
-.credit-card {
+.cr-cash-card {
   border-left: 4px solid #dc3545;
 }
 
-.credit-card h4 {
+.cr-cash-card h4 {
   color: #dc3545;
 }
 
-.balance-card {
+.dr-bank-card {
+  border-left: 4px solid #17a2b8;
+}
+
+.dr-bank-card h4 {
+  color: #17a2b8;
+}
+
+.cr-bank-card {
+  border-left: 4px solid #fd7e14;
+}
+
+.cr-bank-card h4 {
+  color: #fd7e14;
+}
+
+.cash-balance-card {
   border-left: 4px solid #667eea;
 }
 
-.balance-card h4 {
+.cash-balance-card h4 {
   color: #667eea;
 }
 
-.entries-card {
-  border-left: 4px solid #ffc107;
+.bank-balance-card {
+  border-left: 4px solid #764ba2;
 }
 
-.entries-card h4 {
-  color: #ffc107;
+.bank-balance-card h4 {
+  color: #764ba2;
 }
 
-/* Cash Book Ledger */
-.cash-book-ledger {
+/* Double Column Cash Book */
+.double-column-cash-book {
   background: white;
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -208,52 +211,148 @@
   margin-top: 2rem;
 }
 
-.cash-book-ledger h4 {
+.cash-book-header-row {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 1.5rem;
+  margin: 0;
+}
+
+.cash-book-header-row h4 {
   margin: 0;
   font-weight: 700;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  text-align: center;
+  justify-content: center;
 }
 
-.cash-book-ledger h4 i {
+.cash-book-header-row h4 i {
   color: #ffd700;
 }
 
-.table-responsive {
-  margin: 0;
+.cash-book-table-container {
+  overflow-x: auto;
 }
 
-.table {
+.cash-book-table {
   margin: 0;
   background: white;
+  font-size: 0.9rem;
 }
 
-.table thead th {
+.cash-book-table th {
   background: #f8f9fa;
-  border: none;
-  padding: 1rem;
+  border: 1px solid #dee2e6;
+  padding: 12px 8px;
   font-weight: 700;
   color: #495057;
-  text-transform: uppercase;
-  font-size: 0.8rem;
-  letter-spacing: 1px;
-}
-
-.table tbody td {
-  padding: 1rem;
-  border-color: #e9ecef;
+  text-align: center;
+  font-size: 0.85rem;
   vertical-align: middle;
 }
 
-.table tbody tr:hover {
-  background: rgba(102, 126, 234, 0.05);
+.dr-header {
+  background: rgba(40, 167, 69, 0.1) !important;
+  color: #28a745 !important;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
 }
 
-/* Entry Actions */
+.cr-header {
+  background: rgba(220, 53, 69, 0.1) !important;
+  color: #dc3545 !important;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.cash-book-table td {
+  padding: 10px 8px;
+  border: 1px solid #dee2e6 !important;
+  vertical-align: middle;
+  font-size: 0.85rem;
+}
+
+.cash-book-table tbody tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.totals-row {
+  background: rgba(102, 126, 234, 0.05) !important;
+  font-weight: 600;
+}
+
+.final-totals-row {
+  background: rgba(102, 126, 234, 0.1) !important;
+  font-weight: 700;
+  border-top: 2px solid #667eea !important;
+}
+
+.total-cell {
+  background: rgba(102, 126, 234, 0.2) !important;
+  font-weight: 800;
+  color: #667eea !important;
+}
+
+/* Entry Management */
+.entries-actions {
+  padding: 2rem;
+  background: #f8f9fa;
+}
+
+.entries-actions h5 {
+  color: #667eea;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.entries-actions h6 {
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+.entry-item {
+  display: flex;
+  justify-content: between;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border-left: 4px solid;
+}
+
+.dr-entry {
+  background: rgba(40, 167, 69, 0.05);
+  border-left-color: #28a745;
+}
+
+.cr-entry {
+  background: rgba(220, 53, 69, 0.05);
+  border-left-color: #dc3545;
+}
+
+.entry-info {
+  flex: 1;
+}
+
+.entry-info strong {
+  color: #495057;
+}
+
+.entry-info small {
+  color: #6c757d;
+  font-size: 0.75rem;
+}
+
 .entry-actions {
   display: flex;
   gap: 5px;
@@ -331,12 +430,22 @@
     font-size: 1.2rem;
   }
   
-  .table-responsive {
-    font-size: 0.8rem;
+  .cash-book-table {
+    font-size: 0.75rem;
   }
   
-  .cash-book-ledger h4 {
+  .cash-book-table th,
+  .cash-book-table td {
+    padding: 8px 4px;
+  }
+  
+  .entries-actions {
     padding: 1rem;
-    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 1200px) {
+  .cash-book-table-container {
+    font-size: 0.8rem;
   }
 }

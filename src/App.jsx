@@ -11,7 +11,7 @@ import OtherPayment from "./components/jsx/OtherPayment";
 import BonusCalculator from "./components/jsx/BonusCalculator";
 import Analytics from "./components/jsx/Analytics";
 import CashBook from "./components/jsx/CashBook";
-import BankBook from "./components/jsx/BankBook";
+
 
 function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -20,7 +20,6 @@ function App() {
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [cashBookEntries, setCashBookEntries] = useState([]);
-  const [bankBookEntries, setBankBookEntries] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Handle window resize
@@ -189,15 +188,8 @@ function App() {
               className={`menu-item ${activeTab === "cash-book" ? "active" : ""}`}
               onClick={() => handleMenuClick("cash-book")}
             >
-              <i className="bi bi-cash-coin"></i>
-              Cash Book
-            </button>
-            <button
-              className={`menu-item ${activeTab === "bank-book" ? "active" : ""}`}
-              onClick={() => handleMenuClick("bank-book")}
-            >
-              <i className="bi bi-bank"></i>
-              Bank Book
+              <i className="bi bi-book"></i>
+              Cash Book (Double Column)
             </button>
             <button
               className={`menu-item ${activeTab === "bonus-calc" ? "active" : ""}`}
@@ -293,12 +285,6 @@ function App() {
             <CashBook
               cashBookEntries={cashBookEntries}
               setCashBookEntries={setCashBookEntries}
-            />
-          )}
-          {activeTab === "bank-book" && (
-            <BankBook
-              bankBookEntries={bankBookEntries}
-              setBankBookEntries={setBankBookEntries}
             />
           )}
         </div>
