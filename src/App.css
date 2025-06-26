@@ -19,6 +19,11 @@ body {
   overflow-x: hidden;
 }
 
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 /* Custom Navbar */
 .custom-navbar {
   background: var(--primary-gradient) !important;
@@ -190,6 +195,8 @@ body {
   padding: 2rem;
   transition: margin-left 0.3s ease;
   min-height: calc(100vh - var(--navbar-height));
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Sidebar overlay for mobile only */
@@ -226,6 +233,8 @@ body {
   border: 1px solid #e9ecef;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  max-width: 100%;
 }
 
 .stat-card:hover {
@@ -271,6 +280,8 @@ body {
   color: #212529;
   margin: 0;
   line-height: 1.2;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .stat-label {
@@ -307,6 +318,9 @@ body {
   border: 1px solid #e9ecef;
   padding: 1.5rem;
   height: 400px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .chart-card h5 {
@@ -353,6 +367,8 @@ body {
   border: 1px solid #e9ecef;
   overflow: hidden;
   margin-top: 2rem;
+  width: 100%;
+  max-width: 100%;
 }
 
 .table-card h5 {
@@ -464,6 +480,8 @@ body {
 @media (max-width: 575.98px) {
   .main-content {
     padding: 0.75rem;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 
   .stat-card .card-body {
@@ -472,15 +490,20 @@ body {
 
   .form-card {
     padding: 1.5rem;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   .chart-card {
     height: 300px;
     padding: 1rem;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   .custom-navbar .container-fluid {
     padding: 0 0.5rem;
+    max-width: 100%;
   }
 
   .navbar-brand {
@@ -493,6 +516,39 @@ body {
     min-width: 44px;
     min-height: 44px;
     border-radius: 8px;
+  }
+
+  /* Fix container overflow on mobile */
+  .container-fluid {
+    max-width: 100%;
+    overflow-x: hidden;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  /* Ensure rows don't overflow */
+  .row {
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
+  }
+
+  .col-12, .col-sm-6, .col-lg-3, .col-lg-4, .col-lg-8 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    max-width: 100%;
+  }
+
+  /* Fix stat values that might be too long */
+  .stat-value {
+    font-size: 1.5rem;
+    word-break: break-word;
+  }
+
+  /* Ensure tables are responsive */
+  .table-responsive {
+    max-width: 100%;
+    overflow-x: auto;
   }
 }
 
