@@ -79,7 +79,149 @@ function Approval({ fareData, expenseData, cashBookEntries }) {
           <p>Review your financial data and send for approval</p>
         </div>
 
-        {/* Data Summary Cards */}
+        {/* Detailed Section Summaries */}
+        <div className="section-summaries mb-4">
+          {/* Fare Receipt Summary */}
+          <div className="section-summary-card">
+            <h5><i className="bi bi-receipt"></i> Fare Receipt Summary</h5>
+            <div className="row">
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Total Entries</h6>
+                  <h5>{fareData.length}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Cash Collection</h6>
+                  <h5>₹{fareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Bank Collection</h6>
+                  <h5>₹{fareData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card total">
+                  <h6>Total Fare Income</h6>
+                  <h5>₹{fareData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+            </div>
+            {fareData.length > 0 && (
+              <div className="recent-entries-preview">
+                <h6>Recent Entries:</h6>
+                {fareData.slice(-3).map((entry) => (
+                  <div key={entry.id} className="entry-preview">
+                    <span className="entry-type">{entry.type === 'daily' ? 'Daily' : entry.type === 'booking' ? 'Booking' : 'Off Day'}</span>
+                    <span className="entry-detail">
+                      {entry.type === 'daily' && `${entry.route} - ${entry.date}`}
+                      {entry.type === 'booking' && `${entry.bookingDetails?.substring(0, 30)}... - ${entry.dateFrom} to ${entry.dateTo}`}
+                      {entry.type === 'off' && `${entry.reason} - ${entry.date}`}
+                    </span>
+                    {entry.type !== 'off' && <span className="entry-amount">₹{entry.totalAmount}</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Fuel Payment Summary */}
+          <div className="section-summary-card">
+            <h5><i className="bi bi-fuel-pump"></i> Fuel Payment Summary</h5>
+            <div className="row">
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Total Entries</h6>
+                  <h5>{expenseData.filter(entry => entry.type === 'fuel').length}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Cash Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Bank Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card total">
+                  <h6>Total Fuel Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+            </div>
+            {expenseData.filter(entry => entry.type === 'fuel').length > 0 && (
+              <div className="recent-entries-preview">
+                <h6>Recent Entries:</h6>
+                {expenseData.filter(entry => entry.type === 'fuel').slice(-3).map((entry) => (
+                  <div key={entry.id} className="entry-preview">
+                    <span className="entry-type">Fuel</span>
+                    <span className="entry-detail">
+                      {entry.pumpName || 'Fuel Station'} - {entry.date}
+                      {entry.liters && ` (${entry.liters}L)`}
+                    </span>
+                    <span className="entry-amount">₹{entry.totalAmount}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Other Payment Summary */}
+          <div className="section-summary-card">
+            <h5><i className="bi bi-credit-card"></i> Other Payment Summary</h5>
+            <div className="row">
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Total Entries</h6>
+                  <h5>{expenseData.filter(entry => entry.type === 'other').length}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Cash Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'other').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Bank Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'other').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card total">
+                  <h6>Total Other Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'other').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+            </div>
+            {expenseData.filter(entry => entry.type === 'other').length > 0 && (
+              <div className="recent-entries-preview">
+                <h6>Recent Entries:</h6>
+                {expenseData.filter(entry => entry.type === 'other').slice(-3).map((entry) => (
+                  <div key={entry.id} className="entry-preview">
+                    <span className="entry-type">Other</span>
+                    <span className="entry-detail">
+                      {entry.paymentDetails} - {entry.date}
+                      {entry.vendor && ` (${entry.vendor})`}
+                    </span>
+                    <span className="entry-amount">₹{entry.totalAmount}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Overall Summary Cards */}
         <div className="row mb-4">
           <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
             <div className="summary-card cash-receipts">
