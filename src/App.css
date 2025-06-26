@@ -524,15 +524,57 @@ body {
 }
 
 /* Responsive Design */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 250px;
+  }
+
+  .main-content {
+    margin-left: 250px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+
   .sidebar {
     width: 100%;
     position: static;
     height: auto;
+    padding: 15px;
+  }
+
+  .sidebar-header {
+    text-align: left;
+    margin-bottom: 20px;
+  }
+
+  .menu-section {
+    margin-bottom: 15px;
+  }
+
+  .menu-item {
+    padding: 10px 12px;
+    font-size: 13px;
   }
 
   .main-content {
     margin-left: 0;
+    padding: 15px;
   }
 
   .dashboard-header {
@@ -541,27 +583,204 @@ body {
     align-items: flex-start;
   }
 
+  .dashboard-header h1 {
+    font-size: 24px;
+  }
+
   .search-bar input {
     width: 100%;
+    max-width: none;
   }
 
   .stats-grid {
     grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .stat-card {
+    padding: 20px;
+  }
+
+  .stat-icon {
+    font-size: 32px;
+    width: 50px;
+    height: 50px;
+  }
+
+  .stat-info h3 {
+    font-size: 20px;
   }
 
   .charts-grid {
     grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .chart-card {
+    height: 300px;
+    padding: 20px;
+  }
+
+  .chart-card.large {
+    height: 350px;
   }
 
   .form-row {
     grid-template-columns: 1fr;
   }
 
+  .entry-section {
+    padding: 20px;
+  }
+
+  .entry-section h2 {
+    font-size: 20px;
+  }
+
   .analytics-grid {
     grid-template-columns: 1fr;
   }
 
+  .analytics-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+  }
+
   .analysis-metrics {
     grid-template-columns: 1fr;
+  }
+
+  .metric {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .activity-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .entries-table {
+    overflow-x: auto;
+  }
+
+  .entries-table table {
+    min-width: 600px;
+  }
+
+  .entries-table th,
+  .entries-table td {
+    padding: 8px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 10px;
+  }
+
+  .sidebar {
+    padding: 10px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 20px;
+  }
+
+  .stat-card {
+    padding: 15px;
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .stat-info h3 {
+    font-size: 18px;
+  }
+
+  .chart-card {
+    height: 250px;
+    padding: 15px;
+  }
+
+  .chart-card.large {
+    height: 280px;
+  }
+
+  .entry-section {
+    padding: 15px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 10px;
+  }
+
+  .submit-btn,
+  .calculate-btn {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .bonus-calculator {
+    padding: 15px;
+  }
+
+  .summary-card {
+    padding: 15px;
+  }
+
+  .summary-card p {
+    font-size: 20px;
+  }
+
+  .detailed-analysis {
+    padding: 15px;
+  }
+
+  .recent-activity {
+    padding: 15px;
+  }
+
+  .activity-item {
+    padding: 10px;
+  }
+
+  .menu-item {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
+
+/* Additional responsive improvements */
+.dashboard-container {
+  min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    min-height: auto;
+  }
+}
+
+/* Ensure charts are responsive */
+.chart-card canvas {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Mobile-first approach for forms */
+.entry-form {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .entry-form {
+    max-width: 800px;
   }
 }
