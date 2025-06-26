@@ -12,6 +12,7 @@ function App() {
   const [expenseData, setExpenseData] = useState([]);
   const [totalEarnings, setTotalEarnings] = useState(30200);
   const [totalExpenses, setTotalExpenses] = useState(15600);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Calculate profit/loss
   const profit = totalEarnings - totalExpenses;
@@ -19,10 +20,24 @@ function App() {
 
   return (
     <div className="dashboard-container">
-      <div className="sidebar">
+      <button 
+        className="mobile-toggle"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+      >
+        ☰
+      </button>
+      <div className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
         <div className="sidebar-header">
-          <h2>AC SUKOON</h2>
-          <p>Dashboard</p>
+          <div className="header-content">
+            <h2>AC SUKOON</h2>
+            <p>Dashboard</p>
+          </div>
+          <button 
+            className="sidebar-toggle"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          >
+            {sidebarOpen ? '✕' : '☰'}
+          </button>
         </div>
         
         <div className="sidebar-menu">
@@ -31,8 +46,9 @@ function App() {
             <button
               className={`menu-item ${activeTab === 'dashboard' ? 'active' : ''}`}
               onClick={() => setActiveTab('dashboard')}
+              data-tooltip="Dashboard"
             >
-              📊 Dashboard
+              📊 {sidebarOpen && 'Dashboard'}
             </button>
           </div>
 
@@ -41,26 +57,30 @@ function App() {
             <button
               className={`menu-item ${activeTab === 'fare-entry' ? 'active' : ''}`}
               onClick={() => setActiveTab('fare-entry')}
+              data-tooltip="Fare Collection"
             >
-              🎫 Fare Collection
+              🎫 {sidebarOpen && 'Fare Collection'}
             </button>
             <button
               className={`menu-item ${activeTab === 'fuel-entry' ? 'active' : ''}`}
               onClick={() => setActiveTab('fuel-entry')}
+              data-tooltip="Fuel Expense"
             >
-              ⛽ Fuel Expense
+              ⛽ {sidebarOpen && 'Fuel Expense'}
             </button>
             <button
               className={`menu-item ${activeTab === 'adda-fees' ? 'active' : ''}`}
               onClick={() => setActiveTab('adda-fees')}
+              data-tooltip="Adda & Agent Fees"
             >
-              🏢 Adda & Agent Fees
+              🏢 {sidebarOpen && 'Adda & Agent Fees'}
             </button>
             <button
               className={`menu-item ${activeTab === 'service-entry' ? 'active' : ''}`}
               onClick={() => setActiveTab('service-entry')}
+              data-tooltip="Service Expense"
             >
-              🔧 Service Expense
+              🔧 {sidebarOpen && 'Service Expense'}
             </button>
           </div>
 
@@ -69,8 +89,9 @@ function App() {
             <button
               className={`menu-item ${activeTab === 'bonus-calc' ? 'active' : ''}`}
               onClick={() => setActiveTab('bonus-calc')}
+              data-tooltip="Bonus Calculator"
             >
-              💰 Bonus Calculator
+              💰 {sidebarOpen && 'Bonus Calculator'}
             </button>
           </div>
 
@@ -79,14 +100,15 @@ function App() {
             <button
               className={`menu-item ${activeTab === 'analytics' ? 'active' : ''}`}
               onClick={() => setActiveTab('analytics')}
+              data-tooltip="Analytics"
             >
-              📈 Analytics
+              📈 {sidebarOpen && 'Analytics'}
             </button>
           </div>
         </div>
       </div>
 
-      <div className="main-content">
+      <div className={`main-content ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
         {activeTab === 'dashboard' && <Dashboard totalEarnings={totalEarnings} totalExpenses={totalExpenses} profit={profit} profitPercentage={profitPercentage} />}
         {activeTab === 'fare-entry' && <FareEntry fareData={fareData} setFareData={setFareData} setTotalEarnings={setTotalEarnings} />}
         {activeTab === 'fuel-entry' && <FuelEntry expenseData={expenseData} setExpenseData={setExpenseData} setTotalExpenses={setTotalExpenses} />}
