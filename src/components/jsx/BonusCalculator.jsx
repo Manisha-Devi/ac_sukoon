@@ -1,5 +1,6 @@
 
 import React, { useState } from "react";
+import "../css/BonusCalculator.css";
 
 function BonusCalculator() {
   const [period, setPeriod] = useState("weekly");

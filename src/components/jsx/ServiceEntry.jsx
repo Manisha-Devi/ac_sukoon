@@ -1,5 +1,6 @@
 
 import React, { useState } from "react";
+import "../css/ServiceEntry.css";
 
 function ServiceEntry() {
   const [formData, setFormData] = useState({

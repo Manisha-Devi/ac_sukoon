@@ -1,5 +1,6 @@
 
 import React from "react";
+import "../css/Analytics.css";
 import {
   Chart as ChartJS,
   CategoryScale,
