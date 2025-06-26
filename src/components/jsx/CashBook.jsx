@@ -7,6 +7,7 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
   const [customDateFrom, setCustomDateFrom] = useState('');
   const [customDateTo, setCustomDateTo] = useState('');
   const [filteredEntries, setFilteredEntries] = useState([]);
+  const [showFilter, setShowFilter] = useState(false);
 
   useEffect(() => {
     const savedEntries = localStorage.getItem('cashBookEntries');
@@ -16,7 +17,9 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('cashBookEntries', JSON.stringify(cashBookEntries));
+    if (cashBookEntries.length > 0) {
+      localStorage.setItem('cashBookEntries', JSON.stringify(cashBookEntries));
+    }
     filterEntries();
   }, [cashBookEntries, customDateFrom, customDateTo]);
 
@@ -34,6 +37,11 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
     }
     
     setFilteredEntries(filtered);
+  };
+
+  const clearFilter = () => {
+    setCustomDateFrom('');
+    setCustomDateTo('');
   };
 
   // Calculate totals using filtered entries
@@ -73,36 +81,61 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
         <div className="cash-book-header">
           <h2><i className="bi bi-book"></i> Cash Book (Double Column)</h2>
           <p>Traditional Dr./Cr. format with Cash and Bank columns</p>
+          
+          {/* Filter Toggle Button */}
+          <div className="filter-toggle-section">
+            <button 
+              className="btn btn-outline-primary btn-sm filter-toggle-btn"
+              onClick={() => setShowFilter(!showFilter)}
+            >
+              <i className={`bi ${showFilter ? 'bi-eye-slash' : 'bi-funnel'}`}></i>
+              {showFilter ? 'Hide Filter' : 'Show Filter'}
+            </button>
+          </div>
         </div>
 
         {/* Date Filter Controls */}
-        <div className="simple-date-filter">
-          <div className="row align-items-end">
-            <div className="col-md-4">
-              <label className="form-label">From Date</label>
-              <input
-                type="date"
-                className="form-control"
-                value={customDateFrom}
-                onChange={(e) => setCustomDateFrom(e.target.value)}
-              />
-            </div>
-            <div className="col-md-4">
-              <label className="form-label">To Date</label>
-              <input
-                type="date"
-                className="form-control"
-                value={customDateTo}
-                onChange={(e) => setCustomDateTo(e.target.value)}
-              />
-            </div>
-            <div className="col-md-4">
-              <small className="text-muted">
-                {filteredEntries.length} of {cashBookEntries.length} entries
-              </small>
+        {showFilter && (
+          <div className="simple-date-filter">
+            <div className="row align-items-end">
+              <div className="col-md-3">
+                <label className="form-label">From Date</label>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={customDateFrom}
+                  onChange={(e) => setCustomDateFrom(e.target.value)}
+                />
+              </div>
+              <div className="col-md-3">
+                <label className="form-label">To Date</label>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={customDateTo}
+                  onChange={(e) => setCustomDateTo(e.target.value)}
+                />
+              </div>
+              <div className="col-md-3">
+                <button 
+                  className="btn btn-outline-secondary btn-sm clear-filter-btn"
+                  onClick={clearFilter}
+                  disabled={!customDateFrom && !customDateTo}
+                >
+                  <i className="bi bi-x-circle"></i> Clear
+                </button>
+              </div>
+              <div className="col-md-3">
+                <small className="text-muted filter-info">
+                  {customDateFrom || customDateTo ? 
+                    `${filteredEntries.length} of ${cashBookEntries.length} entries` :
+                    `${cashBookEntries.length} total entries`
+                  }
+                </small>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Summary Cards */}
         {filteredEntries.length > 0 && (
