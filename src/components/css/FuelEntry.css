@@ -1,126 +1,373 @@
 
-/* FuelEntry specific styles */
+:root {
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --fuel-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --border-radius: 15px;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --card-shadow-hover: 0 8px 15px rgba(0, 0, 0, 0.15);
+  --transition: all 0.3s ease;
+}
+
 .fuel-entry-container {
-  max-width: 100%;
-  padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px 0;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+}
+
+.fuel-entry-container .container-fluid {
+  padding-left: 15px;
+  padding-right: 15px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .fuel-header {
   text-align: center;
-  margin-bottom: 2rem;
-  color: white;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
 }
 
 .fuel-header h2 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 600;
 }
 
 .fuel-header p {
-  font-size: 1.1rem;
-  opacity: 0.9;
+  color: #666;
   margin: 0;
 }
 
-.fuel-form-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: var(--border-radius);
-  box-shadow: var(--card-shadow);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 2.5rem;
-  margin-bottom: 2rem;
-  transition: var(--transition);
+.fuel-header i {
+  color: #f5576c;
+  margin-right: 10px;
 }
 
-.fuel-form-card:hover {
-  transform: translateY(-2px);
+/* Summary Cards */
+.summary-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  transition: var(--transition);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.summary-card:hover {
+  transform: translateY(-3px);
   box-shadow: var(--card-shadow-hover);
 }
 
-.fuel-form-card h4 {
-  margin-bottom: 1.5rem;
-  font-weight: 600;
-  color: #212529;
-}
-
-.date-input {
-  cursor: pointer;
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  padding: 0.75rem;
-  transition: all 0.2s ease;
-}
-
-.date-input:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-  background-color: white;
-}
-
-.date-input:hover {
-  background-color: white;
-  border-color: #adb5bd;
-}
-
-.amount-summary {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 12px;
-  padding: 1rem;
-  border: 1px solid #dee2e6;
-}
-
-.amount-summary .row {
+.summary-card .card-body {
+  padding: 20px;
   text-align: center;
+}
+
+.summary-card h6 {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-card h4 {
+  color: #333;
+  font-weight: 700;
+  margin: 0;
+}
+
+.cash-card {
+  border-left: 4px solid #28a745;
+}
+
+.bank-card {
+  border-left: 4px solid #007bff;
+}
+
+.total-card {
+  border-left: 4px solid #f5576c;
+}
+
+.entries-card {
+  border-left: 4px solid #6f42c1;
+}
+
+/* Form Card */
+.fuel-form-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--border-radius);
+  padding: 30px;
+  box-shadow: var(--card-shadow);
+  margin-bottom: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.fuel-form-card h4 {
+  color: #333;
+  margin-bottom: 25px;
+  font-weight: 600;
+  border-bottom: 2px solid #f5576c;
+  padding-bottom: 10px;
+}
+
+.fuel-form-card h4 i {
+  color: #f5576c;
+  margin-right: 10px;
+}
+
+/* Form Controls */
+.form-label {
+  color: #555;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.form-control, .form-select {
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 15px;
+  font-size: 14px;
+  transition: var(--transition);
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #f5576c;
+  box-shadow: 0 0 0 3px rgba(245, 87, 108, 0.1);
+}
+
+.form-control::placeholder {
+  color: #a0aec0;
+}
+
+/* Date Input */
+.date-input {
+  position: relative;
+  cursor: pointer;
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(0.5);
+  opacity: 0.8;
+}
+
+.date-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Amount Summary */
+.amount-summary {
+  background: rgba(245, 87, 108, 0.1);
+  border-radius: 10px;
+  padding: 15px;
+  border: 1px solid rgba(245, 87, 108, 0.2);
 }
 
 .amount-summary span {
   font-weight: 500;
-  color: #495057;
+  color: #333;
 }
 
 .amount-summary strong {
-  color: #212529;
-  font-size: 1.1rem;
+  color: #f5576c;
 }
 
-.button-group {
-  text-align: center;
-}
-
+/* Submit Button */
 .fuel-entry-btn {
-  background: var(--primary-gradient);
+  background: var(--fuel-gradient);
   border: none;
-  padding: 0.875rem 2.5rem;
-  border-radius: 12px;
+  padding: 12px 30px;
+  border-radius: 10px;
+  color: white;
   font-weight: 600;
   transition: var(--transition);
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
-  color: white;
+  box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
 }
 
 .fuel-entry-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
-  background: linear-gradient(135deg, #7c91ff 0%, #8b62c7 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(245, 87, 108, 0.4);
+  background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
   color: white;
+}
+
+.fuel-entry-btn i {
+  margin-right: 8px;
+}
+
+.button-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Recent Entries */
+.recent-entries h4 {
+  color: #333;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.entry-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  transition: var(--transition);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  height: 100%;
+}
+
+.entry-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.entry-card .card-body {
+  padding: 20px;
+}
+
+.entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.entry-type {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.entry-type.fuel {
+  background: rgba(245, 87, 108, 0.1);
+  color: #f5576c;
+  border: 1px solid rgba(245, 87, 108, 0.3);
+}
+
+.entry-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.btn-edit {
+  background: rgba(40, 167, 69, 0.1);
+  border: 1px solid rgba(40, 167, 69, 0.3);
+  color: #28a745;
+  padding: 5px 8px;
+  border-radius: 6px;
+  transition: var(--transition);
+}
+
+.btn-edit:hover {
+  background: #28a745;
+  color: white;
+  transform: scale(1.05);
+}
+
+.btn-delete {
+  background: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  color: #dc3545;
+  padding: 5px 8px;
+  border-radius: 6px;
+  transition: var(--transition);
+}
+
+.btn-delete:hover {
+  background: #dc3545;
+  color: white;
+  transform: scale(1.05);
+}
+
+.entry-date {
+  margin-bottom: 10px;
+}
+
+.entry-content {
+  margin-bottom: 15px;
+}
+
+.entry-content p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.entry-amounts {
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.amount-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.total-amount {
+  text-align: center;
+  color: #f5576c;
+  font-size: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .fuel-form-card {
+    padding: 20px;
+  }
+  
+  .summary-card .card-body {
+    padding: 15px;
+  }
+  
+  .button-group {
+    flex-direction: column;
+  }
+  
+  .button-group .btn {
+    width: 100%;
+  }
 }
 
 @media (max-width: 575.98px) {
   .fuel-form-card {
     padding: 1.5rem;
   }
-  
-  .fuel-header h2 {
-    font-size: 2rem;
+
+  .summary-card h4 {
+    font-size: 1.2rem;
   }
-  
+
+  .entry-card {
+    margin-bottom: 1rem;
+  }
+
   .date-input {
     padding: 0.65rem;
   }
+  
+  .amount-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+
+.invalid-feedback {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875em;
+  color: #dc3545;
 }
