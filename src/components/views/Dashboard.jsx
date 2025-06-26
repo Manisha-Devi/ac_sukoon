@@ -29,3 +29,26 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage }) {
 }
 
 export default Dashboard;
+import React from 'react';
+import StatsGrid from '../ui/StatsGrid';
+import ChartsSection from '../ui/ChartsSection';
+import RecentActivity from '../ui/RecentActivity';
+
+function Dashboard() {
+  return (
+    <div className="dashboard-content">
+      <div className="dashboard-header">
+        <h1>Dashboard</h1>
+        <div className="search-bar">
+          <input type="text" placeholder="Search..." />
+        </div>
+      </div>
+      
+      <StatsGrid />
+      <ChartsSection />
+      <RecentActivity />
+    </div>
+  );
+}
+
+export default Dashboard;

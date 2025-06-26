@@ -44,3 +44,56 @@ function StatsGrid({ totalEarnings, totalExpenses, profit, profitPercentage }) {
 }
 
 export default StatsGrid;
+import React from 'react';
+
+function StatsGrid() {
+  const stats = [
+    {
+      title: 'Total Earnings',
+      value: '₹55,420',
+      icon: '💰',
+      type: 'earnings',
+      trend: '+12%'
+    },
+    {
+      title: 'Total Expenses',
+      value: '₹23,650',
+      icon: '📊',
+      type: 'expenses',
+      trend: '-5%'
+    },
+    {
+      title: 'Net Profit',
+      value: '₹31,770',
+      icon: '📈',
+      type: 'profit',
+      trend: '+18%'
+    },
+    {
+      title: 'Active Routes',
+      value: '8',
+      icon: '🚌',
+      type: 'routes',
+      trend: '+2'
+    }
+  ];
+
+  return (
+    <div className="stats-grid">
+      {stats.map((stat, index) => (
+        <div key={index} className={`stat-card ${stat.type}`}>
+          <div className="stat-icon">
+            {stat.icon}
+          </div>
+          <div className="stat-info">
+            <h3>{stat.title}</h3>
+            <p className="stat-value">{stat.value}</p>
+            <span className="stat-trend">{stat.trend}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default StatsGrid;

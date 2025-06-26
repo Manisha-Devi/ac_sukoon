@@ -2,59 +2,68 @@
 import React from 'react';
 
 function Form({ fields, formData, setFormData, onSubmit, buttonText }) {
-  const handleChange = (name, value) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const renderField = (field) => {
-    const { name, label, type, options, required } = field;
-    
-    if (type === 'select') {
-      return (
-        <select
-          value={formData[name] || ''}
-          onChange={(e) => handleChange(name, e.target.value)}
-          required={required}
-        >
-          <option value="">Select {label}</option>
-          {options.map(option => (
-            <option key={option} value={option}>{option}</option>
-          ))}
-        </select>
-      );
-    }
-
-    if (type === 'textarea') {
-      return (
-        <textarea
-          value={formData[name] || ''}
-          onChange={(e) => handleChange(name, e.target.value)}
-          rows={3}
-          required={required}
-        />
-      );
-    }
-
-    return (
-      <input
-        type={type}
-        value={formData[name] || ''}
-        onChange={(e) => handleChange(name, e.target.value)}
-        required={required}
-        step={type === 'number' ? '0.01' : undefined}
-      />
-    );
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   return (
     <form onSubmit={onSubmit} className="entry-form">
-      {fields.map((field, index) => (
-        <div key={field.name} className={field.width === 'full' ? 'form-group' : 'form-group'}>
-          <label>{field.label}</label>
-          {renderField(field)}
-        </div>
-      ))}
-      <button type="submit" className="submit-btn">{buttonText}</button>
+      <div className="form-grid">
+        {fields.map((field, index) => (
+          <div 
+            key={index} 
+            className={`form-group ${field.width === 'full' ? 'full-width' : ''}`}
+          >
+            <label htmlFor={field.name}>
+              {field.label}
+              {field.required && <span className="required">*</span>}
+            </label>
+            
+            {field.type === 'select' ? (
+              <select
+                id={field.name}
+                name={field.name}
+                value={formData[field.name] || ''}
+                onChange={handleInputChange}
+                required={field.required}
+              >
+                <option value="">Select {field.label}</option>
+                {field.options.map((option, optionIndex) => (
+                  <option key={optionIndex} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            ) : field.type === 'textarea' ? (
+              <textarea
+                id={field.name}
+                name={field.name}
+                value={formData[field.name] || ''}
+                onChange={handleInputChange}
+                required={field.required}
+                rows="4"
+              />
+            ) : (
+              <input
+                type={field.type}
+                id={field.name}
+                name={field.name}
+                value={formData[field.name] || ''}
+                onChange={handleInputChange}
+                required={field.required}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+      
+      <button type="submit" className="submit-btn">
+        {buttonText || 'Submit'}
+      </button>
     </form>
   );
 }

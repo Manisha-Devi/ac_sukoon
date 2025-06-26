@@ -73,3 +73,57 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
 }
 
 export default FareEntry;
+import React, { useState } from 'react';
+import Form from '../ui/Form';
+
+function FareEntry() {
+  const [formData, setFormData] = useState({
+    route: '',
+    amount: '',
+    passengers: '',
+    date: '',
+    time: ''
+  });
+
+  const routes = [
+    'Ghuraka to Bhaderwah',
+    'Bhaderwah to Jammu',
+    'Jammu to Srinagar',
+    'Local Route'
+  ];
+
+  const fields = [
+    { 
+      name: 'route', 
+      label: 'Route', 
+      type: 'select', 
+      options: routes, 
+      required: true 
+    },
+    { name: 'amount', label: 'Fare Amount (₹)', type: 'number', required: true },
+    { name: 'passengers', label: 'Number of Passengers', type: 'number', required: true },
+    { name: 'date', label: 'Date', type: 'date', required: true },
+    { name: 'time', label: 'Time', type: 'time', required: true }
+  ];
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Fare entry:', formData);
+    setFormData({ route: '', amount: '', passengers: '', date: '', time: '' });
+  };
+
+  return (
+    <div className="entry-section">
+      <h2>Fare Collection Entry</h2>
+      <Form
+        fields={fields}
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handleSubmit}
+        buttonText="Add Fare Entry"
+      />
+    </div>
+  );
+}
+
+export default FareEntry;
