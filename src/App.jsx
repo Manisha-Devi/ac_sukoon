@@ -38,14 +38,19 @@ function App() {
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 992) {
-        setSidebarOpen(true);
+        // Don't automatically set sidebar state on desktop
+        // Let user control it with toggle button
       } else {
         setSidebarOpen(false);
       }
     };
 
+    // Set initial state based on screen size
+    if (window.innerWidth >= 992) {
+      setSidebarOpen(true); // Default open on desktop
+    }
+
     window.addEventListener("resize", handleResize);
-    handleResize(); // Call once on mount
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 

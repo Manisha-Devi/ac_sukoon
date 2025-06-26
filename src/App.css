@@ -406,13 +406,27 @@ body {
 /* Responsive Design */
 @media (min-width: 992px) {
   .sidebar {
-    transform: translateX(0) !important;
     position: fixed !important;
+  }
+  
+  .sidebar.show {
+    transform: translateX(0) !important;
+  }
+  
+  .sidebar:not(.show) {
+    transform: translateX(-100%) !important;
   }
 
   .main-content {
     transition: margin-left 0.3s ease;
+  }
+  
+  .sidebar.show + .main-content {
     margin-left: var(--sidebar-width) !important;
+  }
+  
+  .sidebar:not(.show) + .main-content {
+    margin-left: 0 !important;
   }
 }
 
