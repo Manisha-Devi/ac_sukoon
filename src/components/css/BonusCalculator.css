@@ -1,0 +1,62 @@
+
+/* BonusCalculator specific styles */
+.bonus-calculator-container {
+  max-width: 100%;
+}
+
+.bonus-form-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+  transition: var(--transition);
+}
+
+.bonus-form-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.bonus-form-card h3 {
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.bonus-calculate-btn {
+  background: var(--primary-gradient);
+  border: none;
+  padding: 0.875rem 2.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: var(--transition);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+}
+
+.bonus-calculate-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #7c91ff 0%, #8b62c7 100%);
+}
+
+.bonus-result {
+  background: rgba(40, 167, 69, 0.1);
+  border: 1px solid rgba(40, 167, 69, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.bonus-result .alert-heading {
+  color: #155724;
+  font-weight: 700;
+}
+
+@media (max-width: 575.98px) {
+  .bonus-form-card {
+    padding: 1.5rem;
+  }
+}

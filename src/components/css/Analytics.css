@@ -1,0 +1,86 @@
+
+/* Analytics specific styles */
+.analytics-container {
+  max-width: 100%;
+}
+
+.analytics-chart-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  transition: var(--transition);
+  height: 400px;
+}
+
+.analytics-chart-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.analytics-chart-card h5 {
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.analytics-stats-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  border: none;
+  transition: var(--transition);
+  margin-bottom: 1rem;
+}
+
+.analytics-stats-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.analytics-stats-card .card-body {
+  padding: 1.5rem;
+}
+
+.analytics-stats-card .card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.analytics-stats-card .card-text {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.analytics-summary-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: var(--transition);
+}
+
+.analytics-summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.analytics-summary-card .card-title {
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 575.98px) {
+  .analytics-chart-card {
+    padding: 1.5rem;
+    height: 320px;
+  }
+}
