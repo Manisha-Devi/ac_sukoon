@@ -61,6 +61,7 @@ function App() {
   // Handle menu item click
   const handleMenuClick = (tab) => {
     setActiveTab(tab);
+    // Only close sidebar on mobile view
     if (window.innerWidth < 992) {
       setSidebarOpen(false);
     }
@@ -74,8 +75,13 @@ function App() {
           {/* Mobile Menu Button - Left Side */}
           <button 
             className="btn btn-link text-white p-2 d-lg-none" 
-            onClick={() => setSidebarOpen(!sidebarOpen)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setSidebarOpen(!sidebarOpen);
+            }}
             aria-label="Toggle sidebar"
+            type="button"
           >
             <i className={`bi ${sidebarOpen ? 'bi-x-lg' : 'bi-list'} fs-4`}></i>
           </button>
@@ -103,8 +109,13 @@ function App() {
             <div className="d-none d-lg-flex align-items-center">
               <button 
                 className="btn btn-link text-white p-2 me-3" 
-                onClick={() => setSidebarOpen(!sidebarOpen)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setSidebarOpen(!sidebarOpen);
+                }}
                 title="Toggle Sidebar"
+                type="button"
               >
                 <i className="bi bi-layout-sidebar-inset fs-5"></i>
               </button>
@@ -124,9 +135,9 @@ function App() {
         </div>
       </nav>
 
-      {/* Sidebar Overlay */}
+      {/* Sidebar Overlay - Only for mobile */}
       <div
-        className={`sidebar-overlay ${sidebarOpen ? "show" : ""}`}
+        className={`sidebar-overlay ${sidebarOpen && window.innerWidth < 992 ? "show" : ""}`}
         onClick={() => setSidebarOpen(false)}
       ></div>
 
