@@ -815,15 +815,34 @@ html, body {
   }
 
   .main-content {
-    transition: margin-left 0.3s ease;
+    transition: margin-left 0.3s ease, width 0.3s ease;
+    width: calc(100% - var(--sidebar-width));
   }
   
   .sidebar.show + .main-content {
     margin-left: var(--sidebar-width) !important;
+    width: calc(100% - var(--sidebar-width)) !important;
   }
   
   .sidebar:not(.show) + .main-content {
     margin-left: 0 !important;
+    width: 100% !important;
+  }
+  
+  /* Ensure form cards and other elements use full available width */
+  .sidebar:not(.show) + .main-content .container-fluid {
+    max-width: 100% !important;
+  }
+  
+  .sidebar:not(.show) + .main-content .form-card,
+  .sidebar:not(.show) + .main-content .table-card,
+  .sidebar:not(.show) + .main-content .dashboard-header,
+  .sidebar:not(.show) + .main-content .quick-stats-grid,
+  .sidebar:not(.show) + .main-content .analytics-card,
+  .sidebar:not(.show) + .main-content .activity-card,
+  .sidebar:not(.show) + .main-content .insights-card {
+    width: 100% !important;
+    max-width: 100% !important;
   }
 }
 
