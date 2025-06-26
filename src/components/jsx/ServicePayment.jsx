@@ -95,6 +95,9 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
       setTotalExpenses((prev) => prev - entryToDelete.totalAmount);
     }
     setExpenseData(expenseData.filter(entry => entry.id !== entryId));
+    
+    // Remove corresponding cash book entry
+    setCashBookEntries(prev => prev.filter(entry => entry.source === 'service-payment' && !entry.jfNo?.includes(entryId.toString())));
   };
 
   const handleEditEntry = (entry) => {

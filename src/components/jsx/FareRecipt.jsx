@@ -312,6 +312,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       setTotalEarnings((prev) => prev - entryToDelete.totalAmount);
     }
     setFareData(fareData.filter(entry => entry.id !== entryId));
+    
+    // Remove corresponding cash book entry
+    setCashBookEntries(prev => prev.filter(entry => entry.source === 'fare-entry' && !entry.jfNo?.includes(entryId.toString())));
   };
 
   const handleEditEntry = (entry) => {
