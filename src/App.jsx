@@ -12,20 +12,45 @@ function App() {
   const [expenseData, setExpenseData] = useState([]);
   const [totalEarnings, setTotalEarnings] = useState(30200);
   const [totalExpenses, setTotalExpenses] = useState(15600);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768) {
+        setSidebarOpen(true);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Calculate profit/loss
   const profit = totalEarnings - totalExpenses;
   const profitPercentage = ((profit / totalExpenses) * 100).toFixed(1);
 
+  // Handle overlay click to close sidebar on mobile
+  const handleOverlayClick = () => {
+    if (window.innerWidth <= 768) {
+      setSidebarOpen(false);
+    }
+  };
+
   return (
     <div className="dashboard-container">
+      {/* Mobile overlay */}
+      {sidebarOpen && window.innerWidth <= 768 && (
+        <div className="sidebar-overlay" onClick={handleOverlayClick}></div>
+      )}
+      
       <button 
         className="mobile-toggle"
         onClick={() => setSidebarOpen(!sidebarOpen)}
       >
-        ☰
+        {sidebarOpen ? '✕' : '☰'}
       </button>
+      
       <div className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
         <div className="sidebar-header">
           <div className="header-content">
