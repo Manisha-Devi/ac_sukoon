@@ -554,11 +554,11 @@ html, body {
   .sidebar {
     position: fixed !important;
   }
-  
+
   .sidebar.show {
     transform: translateX(0) !important;
   }
-  
+
   .sidebar:not(.show) {
     transform: translateX(-100%) !important;
   }
@@ -567,23 +567,23 @@ html, body {
     transition: margin-left 0.3s ease, width 0.3s ease;
     width: calc(100% - var(--sidebar-width));
   }
-  
+
   .sidebar.show + .main-content {
     margin-left: var(--sidebar-width) !important;
     width: calc(100% - var(--sidebar-width)) !important;
   }
-  
+
   .sidebar:not(.show) + .main-content {
     margin-left: 0 !important;
     width: 100% !important;
   }
-  
+
   /* Ensure form cards and other elements use full available width */
   .sidebar:not(.show) + .main-content .container-fluid {
     max-width: 100% !important;
     width: 100% !important;
   }
-  
+
   .sidebar:not(.show) + .main-content .form-card,
   .sidebar:not(.show) + .main-content .table-card,
   .sidebar:not(.show) + .main-content .dashboard-header,
@@ -594,20 +594,20 @@ html, body {
     width: 100% !important;
     max-width: 100% !important;
   }
-  
+
   /* Fix dashboard container when sidebar is hidden */
   .sidebar:not(.show) + .main-content .dashboard-container {
     width: 100% !important;
     max-width: 100% !important;
   }
-  
+
   /* Fix analytics section and rows */
   .sidebar:not(.show) + .main-content .analytics-section,
   .sidebar:not(.show) + .main-content .analytics-section .row {
     width: 100% !important;
     max-width: 100% !important;
   }
-  
+
   /* Fix chart containers */
   .sidebar:not(.show) + .main-content .chart-container {
     width: 100% !important;
@@ -795,4 +795,29 @@ html, body {
 
 .fade-in {
   animation: fadeIn 0.5s ease-out;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.user-role {
+  color: #6c757d;
+  font-size: 0.75rem;
+  margin: 0;
 }

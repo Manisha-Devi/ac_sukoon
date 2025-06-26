@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 
 // Import all components
+import Login from "./components/jsx/Login";
 import Dashboard from "./components/jsx/Dashboard";
 import FareEntry from "./components/jsx/FareRecipt";
 import FuelEntry from "./components/jsx/FuelPayment";
@@ -22,6 +23,21 @@ function App() {
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [cashBookEntries, setCashBookEntries] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = useState(null);
+
+  const handleLogin = (userData) => {
+    setUser(userData);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setActiveTab("dashboard");
+  };
+
+    // If user is not logged in, show login component
+    if (!user) {
+      return <Login onLogin={handleLogin} />;
+    }
 
   // Handle window resize
   useEffect(() => {
@@ -110,8 +126,15 @@ function App() {
               </button>
               <span className="text-white">
                 <i className="bi bi-person-circle me-2"></i>
-                Admin
+                 {user.username} ({user.userType})
               </span>
+              <button
+                  className="btn btn-outline-danger btn-sm ms-2"
+                  onClick={handleLogout}
+                  title="Logout"
+                >
+                  <i className="bi bi-box-arrow-right"></i>
+                </button>
             </div>
 
             {/* Mobile User Icon */}
