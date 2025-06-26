@@ -442,7 +442,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                     </div>
 
                     <div className="row">
-                      <div className="col-md-6 mb-3">
+                      <div className="col-12 mb-3">
                         <label className="form-label">Cash Amount to Handover</label>
                         <input
                           type="number"
@@ -453,18 +453,6 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                           max={Math.max(0, totals.cashBalance)}
                         />
                         <small className="text-muted">Maximum: ₹{Math.max(0, totals.cashBalance).toLocaleString()}</small>
-                      </div>
-                      <div className="col-md-6 mb-3">
-                        <label className="form-label">Bank Amount Information</label>
-                        <input
-                          type="number"
-                          className="form-control"
-                          value={settlementData.bankSettlement}
-                          onChange={(e) => setSettlementData({...settlementData, bankSettlement: e.target.value})}
-                          placeholder="Bank amount (for record)"
-                          max={Math.max(0, totals.bankBalance)}
-                        />
-                        <small className="text-muted">For record keeping: ₹{Math.max(0, totals.bankBalance).toLocaleString()}</small>
                       </div>
                     </div>
                     <div className="row">
