@@ -293,9 +293,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                         <label className="form-label">Date</label>
                         <input
                           type="date"
-                          className="form-control"
+                          className="form-control date-input"
                           value={dailyFareData.date}
                           onChange={(e) => setDailyFareData({ ...dailyFareData, date: e.target.value })}
+                          onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+                          placeholder="Select date"
                           required
                         />
                       </div>
@@ -374,9 +376,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                         <label className="form-label">From Date</label>
                         <input
                           type="date"
-                          className="form-control"
+                          className="form-control date-input"
                           value={bookingData.dateFrom}
                           onChange={(e) => setBookingData({ ...bookingData, dateFrom: e.target.value })}
+                          onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+                          placeholder="Select from date"
                           required
                         />
                       </div>
@@ -384,9 +388,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                         <label className="form-label">To Date</label>
                         <input
                           type="date"
-                          className="form-control"
+                          className="form-control date-input"
                           value={bookingData.dateTo}
                           onChange={(e) => setBookingData({ ...bookingData, dateTo: e.target.value })}
+                          onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+                          placeholder="Select to date"
                           required
                         />
                       </div>
@@ -452,9 +458,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                         <label className="form-label">Date</label>
                         <input
                           type="date"
-                          className="form-control"
+                          className="form-control date-input"
                           value={offDayData.date}
                           onChange={(e) => setOffDayData({ ...offDayData, date: e.target.value })}
+                          onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+                          placeholder="Select off day date"
                           required
                         />
                       </div>
