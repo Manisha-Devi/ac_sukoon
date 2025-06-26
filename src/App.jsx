@@ -10,13 +10,17 @@ import ServiceEntry from "./components/jsx/ServicePayment";
 import OtherPayment from "./components/jsx/OtherPayment";
 import BonusCalculator from "./components/jsx/BonusCalculator";
 import Analytics from "./components/jsx/Analytics";
+import CashBook from "./components/jsx/CashBook";
+import BankBook from "./components/jsx/BankBook";
 
 function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [fareData, setFareData] = useState([]);
   const [expenseData, setExpenseData] = useState([]);
-  const [totalEarnings, setTotalEarnings] = useState(30200);
-  const [totalExpenses, setTotalExpenses] = useState(15600);
+  const [fareData, setFareData] = useState([]);
+  const [totalExpenses, setTotalExpenses] = useState(0);
+  const [totalEarnings, setTotalEarnings] = useState(0);
+  const [cashBookEntries, setCashBookEntries] = useState([]);
+  const [bankBookEntries, setBankBookEntries] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Handle window resize
@@ -233,6 +237,10 @@ function App() {
               fareData={fareData}
               setFareData={setFareData}
               setTotalEarnings={setTotalEarnings}
+              cashBookEntries={cashBookEntries}
+              setCashBookEntries={setCashBookEntries}
+              bankBookEntries={bankBookEntries}
+              setBankBookEntries={setBankBookEntries}
             />
           )}
           {activeTab === "fuel-entry" && (
@@ -240,6 +248,10 @@ function App() {
               expenseData={expenseData}
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
+              cashBookEntries={cashBookEntries}
+              setCashBookEntries={setCashBookEntries}
+              bankBookEntries={bankBookEntries}
+              setBankBookEntries={setBankBookEntries}
             />
           )}
           {activeTab === "adda-fees" && (
@@ -247,6 +259,10 @@ function App() {
               expenseData={expenseData}
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
+              cashBookEntries={cashBookEntries}
+              setCashBookEntries={setCashBookEntries}
+              bankBookEntries={bankBookEntries}
+              setBankBookEntries={setBankBookEntries}
             />
           )}
           {activeTab === "service-entry" && (
@@ -254,6 +270,10 @@ function App() {
               expenseData={expenseData}
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
+              cashBookEntries={cashBookEntries}
+              setCashBookEntries={setCashBookEntries}
+              bankBookEntries={bankBookEntries}
+              setBankBookEntries={setBankBookEntries}
             />
           )}
           {activeTab === "other-payment" && (
@@ -261,10 +281,26 @@ function App() {
               expenseData={expenseData}
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
+              cashBookEntries={cashBookEntries}
+              setCashBookEntries={setCashBookEntries}
+              bankBookEntries={bankBookEntries}
+              setBankBookEntries={setBankBookEntries}
             />
           )}
           {activeTab === "bonus-calc" && <BonusCalculator />}
           {activeTab === "analytics" && <Analytics />}
+          {activeTab === "cash-book" && (
+            <CashBook
+              cashBookEntries={cashBookEntries}
+              setCashBookEntries={setCashBookEntries}
+            />
+          )}
+          {activeTab === "bank-book" && (
+            <BankBook
+              bankBookEntries={bankBookEntries}
+              setBankBookEntries={setBankBookEntries}
+            />
+          )}
         </div>
       </div>
     </div>

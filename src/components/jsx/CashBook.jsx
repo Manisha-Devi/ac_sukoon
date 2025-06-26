@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from "react";
 import "../css/CashBook.css";
 
-const CashBook = () => {
-  const [cashEntries, setCashEntries] = useState([]);
+const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     particulars: "",
@@ -16,14 +15,14 @@ const CashBook = () => {
 
   useEffect(() => {
     const savedEntries = localStorage.getItem('cashBookEntries');
-    if (savedEntries) {
-      setCashEntries(JSON.parse(savedEntries));
+    if (savedEntries && cashBookEntries.length === 0) {
+      setCashBookEntries(JSON.parse(savedEntries));
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('cashBookEntries', JSON.stringify(cashEntries));
-  }, [cashEntries]);
+    localStorage.setItem('cashBookEntries', JSON.stringify(cashBookEntries));
+  }, [cashBookEntries]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -45,12 +44,12 @@ const CashBook = () => {
     };
 
     if (editingEntry) {
-      setCashEntries(cashEntries.map(entry => 
+      setCashBookEntries(cashBookEntries.map(entry => 
         entry.id === editingEntry.id ? entryData : entry
       ));
       setEditingEntry(null);
     } else {
-      setCashEntries([entryData, ...cashEntries]);
+      setCashBookEntries([entryData, ...cashBookEntries]);
     }
 
     setFormData({
@@ -77,7 +76,7 @@ const CashBook = () => {
 
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this entry?")) {
-      setCashEntries(cashEntries.filter(entry => entry.id !== id));
+      setCashBookEntries(cashBookEntries.filter(entry => entry.id !== id));
     }
   };
 
@@ -95,13 +94,13 @@ const CashBook = () => {
 
   // Calculate running balance
   let runningBalance = 0;
-  const entriesWithBalance = cashEntries.map(entry => {
+  const entriesWithBalance = cashBookEntries.map(entry => {
     runningBalance += (entry.debit - entry.credit);
     return { ...entry, balance: runningBalance };
   });
 
-  const totalDebit = cashEntries.reduce((sum, entry) => sum + entry.debit, 0);
-  const totalCredit = cashEntries.reduce((sum, entry) => sum + entry.credit, 0);
+  const totalDebit = cashBookEntries.reduce((sum, entry) => sum + entry.debit, 0);
+  const totalCredit = cashBookEntries.reduce((sum, entry) => sum + entry.credit, 0);
   const finalBalance = totalDebit - totalCredit;
 
   return (
@@ -208,7 +207,7 @@ const CashBook = () => {
         </div>
 
         {/* Summary Cards */}
-        {cashEntries.length > 0 && (
+        {cashBookEntries.length > 0 && (
           <div className="row mb-4">
             <div className="col-md-3 col-sm-6 mb-3">
               <div className="summary-card debit-card">
@@ -241,7 +240,7 @@ const CashBook = () => {
               <div className="summary-card entries-card">
                 <div className="card-body">
                   <h6>Total Entries</h6>
-                  <h4>{cashEntries.length}</h4>
+                  <h4>{cashBookEntries.length}</h4>
                 </div>
               </div>
             </div>
@@ -249,7 +248,7 @@ const CashBook = () => {
         )}
 
         {/* Cash Book Ledger */}
-        {cashEntries.length > 0 && (
+        {cashBookEntries.length > 0 && (
           <div className="cash-book-ledger">
             <h4><i className="bi bi-table"></i> Cash Book Ledger</h4>
             <div className="table-responsive">
@@ -301,7 +300,7 @@ const CashBook = () => {
           </div>
         )}
 
-        {cashEntries.length === 0 && (
+        {cashBookEntries.length === 0 && (
           <div className="no-entries">
             <div className="text-center py-5">
               <i className="bi bi-journal-x display-1 text-muted"></i>

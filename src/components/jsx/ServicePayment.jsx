@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import "../css/ServicePayment.css";
 
-function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses }) {
+function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, cashBookEntries, setCashBookEntries, bankBookEntries, setBankBookEntries }) {
   const [editingEntry, setEditingEntry] = useState(null);
   const [formData, setFormData] = useState({
     serviceDetails: "",

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../css/FareRecipt.css";
 
-function FareEntry({ fareData, setFareData, setTotalEarnings }) {
+function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries, setBankBookEntries }) {
   const [activeTab, setActiveTab] = useState("daily");
   const [editingEntry, setEditingEntry] = useState(null);
   const [dailyFareData, setDailyFareData] = useState({
@@ -27,7 +27,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
   // Function to check if a date is disabled for daily collection
   const isDailyDateDisabled = (selectedDate, selectedRoute) => {
     if (!selectedDate || !selectedRoute) return false;
-    
+
     // Check if same route and date already exists in daily entries
     const existingDailyEntry = fareData.find(entry => 
       entry.type === 'daily' && 
@@ -35,7 +35,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
       entry.route === selectedRoute &&
       (!editingEntry || entry.id !== editingEntry.id)
     );
-    
+
     // Check if date is used in booking entries
     const existingBookingEntry = fareData.find(entry => 
       entry.type === 'booking' && 
@@ -43,49 +43,49 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
       selectedDate <= entry.dateTo &&
       (!editingEntry || entry.id !== editingEntry.id)
     );
-    
+
     // Check if date is used in off day entries
     const existingOffEntry = fareData.find(entry => 
       entry.type === 'off' && 
       entry.date === selectedDate &&
       (!editingEntry || entry.id !== editingEntry.id)
     );
-    
+
     return existingDailyEntry || existingBookingEntry || existingOffEntry;
   };
 
   // Function to check if a date is disabled for booking
   const isBookingDateDisabled = (selectedDate) => {
     if (!selectedDate) return false;
-    
+
     // Check if date is used in daily entries
     const existingDailyEntry = fareData.find(entry => 
       entry.type === 'daily' && 
       entry.date === selectedDate &&
       (!editingEntry || entry.id !== editingEntry.id)
     );
-    
+
     // Check if date is used in off day entries
     const existingOffEntry = fareData.find(entry => 
       entry.type === 'off' && 
       entry.date === selectedDate &&
       (!editingEntry || entry.id !== editingEntry.id)
     );
-    
+
     return existingDailyEntry || existingOffEntry;
   };
 
   // Function to check if a date is disabled for off day
   const isOffDayDateDisabled = (selectedDate) => {
     if (!selectedDate) return false;
-    
+
     // Check if date is used in daily entries
     const existingDailyEntry = fareData.find(entry => 
       entry.type === 'daily' && 
       entry.date === selectedDate &&
       (!editingEntry || entry.id !== editingEntry.id)
     );
-    
+
     // Check if date is used in booking entries
     const existingBookingEntry = fareData.find(entry => 
       entry.type === 'booking' && 
@@ -93,7 +93,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
       selectedDate <= entry.dateTo &&
       (!editingEntry || entry.id !== editingEntry.id)
     );
-    
+
     return existingDailyEntry || existingBookingEntry;
   };
 
@@ -105,11 +105,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
   // Function to get disabled dates for HTML date input
   const getDisabledDatesForDaily = () => {
     if (!dailyFareData.route) return [];
-    
+
     const disabledDates = [];
     fareData.forEach(entry => {
       if (editingEntry && entry.id === editingEntry.id) return;
-      
+
       if (entry.type === 'daily' && entry.route === dailyFareData.route) {
         disabledDates.push(entry.date);
       } else if (entry.type === 'booking') {
@@ -122,7 +122,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
         disabledDates.push(entry.date);
       }
     });
-    
+
     return disabledDates;
   };
 
@@ -137,13 +137,13 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
 
   const handleDailySubmit = (e) => {
     e.preventDefault();
-    
+
     // Validate if date is disabled
     if (isDailyDateDisabled(dailyFareData.date, dailyFareData.route)) {
       alert('This date is already taken for this route or conflicts with existing bookings/off days!');
       return;
     }
-    
+
     const cashAmount = parseInt(dailyFareData.cashAmount) || 0;
     const bankAmount = parseInt(dailyFareData.bankAmount) || 0;
     const totalAmount = cashAmount + bankAmount;
@@ -179,17 +179,49 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
       };
       setFareData([...fareData, newEntry]);
       setTotalEarnings((prev) => prev + totalAmount);
+
+      // Add to cash book if cash amount exists
+      if (cashAmount > 0) {
+        const cashBookEntry = {
+          id: Date.now() + 1,
+          date: dailyFareData.date,
+          particulars: "Fare Collection",
+          description: `Daily fare collection - ${dailyFareData.route}`,
+          voucherNo: `FARE-${Date.now()}`,
+          debit: 0,
+          credit: cashAmount,
+          timestamp: new Date().toISOString(),
+          source: 'fare-entry'
+        };
+        setCashBookEntries(prev => [cashBookEntry, ...prev]);
+      }
+
+      // Add to bank book if bank amount exists
+      if (bankAmount > 0) {
+        const bankBookEntry = {
+          id: Date.now() + 2,
+          date: dailyFareData.date,
+          particulars: "Fare Collection",
+          description: `Daily fare collection - ${dailyFareData.route}`,
+          chequeNo: `FARE-${Date.now()}`,
+          debit: 0,
+          credit: bankAmount,
+          timestamp: new Date().toISOString(),
+          source: 'fare-entry'
+        };
+        setBankBookEntries(prev => [bankBookEntry, ...prev]);
+      }
     }
     setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
   };
 
   const handleBookingSubmit = (e) => {
     e.preventDefault();
-    
+
     // Validate date range for conflicts
     const startDate = new Date(bookingData.dateFrom);
     const endDate = new Date(bookingData.dateTo);
-    
+
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
       const dateStr = d.toISOString().split('T')[0];
       if (isBookingDateDisabled(dateStr)) {
@@ -197,7 +229,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
         return;
       }
     }
-    
+
     const cashAmount = parseInt(bookingData.cashAmount) || 0;
     const bankAmount = parseInt(bookingData.bankAmount) || 0;
     const totalAmount = cashAmount + bankAmount;
@@ -235,13 +267,45 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
       };
       setFareData([...fareData, newEntry]);
       setTotalEarnings((prev) => prev + totalAmount);
+
+      // Add to cash book if cash amount exists
+      if (cashAmount > 0) {
+        const cashBookEntry = {
+          id: Date.now() + 1,
+          date: bookingData.dateFrom,
+          particulars: "Fare Collection",
+          description: `Booking fare - ${bookingData.bookingDetails}`,
+          voucherNo: `BOOKING-${Date.now()}`,
+          debit: 0,
+          credit: cashAmount,
+          timestamp: new Date().toISOString(),
+          source: 'fare-entry'
+        };
+        setCashBookEntries(prev => [cashBookEntry, ...prev]);
+      }
+
+      // Add to bank book if bank amount exists
+      if (bankAmount > 0) {
+        const bankBookEntry = {
+          id: Date.now() + 2,
+          date: bookingData.dateFrom,
+          particulars: "Fare Collection",
+          description: `Booking fare - ${bookingData.bookingDetails}`,
+          chequeNo: `BOOKING-${Date.now()}`,
+          debit: 0,
+          credit: bankAmount,
+          timestamp: new Date().toISOString(),
+          source: 'fare-entry'
+        };
+        setBankBookEntries(prev => [bankBookEntry, ...prev]);
+      }
     }
     setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
   };
 
   const handleOffDaySubmit = (e) => {
     e.preventDefault();
-    
+
     // Validate if date is disabled
     if (isOffDayDateDisabled(offDayData.date)) {
       alert('This date conflicts with existing daily collection or booking entries!');

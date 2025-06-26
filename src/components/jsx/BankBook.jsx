@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from "react";
 import "../css/BankBook.css";
 
-const BankBook = () => {
-  const [bankEntries, setBankEntries] = useState([]);
+const BankBook = ({ bankBookEntries, setBankBookEntries }) => {
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     particulars: "",
@@ -16,14 +15,14 @@ const BankBook = () => {
 
   useEffect(() => {
     const savedEntries = localStorage.getItem('bankBookEntries');
-    if (savedEntries) {
-      setBankEntries(JSON.parse(savedEntries));
+    if (savedEntries && bankBookEntries.length === 0) {
+      setBankBookEntries(JSON.parse(savedEntries));
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('bankBookEntries', JSON.stringify(bankEntries));
-  }, [bankEntries]);
+    localStorage.setItem('bankBookEntries', JSON.stringify(bankBookEntries));
+  }, [bankBookEntries]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -45,12 +44,12 @@ const BankBook = () => {
     };
 
     if (editingEntry) {
-      setBankEntries(bankEntries.map(entry => 
+      setBankBookEntries(bankBookEntries.map(entry => 
         entry.id === editingEntry.id ? entryData : entry
       ));
       setEditingEntry(null);
     } else {
-      setBankEntries([entryData, ...bankEntries]);
+      setBankBookEntries([entryData, ...bankBookEntries]);
     }
 
     setFormData({
@@ -77,7 +76,7 @@ const BankBook = () => {
 
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this entry?")) {
-      setBankEntries(bankEntries.filter(entry => entry.id !== id));
+      setBankBookEntries(bankBookEntries.filter(entry => entry.id !== id));
     }
   };
 
@@ -95,13 +94,13 @@ const BankBook = () => {
 
   // Calculate running balance
   let runningBalance = 0;
-  const entriesWithBalance = bankEntries.map(entry => {
+  const entriesWithBalance = bankBookEntries.map(entry => {
     runningBalance += (entry.debit - entry.credit);
     return { ...entry, balance: runningBalance };
   });
 
-  const totalDebit = bankEntries.reduce((sum, entry) => sum + entry.debit, 0);
-  const totalCredit = bankEntries.reduce((sum, entry) => sum + entry.credit, 0);
+  const totalDebit = bankBookEntries.reduce((sum, entry) => sum + entry.debit, 0);
+  const totalCredit = bankBookEntries.reduce((sum, entry) => sum + entry.credit, 0);
   const finalBalance = totalDebit - totalCredit;
 
   return (
@@ -208,7 +207,7 @@ const BankBook = () => {
         </div>
 
         {/* Summary Cards */}
-        {bankEntries.length > 0 && (
+        {bankBookEntries.length > 0 && (
           <div className="row mb-4">
             <div className="col-md-3 col-sm-6 mb-3">
               <div className="summary-card debit-card">
@@ -241,7 +240,7 @@ const BankBook = () => {
               <div className="summary-card entries-card">
                 <div className="card-body">
                   <h6>Total Entries</h6>
-                  <h4>{bankEntries.length}</h4>
+                  <h4>{bankBookEntries.length}</h4>
                 </div>
               </div>
             </div>
@@ -249,7 +248,7 @@ const BankBook = () => {
         )}
 
         {/* Bank Book Ledger */}
-        {bankEntries.length > 0 && (
+        {bankBookEntries.length > 0 && (
           <div className="bank-book-ledger">
             <h4><i className="bi bi-table"></i> Bank Book Ledger</h4>
             <div className="table-responsive">
@@ -301,7 +300,7 @@ const BankBook = () => {
           </div>
         )}
 
-        {bankEntries.length === 0 && (
+        {bankBookEntries.length === 0 && (
           <div className="no-entries">
             <div className="text-center py-5">
               <i className="bi bi-journal-x display-1 text-muted"></i>

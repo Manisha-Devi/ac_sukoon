@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import "../css/OtherPayment.css";
 
-function OtherPayment({ expenseData, setExpenseData, setTotalExpenses }) {
+function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, cashBookEntries, setCashBookEntries, bankBookEntries, setBankBookEntries }) {
   const [editingEntry, setEditingEntry] = useState(null);
   const [formData, setFormData] = useState({
     paymentDetails: "",
