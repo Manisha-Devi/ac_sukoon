@@ -131,46 +131,7 @@ function Approval({ fareData, expenseData, cashBookEntries }) {
           </div>
         </div>
 
-        {/* All Receipts and Payments Table */}
-        <div className="row mb-4">
-          <div className="col-12">
-            <div className="table-card">
-              <div className="card-body">
-                <h5><i className="bi bi-list-ul"></i> All Receipts and Payments</h5>
-                <div className="table-responsive">
-                  <table className="table table-striped">
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                        <th>Cash Amount</th>
-                        <th>Bank Amount</th>
-                        <th>Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {cashBookEntries.map((entry, index) => (
-                        <tr key={index}>
-                          <td>{new Date(entry.date).toLocaleDateString('en-IN')}</td>
-                          <td>
-                            <span className={`badge ${entry.type === 'receipt' ? 'bg-success' : 'bg-danger'}`}>
-                              {entry.type === 'receipt' ? 'Receipt' : 'Payment'}
-                            </span>
-                          </td>
-                          <td>{entry.description}</td>
-                          <td>₹{(entry.cashAmount || 0).toLocaleString()}</td>
-                          <td>₹{(entry.bankAmount || 0).toLocaleString()}</td>
-                          <td>₹{((entry.cashAmount || 0) + (entry.bankAmount || 0)).toLocaleString()}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        
 
         {/* Send for Approval Button */}
         <div className="text-center">
