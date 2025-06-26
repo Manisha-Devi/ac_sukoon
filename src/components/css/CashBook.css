@@ -1,26 +1,25 @@
 
 .cash-book-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 2rem 0;
+  background: #f8f9fa;
+  padding: 1rem 0;
 }
 
 .cash-book-header {
   text-align: center;
-  margin-bottom: 2rem;
-  color: white;
+  margin-bottom: 1rem;
+  color: #333;
 }
 
 .cash-book-header h2 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
 }
 
 .cash-book-header p {
-  font-size: 1.1rem;
-  opacity: 0.9;
+  font-size: 0.9rem;
+  color: #666;
 }
 
 .cash-book-header i {
@@ -31,26 +30,26 @@
 /* Date Filter Card */
 .date-filter-card {
   background: white;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
   overflow: hidden;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .date-filter-card .card-body {
-  padding: 2rem;
+  padding: 1rem;
 }
 
 .date-filter-card h5 {
-  color: #667eea;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
+  color: #495057;
+  font-weight: 600;
+  margin-bottom: 1rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border-bottom: 2px solid #667eea;
-  padding-bottom: 10px;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 0.5rem;
 }
 
 .date-filter-card h5 i {
@@ -94,23 +93,24 @@
 
 /* Form Styling */
 .form-label {
-  font-weight: 600;
+  font-weight: 500;
   color: #495057;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
 }
 
 .form-control, .form-select {
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  padding: 0.875rem;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  background: #f8f9fa;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  transition: border-color 0.15s ease-in-out;
+  background: white;
 }
 
 .form-control:focus, .form-select:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
   background: white;
 }
 
@@ -157,36 +157,29 @@
 /* Summary Cards */
 .summary-card {
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  border: none;
-  transition: all 0.3s ease;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  transition: none;
   overflow: hidden;
 }
 
-.summary-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-}
-
 .summary-card .card-body {
-  padding: 1.5rem;
+  padding: 1rem;
   text-align: center;
 }
 
 .summary-card h6 {
   color: #6c757d;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  font-size: 0.8rem;
-  letter-spacing: 1px;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
 }
 
 .summary-card h4 {
-  font-weight: 700;
+  font-weight: 600;
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
 }
 
 .dr-cash-card {
@@ -240,27 +233,25 @@
 /* Double Column Cash Book */
 .double-column-cash-book {
   background: white;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
   overflow: hidden;
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 .cash-book-header-row {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #495057;
   color: white;
-  padding: 1.5rem;
+  padding: 0.75rem;
   margin: 0;
 }
 
 .cash-book-header-row h4 {
   margin: 0;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 1.1rem;
   text-align: center;
-  justify-content: center;
 }
 
 .cash-book-header-row h4 i {
@@ -280,35 +271,31 @@
 .cash-book-table th {
   background: #f8f9fa;
   border: 1px solid #dee2e6;
-  padding: 12px 8px;
-  font-weight: 700;
+  padding: 8px 6px;
+  font-weight: 600;
   color: #495057;
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   vertical-align: middle;
 }
 
 .dr-header {
-  background: rgba(40, 167, 69, 0.1) !important;
+  background: #e8f5e8 !important;
   color: #28a745 !important;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 2px;
+  font-weight: 600;
 }
 
 .cr-header {
-  background: rgba(220, 53, 69, 0.1) !important;
+  background: #f8e8e8 !important;
   color: #dc3545 !important;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 2px;
+  font-weight: 600;
 }
 
 .cash-book-table td {
-  padding: 10px 8px;
+  padding: 6px 4px;
   border: 1px solid #dee2e6 !important;
   vertical-align: middle;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
 .cash-book-table tbody tr:nth-child(even) {
@@ -446,36 +433,28 @@
 /* Responsive */
 @media (max-width: 768px) {
   .cash-book-container {
-    padding: 1rem 0;
+    padding: 0.5rem 0;
   }
   
   .cash-book-header h2 {
-    font-size: 2rem;
-  }
-  
-  .cash-form-card .card-body {
-    padding: 1.5rem;
+    font-size: 1.5rem;
   }
   
   .summary-card .card-body {
-    padding: 1rem;
+    padding: 0.75rem;
   }
   
   .summary-card h4 {
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
   
   .cash-book-table {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
   }
   
   .cash-book-table th,
   .cash-book-table td {
-    padding: 8px 4px;
-  }
-  
-  .entries-actions {
-    padding: 1rem;
+    padding: 4px 2px;
   }
 }
 
