@@ -1,0 +1,356 @@
+
+:root {
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --border-radius: 15px;
+  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --card-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.15);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Container */
+.other-entry-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px 0;
+}
+
+/* Header */
+.other-header {
+  text-align: center;
+  margin-bottom: 40px;
+  color: white;
+}
+
+.other-header h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.other-header p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.other-header i {
+  margin-right: 15px;
+  font-size: 2.2rem;
+}
+
+/* Summary Cards */
+.summary-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  transition: var(--transition);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.summary-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.summary-card .card-body {
+  padding: 25px;
+  text-align: center;
+}
+
+.summary-card h6 {
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-card h4 {
+  color: #333;
+  font-weight: 700;
+  margin: 0;
+}
+
+.cash-card {
+  border-left: 4px solid #4ade80;
+}
+
+.bank-card {
+  border-left: 4px solid #60a5fa;
+}
+
+.total-card {
+  border-left: 4px solid #fbbf24;
+}
+
+.entries-card {
+  border-left: 4px solid #f87171;
+}
+
+/* Form Card */
+.other-form-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 30px;
+  margin-bottom: 30px;
+  transition: var(--transition);
+}
+
+.other-form-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.other-form-card h4 {
+  margin-bottom: 25px;
+  font-weight: 600;
+  color: #333;
+}
+
+.other-form-card h4 i {
+  color: #667eea;
+  margin-right: 10px;
+}
+
+/* Form Controls */
+.form-label {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.form-control, .form-select {
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 14px;
+  transition: var(--transition);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background: white;
+}
+
+.form-control::placeholder {
+  color: #a0aec0;
+}
+
+/* Date Input */
+.date-input {
+  position: relative;
+  cursor: pointer;
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(0.5);
+  opacity: 0.8;
+}
+
+.date-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Amount Summary */
+.amount-summary {
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 12px;
+  padding: 15px;
+  font-weight: 500;
+}
+
+.amount-summary span {
+  color: #666;
+}
+
+.amount-summary strong {
+  color: #333;
+}
+
+/* Button */
+.other-entry-btn {
+  background: var(--primary-gradient);
+  border: none;
+  color: white;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: var(--transition);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.other-entry-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  color: white;
+}
+
+.other-entry-btn i {
+  margin-right: 8px;
+}
+
+/* Recent Entries */
+.recent-entries h4 {
+  color: white;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.entry-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  transition: var(--transition);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.entry-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.entry-card .card-body {
+  padding: 20px;
+}
+
+.entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.entry-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.entry-date {
+  margin-bottom: 15px;
+}
+
+.btn-edit, .btn-delete {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 6px;
+  transition: var(--transition);
+  font-size: 0.8rem;
+}
+
+.btn-edit {
+  background: rgba(96, 165, 250, 0.2);
+  color: #2563eb;
+}
+
+.btn-edit:hover {
+  background: rgba(96, 165, 250, 0.3);
+  color: #1d4ed8;
+}
+
+.btn-delete {
+  background: rgba(248, 113, 113, 0.2);
+  color: #dc2626;
+}
+
+.btn-delete:hover {
+  background: rgba(248, 113, 113, 0.3);
+  color: #b91c1c;
+}
+
+.button-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.entry-type {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.entry-type.other {
+  background: rgba(168, 85, 247, 0.2);
+  color: #7c3aed;
+}
+
+.entry-content {
+  margin-bottom: 15px;
+}
+
+.entry-content p {
+  color: #666;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.entry-amounts {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.amount-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.total-amount {
+  text-align: center;
+  padding-top: 8px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .other-header h2 {
+    font-size: 2rem;
+  }
+  
+  .other-form-card {
+    padding: 20px;
+  }
+  
+  .amount-summary .row .col-4 {
+    text-align: center;
+    margin-bottom: 5px;
+  }
+}
+
+@media (max-width: 576px) {
+  .other-entry-container {
+    padding: 15px 0;
+  }
+  
+  .other-header h2 {
+    font-size: 1.8rem;
+  }
+  
+  .other-form-card {
+    padding: 15px;
+  }
+  
+  .summary-card .card-body {
+    padding: 15px;
+  }
+}
