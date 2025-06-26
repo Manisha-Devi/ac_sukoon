@@ -10,7 +10,7 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
     bankAmount: "",
     description: "",
     date: "",
-    mechanic: "",
+    vendor: "",
   });
 
   // Function to get min date for date inputs (today)
@@ -38,7 +38,7 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
               totalAmount: totalAmount,
               description: formData.description,
               date: formData.date,
-              mechanic: formData.mechanic,
+              vendor: formData.vendor,
             }
           : entry
       );
@@ -56,7 +56,7 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
         totalAmount: totalAmount,
         description: formData.description,
         date: formData.date,
-        mechanic: formData.mechanic,
+        vendor: formData.vendor,
       };
       setExpenseData([...expenseData, newEntry]);
       setTotalExpenses((prev) => prev + totalAmount);
@@ -67,7 +67,7 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           id: Date.now() + 1,
           date: formData.date,
           particulars: "Service",
-          description: `Service expense - ${formData.serviceDetails}${formData.mechanic ? ` at ${formData.mechanic}` : ''}`,
+          description: `${formData.serviceDetails}${formData.vendor ? ` - ${formData.vendor}` : ''}`,
           jfNo: `SERVICE-${Date.now()}`,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
@@ -85,7 +85,7 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
       bankAmount: "",
       description: "",
       date: "",
-      mechanic: "",
+      vendor: "",
     });
   };
 
@@ -108,7 +108,7 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
       bankAmount: entry.bankAmount.toString(),
       description: entry.description,
       date: entry.date,
-      mechanic: entry.mechanic || "",
+      vendor: entry.vendor || "",
     });
   };
 
@@ -120,11 +120,11 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
       bankAmount: "",
       description: "",
       date: "",
-      mechanic: "",
+      vendor: "",
     });
   };
 
-  // Filter service entries
+  // Filter service payment entries
   const serviceEntries = expenseData.filter(entry => entry.type === "service");
 
   // Calculate totals for summary
@@ -136,8 +136,8 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
     <div className="service-entry-container">
       <div className="container-fluid">
         <div className="service-header">
-          <h2><i className="bi bi-credit-card"></i> Service Payment Entry</h2>
-          <p>Record your vehicle service and maintenance expenses (Payment)</p>
+          <h2><i className="bi bi-tools"></i> Service Payment Entry</h2>
+          <p>Record your service expenses (Payment)</p>
         </div>
 
         {/* Summary Cards */}
@@ -178,9 +178,9 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           </div>
         )}
 
-        {/* Service Entry Form */}
+        {/* Service Payment Form */}
         <div className="service-form-card">
-          <h4><i className="bi bi-tools"></i> Service Details</h4>
+          <h4><i className="bi bi-tools"></i> Service Payment Details</h4>
           <form onSubmit={handleSubmit}>
             <div className="row">
               <div className="col-md-6 mb-3">
@@ -217,7 +217,7 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                   rows={3}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Enter detailed description of service work"
+                  placeholder="Enter detailed description of service"
                   required
                 />
               </div>
@@ -225,13 +225,13 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
             
             <div className="row">
               <div className="col-md-6 mb-3">
-                <label className="form-label">Mechanic/Service Center (Optional)</label>
+                <label className="form-label">Service Provider (Optional)</label>
                 <input
                   type="text"
                   className="form-control"
-                  value={formData.mechanic}
-                  onChange={(e) => setFormData({ ...formData, mechanic: e.target.value })}
-                  placeholder="Enter mechanic or service center name"
+                  value={formData.vendor}
+                  onChange={(e) => setFormData({ ...formData, vendor: e.target.value })}
+                  placeholder="Enter service provider name"
                 />
               </div>
             </div>
@@ -278,7 +278,7 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
             <div className="button-group">
               <button type="submit" className="btn service-entry-btn">
                 <i className={editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
-                {editingEntry ? "Update Entry" : "Add Service Entry"}
+                {editingEntry ? "Update Entry" : "Add Service Payment"}
               </button>
               {editingEntry && (
                 <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
@@ -299,7 +299,7 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                   <div className="entry-card">
                     <div className="card-body">
                       <div className="entry-header">
-                        <span className="entry-type service">Service</span>
+                        <span className="entry-type service">Service Payment</span>
                         <div className="entry-actions">
                           <button 
                             className="btn btn-sm btn-edit" 
@@ -323,7 +323,7 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                       <div className="entry-content">
                         <p><strong>{entry.serviceDetails}</strong></p>
                         <p>{entry.description?.substring(0, 60)}...</p>
-                        {entry.mechanic && <p><small>At: {entry.mechanic}</small></p>}
+                        {entry.vendor && <p><small>Provider: {entry.vendor}</small></p>}
                       </div>
                       <div className="entry-amounts">
                         <div className="amount-row">
