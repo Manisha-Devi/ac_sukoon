@@ -53,15 +53,32 @@ function Login({ onLogin }) {
     
     setIsLoading(true);
     
-    // Simulate API call
+    // Demo credentials for different user types
+    const validCredentials = {
+      Admin: { username: "admin", password: "1234" },
+      Manager: { username: "manager", password: "1234" },
+      Conductor: { username: "conductor", password: "1234" }
+    };
+    
+    // Simulate API call with credential validation
     setTimeout(() => {
       setIsLoading(false);
-      // Pass user data to parent component
-      onLogin({
-        username: formData.username,
-        userType: formData.userType,
-        isAuthenticated: true
-      });
+      
+      const expectedCreds = validCredentials[formData.userType];
+      
+      if (formData.username === expectedCreds.username && formData.password === expectedCreds.password) {
+        // Valid credentials - login successful
+        onLogin({
+          username: formData.username,
+          userType: formData.userType,
+          isAuthenticated: true
+        });
+      } else {
+        // Invalid credentials
+        setErrors({
+          password: "Invalid username or password for selected user type"
+        });
+      }
     }, 1000);
   };
 
