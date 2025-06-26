@@ -229,10 +229,7 @@ function App() {
               fareData={fareData}
               setFareData={setFareData}
               setTotalEarnings={setTotalEarnings}
-              cashBookEntries={cashBookEntries}
               setCashBookEntries={setCashBookEntries}
-              bankBookEntries={bankBookEntries}
-              setBankBookEntries={setBankBookEntries}
             />
           )}
           {activeTab === "fuel-entry" && (
@@ -240,10 +237,7 @@ function App() {
               expenseData={expenseData}
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
-              cashBookEntries={cashBookEntries}
               setCashBookEntries={setCashBookEntries}
-              bankBookEntries={bankBookEntries}
-              setBankBookEntries={setBankBookEntries}
             />
           )}
           {activeTab === "adda-fees" && (
@@ -251,10 +245,7 @@ function App() {
               expenseData={expenseData}
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
-              cashBookEntries={cashBookEntries}
               setCashBookEntries={setCashBookEntries}
-              bankBookEntries={bankBookEntries}
-              setBankBookEntries={setBankBookEntries}
             />
           )}
           {activeTab === "service-entry" && (
@@ -262,10 +253,7 @@ function App() {
               expenseData={expenseData}
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
-              cashBookEntries={cashBookEntries}
               setCashBookEntries={setCashBookEntries}
-              bankBookEntries={bankBookEntries}
-              setBankBookEntries={setBankBookEntries}
             />
           )}
           {activeTab === "other-payment" && (
@@ -273,10 +261,7 @@ function App() {
               expenseData={expenseData}
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
-              cashBookEntries={cashBookEntries}
               setCashBookEntries={setCashBookEntries}
-              bankBookEntries={bankBookEntries}
-              setBankBookEntries={setBankBookEntries}
             />
           )}
           {activeTab === "bonus-calc" && <BonusCalculator />}

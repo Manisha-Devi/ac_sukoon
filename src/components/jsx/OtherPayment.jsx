@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import "../css/OtherPayment.css";
 
-function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, cashBookEntries, setCashBookEntries, bankBookEntries, setBankBookEntries }) {
+function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
   const [editingEntry, setEditingEntry] = useState(null);
   const [formData, setFormData] = useState({
     paymentDetails: "",
@@ -60,6 +60,23 @@ function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, cashBookE
       };
       setExpenseData([...expenseData, newEntry]);
       setTotalExpenses((prev) => prev + totalAmount);
+      
+      // Add to cash book - payments go to Cr. side
+      if (cashAmount > 0 || bankAmount > 0) {
+        const cashBookEntry = {
+          id: Date.now() + 1,
+          date: formData.date,
+          particulars: "Other",
+          description: `${formData.paymentDetails}${formData.vendor ? ` - ${formData.vendor}` : ''}`,
+          jfNo: `OTHER-${Date.now()}`,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
+          type: 'cr', // Payments go to Cr. side
+          timestamp: new Date().toISOString(),
+          source: 'other-payment'
+        };
+        setCashBookEntries(prev => [cashBookEntry, ...prev]);
+      }
     }
     
     setFormData({

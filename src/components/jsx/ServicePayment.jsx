@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import "../css/ServicePayment.css";
 
-function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, cashBookEntries, setCashBookEntries, bankBookEntries, setBankBookEntries }) {
+function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
   const [editingEntry, setEditingEntry] = useState(null);
   const [formData, setFormData] = useState({
     serviceDetails: "",
@@ -60,6 +60,23 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, cashBookE
       };
       setExpenseData([...expenseData, newEntry]);
       setTotalExpenses((prev) => prev + totalAmount);
+      
+      // Add to cash book - payments go to Cr. side
+      if (cashAmount > 0 || bankAmount > 0) {
+        const cashBookEntry = {
+          id: Date.now() + 1,
+          date: formData.date,
+          particulars: "Service",
+          description: `Service expense - ${formData.serviceDetails}${formData.mechanic ? ` at ${formData.mechanic}` : ''}`,
+          jfNo: `SERVICE-${Date.now()}`,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
+          type: 'cr', // Payments go to Cr. side
+          timestamp: new Date().toISOString(),
+          source: 'service-payment'
+        };
+        setCashBookEntries(prev => [cashBookEntry, ...prev]);
+      }
     }
     
     setFormData({

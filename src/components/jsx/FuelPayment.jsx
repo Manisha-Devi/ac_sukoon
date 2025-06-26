@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import "../css/FuelPayment.css";
 
-function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, cashBookEntries, setCashBookEntries, bankBookEntries, setBankBookEntries }) {
+function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
   const [editingEntry, setEditingEntry] = useState(null);
   const [formData, setFormData] = useState({
     cashAmount: "",
@@ -61,36 +61,21 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, cashBookEntr
       setExpenseData([...expenseData, newEntry]);
       setTotalExpenses((prev) => prev + totalAmount);
       
-      // Add to cash book if cash amount exists
-      if (cashAmount > 0) {
+      // Add to cash book - payments go to Cr. side
+      if (cashAmount > 0 || bankAmount > 0) {
         const cashBookEntry = {
           id: Date.now() + 1,
           date: formData.date,
-          particulars: "Fuel Payment",
+          particulars: "Fuel",
           description: `Fuel expense - ${formData.pumpName || 'Fuel Station'}${formData.liters ? ` (${formData.liters}L)` : ''}`,
-          voucherNo: `FUEL-${Date.now()}`,
-          debit: cashAmount,
-          credit: 0,
+          jfNo: `FUEL-${Date.now()}`,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
+          type: 'cr', // Payments go to Cr. side
           timestamp: new Date().toISOString(),
           source: 'fuel-payment'
         };
         setCashBookEntries(prev => [cashBookEntry, ...prev]);
-      }
-      
-      // Add to bank book if bank amount exists
-      if (bankAmount > 0) {
-        const bankBookEntry = {
-          id: Date.now() + 2,
-          date: formData.date,
-          particulars: "Fuel Payment",
-          description: `Fuel expense - ${formData.pumpName || 'Fuel Station'}${formData.liters ? ` (${formData.liters}L)` : ''}`,
-          chequeNo: `FUEL-${Date.now()}`,
-          debit: bankAmount,
-          credit: 0,
-          timestamp: new Date().toISOString(),
-          source: 'fuel-payment'
-        };
-        setBankBookEntries(prev => [bankBookEntry, ...prev]);
       }
     }
     setFormData({ cashAmount: "", bankAmount: "", liters: "", rate: "", date: "", pumpName: "" });

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../css/FareRecipt.css";
 
-function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries, setBankBookEntries }) {
+function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries }) {
   const [activeTab, setActiveTab] = useState("daily");
   const [editingEntry, setEditingEntry] = useState(null);
   const [dailyFareData, setDailyFareData] = useState({
@@ -180,36 +180,21 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       setFareData([...fareData, newEntry]);
       setTotalEarnings((prev) => prev + totalAmount);
 
-      // Add to cash book if cash amount exists
-      if (cashAmount > 0) {
+      // Add to cash book - receipts go to Dr. side
+      if (cashAmount > 0 || bankAmount > 0) {
         const cashBookEntry = {
           id: Date.now() + 1,
           date: dailyFareData.date,
-          particulars: "Fare Collection",
+          particulars: "Fare",
           description: `Daily fare collection - ${dailyFareData.route}`,
-          voucherNo: `FARE-${Date.now()}`,
-          debit: 0,
-          credit: cashAmount,
+          jfNo: `FARE-${Date.now()}`,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
+          type: 'dr', // Receipts go to Dr. side
           timestamp: new Date().toISOString(),
           source: 'fare-entry'
         };
         setCashBookEntries(prev => [cashBookEntry, ...prev]);
-      }
-
-      // Add to bank book if bank amount exists
-      if (bankAmount > 0) {
-        const bankBookEntry = {
-          id: Date.now() + 2,
-          date: dailyFareData.date,
-          particulars: "Fare Collection",
-          description: `Daily fare collection - ${dailyFareData.route}`,
-          chequeNo: `FARE-${Date.now()}`,
-          debit: 0,
-          credit: bankAmount,
-          timestamp: new Date().toISOString(),
-          source: 'fare-entry'
-        };
-        setBankBookEntries(prev => [bankBookEntry, ...prev]);
       }
     }
     setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
@@ -268,36 +253,21 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       setFareData([...fareData, newEntry]);
       setTotalEarnings((prev) => prev + totalAmount);
 
-      // Add to cash book if cash amount exists
-      if (cashAmount > 0) {
+      // Add to cash book - receipts go to Dr. side  
+      if (cashAmount > 0 || bankAmount > 0) {
         const cashBookEntry = {
           id: Date.now() + 1,
           date: bookingData.dateFrom,
-          particulars: "Fare Collection",
+          particulars: "Fare",
           description: `Booking fare - ${bookingData.bookingDetails}`,
-          voucherNo: `BOOKING-${Date.now()}`,
-          debit: 0,
-          credit: cashAmount,
+          jfNo: `BOOKING-${Date.now()}`,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
+          type: 'dr', // Receipts go to Dr. side
           timestamp: new Date().toISOString(),
           source: 'fare-entry'
         };
         setCashBookEntries(prev => [cashBookEntry, ...prev]);
-      }
-
-      // Add to bank book if bank amount exists
-      if (bankAmount > 0) {
-        const bankBookEntry = {
-          id: Date.now() + 2,
-          date: bookingData.dateFrom,
-          particulars: "Fare Collection",
-          description: `Booking fare - ${bookingData.bookingDetails}`,
-          chequeNo: `BOOKING-${Date.now()}`,
-          debit: 0,
-          credit: bankAmount,
-          timestamp: new Date().toISOString(),
-          source: 'fare-entry'
-        };
-        setBankBookEntries(prev => [bankBookEntry, ...prev]);
       }
     }
     setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
