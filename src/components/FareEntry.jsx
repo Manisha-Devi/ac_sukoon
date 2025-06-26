@@ -5,15 +5,15 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
   const [activeCase, setActiveCase] = useState("daily");
   const [dailyFareData, setDailyFareData] = useState({
     route: "",
-    totalFare: "",
-    paymentMethod: "cash",
+    cashAmount: "",
+    bankAmount: "",
     date: "",
   });
 
   const [bookingData, setBookingData] = useState({
     bookingDetails: "",
-    totalFare: "",
-    paymentMethod: "cash",
+    cashAmount: "",
+    bankAmount: "",
     dateFrom: "",
     dateTo: "",
   });
@@ -34,28 +34,45 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
 
   const handleDailySubmit = (e) => {
     e.preventDefault();
+    const cashAmount = parseInt(dailyFareData.cashAmount) || 0;
+    const bankAmount = parseInt(dailyFareData.bankAmount) || 0;
+    const totalAmount = cashAmount + bankAmount;
+    
     const newEntry = {
       id: Date.now(),
       type: "daily",
-      ...dailyFareData,
-      totalAmount: parseInt(dailyFareData.totalFare),
+      route: dailyFareData.route,
+      cashAmount: cashAmount,
+      bankAmount: bankAmount,
+      totalAmount: totalAmount,
+      date: dailyFareData.date,
     };
+    
     setFareData([...fareData, newEntry]);
-    setTotalEarnings((prev) => prev + parseInt(dailyFareData.totalFare));
-    setDailyFareData({ route: "", totalFare: "", paymentMethod: "cash", date: "" });
+    setTotalEarnings((prev) => prev + totalAmount);
+    setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
   };
 
   const handleBookingSubmit = (e) => {
     e.preventDefault();
+    const cashAmount = parseInt(bookingData.cashAmount) || 0;
+    const bankAmount = parseInt(bookingData.bankAmount) || 0;
+    const totalAmount = cashAmount + bankAmount;
+    
     const newEntry = {
       id: Date.now(),
       type: "booking",
-      ...bookingData,
-      totalAmount: parseInt(bookingData.totalFare),
+      bookingDetails: bookingData.bookingDetails,
+      cashAmount: cashAmount,
+      bankAmount: bankAmount,
+      totalAmount: totalAmount,
+      dateFrom: bookingData.dateFrom,
+      dateTo: bookingData.dateTo,
     };
+    
     setFareData([...fareData, newEntry]);
-    setTotalEarnings((prev) => prev + parseInt(bookingData.totalFare));
-    setBookingData({ bookingDetails: "", totalFare: "", paymentMethod: "cash", dateFrom: "", dateTo: "" });
+    setTotalEarnings((prev) => prev + totalAmount);
+    setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
   };
 
   const handleOffDaySubmit = (e) => {
@@ -63,7 +80,10 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
     const newEntry = {
       id: Date.now(),
       type: "off",
-      ...offDayData,
+      date: offDayData.date,
+      reason: offDayData.reason,
+      cashAmount: 0,
+      bankAmount: 0,
       totalAmount: 0,
     };
     setFareData([...fareData, newEntry]);
@@ -76,7 +96,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
         return (
           <div className="form-card">
             <h3>Case 1: Daily Fare Collection</h3>
-            <p className="text-muted mb-3">Daily basis route fare collection with payment method</p>
+            <p className="text-muted mb-3">Daily basis route fare collection with cash and bank amounts</p>
             <form onSubmit={handleDailySubmit}>
               <div className="row g-3">
                 <div className="col-12">
@@ -99,31 +119,48 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label">Total Fare Collected (₹)</label>
+                  <label className="form-label">
+                    <i className="bi bi-cash-coin me-2 text-success"></i>
+                    Cash Amount (₹)
+                  </label>
                   <input
                     type="number"
                     className="form-control"
-                    value={dailyFareData.totalFare}
+                    value={dailyFareData.cashAmount}
                     onChange={(e) =>
-                      setDailyFareData({ ...dailyFareData, totalFare: e.target.value })
+                      setDailyFareData({ ...dailyFareData, cashAmount: e.target.value })
                     }
-                    required
+                    placeholder="0"
+                    min="0"
                   />
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label">Payment Method</label>
-                  <select
-                    className="form-select"
-                    value={dailyFareData.paymentMethod}
+                  <label className="form-label">
+                    <i className="bi bi-bank me-2 text-primary"></i>
+                    Bank Amount (₹)
+                  </label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={dailyFareData.bankAmount}
                     onChange={(e) =>
-                      setDailyFareData({ ...dailyFareData, paymentMethod: e.target.value })
+                      setDailyFareData({ ...dailyFareData, bankAmount: e.target.value })
                     }
-                    required
-                  >
-                    <option value="cash">Cash</option>
-                    <option value="bank">Bank</option>
-                  </select>
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+
+                <div className="col-12">
+                  <div className="alert alert-info d-flex align-items-center">
+                    <i className="bi bi-info-circle me-2"></i>
+                    <div>
+                      <strong>Total Amount: ₹{(parseInt(dailyFareData.cashAmount) || 0) + (parseInt(dailyFareData.bankAmount) || 0)}</strong>
+                      <br />
+                      <small>Cash: ₹{parseInt(dailyFareData.cashAmount) || 0} | Bank: ₹{parseInt(dailyFareData.bankAmount) || 0}</small>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="col-12">
@@ -140,7 +177,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                 </div>
 
                 <div className="col-12">
-                  <button type="submit" className="btn btn-primary">
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary"
+                    disabled={!dailyFareData.route || !dailyFareData.date || 
+                             ((parseInt(dailyFareData.cashAmount) || 0) + (parseInt(dailyFareData.bankAmount) || 0)) === 0}
+                  >
                     <i className="bi bi-plus-circle me-2"></i>
                     Add Daily Fare Entry
                   </button>
@@ -154,7 +196,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
         return (
           <div className="form-card">
             <h3>Case 2: Booking Fare Collection</h3>
-            <p className="text-muted mb-3">Booking details with separate total fare and date range</p>
+            <p className="text-muted mb-3">Booking details with cash and bank amounts and date range</p>
             <form onSubmit={handleBookingSubmit}>
               <div className="row g-3">
                 <div className="col-12">
@@ -172,31 +214,48 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label">Total Fare (₹)</label>
+                  <label className="form-label">
+                    <i className="bi bi-cash-coin me-2 text-success"></i>
+                    Cash Amount (₹)
+                  </label>
                   <input
                     type="number"
                     className="form-control"
-                    value={bookingData.totalFare}
+                    value={bookingData.cashAmount}
                     onChange={(e) =>
-                      setBookingData({ ...bookingData, totalFare: e.target.value })
+                      setBookingData({ ...bookingData, cashAmount: e.target.value })
                     }
-                    required
+                    placeholder="0"
+                    min="0"
                   />
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label">Payment Method</label>
-                  <select
-                    className="form-select"
-                    value={bookingData.paymentMethod}
+                  <label className="form-label">
+                    <i className="bi bi-bank me-2 text-primary"></i>
+                    Bank Amount (₹)
+                  </label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={bookingData.bankAmount}
                     onChange={(e) =>
-                      setBookingData({ ...bookingData, paymentMethod: e.target.value })
+                      setBookingData({ ...bookingData, bankAmount: e.target.value })
                     }
-                    required
-                  >
-                    <option value="cash">Cash</option>
-                    <option value="bank">Bank</option>
-                  </select>
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+
+                <div className="col-12">
+                  <div className="alert alert-info d-flex align-items-center">
+                    <i className="bi bi-info-circle me-2"></i>
+                    <div>
+                      <strong>Total Amount: ₹{(parseInt(bookingData.cashAmount) || 0) + (parseInt(bookingData.bankAmount) || 0)}</strong>
+                      <br />
+                      <small>Cash: ₹{parseInt(bookingData.cashAmount) || 0} | Bank: ₹{parseInt(bookingData.bankAmount) || 0}</small>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="col-md-6">
@@ -226,7 +285,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                 </div>
 
                 <div className="col-12">
-                  <button type="submit" className="btn btn-primary">
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary"
+                    disabled={!bookingData.bookingDetails || !bookingData.dateFrom || !bookingData.dateTo ||
+                             ((parseInt(bookingData.cashAmount) || 0) + (parseInt(bookingData.bankAmount) || 0)) === 0}
+                  >
                     <i className="bi bi-plus-circle me-2"></i>
                     Add Booking Entry
                   </button>
@@ -286,12 +350,62 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
     }
   };
 
+  // Calculate totals for summary
+  const totalCash = fareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
+  const totalBank = fareData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+  const grandTotal = totalCash + totalBank;
+
   return (
     <div className="fade-in">
       <h2 className="mb-4">
         <i className="bi bi-ticket-perforated me-2"></i>
         Fare Collection Management
       </h2>
+
+      {/* Summary Cards */}
+      {fareData.length > 0 && (
+        <div className="row g-3 mb-4">
+          <div className="col-md-4">
+            <div className="card bg-success text-white">
+              <div className="card-body">
+                <div className="d-flex align-items-center">
+                  <i className="bi bi-cash-coin fs-3 me-3"></i>
+                  <div>
+                    <h5 className="card-title mb-1">Total Cash</h5>
+                    <h3 className="mb-0">₹{totalCash.toLocaleString()}</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-4">
+            <div className="card bg-primary text-white">
+              <div className="card-body">
+                <div className="d-flex align-items-center">
+                  <i className="bi bi-bank fs-3 me-3"></i>
+                  <div>
+                    <h5 className="card-title mb-1">Total Bank</h5>
+                    <h3 className="mb-0">₹{totalBank.toLocaleString()}</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-4">
+            <div className="card bg-info text-white">
+              <div className="card-body">
+                <div className="d-flex align-items-center">
+                  <i className="bi bi-wallet2 fs-3 me-3"></i>
+                  <div>
+                    <h5 className="card-title mb-1">Grand Total</h5>
+                    <h3 className="mb-0">₹{grandTotal.toLocaleString()}</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Case Selection Tabs */}
       <div className="mb-4">
@@ -336,8 +450,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                 <tr>
                   <th>Type</th>
                   <th>Details</th>
-                  <th>Amount</th>
-                  <th>Payment</th>
+                  <th>Cash Amount</th>
+                  <th>Bank Amount</th>
+                  <th>Total Amount</th>
                   <th>Date</th>
                   <th>Status</th>
                 </tr>
@@ -360,14 +475,23 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                       {entry.type === "off" && entry.reason?.substring(0, 50) + "..."}
                     </td>
                     <td>
-                      {entry.type !== "off" ? `₹${entry.totalAmount}` : "-"}
+                      {entry.type !== "off" ? (
+                        <span className="badge bg-success">
+                          ₹{entry.cashAmount || 0}
+                        </span>
+                      ) : "-"}
                     </td>
                     <td>
-                      {entry.type !== "off" && (
-                        <span className={`badge ${entry.paymentMethod === "cash" ? "bg-warning" : "bg-primary"}`}>
-                          {entry.paymentMethod?.toUpperCase()}
+                      {entry.type !== "off" ? (
+                        <span className="badge bg-primary">
+                          ₹{entry.bankAmount || 0}
                         </span>
-                      )}
+                      ) : "-"}
+                    </td>
+                    <td>
+                      {entry.type !== "off" ? (
+                        <strong>₹{entry.totalAmount}</strong>
+                      ) : "-"}
                     </td>
                     <td>
                       {entry.type === "daily" && entry.date}
