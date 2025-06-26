@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../css/FareEntry.css";
+import "../css/FareRecipt.css";
 
 function FareEntry({ fareData, setFareData, setTotalEarnings }) {
   const [activeTab, setActiveTab] = useState("daily");

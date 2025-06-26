@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import "../css/AddaFeesEntry.css";
+import "../css/FeesPayment.css";
 
 function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses }) {
   const [editingEntry, setEditingEntry] = useState(null);

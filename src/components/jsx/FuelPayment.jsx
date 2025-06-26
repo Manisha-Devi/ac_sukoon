@@ -1,16 +1,16 @@
 
 import React, { useState } from "react";
-import "../css/ServiceEntry.css";
+import "../FuelPayment.css";
 
-function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses }) {
+function FuelEntry({ expenseData, setExpenseData, setTotalExpenses }) {
   const [editingEntry, setEditingEntry] = useState(null);
   const [formData, setFormData] = useState({
-    serviceDetails: "",
     cashAmount: "",
     bankAmount: "",
-    description: "",
+    liters: "",
+    rate: "",
     date: "",
-    mechanic: "",
+    pumpName: "",
   });
 
   // Function to get min date for date inputs (today)
@@ -32,13 +32,13 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses }) {
         entry.id === editingEntry.id 
           ? {
               ...entry,
-              serviceDetails: formData.serviceDetails,
               cashAmount: cashAmount,
               bankAmount: bankAmount,
               totalAmount: totalAmount,
-              description: formData.description,
+              liters: formData.liters,
+              rate: formData.rate,
               date: formData.date,
-              mechanic: formData.mechanic,
+              pumpName: formData.pumpName,
             }
           : entry
       );
@@ -49,27 +49,19 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses }) {
       // Create new entry
       const newEntry = {
         id: Date.now(),
-        type: "service",
-        serviceDetails: formData.serviceDetails,
+        type: "fuel",
         cashAmount: cashAmount,
         bankAmount: bankAmount,
         totalAmount: totalAmount,
-        description: formData.description,
+        liters: formData.liters,
+        rate: formData.rate,
         date: formData.date,
-        mechanic: formData.mechanic,
+        pumpName: formData.pumpName,
       };
       setExpenseData([...expenseData, newEntry]);
       setTotalExpenses((prev) => prev + totalAmount);
     }
-    
-    setFormData({
-      serviceDetails: "",
-      cashAmount: "",
-      bankAmount: "",
-      description: "",
-      date: "",
-      mechanic: "",
-    });
+    setFormData({ cashAmount: "", bankAmount: "", liters: "", rate: "", date: "", pumpName: "" });
   };
 
   const handleDeleteEntry = (entryId) => {
@@ -83,50 +75,40 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses }) {
   const handleEditEntry = (entry) => {
     setEditingEntry(entry);
     setFormData({
-      serviceDetails: entry.serviceDetails,
       cashAmount: entry.cashAmount.toString(),
       bankAmount: entry.bankAmount.toString(),
-      description: entry.description,
+      liters: entry.liters || "",
+      rate: entry.rate || "",
       date: entry.date,
-      mechanic: entry.mechanic || "",
+      pumpName: entry.pumpName || "",
     });
   };
 
   const handleCancelEdit = () => {
     setEditingEntry(null);
-    setFormData({
-      serviceDetails: "",
-      cashAmount: "",
-      bankAmount: "",
-      description: "",
-      date: "",
-      mechanic: "",
-    });
+    setFormData({ cashAmount: "", bankAmount: "", liters: "", rate: "", date: "", pumpName: "" });
   };
 
-  // Filter service entries
-  const serviceEntries = expenseData.filter(entry => entry.type === "service");
-
   // Calculate totals for summary
-  const totalCash = serviceEntries.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
-  const totalBank = serviceEntries.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+  const totalCash = expenseData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
+  const totalBank = expenseData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
   const grandTotal = totalCash + totalBank;
 
   return (
-    <div className="service-entry-container">
+    <div className="fuel-entry-container">
       <div className="container-fluid">
-        <div className="service-header">
-          <h2><i className="bi bi-credit-card"></i> Service Payment Entry</h2>
-          <p>Record your vehicle service and maintenance expenses (Payment)</p>
+        <div className="fuel-header">
+          <h2><i className="bi bi-credit-card"></i> Fuel Payment Entry</h2>
+          <p>Record your fuel expenses (Payment)</p>
         </div>
 
         {/* Summary Cards */}
-        {serviceEntries.length > 0 && (
+        {expenseData.length > 0 && (
           <div className="row mb-4">
             <div className="col-md-3 col-sm-6 mb-3">
               <div className="summary-card cash-card">
                 <div className="card-body">
-                  <h6>Cash Expenses</h6>
+                  <h6>Cash Expense</h6>
                   <h4>₹{totalCash.toLocaleString('en-IN')}</h4>
                 </div>
               </div>
@@ -134,7 +116,7 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses }) {
             <div className="col-md-3 col-sm-6 mb-3">
               <div className="summary-card bank-card">
                 <div className="card-body">
-                  <h6>Bank Expenses</h6>
+                  <h6>Bank Transfer</h6>
                   <h4>₹{totalBank.toLocaleString('en-IN')}</h4>
                 </div>
               </div>
@@ -151,29 +133,17 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses }) {
               <div className="summary-card entries-card">
                 <div className="card-body">
                   <h6>Total Entries</h6>
-                  <h4>{serviceEntries.length}</h4>
+                  <h4>{expenseData.length}</h4>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Service Entry Form */}
-        <div className="service-form-card">
-          <h4><i className="bi bi-tools"></i> Service Details</h4>
+        <div className="fuel-form-card">
+          <h4><i className="bi bi-fuel-pump"></i> {editingEntry ? "Edit Fuel Expense" : "Add Fuel Expense"}</h4>
           <form onSubmit={handleSubmit}>
             <div className="row">
-              <div className="col-md-6 mb-3">
-                <label className="form-label">Service Details</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formData.serviceDetails}
-                  onChange={(e) => setFormData({ ...formData, serviceDetails: e.target.value })}
-                  placeholder="Enter service details"
-                  required
-                />
-              </div>
               <div className="col-md-6 mb-3">
                 <label className="form-label">Date</label>
                 <input
@@ -187,31 +157,41 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses }) {
                   required
                 />
               </div>
-            </div>
-            
-            <div className="row">
-              <div className="col-12 mb-3">
-                <label className="form-label">Description</label>
-                <textarea
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Pump Name (Optional)</label>
+                <input
+                  type="text"
                   className="form-control"
-                  rows={3}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Enter detailed description of service work"
-                  required
+                  value={formData.pumpName}
+                  onChange={(e) => setFormData({ ...formData, pumpName: e.target.value })}
+                  placeholder="Enter pump name"
                 />
               </div>
             </div>
             
             <div className="row">
               <div className="col-md-6 mb-3">
-                <label className="form-label">Mechanic/Service Center (Optional)</label>
+                <label className="form-label">Liters (Optional)</label>
                 <input
-                  type="text"
+                  type="number"
+                  step="0.01"
                   className="form-control"
-                  value={formData.mechanic}
-                  onChange={(e) => setFormData({ ...formData, mechanic: e.target.value })}
-                  placeholder="Enter mechanic or service center name"
+                  value={formData.liters}
+                  onChange={(e) => setFormData({ ...formData, liters: e.target.value })}
+                  placeholder="Enter liters"
+                  min="0"
+                />
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Rate per Liter (₹) (Optional)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  className="form-control"
+                  value={formData.rate}
+                  onChange={(e) => setFormData({ ...formData, rate: e.target.value })}
+                  placeholder="Enter rate per liter"
+                  min="0"
                 />
               </div>
             </div>
@@ -256,9 +236,9 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses }) {
             </div>
             
             <div className="button-group">
-              <button type="submit" className="btn service-entry-btn">
+              <button type="submit" className="btn fuel-entry-btn">
                 <i className={editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
-                {editingEntry ? "Update Entry" : "Add Service Entry"}
+                {editingEntry ? "Update Entry" : "Add Fuel Entry"}
               </button>
               {editingEntry && (
                 <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
@@ -270,16 +250,18 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses }) {
         </div>
 
         {/* Recent Entries */}
-        {serviceEntries.length > 0 && (
+        {expenseData.length > 0 && (
           <div className="recent-entries mt-4">
             <h4>Recent Entries</h4>
             <div className="row">
-              {serviceEntries.slice(-6).reverse().map((entry) => (
+              {expenseData.slice(-6).reverse().map((entry) => (
                 <div key={entry.id} className="col-md-6 col-lg-4 mb-3">
                   <div className="entry-card">
                     <div className="card-body">
                       <div className="entry-header">
-                        <span className="entry-type service">Service</span>
+                        <span className="entry-type fuel">
+                          Fuel Expense
+                        </span>
                         <div className="entry-actions">
                           <button 
                             className="btn btn-sm btn-edit" 
@@ -301,9 +283,11 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses }) {
                         <small className="text-muted">{entry.date}</small>
                       </div>
                       <div className="entry-content">
-                        <p><strong>{entry.serviceDetails}</strong></p>
-                        <p>{entry.description?.substring(0, 60)}...</p>
-                        {entry.mechanic && <p><small>At: {entry.mechanic}</small></p>}
+                        <p>
+                          {entry.pumpName && <><strong>Pump:</strong> {entry.pumpName}<br/></>}
+                          {entry.liters && <><strong>Liters:</strong> {entry.liters}<br/></>}
+                          {entry.rate && <><strong>Rate:</strong> ₹{entry.rate}/L</>}
+                        </p>
                       </div>
                       <div className="entry-amounts">
                         <div className="amount-row">
@@ -326,4 +310,4 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses }) {
   );
 }
 
-export default ServiceEntry;
+export default FuelEntry;

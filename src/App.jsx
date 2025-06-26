@@ -3,9 +3,9 @@ import "./App.css";
 
 // Import all components
 import Dashboard from "./components/jsx/Dashboard";
-import FareEntry from "./components/jsx/FareEntry";
-import FuelEntry from "./components/jsx/FuelEntry";
-import AddaFeesEntry from "./components/jsx/AddaFeesEntry";
+import FareEntry from "./components/jsx/FareRecipt";
+import FuelEntry from "./components/jsx/FuelPayment";
+import AddaFeesEntry from "./components/jsx/FeesPayment";
 import ServiceEntry from "./components/jsx/ServiceEntry";
 import BonusCalculator from "./components/jsx/BonusCalculator";
 import Analytics from "./components/jsx/Analytics";
