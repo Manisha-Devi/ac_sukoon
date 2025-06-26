@@ -1,11 +1,4 @@
-` tags:
 
-```
-Updated CSS import path in AddaFeesEntry.jsx
-```
-
-```jsx
-<replit_final_file>
 import React from 'react';
 import "../css/AddaFeesEntry.css";
 
