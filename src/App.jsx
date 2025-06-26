@@ -182,6 +182,20 @@ function App() {
           <div className="menu-section">
             <h6>AUTOMATION</h6>
             <button
+              className={`menu-item ${activeTab === "cash-book" ? "active" : ""}`}
+              onClick={() => handleMenuClick("cash-book")}
+            >
+              <i className="bi bi-cash-coin"></i>
+              Cash Book
+            </button>
+            <button
+              className={`menu-item ${activeTab === "bank-book" ? "active" : ""}`}
+              onClick={() => handleMenuClick("bank-book")}
+            >
+              <i className="bi bi-bank"></i>
+              Bank Book
+            </button>
+            <button
               className={`menu-item ${activeTab === "bonus-calc" ? "active" : ""}`}
               onClick={() => handleMenuClick("bonus-calc")}
             >
