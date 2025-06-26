@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../css/FeesPayment.css";
 
-function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses }) {
+function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
   const [editingEntry, setEditingEntry] = useState(null);
   const [formData, setFormData] = useState({
     cashAmount: "",
@@ -84,6 +84,20 @@ function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses }) {
   const totalCash = expenseData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
   const totalBank = expenseData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
   const grandTotal = totalCash + totalBank;
+
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this entry?")) {
+      const expenseToDelete = expenseData.find(expense => expense.id === id);
+      setExpenseData(expenseData.filter(expense => expense.id !== id));
+
+      // Remove corresponding cash book entry
+      if (expenseToDelete && setCashBookEntries) {
+        setCashBookEntries(prev => prev.filter(entry => 
+          !(entry.source === 'fees-payment' && entry.id === expenseToDelete.id + 1)
+        ));
+      }
+    }
+  };
 
   return (
     <div className="adda-entry-container">
@@ -237,7 +251,7 @@ function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses }) {
                           </button>
                           <button 
                             className="btn btn-sm btn-delete" 
-                            onClick={() => handleDeleteEntry(entry.id)}
+                            onClick={() => handleDelete(entry.id)}
                             title="Delete Entry"
                           >
                             <i className="bi bi-trash"></i>

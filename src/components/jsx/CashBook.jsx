@@ -11,16 +11,6 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
   const [showSummary, setShowSummary] = useState(true);
 
   useEffect(() => {
-    const savedEntries = localStorage.getItem('cashBookEntries');
-    if (savedEntries && cashBookEntries.length === 0) {
-      setCashBookEntries(JSON.parse(savedEntries));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (cashBookEntries.length > 0) {
-      localStorage.setItem('cashBookEntries', JSON.stringify(cashBookEntries));
-    }
     filterEntries();
   }, [cashBookEntries, customDateFrom, customDateTo]);
 
