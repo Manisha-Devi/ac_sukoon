@@ -1,188 +1,533 @@
 
-/* FareEntry specific styles */
+/* FareEntry Modern Design */
 .fare-entry-container {
   max-width: 100%;
+  padding: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
 }
 
-.fare-summary-cards {
-  margin-bottom: 2rem;
-}
-
-.fare-summary-card {
-  border-radius: var(--border-radius);
-  border: none;
-  box-shadow: var(--card-shadow);
-  transition: var(--transition);
-}
-
-.fare-summary-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--card-shadow-hover);
-}
-
-.fare-case-tabs {
-  margin-bottom: 2rem;
-}
-
-.fare-case-tabs .btn-group {
-  border-radius: var(--border-radius);
-  overflow: hidden;
-  box-shadow: var(--card-shadow);
-}
-
-.fare-case-tabs .btn {
-  border-radius: 0;
-  border: none;
-  padding: 1rem 1.5rem;
-  font-weight: 600;
-  transition: var(--transition);
-}
-
-.fare-case-tabs .btn-primary {
-  background: var(--primary-gradient);
-}
-
-.fare-case-tabs .btn-outline-primary {
-  background: rgba(255, 255, 255, 0.8);
-  color: var(--primary-blue);
-}
-
-.fare-case-tabs .btn-outline-primary:hover {
-  background: rgba(102, 126, 234, 0.1);
-  color: var(--primary-blue);
-}
-
-.fare-form-card {
-  background: rgba(255, 255, 255, 0.95);
+/* Header Section */
+.fare-header {
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
-  border-radius: var(--border-radius);
-  box-shadow: var(--card-shadow);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 2.5rem;
-  margin-bottom: 2rem;
-  transition: var(--transition);
-}
-
-.fare-form-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--card-shadow-hover);
-}
-
-.fare-form-card h3 {
-  margin-bottom: 0.5rem;
-  font-weight: 700;
-  color: #2d3748;
-}
-
-.fare-form-card .text-muted {
-  margin-bottom: 1.5rem;
-  font-size: 0.95rem;
-}
-
-.fare-amount-preview {
-  background: rgba(23, 162, 184, 0.1);
-  border: 1px solid rgba(23, 162, 184, 0.2);
-  border-radius: 12px;
-  padding: 1rem;
-}
-
-.fare-amount-preview strong {
-  color: #117a8b;
-}
-
-.fare-amount-preview small {
-  color: #6c757d;
-}
-
-.fare-entry-btn {
-  background: var(--primary-gradient);
-  border: none;
-  padding: 0.875rem 2rem;
-  border-radius: 12px;
-  font-weight: 600;
-  transition: var(--transition);
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
-}
-
-.fare-entry-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
-  background: linear-gradient(135deg, #7c91ff 0%, #8b62c7 100%);
-}
-
-.fare-entry-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
-}
-
-.fare-table-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: var(--border-radius);
-  box-shadow: var(--card-shadow);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  overflow: hidden;
-  margin-top: 2rem;
-  transition: var(--transition);
-}
-
-.fare-table-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--card-shadow-hover);
-}
-
-.fare-table-card h5 {
-  padding: 1.5rem 1.5rem 0 1.5rem;
-  margin-bottom: 1rem;
-  font-weight: 600;
-  color: #212529;
-}
-
-.fare-table {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 2rem 2rem 1.5rem;
   margin-bottom: 0;
 }
 
-.fare-table thead th {
-  background: #f8f9fa;
-  border-bottom: 2px solid #dee2e6;
+.fare-header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.fare-title-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.fare-main-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.fare-main-title i {
+  margin-right: 1rem;
+  color: #ffd700;
+}
+
+.fare-subtitle {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+/* Quick Stats */
+.fare-quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.stat-item {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.stat-icon.cash {
+  background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.stat-icon.bank {
+  background: linear-gradient(135deg, #007bff, #6610f2);
+}
+
+.stat-icon.total {
+  background: linear-gradient(135deg, #fd7e14, #dc3545);
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+/* Navigation Tabs */
+.fare-nav-tabs {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.fare-nav-btn {
+  background: transparent;
+  border: none;
+  padding: 1rem 2rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
   font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  min-width: 140px;
 }
 
-.fare-table tbody tr:hover {
-  background: rgba(102, 126, 234, 0.05);
+.fare-nav-btn:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.fare-type-badge {
-  font-size: 0.75rem;
-  padding: 0.375rem 0.75rem;
-  border-radius: 6px;
+.fare-nav-btn.active {
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.fare-nav-btn i {
+  font-size: 1.2rem;
+}
+
+.nav-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 3px;
+  background: #ffd700;
+  transition: width 0.3s ease;
+}
+
+.fare-nav-btn.active .nav-indicator {
+  width: 60%;
+}
+
+/* Content Area */
+.fare-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Form Section */
+.fare-form-section {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 25px;
+  padding: 3rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  margin-bottom: 2rem;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.form-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.form-header p {
+  color: #718096;
+  font-size: 1.1rem;
+}
+
+/* Form Grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.form-label i {
+  color: #667eea;
+}
+
+.form-input, .form-textarea {
+  padding: 1rem 1.25rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 15px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.form-input:focus, .form-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* Amount Preview */
+.amount-preview {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  border-radius: 20px;
+  padding: 1.5rem;
+  border: 2px solid rgba(102, 126, 234, 0.1);
+}
+
+.preview-content h4 {
+  color: #2d3748;
+  margin-bottom: 1rem;
   font-weight: 600;
 }
 
-.fare-amount-badge {
+.preview-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  color: #4a5568;
+}
+
+.breakdown-total {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 0 0.5rem;
+  border-top: 2px solid rgba(102, 126, 234, 0.2);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #2d3748;
+}
+
+/* Submit Button */
+.submit-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 15px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 auto;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.submit-btn.off-day {
+  background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+  box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+}
+
+.submit-btn.off-day:hover:not(:disabled) {
+  box-shadow: 0 12px 35px rgba(220, 53, 69, 0.4);
+}
+
+/* Recent Entries */
+.recent-entries {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 25px;
+  padding: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.entries-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.entries-header h3 {
+  color: #2d3748;
+  font-weight: 700;
+  margin: 0;
+}
+
+.entries-count {
+  background: #e2e8f0;
+  color: #4a5568;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.entries-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.entry-card {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.entry-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.entry-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: white;
+}
+
+.entry-card.daily .entry-icon {
+  background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.entry-card.booking .entry-icon {
+  background: linear-gradient(135deg, #007bff, #6610f2);
+}
+
+.entry-card.off .entry-icon {
+  background: linear-gradient(135deg, #dc3545, #fd7e14);
+}
+
+.entry-content {
+  flex: 1;
+}
+
+.entry-title {
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.25rem;
+}
+
+.entry-details {
+  color: #718096;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.entry-description {
+  color: #a0aec0;
+  font-size: 0.85rem;
+}
+
+.entry-amount {
+  text-align: right;
+}
+
+.amount-breakdown {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.cash-amount, .bank-amount {
   font-size: 0.8rem;
-  padding: 0.25rem 0.6rem;
+  padding: 0.25rem 0.5rem;
   border-radius: 6px;
   font-weight: 600;
 }
 
-@media (max-width: 575.98px) {
-  .fare-form-card {
-    padding: 1.5rem;
-  }
+.cash-amount {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+}
 
-  .fare-case-tabs .btn {
+.bank-amount {
+  background: rgba(0, 123, 255, 0.1);
+  color: #007bff;
+}
+
+.total-amount {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #2d3748;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .fare-header {
+    padding: 1.5rem 1rem;
+  }
+  
+  .fare-main-title {
+    font-size: 2rem;
+  }
+  
+  .fare-nav-tabs {
+    padding: 0.5rem 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .fare-nav-btn {
     padding: 0.75rem 1rem;
-    font-size: 0.9rem;
+    min-width: 100px;
   }
+  
+  .fare-content {
+    padding: 1rem;
+  }
+  
+  .fare-form-section {
+    padding: 2rem 1.5rem;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stat-item {
+    padding: 1rem;
+  }
+  
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .stat-value {
+    font-size: 1.2rem;
+  }
+}
 
-  .fare-summary-cards .col-md-4 {
-    margin-bottom: 1rem;
+@media (max-width: 480px) {
+  .fare-header {
+    padding: 1rem;
+  }
+  
+  .fare-main-title {
+    font-size: 1.5rem;
+  }
+  
+  .fare-subtitle {
+    font-size: 1rem;
+  }
+  
+  .fare-quick-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .entry-card {
+    padding: 1rem;
+  }
+  
+  .entry-icon {
+    width: 40px;
+    height: 40px;
   }
 }
