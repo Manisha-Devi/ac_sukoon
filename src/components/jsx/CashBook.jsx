@@ -1,7 +1,13 @@
+
 import React, { useState, useEffect } from "react";
 import "../css/CashBook.css";
 
 const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
+  const [dateFilter, setDateFilter] = useState('all');
+  const [customDateFrom, setCustomDateFrom] = useState('');
+  const [customDateTo, setCustomDateTo] = useState('');
+  const [filteredEntries, setFilteredEntries] = useState([]);
+
   useEffect(() => {
     const savedEntries = localStorage.getItem('cashBookEntries');
     if (savedEntries && cashBookEntries.length === 0) {
@@ -11,13 +17,67 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
 
   useEffect(() => {
     localStorage.setItem('cashBookEntries', JSON.stringify(cashBookEntries));
-  }, [cashBookEntries]);
+    filterEntries();
+  }, [cashBookEntries, dateFilter, customDateFrom, customDateTo]);
 
-  // Separate entries by type
-  const drEntries = cashBookEntries.filter(entry => entry.type === 'dr');
-  const crEntries = cashBookEntries.filter(entry => entry.type === 'cr');
+  const filterEntries = () => {
+    let filtered = [...cashBookEntries];
+    const today = new Date();
+    
+    switch (dateFilter) {
+      case 'today':
+        filtered = filtered.filter(entry => {
+          const entryDate = new Date(entry.date);
+          return entryDate.toDateString() === today.toDateString();
+        });
+        break;
+      case 'week':
+        const weekAgo = new Date(today);
+        weekAgo.setDate(today.getDate() - 7);
+        filtered = filtered.filter(entry => {
+          const entryDate = new Date(entry.date);
+          return entryDate >= weekAgo;
+        });
+        break;
+      case 'month':
+        const monthAgo = new Date(today);
+        monthAgo.setMonth(today.getMonth() - 1);
+        filtered = filtered.filter(entry => {
+          const entryDate = new Date(entry.date);
+          return entryDate >= monthAgo;
+        });
+        break;
+      case 'year':
+        const yearAgo = new Date(today);
+        yearAgo.setFullYear(today.getFullYear() - 1);
+        filtered = filtered.filter(entry => {
+          const entryDate = new Date(entry.date);
+          return entryDate >= yearAgo;
+        });
+        break;
+      case 'custom':
+        if (customDateFrom && customDateTo) {
+          const fromDate = new Date(customDateFrom);
+          const toDate = new Date(customDateTo);
+          toDate.setHours(23, 59, 59); // Include full end date
+          filtered = filtered.filter(entry => {
+            const entryDate = new Date(entry.date);
+            return entryDate >= fromDate && entryDate <= toDate;
+          });
+        }
+        break;
+      default:
+        // 'all' - no filtering
+        break;
+    }
+    
+    setFilteredEntries(filtered);
+  };
 
-  // Calculate totals
+  // Calculate totals using filtered entries
+  const drEntries = filteredEntries.filter(entry => entry.type === 'dr');
+  const crEntries = filteredEntries.filter(entry => entry.type === 'cr');
+
   const totalDrCash = drEntries.reduce((sum, entry) => sum + entry.cashAmount, 0);
   const totalDrBank = drEntries.reduce((sum, entry) => sum + entry.bankAmount, 0);
   const totalCrCash = crEntries.reduce((sum, entry) => sum + entry.cashAmount, 0);
@@ -25,6 +85,25 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
 
   const cashBalance = totalDrCash - totalCrCash;
   const bankBalance = totalDrBank - totalCrBank;
+
+  const formatEntryParticulars = (entry) => {
+    switch (entry.source) {
+      case 'fare-daily':
+        return `To Daily Fare - ${entry.route || 'Route'}`;
+      case 'fare-booking':
+        return `To Booking - ${entry.bookingDetails || entry.description}`;
+      case 'fees-payment':
+        return `By Fees Payment - ${entry.description}`;
+      case 'fuel-payment':
+        return `By Fuel Payment - ${entry.description}`;
+      case 'service-payment':
+        return `By Service Payment - ${entry.description}`;
+      case 'other-payment':
+        return `By Other Payment - ${entry.description}`;
+      default:
+        return entry.type === 'dr' ? `To ${entry.particulars}` : `By ${entry.particulars}`;
+    }
+  };
 
   return (
     <div className="cash-book-container">
@@ -34,8 +113,60 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
           <p>Traditional Dr./Cr. format with Cash and Bank columns</p>
         </div>
 
+        {/* Date Filter Controls */}
+        <div className="date-filter-card">
+          <div className="card-body">
+            <h5><i className="bi bi-calendar3"></i> Date Filter</h5>
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Filter Type</label>
+                <select 
+                  className="form-select"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                >
+                  <option value="all">All Entries</option>
+                  <option value="today">Today</option>
+                  <option value="week">Last 7 Days</option>
+                  <option value="month">Last Month</option>
+                  <option value="year">Last Year</option>
+                  <option value="custom">Custom Range</option>
+                </select>
+              </div>
+              {dateFilter === 'custom' && (
+                <>
+                  <div className="col-md-3 mb-3">
+                    <label className="form-label">From Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={customDateFrom}
+                      onChange={(e) => setCustomDateFrom(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-md-3 mb-3">
+                    <label className="form-label">To Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={customDateTo}
+                      onChange={(e) => setCustomDateTo(e.target.value)}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="filter-info">
+              <small className="text-muted">
+                Showing {filteredEntries.length} of {cashBookEntries.length} entries
+                {dateFilter !== 'all' && ` (${dateFilter === 'custom' ? 'Custom Range' : dateFilter})`}
+              </small>
+            </div>
+          </div>
+        </div>
+
         {/* Summary Cards */}
-        {cashBookEntries.length > 0 && (
+        {filteredEntries.length > 0 && (
           <div className="row mb-4">
             <div className="col-md-3 col-sm-6 mb-3">
               <div className="summary-card dr-cash-card">
@@ -73,7 +204,7 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
         )}
 
         {/* Balance Cards */}
-        {cashBookEntries.length > 0 && (
+        {filteredEntries.length > 0 && (
           <div className="row mb-4">
             <div className="col-md-6 mb-3">
               <div className="summary-card cash-balance-card">
@@ -101,7 +232,7 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
         )}
 
         {/* Double Column Cash Book */}
-        {cashBookEntries.length > 0 && (
+        {filteredEntries.length > 0 && (
           <div className="double-column-cash-book">
             <div className="cash-book-header-row">
               <h4><i className="bi bi-book-half"></i> In the Books of... Cash Book</h4>
@@ -157,7 +288,7 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
                           <tr key={`row-${index}`}>
                             {/* Dr. Side */}
                             <td>{drEntry ? new Date(drEntry.date).toLocaleDateString('en-IN') : ''}</td>
-                            <td>{drEntry ? `To ${drEntry.particulars}` : ''}</td>
+                            <td>{drEntry ? formatEntryParticulars(drEntry) : ''}</td>
                             <td className="text-success">
                               {drEntry && drEntry.cashAmount > 0 ? `₹${drEntry.cashAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}` : (drEntry ? '-' : '')}
                             </td>
@@ -167,7 +298,7 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
 
                             {/* Cr. Side */}
                             <td>{crEntry ? new Date(crEntry.date).toLocaleDateString('en-IN') : ''}</td>
-                            <td>{crEntry ? `By ${crEntry.particulars}` : ''}</td>
+                            <td>{crEntry ? formatEntryParticulars(crEntry) : ''}</td>
                             <td className="text-danger">
                               {crEntry && crEntry.cashAmount > 0 ? `₹${crEntry.cashAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}` : (crEntry ? '-' : '')}
                             </td>
@@ -216,12 +347,22 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
           </div>
         )}
 
-        {cashBookEntries.length === 0 && (
+        {filteredEntries.length === 0 && cashBookEntries.length === 0 && (
           <div className="no-entries">
             <div className="text-center py-5">
               <i className="bi bi-book display-1 text-muted"></i>
               <h4 className="mt-3 text-muted">No Cash Book Entries Found</h4>
               <p className="text-muted">Entries will appear here automatically when you add Fare Receipts or Payment transactions.</p>
+            </div>
+          </div>
+        )}
+
+        {filteredEntries.length === 0 && cashBookEntries.length > 0 && (
+          <div className="no-entries">
+            <div className="text-center py-5">
+              <i className="bi bi-calendar-x display-1 text-muted"></i>
+              <h4 className="mt-3 text-muted">No Entries for Selected Date Range</h4>
+              <p className="text-muted">Try adjusting the date filter to view entries from different time periods.</p>
             </div>
           </div>
         )}

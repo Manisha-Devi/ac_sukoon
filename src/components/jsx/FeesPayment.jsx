@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import "../css/FeesPayment.css";
 
@@ -18,7 +17,7 @@ function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     const cashAmount = parseInt(formData.cashAmount) || 0;
     const bankAmount = parseInt(formData.bankAmount) || 0;
     const totalAmount = cashAmount + bankAmount;
@@ -161,7 +160,7 @@ function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses }) {
                 />
               </div>
             </div>
-            
+
             <div className="row">
               <div className="col-md-6 mb-3">
                 <label className="form-label">Cash Amount (₹)</label>
@@ -186,7 +185,7 @@ function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses }) {
                 />
               </div>
             </div>
-            
+
             <div className="amount-summary mb-3">
               <div className="row">
                 <div className="col-4">
@@ -200,7 +199,7 @@ function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses }) {
                 </div>
               </div>
             </div>
-            
+
             <div className="button-group">
               <button type="submit" className="btn adda-entry-btn">
                 <i className={editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
