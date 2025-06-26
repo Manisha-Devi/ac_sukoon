@@ -12,7 +12,7 @@ import OtherPayment from "./components/jsx/OtherPayment";
 import BonusCalculator from "./components/jsx/BonusCalculator";
 import Analytics from "./components/jsx/Analytics";
 import CashBook from "./components/jsx/CashBook";
-import Approval from "./components/jsx/Approval";
+import DataSummary from "./components/jsx/DataSummary";
 
 
 function App() {
@@ -310,7 +310,7 @@ function App() {
             />
           )}
           {activeTab === "approval" && (
-            <Approval
+            <DataSummary
               fareData={fareData}
               expenseData={expenseData}
               cashBookEntries={cashBookEntries}
