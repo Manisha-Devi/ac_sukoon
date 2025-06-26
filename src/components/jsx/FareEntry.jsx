@@ -3,6 +3,7 @@ import "../css/FareEntry.css";
 
 function FareEntry({ fareData, setFareData, setTotalEarnings }) {
   const [activeTab, setActiveTab] = useState("daily");
+  const [editingEntry, setEditingEntry] = useState(null);
   const [dailyFareData, setDailyFareData] = useState({
     route: "",
     cashAmount: "",
@@ -38,18 +39,38 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
     const bankAmount = parseInt(dailyFareData.bankAmount) || 0;
     const totalAmount = cashAmount + bankAmount;
 
-    const newEntry = {
-      id: Date.now(),
-      type: "daily",
-      route: dailyFareData.route,
-      cashAmount: cashAmount,
-      bankAmount: bankAmount,
-      totalAmount: totalAmount,
-      date: dailyFareData.date,
-    };
-
-    setFareData([...fareData, newEntry]);
-    setTotalEarnings((prev) => prev + totalAmount);
+    if (editingEntry) {
+      // Update existing entry
+      const oldTotal = editingEntry.totalAmount;
+      const updatedEntries = fareData.map(entry => 
+        entry.id === editingEntry.id 
+          ? {
+              ...entry,
+              route: dailyFareData.route,
+              cashAmount: cashAmount,
+              bankAmount: bankAmount,
+              totalAmount: totalAmount,
+              date: dailyFareData.date,
+            }
+          : entry
+      );
+      setFareData(updatedEntries);
+      setTotalEarnings((prev) => prev - oldTotal + totalAmount);
+      setEditingEntry(null);
+    } else {
+      // Create new entry
+      const newEntry = {
+        id: Date.now(),
+        type: "daily",
+        route: dailyFareData.route,
+        cashAmount: cashAmount,
+        bankAmount: bankAmount,
+        totalAmount: totalAmount,
+        date: dailyFareData.date,
+      };
+      setFareData([...fareData, newEntry]);
+      setTotalEarnings((prev) => prev + totalAmount);
+    }
     setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
   };
 
@@ -59,34 +80,110 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
     const bankAmount = parseInt(bookingData.bankAmount) || 0;
     const totalAmount = cashAmount + bankAmount;
 
-    const newEntry = {
-      id: Date.now(),
-      type: "booking",
-      bookingDetails: bookingData.bookingDetails,
-      cashAmount: cashAmount,
-      bankAmount: bankAmount,
-      totalAmount: totalAmount,
-      dateFrom: bookingData.dateFrom,
-      dateTo: bookingData.dateTo,
-    };
-
-    setFareData([...fareData, newEntry]);
-    setTotalEarnings((prev) => prev + totalAmount);
+    if (editingEntry) {
+      // Update existing entry
+      const oldTotal = editingEntry.totalAmount;
+      const updatedEntries = fareData.map(entry => 
+        entry.id === editingEntry.id 
+          ? {
+              ...entry,
+              bookingDetails: bookingData.bookingDetails,
+              cashAmount: cashAmount,
+              bankAmount: bankAmount,
+              totalAmount: totalAmount,
+              dateFrom: bookingData.dateFrom,
+              dateTo: bookingData.dateTo,
+            }
+          : entry
+      );
+      setFareData(updatedEntries);
+      setTotalEarnings((prev) => prev - oldTotal + totalAmount);
+      setEditingEntry(null);
+    } else {
+      // Create new entry
+      const newEntry = {
+        id: Date.now(),
+        type: "booking",
+        bookingDetails: bookingData.bookingDetails,
+        cashAmount: cashAmount,
+        bankAmount: bankAmount,
+        totalAmount: totalAmount,
+        dateFrom: bookingData.dateFrom,
+        dateTo: bookingData.dateTo,
+      };
+      setFareData([...fareData, newEntry]);
+      setTotalEarnings((prev) => prev + totalAmount);
+    }
     setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
   };
 
   const handleOffDaySubmit = (e) => {
     e.preventDefault();
-    const newEntry = {
-      id: Date.now(),
-      type: "off",
-      date: offDayData.date,
-      reason: offDayData.reason,
-      cashAmount: 0,
-      bankAmount: 0,
-      totalAmount: 0,
-    };
-    setFareData([...fareData, newEntry]);
+    if (editingEntry) {
+      // Update existing entry
+      const updatedEntries = fareData.map(entry => 
+        entry.id === editingEntry.id 
+          ? { ...entry, date: offDayData.date, reason: offDayData.reason }
+          : entry
+      );
+      setFareData(updatedEntries);
+      setEditingEntry(null);
+    } else {
+      // Create new entry
+      const newEntry = {
+        id: Date.now(),
+        type: "off",
+        date: offDayData.date,
+        reason: offDayData.reason,
+        cashAmount: 0,
+        bankAmount: 0,
+        totalAmount: 0,
+      };
+      setFareData([...fareData, newEntry]);
+    }
+    setOffDayData({ date: "", reason: "" });
+  };
+
+  const handleDeleteEntry = (entryId) => {
+    const entryToDelete = fareData.find(entry => entry.id === entryId);
+    if (entryToDelete && entryToDelete.totalAmount) {
+      setTotalEarnings((prev) => prev - entryToDelete.totalAmount);
+    }
+    setFareData(fareData.filter(entry => entry.id !== entryId));
+  };
+
+  const handleEditEntry = (entry) => {
+    setEditingEntry(entry);
+    if (entry.type === "daily") {
+      setActiveTab("daily");
+      setDailyFareData({
+        route: entry.route,
+        cashAmount: entry.cashAmount.toString(),
+        bankAmount: entry.bankAmount.toString(),
+        date: entry.date,
+      });
+    } else if (entry.type === "booking") {
+      setActiveTab("booking");
+      setBookingData({
+        bookingDetails: entry.bookingDetails,
+        cashAmount: entry.cashAmount.toString(),
+        bankAmount: entry.bankAmount.toString(),
+        dateFrom: entry.dateFrom,
+        dateTo: entry.dateTo,
+      });
+    } else if (entry.type === "off") {
+      setActiveTab("off");
+      setOffDayData({
+        date: entry.date,
+        reason: entry.reason,
+      });
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingEntry(null);
+    setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
+    setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
     setOffDayData({ date: "", reason: "" });
   };
 
@@ -240,9 +337,17 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                         </div>
                       </div>
                     </div>
-                    <button type="submit" className="btn fare-entry-btn">
-                      <i className="bi bi-plus-circle"></i> Add Daily Entry
-                    </button>
+                    <div className="button-group">
+                      <button type="submit" className="btn fare-entry-btn">
+                        <i className={editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
+                        {editingEntry ? "Update Entry" : "Add Daily Entry"}
+                      </button>
+                      {editingEntry && (
+                        <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
+                          <i className="bi bi-x-circle"></i> Cancel
+                        </button>
+                      )}
+                    </div>
                   </form>
                 </div>
               )}
@@ -323,9 +428,17 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                         </div>
                       </div>
                     </div>
-                    <button type="submit" className="btn fare-entry-btn">
-                      <i className="bi bi-journal-plus"></i> Add Booking Entry
-                    </button>
+                    <div className="button-group">
+                      <button type="submit" className="btn fare-entry-btn">
+                        <i className={editingEntry ? "bi bi-check-circle" : "bi bi-journal-plus"}></i> 
+                        {editingEntry ? "Update Entry" : "Add Booking Entry"}
+                      </button>
+                      {editingEntry && (
+                        <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
+                          <i className="bi bi-x-circle"></i> Cancel
+                        </button>
+                      )}
+                    </div>
                   </form>
                 </div>
               )}
@@ -357,9 +470,17 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                         />
                       </div>
                     </div>
-                    <button type="submit" className="btn fare-entry-btn">
-                      <i className="bi bi-check-circle"></i> Mark Day as Off
-                    </button>
+                    <div className="button-group">
+                      <button type="submit" className="btn fare-entry-btn">
+                        <i className="bi bi-check-circle"></i> 
+                        {editingEntry ? "Update Entry" : "Mark Day as Off"}
+                      </button>
+                      {editingEntry && (
+                        <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
+                          <i className="bi bi-x-circle"></i> Cancel
+                        </button>
+                      )}
+                    </div>
                   </form>
                 </div>
               )}
@@ -379,6 +500,24 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                               {entry.type === "daily" ? "Daily" : 
                                entry.type === "booking" ? "Booking" : "Off Day"}
                             </span>
+                            <div className="entry-actions">
+                              <button 
+                                className="btn btn-sm btn-edit" 
+                                onClick={() => handleEditEntry(entry)}
+                                title="Edit Entry"
+                              >
+                                <i className="bi bi-pencil"></i>
+                              </button>
+                              <button 
+                                className="btn btn-sm btn-delete" 
+                                onClick={() => handleDeleteEntry(entry.id)}
+                                title="Delete Entry"
+                              >
+                                <i className="bi bi-trash"></i>
+                              </button>
+                            </div>
+                          </div>
+                          <div className="entry-date">
                             <small className="text-muted">
                               {entry.type === "daily" && entry.date}
                               {entry.type === "booking" && `${entry.dateFrom} - ${entry.dateTo}`}

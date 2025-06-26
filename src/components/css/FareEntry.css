@@ -248,8 +248,52 @@
 .entry-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.entry-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.entry-date {
   margin-bottom: 15px;
+}
+
+.btn-edit, .btn-delete {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 6px;
+  transition: var(--transition);
+  font-size: 0.8rem;
+}
+
+.btn-edit {
+  background: rgba(96, 165, 250, 0.2);
+  color: #2563eb;
+}
+
+.btn-edit:hover {
+  background: rgba(96, 165, 250, 0.3);
+  color: #1d4ed8;
+}
+
+.btn-delete {
+  background: rgba(248, 113, 113, 0.2);
+  color: #dc2626;
+}
+
+.btn-delete:hover {
+  background: rgba(248, 113, 113, 0.3);
+  color: #b91c1c;
+}
+
+.button-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .entry-type {
@@ -343,6 +387,22 @@
   .fare-entry-btn {
     width: 100%;
     padding: 15px;
+  }
+
+  .button-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .button-group .btn-secondary {
+    width: 100%;
+    margin-top: 10px !important;
+    margin-left: 0 !important;
+  }
+
+  .entry-actions {
+    flex-direction: column;
+    gap: 3px;
   }
 }
 
