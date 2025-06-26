@@ -815,18 +815,17 @@ html, body {
   }
 
   .main-content {
-    transition: margin-left 0.3s ease, width 0.3s ease;
-    width: calc(100% - var(--sidebar-width));
+    transition: margin-left 0.3s ease;
+    margin-left: 0;
+    width: 100%;
   }
   
   .sidebar.show + .main-content {
     margin-left: var(--sidebar-width) !important;
-    width: calc(100% - var(--sidebar-width)) !important;
   }
   
   .sidebar:not(.show) + .main-content {
     margin-left: 0 !important;
-    width: 100% !important;
   }
   
   /* Ensure form cards and other elements use full available width */
