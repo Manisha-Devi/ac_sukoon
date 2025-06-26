@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Sidebar from './components/layout/Sidebar';
 import Dashboard from './components/views/Dashboard';
@@ -11,22 +12,15 @@ import './App.css';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [fareData, setFareData] = useState([]);
-  const [expenseData, setExpenseData] = useState([]);
-  const [totalEarnings, setTotalEarnings] = useState(30200);
-  const [totalExpenses, setTotalExpenses] = useState(15600);
-
-  const profit = totalEarnings - totalExpenses;
-  const profitPercentage = ((profit / totalExpenses) * 100).toFixed(1);
 
   const renderContent = () => {
-    switch(activeTab) {
+    switch (activeTab) {
       case 'dashboard':
-        return <Dashboard totalEarnings={totalEarnings} totalExpenses={totalExpenses} profit={profit} profitPercentage={profitPercentage} />;
+        return <Dashboard />;
       case 'fare-entry':
-        return <FareEntry fareData={fareData} setFareData={setFareData} setTotalEarnings={setTotalEarnings} />;
+        return <FareEntry />;
       case 'fuel-entry':
-        return <FuelEntry expenseData={expenseData} setExpenseData={setExpenseData} setTotalExpenses={setTotalExpenses} />;
+        return <FuelEntry />;
       case 'adda-fees':
         return <AddaFeesEntry />;
       case 'service-entry':
@@ -36,7 +30,7 @@ function App() {
       case 'analytics':
         return <Analytics />;
       default:
-        return <Dashboard totalEarnings={totalEarnings} totalExpenses={totalExpenses} profit={profit} profitPercentage={profitPercentage} />;
+        return <Dashboard />;
     }
   };
 
