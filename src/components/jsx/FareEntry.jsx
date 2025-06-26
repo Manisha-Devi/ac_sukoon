@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import "../css/FareEntry.css";
 
 function FareEntry({ fareData, setFareData, setTotalEarnings }) {
-  const [activeCase, setActiveCase] = useState("daily");
+  const [activeTab, setActiveTab] = useState("daily");
   const [dailyFareData, setDailyFareData] = useState({
     route: "",
     cashAmount: "",
@@ -91,479 +91,477 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
     setOffDayData({ date: "", reason: "" });
   };
 
-  const renderCaseForm = () => {
-    switch (activeCase) {
-      case "daily":
-        return (
-          <div className="modern-form-container">
-            <div className="form-header">
-              <div className="form-icon daily-icon">
-                <i className="bi bi-calendar-day"></i>
-              </div>
-              <h3>Daily Fare Collection</h3>
-              <p>Track your daily route earnings with ease</p>
-            </div>
-            
-            <form onSubmit={handleDailySubmit} className="modern-form">
-              <div className="form-row">
-                <div className="form-group full-width">
-                  <label className="modern-label">
-                    <i className="bi bi-geo-alt"></i>
-                    Select Route
-                  </label>
-                  <select
-                    className="modern-select"
-                    value={dailyFareData.route}
-                    onChange={(e) =>
-                      setDailyFareData({ ...dailyFareData, route: e.target.value })
-                    }
-                    required
-                  >
-                    <option value="">Choose your route...</option>
-                    {routes.map((route) => (
-                      <option key={route} value={route}>
-                        {route}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="modern-label">
-                    <i className="bi bi-cash-coin"></i>
-                    Cash Amount
-                  </label>
-                  <div className="input-with-icon">
-                    <span className="currency-symbol">₹</span>
-                    <input
-                      type="number"
-                      className="modern-input"
-                      value={dailyFareData.cashAmount}
-                      onChange={(e) =>
-                        setDailyFareData({ ...dailyFareData, cashAmount: e.target.value })
-                      }
-                      placeholder="0"
-                      min="0"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="modern-label">
-                    <i className="bi bi-bank"></i>
-                    Bank Amount
-                  </label>
-                  <div className="input-with-icon">
-                    <span className="currency-symbol">₹</span>
-                    <input
-                      type="number"
-                      className="modern-input"
-                      value={dailyFareData.bankAmount}
-                      onChange={(e) =>
-                        setDailyFareData({ ...dailyFareData, bankAmount: e.target.value })
-                      }
-                      placeholder="0"
-                      min="0"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="amount-summary">
-                <div className="summary-item">
-                  <span>Cash</span>
-                  <span className="cash-amount">₹{parseInt(dailyFareData.cashAmount) || 0}</span>
-                </div>
-                <div className="summary-item">
-                  <span>Bank</span>
-                  <span className="bank-amount">₹{parseInt(dailyFareData.bankAmount) || 0}</span>
-                </div>
-                <div className="summary-item total">
-                  <span>Total</span>
-                  <span className="total-amount">₹{(parseInt(dailyFareData.cashAmount) || 0) + (parseInt(dailyFareData.bankAmount) || 0)}</span>
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group full-width">
-                  <label className="modern-label">
-                    <i className="bi bi-calendar3"></i>
-                    Date
-                  </label>
-                  <input
-                    type="date"
-                    className="modern-input"
-                    value={dailyFareData.date}
-                    onChange={(e) =>
-                      setDailyFareData({ ...dailyFareData, date: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-              </div>
-
-              <button 
-                type="submit" 
-                className="modern-submit-btn daily-btn"
-                disabled={!dailyFareData.route || !dailyFareData.date || 
-                         ((parseInt(dailyFareData.cashAmount) || 0) + (parseInt(dailyFareData.bankAmount) || 0)) === 0}
-              >
-                <i className="bi bi-plus-circle"></i>
-                Add Daily Entry
-              </button>
-            </form>
-          </div>
-        );
-
-      case "booking":
-        return (
-          <div className="modern-form-container">
-            <div className="form-header">
-              <div className="form-icon booking-icon">
-                <i className="bi bi-journal-bookmark"></i>
-              </div>
-              <h3>Booking Fare Collection</h3>
-              <p>Record special bookings and reservations</p>
-            </div>
-            
-            <form onSubmit={handleBookingSubmit} className="modern-form">
-              <div className="form-row">
-                <div className="form-group full-width">
-                  <label className="modern-label">
-                    <i className="bi bi-file-text"></i>
-                    Booking Details
-                  </label>
-                  <textarea
-                    className="modern-textarea"
-                    rows={4}
-                    value={bookingData.bookingDetails}
-                    onChange={(e) =>
-                      setBookingData({ ...bookingData, bookingDetails: e.target.value })
-                    }
-                    placeholder="Enter booking details, customer info, destination..."
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="modern-label">
-                    <i className="bi bi-cash-coin"></i>
-                    Cash Amount
-                  </label>
-                  <div className="input-with-icon">
-                    <span className="currency-symbol">₹</span>
-                    <input
-                      type="number"
-                      className="modern-input"
-                      value={bookingData.cashAmount}
-                      onChange={(e) =>
-                        setBookingData({ ...bookingData, cashAmount: e.target.value })
-                      }
-                      placeholder="0"
-                      min="0"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="modern-label">
-                    <i className="bi bi-bank"></i>
-                    Bank Amount
-                  </label>
-                  <div className="input-with-icon">
-                    <span className="currency-symbol">₹</span>
-                    <input
-                      type="number"
-                      className="modern-input"
-                      value={bookingData.bankAmount}
-                      onChange={(e) =>
-                        setBookingData({ ...bookingData, bankAmount: e.target.value })
-                      }
-                      placeholder="0"
-                      min="0"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="amount-summary">
-                <div className="summary-item">
-                  <span>Cash</span>
-                  <span className="cash-amount">₹{parseInt(bookingData.cashAmount) || 0}</span>
-                </div>
-                <div className="summary-item">
-                  <span>Bank</span>
-                  <span className="bank-amount">₹{parseInt(bookingData.bankAmount) || 0}</span>
-                </div>
-                <div className="summary-item total">
-                  <span>Total</span>
-                  <span className="total-amount">₹{(parseInt(bookingData.cashAmount) || 0) + (parseInt(bookingData.bankAmount) || 0)}</span>
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="modern-label">
-                    <i className="bi bi-calendar-check"></i>
-                    From Date
-                  </label>
-                  <input
-                    type="date"
-                    className="modern-input"
-                    value={bookingData.dateFrom}
-                    onChange={(e) =>
-                      setBookingData({ ...bookingData, dateFrom: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="modern-label">
-                    <i className="bi bi-calendar-x"></i>
-                    To Date
-                  </label>
-                  <input
-                    type="date"
-                    className="modern-input"
-                    value={bookingData.dateTo}
-                    onChange={(e) =>
-                      setBookingData({ ...bookingData, dateTo: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-              </div>
-
-              <button 
-                type="submit" 
-                className="modern-submit-btn booking-btn"
-                disabled={!bookingData.bookingDetails || !bookingData.dateFrom || !bookingData.dateTo ||
-                         ((parseInt(bookingData.cashAmount) || 0) + (parseInt(bookingData.bankAmount) || 0)) === 0}
-              >
-                <i className="bi bi-plus-circle"></i>
-                Add Booking Entry
-              </button>
-            </form>
-          </div>
-        );
-
-      case "off":
-        return (
-          <div className="modern-form-container">
-            <div className="form-header">
-              <div className="form-icon off-icon">
-                <i className="bi bi-x-circle"></i>
-              </div>
-              <h3>Off Day Entry</h3>
-              <p>Mark days when no work was done</p>
-            </div>
-            
-            <form onSubmit={handleOffDaySubmit} className="modern-form">
-              <div className="form-row">
-                <div className="form-group full-width">
-                  <label className="modern-label">
-                    <i className="bi bi-calendar3"></i>
-                    Date
-                  </label>
-                  <input
-                    type="date"
-                    className="modern-input"
-                    value={offDayData.date}
-                    onChange={(e) =>
-                      setOffDayData({ ...offDayData, date: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group full-width">
-                  <label className="modern-label">
-                    <i className="bi bi-chat-left-text"></i>
-                    Reason for Off Day
-                  </label>
-                  <textarea
-                    className="modern-textarea"
-                    rows={4}
-                    value={offDayData.reason}
-                    onChange={(e) =>
-                      setOffDayData({ ...offDayData, reason: e.target.value })
-                    }
-                    placeholder="Enter reason (e.g., maintenance, personal, weather, holiday...)"
-                    required
-                  />
-                </div>
-              </div>
-
-              <button type="submit" className="modern-submit-btn off-btn">
-                <i className="bi bi-x-circle"></i>
-                Mark Day as Off
-              </button>
-            </form>
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
-
   // Calculate totals for summary
   const totalCash = fareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
   const totalBank = fareData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
   const grandTotal = totalCash + totalBank;
 
   return (
-    <div className="fare-entry-modern">
-      {/* Header Section */}
-      <div className="fare-header-modern">
-        <div className="header-content">
-          <div className="header-title">
-            <i className="bi bi-ticket-perforated"></i>
-            <div>
-              <h1>Fare Collection</h1>
-              <p>Manage your daily earnings efficiently</p>
-            </div>
+    <div className="fare-entry-wrapper">
+      {/* Hero Section */}
+      <div className="hero-section">
+        <div className="hero-content">
+          <div className="hero-icon">
+            <i className="bi bi-wallet2"></i>
           </div>
+          <div className="hero-text">
+            <h1>Fare Collection Hub</h1>
+            <p>Streamline your daily earnings with smart tracking</p>
+          </div>
+        </div>
+        <div className="hero-decoration">
+          <div className="decoration-circle circle-1"></div>
+          <div className="decoration-circle circle-2"></div>
+          <div className="decoration-circle circle-3"></div>
         </div>
       </div>
 
-      {/* Summary Cards */}
+      {/* Stats Overview */}
       {fareData.length > 0 && (
-        <div className="summary-cards">
-          <div className="summary-card cash-card">
-            <div className="card-content">
-              <div className="card-icon">
-                <i className="bi bi-cash-coin"></i>
-              </div>
-              <div className="card-info">
-                <h3>₹{totalCash.toLocaleString()}</h3>
-                <p>Total Cash</p>
-              </div>
+        <div className="stats-overview">
+          <div className="stat-card cash-stat">
+            <div className="stat-header">
+              <i className="bi bi-cash-coin"></i>
+              <span>Cash Collection</span>
+            </div>
+            <div className="stat-value">₹{totalCash.toLocaleString('en-IN')}</div>
+            <div className="stat-trend">
+              <i className="bi bi-arrow-up"></i>
+              <span>+12.5%</span>
             </div>
           </div>
           
-          <div className="summary-card bank-card">
-            <div className="card-content">
-              <div className="card-icon">
-                <i className="bi bi-bank"></i>
-              </div>
-              <div className="card-info">
-                <h3>₹{totalBank.toLocaleString()}</h3>
-                <p>Total Bank</p>
-              </div>
+          <div className="stat-card bank-stat">
+            <div className="stat-header">
+              <i className="bi bi-bank"></i>
+              <span>Bank Transfer</span>
+            </div>
+            <div className="stat-value">₹{totalBank.toLocaleString('en-IN')}</div>
+            <div className="stat-trend">
+              <i className="bi bi-arrow-up"></i>
+              <span>+8.3%</span>
             </div>
           </div>
           
-          <div className="summary-card total-card">
-            <div className="card-content">
-              <div className="card-icon">
-                <i className="bi bi-wallet2"></i>
-              </div>
-              <div className="card-info">
-                <h3>₹{grandTotal.toLocaleString()}</h3>
-                <p>Grand Total</p>
-              </div>
+          <div className="stat-card total-stat">
+            <div className="stat-header">
+              <i className="bi bi-trophy"></i>
+              <span>Total Earnings</span>
+            </div>
+            <div className="stat-value">₹{grandTotal.toLocaleString('en-IN')}</div>
+            <div className="stat-trend">
+              <i className="bi bi-arrow-up"></i>
+              <span>+10.2%</span>
+            </div>
+          </div>
+          
+          <div className="stat-card entries-stat">
+            <div className="stat-header">
+              <i className="bi bi-journal-check"></i>
+              <span>Total Entries</span>
+            </div>
+            <div className="stat-value">{fareData.length}</div>
+            <div className="stat-trend">
+              <i className="bi bi-plus-circle"></i>
+              <span>Active</span>
             </div>
           </div>
         </div>
       )}
 
-      {/* Navigation Tabs */}
-      <div className="modern-tabs">
-        <button
-          className={`tab-btn ${activeCase === "daily" ? "active" : ""}`}
-          onClick={() => setActiveCase("daily")}
-        >
-          <i className="bi bi-calendar-day"></i>
-          <span>Daily</span>
-        </button>
-        <button
-          className={`tab-btn ${activeCase === "booking" ? "active" : ""}`}
-          onClick={() => setActiveCase("booking")}
-        >
-          <i className="bi bi-journal-bookmark"></i>
-          <span>Booking</span>
-        </button>
-        <button
-          className={`tab-btn ${activeCase === "off" ? "active" : ""}`}
-          onClick={() => setActiveCase("off")}
-        >
-          <i className="bi bi-x-circle"></i>
-          <span>Off Day</span>
-        </button>
+      {/* Tab Navigation */}
+      <div className="tab-navigation">
+        <div className="tab-container">
+          <button 
+            className={`nav-tab ${activeTab === 'daily' ? 'active' : ''}`}
+            onClick={() => setActiveTab('daily')}
+          >
+            <i className="bi bi-calendar-day"></i>
+            <span>Daily Collection</span>
+            <div className="tab-indicator"></div>
+          </button>
+          
+          <button 
+            className={`nav-tab ${activeTab === 'booking' ? 'active' : ''}`}
+            onClick={() => setActiveTab('booking')}
+          >
+            <i className="bi bi-journal-bookmark"></i>
+            <span>Booking Entry</span>
+            <div className="tab-indicator"></div>
+          </button>
+          
+          <button 
+            className={`nav-tab ${activeTab === 'off' ? 'active' : ''}`}
+            onClick={() => setActiveTab('off')}
+          >
+            <i className="bi bi-x-circle"></i>
+            <span>Off Day</span>
+            <div className="tab-indicator"></div>
+          </button>
+        </div>
       </div>
 
-      {/* Form Section */}
-      {renderCaseForm()}
+      {/* Form Content */}
+      <div className="form-content">
+        {activeTab === 'daily' && (
+          <div className="form-section daily-section">
+            <div className="section-header">
+              <div className="header-icon daily-icon">
+                <i className="bi bi-calendar-day"></i>
+              </div>
+              <div className="header-text">
+                <h2>Daily Collection</h2>
+                <p>Record your daily route earnings</p>
+              </div>
+            </div>
+
+            <div className="form-card">
+              <form onSubmit={handleDailySubmit} className="modern-form">
+                <div className="form-grid">
+                  <div className="form-field full-width">
+                    <label className="field-label">
+                      <i className="bi bi-geo-alt"></i>
+                      Route Selection
+                    </label>
+                    <div className="select-wrapper">
+                      <select
+                        className="form-select"
+                        value={dailyFareData.route}
+                        onChange={(e) => setDailyFareData({ ...dailyFareData, route: e.target.value })}
+                        required
+                      >
+                        <option value="">Choose your route...</option>
+                        {routes.map((route) => (
+                          <option key={route} value={route}>{route}</option>
+                        ))}
+                      </select>
+                      <i className="bi bi-chevron-down select-icon"></i>
+                    </div>
+                  </div>
+
+                  <div className="form-field">
+                    <label className="field-label">
+                      <i className="bi bi-cash-coin"></i>
+                      Cash Amount
+                    </label>
+                    <div className="input-wrapper">
+                      <span className="input-prefix">₹</span>
+                      <input
+                        type="number"
+                        className="form-input"
+                        value={dailyFareData.cashAmount}
+                        onChange={(e) => setDailyFareData({ ...dailyFareData, cashAmount: e.target.value })}
+                        placeholder="0"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-field">
+                    <label className="field-label">
+                      <i className="bi bi-bank"></i>
+                      Bank Amount
+                    </label>
+                    <div className="input-wrapper">
+                      <span className="input-prefix">₹</span>
+                      <input
+                        type="number"
+                        className="form-input"
+                        value={dailyFareData.bankAmount}
+                        onChange={(e) => setDailyFareData({ ...dailyFareData, bankAmount: e.target.value })}
+                        placeholder="0"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-field">
+                    <label className="field-label">
+                      <i className="bi bi-calendar3"></i>
+                      Date
+                    </label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={dailyFareData.date}
+                      onChange={(e) => setDailyFareData({ ...dailyFareData, date: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="amount-preview">
+                  <div className="preview-item">
+                    <span className="preview-label">Cash</span>
+                    <span className="preview-value cash-value">₹{parseInt(dailyFareData.cashAmount) || 0}</span>
+                  </div>
+                  <div className="preview-item">
+                    <span className="preview-label">Bank</span>
+                    <span className="preview-value bank-value">₹{parseInt(dailyFareData.bankAmount) || 0}</span>
+                  </div>
+                  <div className="preview-item total-preview">
+                    <span className="preview-label">Total</span>
+                    <span className="preview-value total-value">₹{(parseInt(dailyFareData.cashAmount) || 0) + (parseInt(dailyFareData.bankAmount) || 0)}</span>
+                  </div>
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="submit-btn daily-btn"
+                  disabled={!dailyFareData.route || !dailyFareData.date || 
+                           ((parseInt(dailyFareData.cashAmount) || 0) + (parseInt(dailyFareData.bankAmount) || 0)) === 0}
+                >
+                  <i className="bi bi-plus-circle"></i>
+                  Add Daily Entry
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'booking' && (
+          <div className="form-section booking-section">
+            <div className="section-header">
+              <div className="header-icon booking-icon">
+                <i className="bi bi-journal-bookmark"></i>
+              </div>
+              <div className="header-text">
+                <h2>Booking Entry</h2>
+                <p>Manage special bookings and reservations</p>
+              </div>
+            </div>
+
+            <div className="form-card">
+              <form onSubmit={handleBookingSubmit} className="modern-form">
+                <div className="form-grid">
+                  <div className="form-field full-width">
+                    <label className="field-label">
+                      <i className="bi bi-file-text"></i>
+                      Booking Details
+                    </label>
+                    <textarea
+                      className="form-textarea"
+                      rows={4}
+                      value={bookingData.bookingDetails}
+                      onChange={(e) => setBookingData({ ...bookingData, bookingDetails: e.target.value })}
+                      placeholder="Enter booking details, customer info, destination..."
+                      required
+                    />
+                  </div>
+
+                  <div className="form-field">
+                    <label className="field-label">
+                      <i className="bi bi-cash-coin"></i>
+                      Cash Amount
+                    </label>
+                    <div className="input-wrapper">
+                      <span className="input-prefix">₹</span>
+                      <input
+                        type="number"
+                        className="form-input"
+                        value={bookingData.cashAmount}
+                        onChange={(e) => setBookingData({ ...bookingData, cashAmount: e.target.value })}
+                        placeholder="0"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-field">
+                    <label className="field-label">
+                      <i className="bi bi-bank"></i>
+                      Bank Amount
+                    </label>
+                    <div className="input-wrapper">
+                      <span className="input-prefix">₹</span>
+                      <input
+                        type="number"
+                        className="form-input"
+                        value={bookingData.bankAmount}
+                        onChange={(e) => setBookingData({ ...bookingData, bankAmount: e.target.value })}
+                        placeholder="0"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-field">
+                    <label className="field-label">
+                      <i className="bi bi-calendar-check"></i>
+                      From Date
+                    </label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={bookingData.dateFrom}
+                      onChange={(e) => setBookingData({ ...bookingData, dateFrom: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-field">
+                    <label className="field-label">
+                      <i className="bi bi-calendar-x"></i>
+                      To Date
+                    </label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={bookingData.dateTo}
+                      onChange={(e) => setBookingData({ ...bookingData, dateTo: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="amount-preview">
+                  <div className="preview-item">
+                    <span className="preview-label">Cash</span>
+                    <span className="preview-value cash-value">₹{parseInt(bookingData.cashAmount) || 0}</span>
+                  </div>
+                  <div className="preview-item">
+                    <span className="preview-label">Bank</span>
+                    <span className="preview-value bank-value">₹{parseInt(bookingData.bankAmount) || 0}</span>
+                  </div>
+                  <div className="preview-item total-preview">
+                    <span className="preview-label">Total</span>
+                    <span className="preview-value total-value">₹{(parseInt(bookingData.cashAmount) || 0) + (parseInt(bookingData.bankAmount) || 0)}</span>
+                  </div>
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="submit-btn booking-btn"
+                  disabled={!bookingData.bookingDetails || !bookingData.dateFrom || !bookingData.dateTo ||
+                           ((parseInt(bookingData.cashAmount) || 0) + (parseInt(bookingData.bankAmount) || 0)) === 0}
+                >
+                  <i className="bi bi-journal-plus"></i>
+                  Add Booking Entry
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'off' && (
+          <div className="form-section off-section">
+            <div className="section-header">
+              <div className="header-icon off-icon">
+                <i className="bi bi-x-circle"></i>
+              </div>
+              <div className="header-text">
+                <h2>Off Day Entry</h2>
+                <p>Record non-working days with reasons</p>
+              </div>
+            </div>
+
+            <div className="form-card">
+              <form onSubmit={handleOffDaySubmit} className="modern-form">
+                <div className="form-grid">
+                  <div className="form-field">
+                    <label className="field-label">
+                      <i className="bi bi-calendar3"></i>
+                      Date
+                    </label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={offDayData.date}
+                      onChange={(e) => setOffDayData({ ...offDayData, date: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-field full-width">
+                    <label className="field-label">
+                      <i className="bi bi-chat-left-text"></i>
+                      Reason for Off Day
+                    </label>
+                    <textarea
+                      className="form-textarea"
+                      rows={4}
+                      value={offDayData.reason}
+                      onChange={(e) => setOffDayData({ ...offDayData, reason: e.target.value })}
+                      placeholder="Enter reason (e.g., maintenance, personal, weather, holiday...)"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <button type="submit" className="submit-btn off-btn">
+                  <i className="bi bi-check-circle"></i>
+                  Mark Day as Off
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Recent Entries */}
       {fareData.length > 0 && (
-        <div className="recent-entries-modern">
+        <div className="recent-entries">
           <div className="entries-header">
-            <h3>
-              <i className="bi bi-clock-history"></i>
-              Recent Entries
-            </h3>
-            <span className="entries-count">{fareData.length} entries</span>
+            <div className="header-text">
+              <h3>Recent Entries</h3>
+              <p>Latest {Math.min(6, fareData.length)} entries</p>
+            </div>
+            <div className="entries-badge">
+              {fareData.length} total
+            </div>
           </div>
           
           <div className="entries-grid">
             {fareData.slice(-6).reverse().map((entry) => (
-              <div key={entry.id} className={`entry-card-modern ${entry.type}`}>
+              <div key={entry.id} className={`entry-card ${entry.type}-entry`}>
                 <div className="entry-header">
-                  <div className={`entry-icon-modern ${entry.type}`}>
+                  <div className={`entry-icon ${entry.type}-icon`}>
                     <i className={`bi ${
                       entry.type === "daily" ? "bi-calendar-day" : 
                       entry.type === "booking" ? "bi-journal-bookmark" : "bi-x-circle"
                     }`}></i>
                   </div>
-                  <div className="entry-type">
-                    {entry.type === "daily" ? "Daily" : 
-                     entry.type === "booking" ? "Booking" : "Off Day"}
+                  <div className="entry-meta">
+                    <span className="entry-type">
+                      {entry.type === "daily" ? "Daily" : 
+                       entry.type === "booking" ? "Booking" : "Off Day"}
+                    </span>
+                    <span className="entry-date">
+                      {entry.type === "daily" && entry.date}
+                      {entry.type === "booking" && `${entry.dateFrom} to ${entry.dateTo}`}
+                      {entry.type === "off" && entry.date}
+                    </span>
                   </div>
                 </div>
                 
-                <div className="entry-details">
+                <div className="entry-content">
                   {entry.type === "daily" && (
                     <p className="entry-route">{entry.route}</p>
                   )}
                   {entry.type === "booking" && (
-                    <p className="entry-description">{entry.bookingDetails?.substring(0, 40)}...</p>
+                    <p className="entry-description">{entry.bookingDetails?.substring(0, 50)}...</p>
                   )}
                   {entry.type === "off" && (
-                    <p className="entry-reason">{entry.reason?.substring(0, 40)}...</p>
+                    <p className="entry-reason">{entry.reason?.substring(0, 50)}...</p>
                   )}
                 </div>
                 
                 {entry.type !== "off" && (
                   <div className="entry-amounts">
-                    <div className="amount-row">
-                      <span className="amount-label">Cash:</span>
+                    <div className="amount-item">
+                      <span className="amount-label">Cash</span>
                       <span className="amount-value cash">₹{entry.cashAmount || 0}</span>
                     </div>
-                    <div className="amount-row">
-                      <span className="amount-label">Bank:</span>
+                    <div className="amount-item">
+                      <span className="amount-label">Bank</span>
                       <span className="amount-value bank">₹{entry.bankAmount || 0}</span>
                     </div>
-                    <div className="amount-row total">
-                      <span className="amount-label">Total:</span>
+                    <div className="amount-item total-amount">
+                      <span className="amount-label">Total</span>
                       <span className="amount-value">₹{entry.totalAmount}</span>
                     </div>
                   </div>
                 )}
-                
-                <div className="entry-date">
-                  {entry.type === "daily" && entry.date}
-                  {entry.type === "booking" && `${entry.dateFrom} to ${entry.dateTo}`}
-                  {entry.type === "off" && entry.date}
-                </div>
               </div>
             ))}
           </div>
