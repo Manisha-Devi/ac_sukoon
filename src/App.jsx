@@ -145,29 +145,29 @@ function App() {
               className={`menu-item ${activeTab === "fare-entry" ? "active" : ""}`}
               onClick={() => handleMenuClick("fare-entry")}
             >
-              <i className="bi bi-ticket-perforated"></i>
-              Fare Collection
+              <i className="bi bi-receipt"></i>
+              Fare Receipt
             </button>
             <button
               className={`menu-item ${activeTab === "fuel-entry" ? "active" : ""}`}
               onClick={() => handleMenuClick("fuel-entry")}
             >
-              <i className="bi bi-fuel-pump"></i>
-              Fuel Expense
+              <i className="bi bi-credit-card"></i>
+              Fuel Payment
             </button>
             <button
               className={`menu-item ${activeTab === "adda-fees" ? "active" : ""}`}
               onClick={() => handleMenuClick("adda-fees")}
             >
-              <i className="bi bi-building"></i>
-              Adda & Agent Fees
+              <i className="bi bi-credit-card"></i>
+              Adda Payment
             </button>
             <button
               className={`menu-item ${activeTab === "service-entry" ? "active" : ""}`}
               onClick={() => handleMenuClick("service-entry")}
             >
-              <i className="bi bi-tools"></i>
-              Service Expense
+              <i className="bi bi-credit-card"></i>
+              Service Payment
             </button>
           </div>
 

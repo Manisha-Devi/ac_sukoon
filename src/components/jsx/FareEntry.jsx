@@ -324,8 +324,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
     <div className="fare-entry-container">
       <div className="container-fluid">
             <div className="fare-header">
-              <h2><i className="bi bi-wallet2"></i> Fare Entry</h2>
-              <p>Record your daily earnings and bookings</p>
+              <h2><i className="bi bi-receipt"></i> Fare Receipt Entry</h2>
+              <p>Record your daily earnings and bookings (Income)</p>
             </div>
 
             {/* Summary Cards */}

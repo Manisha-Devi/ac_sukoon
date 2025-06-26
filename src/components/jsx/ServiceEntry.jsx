@@ -116,8 +116,8 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses }) {
     <div className="service-entry-container">
       <div className="container-fluid">
         <div className="service-header">
-          <h2><i className="bi bi-tools"></i> Service Entry</h2>
-          <p>Record your vehicle service and maintenance expenses</p>
+          <h2><i className="bi bi-credit-card"></i> Service Payment Entry</h2>
+          <p>Record your vehicle service and maintenance expenses (Payment)</p>
         </div>
 
         {/* Summary Cards */}

@@ -98,8 +98,8 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses }) {
     <div className="fuel-entry-container">
       <div className="container-fluid">
         <div className="fuel-header">
-          <h2><i className="bi bi-fuel-pump"></i> Fuel Entry</h2>
-          <p>Record your fuel expenses</p>
+          <h2><i className="bi bi-credit-card"></i> Fuel Payment Entry</h2>
+          <p>Record your fuel expenses (Payment)</p>
         </div>
 
         {/* Summary Cards */}

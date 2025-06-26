@@ -90,8 +90,8 @@ function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses }) {
     <div className="adda-entry-container">
       <div className="container-fluid">
         <div className="adda-header">
-          <h2><i className="bi bi-building"></i> Adda Fees Entry</h2>
-          <p>Record your adda fees expenses</p>
+          <h2><i className="bi bi-credit-card"></i> Adda Fees Payment Entry</h2>
+          <p>Record your adda fees expenses (Payment)</p>
         </div>
 
         {/* Summary Cards */}
