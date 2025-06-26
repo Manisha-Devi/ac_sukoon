@@ -98,8 +98,6 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
   return (
     <div className="fare-entry-container">
       <div className="container-fluid">
-        <div className="row">
-          <div className="col-12">
             <div className="fare-header">
               <h2><i className="bi bi-wallet2"></i> Fare Entry</h2>
               <p>Record your daily earnings and bookings</p>
@@ -410,8 +408,6 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                 </div>
               </div>
             )}
-          </div>
-        </div>
       </div>
     </div>
   );
