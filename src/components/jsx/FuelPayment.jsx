@@ -109,9 +109,10 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookE
     setFormData({ cashAmount: "", bankAmount: "", liters: "", rate: "", date: "", pumpName: "" });
   };
 
-  // Calculate totals for summary
-  const totalCash = expenseData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
-  const totalBank = expenseData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+  // Filter fuel entries and calculate totals for summary
+  const fuelEntries = expenseData.filter(entry => entry.type === "fuel");
+  const totalCash = fuelEntries.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
+  const totalBank = fuelEntries.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
   const grandTotal = totalCash + totalBank;
 
   return (
@@ -123,7 +124,7 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookE
         </div>
 
         {/* Summary Cards */}
-        {expenseData.length > 0 && (
+        {fuelEntries.length > 0 && (
           <div className="row mb-4">
             <div className="col-md-3 col-sm-6 mb-3">
               <div className="summary-card cash-card">
@@ -153,7 +154,7 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookE
               <div className="summary-card entries-card">
                 <div className="card-body">
                   <h6>Total Entries</h6>
-                  <h4>{expenseData.length}</h4>
+                  <h4>{fuelEntries.length}</h4>
                 </div>
               </div>
             </div>
@@ -270,11 +271,11 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookE
         </div>
 
         {/* Recent Entries */}
-        {expenseData.length > 0 && (
+        {fuelEntries.length > 0 && (
           <div className="recent-entries mt-4">
             <h4>Recent Entries</h4>
             <div className="row">
-              {expenseData.slice(-6).reverse().map((entry) => (
+              {fuelEntries.slice(-6).reverse().map((entry) => (
                 <div key={entry.id} className="col-md-6 col-lg-4 mb-3">
                   <div className="entry-card">
                     <div className="card-body">

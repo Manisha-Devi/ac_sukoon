@@ -53,6 +53,23 @@ function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses, setCashB
       };
       setExpenseData([...expenseData, newEntry]);
       setTotalExpenses((prev) => prev + totalAmount);
+      
+      // Add to cash book - payments go to Cr. side
+      if (cashAmount > 0 || bankAmount > 0) {
+        const cashBookEntry = {
+          id: Date.now() + 1,
+          date: formData.date,
+          particulars: "Adda Fees",
+          description: `Adda fees payment - ${formData.description}`,
+          jfNo: `ADDA-${Date.now()}`,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
+          type: 'cr', // Payments go to Cr. side
+          timestamp: new Date().toISOString(),
+          source: 'fees-payment'
+        };
+        setCashBookEntries(prev => [cashBookEntry, ...prev]);
+      }
     }
     setFormData({ cashAmount: "", bankAmount: "", description: "", date: "" });
   };
@@ -63,6 +80,9 @@ function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses, setCashB
       setTotalExpenses((prev) => prev - entryToDelete.totalAmount);
     }
     setExpenseData(expenseData.filter(entry => entry.id !== entryId));
+    
+    // Remove corresponding cash book entry
+    setCashBookEntries(prev => prev.filter(entry => entry.source === 'fees-payment' && !entry.jfNo?.includes(entryId.toString())));
   };
 
   const handleEditEntry = (entry) => {
@@ -80,9 +100,10 @@ function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses, setCashB
     setFormData({ cashAmount: "", bankAmount: "", description: "", date: "" });
   };
 
-  // Calculate totals for summary
-  const totalCash = expenseData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
-  const totalBank = expenseData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+  // Filter adda entries and calculate totals for summary
+  const addaEntries = expenseData.filter(entry => entry.type === "adda");
+  const totalCash = addaEntries.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
+  const totalBank = addaEntries.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
   const grandTotal = totalCash + totalBank;
 
   const handleDelete = (id) => {
@@ -108,7 +129,7 @@ function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses, setCashB
         </div>
 
         {/* Summary Cards */}
-        {expenseData.length > 0 && (
+        {addaEntries.length > 0 && (
           <div className="row mb-4">
             <div className="col-md-3 col-sm-6 mb-3">
               <div className="summary-card cash-card">
@@ -138,7 +159,7 @@ function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses, setCashB
               <div className="summary-card entries-card">
                 <div className="card-body">
                   <h6>Total Entries</h6>
-                  <h4>{expenseData.length}</h4>
+                  <h4>{addaEntries.length}</h4>
                 </div>
               </div>
             </div>
@@ -229,11 +250,11 @@ function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses, setCashB
         </div>
 
         {/* Recent Entries */}
-        {expenseData.length > 0 && (
+        {addaEntries.length > 0 && (
           <div className="recent-entries mt-4">
             <h4>Recent Entries</h4>
             <div className="row">
-              {expenseData.slice(-6).reverse().map((entry) => (
+              {addaEntries.slice(-6).reverse().map((entry) => (
                 <div key={entry.id} className="col-md-6 col-lg-4 mb-3">
                   <div className="entry-card">
                     <div className="card-body">

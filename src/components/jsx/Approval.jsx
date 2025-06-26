@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import "../css/Approval.css";
 
@@ -49,7 +48,7 @@ function Approval({ fareData, expenseData, cashBookEntries }) {
 
   const handleApprovalSubmit = (e) => {
     e.preventDefault();
-    
+
     // Validation
     if (!settlementData.settlementWith.trim()) {
       alert("Please enter manager name");
@@ -96,14 +95,14 @@ function Approval({ fareData, expenseData, cashBookEntries }) {
 
     // Here you can handle the approval submission
     console.log("Approval submitted:", submissionData);
-    
+
     let successMessage = "Data sent for approval successfully!";
     if (settlementData.cashSettlement && parseFloat(settlementData.cashSettlement) > 0) {
       successMessage += `\n\nCash Handover: ₹${parseFloat(settlementData.cashSettlement).toLocaleString()} to ${settlementData.settlementWith}`;
     }
-    
+
     alert(successMessage);
-    
+
     setShowApprovalModal(false);
     setSettlementData({
       cashSettlement: "",
@@ -416,7 +415,7 @@ function Approval({ fareData, expenseData, cashBookEntries }) {
           </div>
         </div>
 
-        
+
 
         {/* Send for Approval Button */}
         <div className="text-center">
@@ -454,7 +453,7 @@ function Approval({ fareData, expenseData, cashBookEntries }) {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="row">
                       <div className="col-md-6 mb-3">
                         <label className="form-label">Cash Amount to Handover</label>
