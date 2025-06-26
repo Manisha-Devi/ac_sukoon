@@ -104,46 +104,15 @@ function Login({ onLogin }) {
     <div className="login-wrapper">
       <div className="container-fluid vh-100">
         <div className="row h-100 g-0">
-          {/* Left Side - Brand Section */}
-          <div className="col-lg-6 d-none d-lg-flex">
-            <div className="brand-section">
-              <div className="brand-content">
-                <div className="brand-logo mb-4">
-                  <i className="bi bi-speedometer2"></i>
-                </div>
-                <h1 className="brand-title">AC SUKOON</h1>
-                <h4 className="brand-subtitle">Transport Management System</h4>
-                <p className="brand-description">
-                  Streamline your transport operations with our comprehensive management solution.
-                  Track expenses, manage fares, and monitor your fleet efficiently.
-                </p>
-                <div className="features-list">
-                  <div className="feature-item">
-                    <i className="bi bi-check-circle-fill"></i>
-                    <span>Real-time Analytics</span>
-                  </div>
-                  <div className="feature-item">
-                    <i className="bi bi-check-circle-fill"></i>
-                    <span>Expense Tracking</span>
-                  </div>
-                  <div className="feature-item">
-                    <i className="bi bi-check-circle-fill"></i>
-                    <span>Fleet Management</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Side - Login Form */}
-          <div className="col-lg-6 col-12">
+          {/* Single Column - Login Section */}
+          <div className="col-12">
             <div className="login-section">
               <div className="login-container">
-                {/* Mobile Brand Header */}
-                <div className="mobile-brand d-lg-none text-center mb-4">
+                {/* Brand Header */}
+                <div className="brand-header">
                   <i className="bi bi-speedometer2 brand-icon"></i>
-                  <h3>AC SUKOON</h3>
-                  <p className="text-muted">Transport Management</p>
+                  <h2>AC SUKOON</h2>
+                  <p>Transport Management System</p>
                 </div>
 
                 <div className="login-card">

@@ -3,18 +3,19 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Brand Section (Left Side) */
-.brand-section {
+/* Login Section - Full Width Single Column */
+.login-section {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  min-height: 100vh;
+  padding: 2rem 1rem;
   position: relative;
   overflow: hidden;
 }
 
-.brand-section::before {
+.login-section::before {
   content: '';
   position: absolute;
   top: 0;
@@ -24,89 +25,52 @@
   background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
 }
 
-.brand-content {
-  text-align: center;
+.login-container {
+  width: 100%;
+  max-width: 450px;
   z-index: 1;
   position: relative;
-  max-width: 400px;
-  padding: 2rem;
 }
 
-.brand-logo i {
+/* Brand Header */
+.brand-header {
+  text-align: center;
+  color: white;
+  margin-bottom: 2rem;
+}
+
+.brand-header .brand-icon {
   font-size: 4rem;
-  display: block;
   margin-bottom: 1rem;
+  display: block;
 }
 
-.brand-title {
-  font-size: 3rem;
+.brand-header h2 {
+  font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
   text-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.brand-subtitle {
-  font-size: 1.2rem;
-  margin-bottom: 1.5rem;
+.brand-header p {
+  font-size: 1.1rem;
   opacity: 0.9;
-}
-
-.brand-description {
-  font-size: 1rem;
-  line-height: 1.6;
-  margin-bottom: 2rem;
-  opacity: 0.8;
-}
-
-.features-list {
-  text-align: left;
-}
-
-.feature-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.75rem;
-}
-
-.feature-item i {
-  margin-right: 0.75rem;
-  color: #28a745;
-}
-
-/* Login Section (Right Side) */
-.login-section {
-  background: #f8f9fa;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 2rem 1rem;
-}
-
-.login-container {
-  width: 100%;
-  max-width: 420px;
-}
-
-/* Mobile Brand */
-.mobile-brand .brand-icon {
-  font-size: 3rem;
-  color: #667eea;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
 }
 
 /* Login Card */
 .login-card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   overflow: hidden;
 }
 
 .login-card .card-header {
-  background: white;
-  border-bottom: 1px solid #e9ecef;
+  background: transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   padding: 2rem 2rem 1rem;
 }
 
