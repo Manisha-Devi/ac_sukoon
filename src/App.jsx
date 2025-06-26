@@ -227,7 +227,13 @@ function App() {
               setTotalExpenses={setTotalExpenses}
             />
           )}
-          {activeTab === "service-entry" && <ServiceEntry />}
+          {activeTab === "service-entry" && (
+            <ServiceEntry
+              expenseData={expenseData}
+              setExpenseData={setExpenseData}
+              setTotalExpenses={setTotalExpenses}
+            />
+          )}
           {activeTab === "bonus-calc" && <BonusCalculator />}
           {activeTab === "analytics" && <Analytics />}
         </div>
