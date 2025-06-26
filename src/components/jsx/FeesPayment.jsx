@@ -1,288 +1,352 @@
+
 import React, { useState } from "react";
 import "../css/FeesPayment.css";
 
-function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
-  const [editingEntry, setEditingEntry] = useState(null);
+function FeesPayment({ onAddExpense }) {
   const [formData, setFormData] = useState({
+    date: "",
+    description: "",
+    totalAmount: "",
     cashAmount: "",
     bankAmount: "",
-    description: "",
-    date: "",
+    paymentMethod: "cash",
+    addaName: "",
+    remarks: ""
   });
 
-  // Function to get min date for date inputs (today)
-  const getTodayDate = () => {
-    return new Date().toISOString().split('T')[0];
-  };
+  const [entries, setEntries] = useState([]);
+  const [editIndex, setEditIndex] = useState(-1);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    if (!formData.date || !formData.description || !formData.totalAmount) {
+      alert("Please fill in all required fields");
+      return;
+    }
 
-    const cashAmount = parseInt(formData.cashAmount) || 0;
-    const bankAmount = parseInt(formData.bankAmount) || 0;
-    const totalAmount = cashAmount + bankAmount;
+    const totalAmount = parseFloat(formData.totalAmount) || 0;
+    const cashAmount = parseFloat(formData.cashAmount) || 0;
+    const bankAmount = parseFloat(formData.bankAmount) || 0;
 
-    if (editingEntry) {
-      // Update existing entry
-      const oldTotal = editingEntry.totalAmount;
-      const updatedEntries = expenseData.map(entry => 
-        entry.id === editingEntry.id 
-          ? {
-              ...entry,
-              cashAmount: cashAmount,
-              bankAmount: bankAmount,
-              totalAmount: totalAmount,
-              description: formData.description,
-              date: formData.date,
-            }
-          : entry
-      );
-      setExpenseData(updatedEntries);
-      setTotalExpenses((prev) => prev - oldTotal + totalAmount);
-      setEditingEntry(null);
+    if (Math.abs(totalAmount - (cashAmount + bankAmount)) > 0.01) {
+      alert("Total amount should equal cash + bank amount");
+      return;
+    }
+
+    const newEntry = {
+      id: editIndex >= 0 ? entries[editIndex].id : Date.now(),
+      type: "fees",
+      date: formData.date,
+      description: formData.description,
+      totalAmount: totalAmount,
+      cashAmount: cashAmount,
+      bankAmount: bankAmount,
+      paymentMethod: formData.paymentMethod,
+      addaName: formData.addaName,
+      remarks: formData.remarks,
+      timestamp: new Date().toISOString()
+    };
+
+    if (editIndex >= 0) {
+      const updatedEntries = [...entries];
+      updatedEntries[editIndex] = newEntry;
+      setEntries(updatedEntries);
+      setEditIndex(-1);
     } else {
-      // Create new entry
-      const newEntry = {
-        id: Date.now(),
-        type: "adda",
-        cashAmount: cashAmount,
-        bankAmount: bankAmount,
-        totalAmount: totalAmount,
-        description: formData.description,
-        date: formData.date,
-      };
-      setExpenseData([...expenseData, newEntry]);
-      setTotalExpenses((prev) => prev + totalAmount);
+      setEntries([...entries, newEntry]);
     }
-    setFormData({ cashAmount: "", bankAmount: "", description: "", date: "" });
-  };
 
-  const handleDeleteEntry = (entryId) => {
-    const entryToDelete = expenseData.find(entry => entry.id === entryId);
-    if (entryToDelete && entryToDelete.totalAmount) {
-      setTotalExpenses((prev) => prev - entryToDelete.totalAmount);
+    if (onAddExpense) {
+      onAddExpense(newEntry);
     }
-    setExpenseData(expenseData.filter(entry => entry.id !== entryId));
-  };
 
-  const handleEditEntry = (entry) => {
-    setEditingEntry(entry);
     setFormData({
-      cashAmount: entry.cashAmount.toString(),
-      bankAmount: entry.bankAmount.toString(),
-      description: entry.description,
-      date: entry.date,
+      date: "",
+      description: "",
+      totalAmount: "",
+      cashAmount: "",
+      bankAmount: "",
+      paymentMethod: "cash",
+      addaName: "",
+      remarks: ""
     });
   };
 
-  const handleCancelEdit = () => {
-    setEditingEntry(null);
-    setFormData({ cashAmount: "", bankAmount: "", description: "", date: "" });
+  const handleEdit = (index) => {
+    const entry = entries[index];
+    setFormData({
+      date: entry.date,
+      description: entry.description,
+      totalAmount: entry.totalAmount.toString(),
+      cashAmount: entry.cashAmount.toString(),
+      bankAmount: entry.bankAmount.toString(),
+      paymentMethod: entry.paymentMethod,
+      addaName: entry.addaName || "",
+      remarks: entry.remarks || ""
+    });
+    setEditIndex(index);
   };
 
-  // Calculate totals for summary
-  const totalCash = expenseData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
-  const totalBank = expenseData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
-  const grandTotal = totalCash + totalBank;
-
-  const handleDelete = (id) => {
+  const handleDelete = (index) => {
     if (window.confirm("Are you sure you want to delete this entry?")) {
-      const expenseToDelete = expenseData.find(expense => expense.id === id);
-      setExpenseData(expenseData.filter(expense => expense.id !== id));
-
-      // Remove corresponding cash book entry
-      if (expenseToDelete && setCashBookEntries) {
-        setCashBookEntries(prev => prev.filter(entry => 
-          !(entry.source === 'fees-payment' && entry.id === expenseToDelete.id + 1)
-        ));
-      }
+      const updatedEntries = entries.filter((_, i) => i !== index);
+      setEntries(updatedEntries);
     }
   };
 
+  const handleCancelEdit = () => {
+    setEditIndex(-1);
+    setFormData({
+      date: "",
+      description: "",
+      totalAmount: "",
+      cashAmount: "",
+      bankAmount: "",
+      paymentMethod: "cash",
+      addaName: "",
+      remarks: ""
+    });
+  };
+
+  const handleTotalAmountChange = (e) => {
+    const total = parseFloat(e.target.value) || 0;
+    setFormData({
+      ...formData,
+      totalAmount: e.target.value,
+      cashAmount: formData.paymentMethod === "cash" ? total.toString() : "0",
+      bankAmount: formData.paymentMethod === "bank" ? total.toString() : "0"
+    });
+  };
+
+  const handlePaymentMethodChange = (e) => {
+    const method = e.target.value;
+    const total = parseFloat(formData.totalAmount) || 0;
+    
+    setFormData({
+      ...formData,
+      paymentMethod: method,
+      cashAmount: method === "cash" ? total.toString() : "0",
+      bankAmount: method === "bank" ? total.toString() : "0"
+    });
+  };
+
   return (
-    <div className="adda-entry-container">
+    <div className="fees-entry-container">
       <div className="container-fluid">
-        <div className="adda-header">
-          <h2><i className="bi bi-credit-card"></i> Adda Fees Payment Entry</h2>
-          <p>Record your adda fees expenses (Payment)</p>
+        <div className="fees-header">
+          <h2><i className="bi bi-building"></i> Adda Payment Entry</h2>
+          <p>Record your adda fees and parking expenses (Payment)</p>
         </div>
 
-        {/* Summary Cards */}
-        {expenseData.length > 0 && (
-          <div className="row mb-4">
-            <div className="col-md-3 col-sm-6 mb-3">
-              <div className="summary-card cash-card">
-                <div className="card-body">
-                  <h6>Cash Expense</h6>
-                  <h4>₹{totalCash.toLocaleString('en-IN')}</h4>
-                </div>
+        <div className="row">
+          <div className="col-lg-5">
+            <div className="form-card">
+              <div className="form-header">
+                <h5>
+                  <i className="bi bi-plus-circle"></i>
+                  {editIndex >= 0 ? "Edit Entry" : "Add New Entry"}
+                </h5>
               </div>
-            </div>
-            <div className="col-md-3 col-sm-6 mb-3">
-              <div className="summary-card bank-card">
-                <div className="card-body">
-                  <h6>Bank Transfer</h6>
-                  <h4>₹{totalBank.toLocaleString('en-IN')}</h4>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-3 col-sm-6 mb-3">
-              <div className="summary-card total-card">
-                <div className="card-body">
-                  <h6>Total Expenses</h6>
-                  <h4>₹{grandTotal.toLocaleString('en-IN')}</h4>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-3 col-sm-6 mb-3">
-              <div className="summary-card entries-card">
-                <div className="card-body">
-                  <h6>Total Entries</h6>
-                  <h4>{expenseData.length}</h4>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="adda-form-card">
-          <h4><i className="bi bi-building"></i> {editingEntry ? "Edit Adda Fees" : "Add Adda Fees"}</h4>
-          <form onSubmit={handleSubmit}>
-            <div className="row">
-              <div className="col-md-6 mb-3">
-                <label className="form-label">Date</label>
-                <input
-                  type="date"
-                  className="form-control date-input"
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  onFocus={(e) => e.target.showPicker && e.target.showPicker()}
-                  placeholder="Select date"
-                  min={getTodayDate()}
-                  required
-                />
-              </div>
-              <div className="col-md-6 mb-3">
-                <label className="form-label">Description</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Enter description"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="col-md-6 mb-3">
-                <label className="form-label">Cash Amount (₹)</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  value={formData.cashAmount}
-                  onChange={(e) => setFormData({ ...formData, cashAmount: e.target.value })}
-                  placeholder="Enter cash amount"
-                  min="0"
-                />
-              </div>
-              <div className="col-md-6 mb-3">
-                <label className="form-label">Bank Amount (₹)</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  value={formData.bankAmount}
-                  onChange={(e) => setFormData({ ...formData, bankAmount: e.target.value })}
-                  placeholder="Enter bank amount"
-                  min="0"
-                />
-              </div>
-            </div>
-
-            <div className="amount-summary mb-3">
-              <div className="row">
-                <div className="col-4">
-                  <span>Cash: ₹{parseInt(formData.cashAmount) || 0}</span>
-                </div>
-                <div className="col-4">
-                  <span>Bank: ₹{parseInt(formData.bankAmount) || 0}</span>
-                </div>
-                <div className="col-4">
-                  <strong>Total: ₹{(parseInt(formData.cashAmount) || 0) + (parseInt(formData.bankAmount) || 0)}</strong>
-                </div>
-              </div>
-            </div>
-
-            <div className="button-group">
-              <button type="submit" className="btn adda-entry-btn">
-                <i className={editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
-                {editingEntry ? "Update Entry" : "Add Adda Entry"}
-              </button>
-              {editingEntry && (
-                <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
-                  <i className="bi bi-x-circle"></i> Cancel
-                </button>
-              )}
-            </div>
-          </form>
-        </div>
-
-        {/* Recent Entries */}
-        {expenseData.length > 0 && (
-          <div className="recent-entries mt-4">
-            <h4>Recent Entries</h4>
-            <div className="row">
-              {expenseData.slice(-6).reverse().map((entry) => (
-                <div key={entry.id} className="col-md-6 col-lg-4 mb-3">
-                  <div className="entry-card">
-                    <div className="card-body">
-                      <div className="entry-header">
-                        <span className="entry-type adda">
-                          Adda Fees
-                        </span>
-                        <div className="entry-actions">
-                          <button 
-                            className="btn btn-sm btn-edit" 
-                            onClick={() => handleEditEntry(entry)}
-                            title="Edit Entry"
-                          >
-                            <i className="bi bi-pencil"></i>
-                          </button>
-                          <button 
-                            className="btn btn-sm btn-delete" 
-                            onClick={() => handleDelete(entry.id)}
-                            title="Delete Entry"
-                          >
-                            <i className="bi bi-trash"></i>
-                          </button>
-                        </div>
-                      </div>
-                      <div className="entry-date">
-                        <small className="text-muted">{entry.date}</small>
-                      </div>
-                      <div className="entry-content">
-                        <p><strong>Description:</strong> {entry.description}</p>
-                      </div>
-                      <div className="entry-amounts">
-                        <div className="amount-row">
-                          <span>Cash: ₹{entry.cashAmount}</span>
-                          <span>Bank: ₹{entry.bankAmount}</span>
-                        </div>
-                        <div className="total-amount">
-                          <strong>Total: ₹{entry.totalAmount}</strong>
-                        </div>
-                      </div>
+              <div className="form-body">
+                <form onSubmit={handleSubmit}>
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Date</label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        value={formData.date}
+                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Adda Name</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={formData.addaName}
+                        onChange={(e) => setFormData({ ...formData, addaName: e.target.value })}
+                        placeholder="Enter adda/stand name"
+                      />
                     </div>
                   </div>
-                </div>
-              ))}
+
+                  <div className="mb-3">
+                    <label className="form-label">Description</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="e.g., Daily parking fee, Stand charge"
+                      required
+                    />
+                  </div>
+
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Payment Method</label>
+                      <select
+                        className="form-control"
+                        value={formData.paymentMethod}
+                        onChange={handlePaymentMethodChange}
+                      >
+                        <option value="cash">Cash</option>
+                        <option value="bank">Bank</option>
+                        <option value="mixed">Mixed (Cash + Bank)</option>
+                      </select>
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Total Amount (₹)</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={formData.totalAmount}
+                        onChange={handleTotalAmountChange}
+                        placeholder="Enter total amount"
+                        min="0"
+                        step="0.01"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {(formData.paymentMethod === "mixed" || formData.paymentMethod === "cash") && (
+                    <div className="row">
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Cash Amount (₹)</label>
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={formData.cashAmount}
+                          onChange={(e) => setFormData({ ...formData, cashAmount: e.target.value })}
+                          placeholder="Enter cash amount"
+                          min="0"
+                          step="0.01"
+                        />
+                      </div>
+                      {formData.paymentMethod === "mixed" && (
+                        <div className="col-md-6 mb-3">
+                          <label className="form-label">Bank Amount (₹)</label>
+                          <input
+                            type="number"
+                            className="form-control"
+                            value={formData.bankAmount}
+                            onChange={(e) => setFormData({ ...formData, bankAmount: e.target.value })}
+                            placeholder="Enter bank amount"
+                            min="0"
+                            step="0.01"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {formData.paymentMethod === "bank" && (
+                    <div className="mb-3">
+                      <label className="form-label">Bank Amount (₹)</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={formData.bankAmount}
+                        onChange={(e) => setFormData({ ...formData, bankAmount: e.target.value })}
+                        placeholder="Enter bank amount"
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+                  )}
+
+                  <div className="mb-3">
+                    <label className="form-label">Remarks</label>
+                    <textarea
+                      className="form-control"
+                      rows="2"
+                      value={formData.remarks}
+                      onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
+                      placeholder="Any additional notes"
+                    />
+                  </div>
+
+                  <div className="form-actions">
+                    <button type="submit" className="btn btn-primary">
+                      <i className="bi bi-check-circle"></i>
+                      {editIndex >= 0 ? "Update Entry" : "Add Entry"}
+                    </button>
+                    {editIndex >= 0 && (
+                      <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
+                        <i className="bi bi-x-circle"></i> Cancel
+                      </button>
+                    )}
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
-        )}
+
+          <div className="col-lg-7">
+            <div className="entries-card">
+              <div className="entries-header">
+                <h5><i className="bi bi-list-ul"></i> Recent Entries ({entries.length})</h5>
+              </div>
+              <div className="entries-body">
+                {entries.length === 0 ? (
+                  <div className="no-entries">
+                    <i className="bi bi-inbox"></i>
+                    <p>No adda payments recorded yet</p>
+                  </div>
+                ) : (
+                  <div className="entries-list">
+                    {entries.map((entry, index) => (
+                      <div key={entry.id} className="entry-item">
+                        <div className="entry-content">
+                          <div className="entry-main">
+                            <h6>{entry.description}</h6>
+                            <p className="entry-details">
+                              <span className="entry-date">{entry.date}</span>
+                              {entry.addaName && <span className="entry-adda">• {entry.addaName}</span>}
+                            </p>
+                          </div>
+                          <div className="entry-amounts">
+                            <div className="total-amount">₹{entry.totalAmount.toLocaleString()}</div>
+                            <div className="amount-breakdown">
+                              {entry.cashAmount > 0 && <span className="cash-amount">Cash: ₹{entry.cashAmount}</span>}
+                              {entry.bankAmount > 0 && <span className="bank-amount">Bank: ₹{entry.bankAmount}</span>}
+                            </div>
+                          </div>
+                          <div className="entry-actions">
+                            <button 
+                              className="btn btn-sm btn-outline-primary"
+                              onClick={() => handleEdit(index)}
+                            >
+                              <i className="bi bi-pencil"></i>
+                            </button>
+                            <button 
+                              className="btn btn-sm btn-outline-danger"
+                              onClick={() => handleDelete(index)}
+                            >
+                              <i className="bi bi-trash"></i>
+                            </button>
+                          </div>
+                        </div>
+                        {entry.remarks && (
+                          <div className="entry-remarks">
+                            <small><i className="bi bi-chat-text"></i> {entry.remarks}</small>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-export default AddaFeesEntry;
+export default FeesPayment;
