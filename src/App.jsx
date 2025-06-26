@@ -11,6 +11,7 @@ import OtherPayment from "./components/jsx/OtherPayment";
 import BonusCalculator from "./components/jsx/BonusCalculator";
 import Analytics from "./components/jsx/Analytics";
 import CashBook from "./components/jsx/CashBook";
+import Approval from "./components/jsx/Approval";
 
 
 function App() {
@@ -201,6 +202,17 @@ function App() {
           </div>
 
           <div className="menu-section">
+            <h6>APPROVAL</h6>
+            <button
+              className={`menu-item ${activeTab === "approval" ? "active" : ""}`}
+              onClick={() => handleMenuClick("approval")}
+            >
+              <i className="bi bi-check-circle"></i>
+              Data Summary
+            </button>
+          </div>
+
+          <div className="menu-section">
             <h6>REPORTS</h6>
             <button
               className={`menu-item ${activeTab === "analytics" ? "active" : ""}`}
@@ -270,6 +282,13 @@ function App() {
             <CashBook
               cashBookEntries={cashBookEntries}
               setCashBookEntries={setCashBookEntries}
+            />
+          )}
+          {activeTab === "approval" && (
+            <Approval
+              fareData={fareData}
+              expenseData={expenseData}
+              cashBookEntries={cashBookEntries}
             />
           )}
         </div>
