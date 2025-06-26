@@ -207,7 +207,13 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
         {filteredEntries.length > 0 && (
           <div className="double-column-cash-book">
             <div className="cash-book-header-row">
-              <h4><i className="bi bi-book-half"></i> In the Books of... Cash Book</h4>
+              <h4>
+                <i className="bi bi-book-half"></i> 
+                Cash Book {customDateFrom || customDateTo ? 
+                  `Custom Date [${customDateFrom ? new Date(customDateFrom).toLocaleDateString('en-IN') : 'Start'} - ${customDateTo ? new Date(customDateTo).toLocaleDateString('en-IN') : 'End'}]` : 
+                  'All'
+                }
+              </h4>
             </div>
 
             <div className="cash-book-table-container">
