@@ -45,10 +45,12 @@ function App() {
       )}
       
       <button 
-        className="mobile-toggle"
+        className={`mobile-toggle ${sidebarOpen ? 'open' : ''}`}
         onClick={() => setSidebarOpen(!sidebarOpen)}
       >
-        {sidebarOpen ? '✕' : '☰'}
+        <div className="mobile-icon">
+          <span></span>
+        </div>
       </button>
       
       <div className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
@@ -61,7 +63,9 @@ function App() {
             className="sidebar-toggle"
             onClick={() => setSidebarOpen(!sidebarOpen)}
           >
-            {sidebarOpen ? '✕' : '☰'}
+            <div className="toggle-icon">
+              <span></span>
+            </div>
           </button>
         </div>
         
