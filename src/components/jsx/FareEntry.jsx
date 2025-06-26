@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import "../css/FareEntry.css";
 
@@ -38,7 +37,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
     const cashAmount = parseInt(dailyFareData.cashAmount) || 0;
     const bankAmount = parseInt(dailyFareData.bankAmount) || 0;
     const totalAmount = cashAmount + bankAmount;
-    
+
     const newEntry = {
       id: Date.now(),
       type: "daily",
@@ -48,7 +47,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
       totalAmount: totalAmount,
       date: dailyFareData.date,
     };
-    
+
     setFareData([...fareData, newEntry]);
     setTotalEarnings((prev) => prev + totalAmount);
     setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
@@ -59,7 +58,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
     const cashAmount = parseInt(bookingData.cashAmount) || 0;
     const bankAmount = parseInt(bookingData.bankAmount) || 0;
     const totalAmount = cashAmount + bankAmount;
-    
+
     const newEntry = {
       id: Date.now(),
       type: "booking",
@@ -70,7 +69,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
       dateFrom: bookingData.dateFrom,
       dateTo: bookingData.dateTo,
     };
-    
+
     setFareData([...fareData, newEntry]);
     setTotalEarnings((prev) => prev + totalAmount);
     setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
@@ -103,7 +102,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
               <h3>Daily Fare Collection</h3>
               <p>Track your daily route earnings with ease</p>
             </div>
-            
+
             <form onSubmit={handleDailySubmit} className="modern-form">
               <div className="form-row">
                 <div className="form-group full-width">
@@ -227,7 +226,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
               <h3>Booking Fare Collection</h3>
               <p>Record special bookings and reservations</p>
             </div>
-            
+
             <form onSubmit={handleBookingSubmit} className="modern-form">
               <div className="form-row">
                 <div className="form-group full-width">
@@ -362,7 +361,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
               <h3>Off Day Entry</h3>
               <p>Mark days when no work was done</p>
             </div>
-            
+
             <form onSubmit={handleOffDaySubmit} className="modern-form">
               <div className="form-row">
                 <div className="form-group full-width">
@@ -448,7 +447,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
               </div>
             </div>
           </div>
-          
+
           <div className="summary-card bank-card">
             <div className="card-content">
               <div className="card-icon">
@@ -460,7 +459,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
               </div>
             </div>
           </div>
-          
+
           <div className="summary-card total-card">
             <div className="card-content">
               <div className="card-icon">
@@ -513,7 +512,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
             </h3>
             <span className="entries-count">{fareData.length} entries</span>
           </div>
-          
+
           <div className="entries-grid">
             {fareData.slice(-6).reverse().map((entry) => (
               <div key={entry.id} className={`entry-card-modern ${entry.type}`}>
@@ -529,7 +528,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                      entry.type === "booking" ? "Booking" : "Off Day"}
                   </div>
                 </div>
-                
+
                 <div className="entry-details">
                   {entry.type === "daily" && (
                     <p className="entry-route">{entry.route}</p>
@@ -541,7 +540,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                     <p className="entry-reason">{entry.reason?.substring(0, 40)}...</p>
                   )}
                 </div>
-                
+
                 {entry.type !== "off" && (
                   <div className="entry-amounts">
                     <div className="amount-row">
@@ -558,7 +557,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                     </div>
                   </div>
                 )}
-                
+
                 <div className="entry-date">
                   {entry.type === "daily" && entry.date}
                   {entry.type === "booking" && `${entry.dateFrom} to ${entry.dateTo}`}
