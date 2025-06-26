@@ -44,7 +44,7 @@ function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses, setCashB
       // Create new entry
       const newEntry = {
         id: Date.now(),
-        type: "adda",
+        type: "fees",
         cashAmount: cashAmount,
         bankAmount: bankAmount,
         totalAmount: totalAmount,
@@ -101,7 +101,7 @@ function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses, setCashB
   };
 
   // Filter adda entries and calculate totals for summary
-  const addaEntries = expenseData.filter(entry => entry.type === "adda");
+  const addaEntries = expenseData.filter(entry => entry.type === "fees");
   const totalCash = addaEntries.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
   const totalBank = addaEntries.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
   const grandTotal = totalCash + totalBank;
