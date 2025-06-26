@@ -8,6 +8,7 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
   const [customDateTo, setCustomDateTo] = useState('');
   const [filteredEntries, setFilteredEntries] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
+  const [showSummary, setShowSummary] = useState(true);
 
   useEffect(() => {
     const savedEntries = localStorage.getItem('cashBookEntries');
@@ -82,14 +83,21 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
           <h2><i className="bi bi-book"></i> Cash Book (Double Column)</h2>
           <p>Traditional Dr./Cr. format with Cash and Bank columns</p>
           
-          {/* Filter Toggle Button */}
+          {/* Toggle Buttons */}
           <div className="filter-toggle-section">
             <button 
-              className="btn btn-outline-primary btn-sm filter-toggle-btn"
+              className="btn btn-outline-primary btn-sm filter-toggle-btn me-2"
               onClick={() => setShowFilter(!showFilter)}
             >
               <i className={`bi ${showFilter ? 'bi-eye-slash' : 'bi-funnel'}`}></i>
               {showFilter ? 'Hide Filter' : 'Show Filter'}
+            </button>
+            <button 
+              className="btn btn-outline-info btn-sm filter-toggle-btn"
+              onClick={() => setShowSummary(!showSummary)}
+            >
+              <i className={`bi ${showSummary ? 'bi-eye-slash' : 'bi-bar-chart'}`}></i>
+              {showSummary ? 'Hide Summary' : 'Show Summary'}
             </button>
           </div>
         </div>
@@ -138,7 +146,7 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
         )}
 
         {/* Summary Cards */}
-        {filteredEntries.length > 0 && (
+        {filteredEntries.length > 0 && showSummary && (
           <div className="row mb-4">
             <div className="col-md-3 col-sm-6 mb-3">
               <div className="summary-card dr-cash-card">
@@ -176,7 +184,7 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
         )}
 
         {/* Balance Cards */}
-        {filteredEntries.length > 0 && (
+        {filteredEntries.length > 0 && showSummary && (
           <div className="row mb-4">
             <div className="col-md-6 mb-3">
               <div className="summary-card cash-balance-card">
