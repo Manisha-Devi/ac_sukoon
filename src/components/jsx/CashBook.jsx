@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import "../css/CashBook.css";
 
 const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
-  const [dateFilter, setDateFilter] = useState('all');
+  
   const [customDateFrom, setCustomDateFrom] = useState('');
   const [customDateTo, setCustomDateTo] = useState('');
   const [filteredEntries, setFilteredEntries] = useState([]);
@@ -18,57 +18,19 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
   useEffect(() => {
     localStorage.setItem('cashBookEntries', JSON.stringify(cashBookEntries));
     filterEntries();
-  }, [cashBookEntries, dateFilter, customDateFrom, customDateTo]);
+  }, [cashBookEntries, customDateFrom, customDateTo]);
 
   const filterEntries = () => {
     let filtered = [...cashBookEntries];
-    const today = new Date();
     
-    switch (dateFilter) {
-      case 'today':
-        filtered = filtered.filter(entry => {
-          const entryDate = new Date(entry.date);
-          return entryDate.toDateString() === today.toDateString();
-        });
-        break;
-      case 'week':
-        const weekAgo = new Date(today);
-        weekAgo.setDate(today.getDate() - 7);
-        filtered = filtered.filter(entry => {
-          const entryDate = new Date(entry.date);
-          return entryDate >= weekAgo;
-        });
-        break;
-      case 'month':
-        const monthAgo = new Date(today);
-        monthAgo.setMonth(today.getMonth() - 1);
-        filtered = filtered.filter(entry => {
-          const entryDate = new Date(entry.date);
-          return entryDate >= monthAgo;
-        });
-        break;
-      case 'year':
-        const yearAgo = new Date(today);
-        yearAgo.setFullYear(today.getFullYear() - 1);
-        filtered = filtered.filter(entry => {
-          const entryDate = new Date(entry.date);
-          return entryDate >= yearAgo;
-        });
-        break;
-      case 'custom':
-        if (customDateFrom && customDateTo) {
-          const fromDate = new Date(customDateFrom);
-          const toDate = new Date(customDateTo);
-          toDate.setHours(23, 59, 59); // Include full end date
-          filtered = filtered.filter(entry => {
-            const entryDate = new Date(entry.date);
-            return entryDate >= fromDate && entryDate <= toDate;
-          });
-        }
-        break;
-      default:
-        // 'all' - no filtering
-        break;
+    if (customDateFrom && customDateTo) {
+      const fromDate = new Date(customDateFrom);
+      const toDate = new Date(customDateTo);
+      toDate.setHours(23, 59, 59); // Include full end date
+      filtered = filtered.filter(entry => {
+        const entryDate = new Date(entry.date);
+        return entryDate >= fromDate && entryDate <= toDate;
+      });
     }
     
     setFilteredEntries(filtered);
@@ -114,52 +76,29 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
         </div>
 
         {/* Date Filter Controls */}
-        <div className="date-filter-card">
-          <div className="card-body">
-            <h5><i className="bi bi-calendar3"></i> Date Filter</h5>
-            <div className="row">
-              <div className="col-md-6 mb-3">
-                <label className="form-label">Filter Type</label>
-                <select 
-                  className="form-select"
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                >
-                  <option value="all">All Entries</option>
-                  <option value="today">Today</option>
-                  <option value="week">Last 7 Days</option>
-                  <option value="month">Last Month</option>
-                  <option value="year">Last Year</option>
-                  <option value="custom">Custom Range</option>
-                </select>
-              </div>
-              {dateFilter === 'custom' && (
-                <>
-                  <div className="col-md-3 mb-3">
-                    <label className="form-label">From Date</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={customDateFrom}
-                      onChange={(e) => setCustomDateFrom(e.target.value)}
-                    />
-                  </div>
-                  <div className="col-md-3 mb-3">
-                    <label className="form-label">To Date</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={customDateTo}
-                      onChange={(e) => setCustomDateTo(e.target.value)}
-                    />
-                  </div>
-                </>
-              )}
+        <div className="simple-date-filter">
+          <div className="row align-items-end">
+            <div className="col-md-4">
+              <label className="form-label">From Date</label>
+              <input
+                type="date"
+                className="form-control"
+                value={customDateFrom}
+                onChange={(e) => setCustomDateFrom(e.target.value)}
+              />
             </div>
-            <div className="filter-info">
+            <div className="col-md-4">
+              <label className="form-label">To Date</label>
+              <input
+                type="date"
+                className="form-control"
+                value={customDateTo}
+                onChange={(e) => setCustomDateTo(e.target.value)}
+              />
+            </div>
+            <div className="col-md-4">
               <small className="text-muted">
-                Showing {filteredEntries.length} of {cashBookEntries.length} entries
-                {dateFilter !== 'all' && ` (${dateFilter === 'custom' ? 'Custom Range' : dateFilter})`}
+                {filteredEntries.length} of {cashBookEntries.length} entries
               </small>
             </div>
           </div>
