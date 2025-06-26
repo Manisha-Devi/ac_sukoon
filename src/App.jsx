@@ -34,11 +34,6 @@ function App() {
     setActiveTab("dashboard");
   };
 
-    // If user is not logged in, show login component
-    if (!user) {
-      return <Login onLogin={handleLogin} />;
-    }
-
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
@@ -58,6 +53,11 @@ function App() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // If user is not logged in, show login component
+  if (!user) {
+    return <Login onLogin={handleLogin} />;
+  }
 
   // Calculate profit/loss
   const profit = totalEarnings - totalExpenses;
