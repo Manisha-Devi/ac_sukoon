@@ -1,9 +1,19 @@
 /* Custom CSS to enhance Bootstrap */
 :root {
   --primary-blue: #667eea;
+  --primary-purple: #764ba2;
   --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --secondary-gradient: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+  --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+  --success-gradient: linear-gradient(135deg, #26de81 0%, #4bcf7f 100%);
+  --warning-gradient: linear-gradient(135deg, #feca57 0%, #ffdc78 100%);
+  --info-gradient: linear-gradient(135deg, #667eea 0%, #89a7ff 100%);
   --sidebar-width: 280px;
   --navbar-height: 60px;
+  --card-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  --card-shadow-hover: 0 16px 48px rgba(0,0,0,0.15);
+  --border-radius: 16px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Remove default margins and padding */
@@ -15,7 +25,8 @@
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background-attachment: fixed;
   overflow-x: hidden;
 }
 
@@ -29,13 +40,15 @@ html, body {
   background: var(--primary-gradient) !important;
   height: var(--navbar-height);
   padding: 0.5rem 1rem;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+  backdrop-filter: blur(10px);
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   right: 0 !important;
   width: 100% !important;
   z-index: 1050 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .navbar-brand {
@@ -105,11 +118,12 @@ html, body {
   left: 0;
   width: var(--sidebar-width);
   height: calc(100vh - var(--navbar-height));
-  background: white;
-  border-right: 1px solid #e9ecef;
-  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 4px 0 20px rgba(0,0,0,0.1);
   transform: translateX(-100%);
-  transition: transform 0.3s ease;
+  transition: var(--transition);
   z-index: 1040;
   overflow-y: auto;
 }
@@ -162,15 +176,21 @@ html, body {
 }
 
 .menu-item:hover {
-  background: rgba(102, 126, 234, 0.08);
+  background: rgba(102, 126, 234, 0.1);
+  backdrop-filter: blur(10px);
   color: var(--primary-blue);
-  transform: translateX(5px);
+  transform: translateX(8px);
+  border-radius: 12px;
+  margin: 0 8px;
 }
 
 .menu-item.active {
-  background: rgba(102, 126, 234, 0.12);
+  background: rgba(102, 126, 234, 0.15);
+  backdrop-filter: blur(10px);
   color: var(--primary-blue);
   font-weight: 600;
+  border-radius: 12px;
+  margin: 0 8px;
 }
 
 .menu-item.active::before {
@@ -233,10 +253,24 @@ html, body {
 
 /* Dashboard Header */
 .dashboard-header {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-  border-radius: 16px;
-  padding: 2rem;
-  border: 1px solid rgba(102, 126, 234, 0.1);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+  backdrop-filter: blur(20px);
+  border-radius: var(--border-radius);
+  padding: 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--card-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary-gradient);
 }
 
 .dashboard-title {
@@ -272,35 +306,50 @@ html, body {
 }
 
 .quick-stat-card {
-  background: white;
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: var(--border-radius);
   padding: 2rem;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--card-shadow);
+  transition: var(--transition);
   position: relative;
   overflow: hidden;
 }
 
+.quick-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  transition: var(--transition);
+}
+
 .quick-stat-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: var(--card-shadow-hover);
 }
 
-.quick-stat-card.earnings {
-  border-left: 4px solid #feca57;
+.quick-stat-card:hover::before {
+  height: 6px;
 }
 
-.quick-stat-card.expenses {
-  border-left: 4px solid #ff6b6b;
+.quick-stat-card.earnings::before {
+  background: var(--warning-gradient);
 }
 
-.quick-stat-card.profit {
-  border-left: 4px solid #26de81;
+.quick-stat-card.expenses::before {
+  background: var(--danger-gradient);
 }
 
-.quick-stat-card.routes {
-  border-left: 4px solid #667eea;
+.quick-stat-card.profit::before {
+  background: var(--success-gradient);
+}
+
+.quick-stat-card.routes::before {
+  background: var(--info-gradient);
 }
 
 .stat-content {
@@ -322,19 +371,23 @@ html, body {
 }
 
 .quick-stat-card.earnings .stat-icon-wrapper {
-  background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+  background: var(--warning-gradient);
+  box-shadow: 0 8px 24px rgba(254, 202, 87, 0.3);
 }
 
 .quick-stat-card.expenses .stat-icon-wrapper {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  background: var(--danger-gradient);
+  box-shadow: 0 8px 24px rgba(255, 107, 107, 0.3);
 }
 
 .quick-stat-card.profit .stat-icon-wrapper {
-  background: linear-gradient(135deg, #26de81 0%, #20bf6b 100%);
+  background: var(--success-gradient);
+  box-shadow: 0 8px 24px rgba(38, 222, 129, 0.3);
 }
 
 .quick-stat-card.routes .stat-icon-wrapper {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--info-gradient);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
 }
 
 .stat-details {
@@ -417,12 +470,19 @@ html, body {
 
 /* Analytics Section */
 .analytics-section .analytics-card {
-  background: white;
-  border-radius: 20px;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--card-shadow);
   overflow: hidden;
   height: 100%;
+  transition: var(--transition);
+}
+
+.analytics-section .analytics-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .analytics-card .card-header {
@@ -453,12 +513,19 @@ html, body {
 
 /* Activity Card */
 .activity-card {
-  background: white;
-  border-radius: 20px;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--card-shadow);
   overflow: hidden;
   height: 100%;
+  transition: var(--transition);
+}
+
+.activity-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .activity-card .card-header {
@@ -557,12 +624,19 @@ html, body {
 
 /* Insights Card */
 .insights-card {
-  background: white;
-  border-radius: 20px;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--card-shadow);
   overflow: hidden;
   height: 100%;
+  transition: var(--transition);
+}
+
+.insights-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .insights-card .card-header {
@@ -615,12 +689,19 @@ html, body {
 
 /* Form Styling */
 .form-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e9ecef;
-  padding: 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 2.5rem;
   margin-bottom: 2rem;
+  transition: var(--transition);
+}
+
+.form-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .form-card h3 {
@@ -632,27 +713,36 @@ html, body {
 .btn-primary {
   background: var(--primary-gradient);
   border: none;
-  padding: 0.75rem 2rem;
-  border-radius: 8px;
+  padding: 0.875rem 2.5rem;
+  border-radius: 12px;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: var(--transition);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #7c91ff 0%, #8b62c7 100%);
 }
 
 /* Tables */
 .table-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e9ecef;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   overflow: hidden;
   margin-top: 2rem;
   width: 100%;
   max-width: 100%;
+  transition: var(--transition);
+}
+
+.table-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .table-card h5 {
