@@ -1,13 +1,33 @@
+import React, { useState, useEffect } from "react";
+import "./App.css";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  BarElement,
+} from "chart.js";
+import { Line, Doughnut, Bar } from "react-chartjs-2";
 
-import React, { useState, useEffect } from 'react';
-import './App.css';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement, BarElement } from 'chart.js';
-import { Line, Doughnut, Bar } from 'react-chartjs-2';
-
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement, BarElement);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  BarElement,
+);
 
 function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [fareData, setFareData] = useState([]);
   const [expenseData, setExpenseData] = useState([]);
   const [totalEarnings, setTotalEarnings] = useState(30200);
@@ -24,9 +44,9 @@ function App() {
       }
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
     handleResize(); // Call once on mount
-    return () => window.removeEventListener('resize', handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Calculate profit/loss
@@ -46,8 +66,8 @@ function App() {
       {/* Bootstrap Navbar */}
       <nav className="navbar navbar-expand-lg custom-navbar">
         <div className="container-fluid">
-          <button 
-            className="navbar-toggler d-lg-none" 
+          <button
+            className="navbar-toggler d-lg-none"
             type="button"
             onClick={() => setSidebarOpen(!sidebarOpen)}
             aria-label="Toggle navigation"
@@ -56,33 +76,35 @@ function App() {
               <span></span>
             </span>
           </button>
-          
+
           <a className="navbar-brand mx-auto mx-lg-0" href="#">
             <i className="bi bi-speedometer2 me-2"></i>
-            AC SUKOON Dashboard System
+            A/C SUKOON
           </a>
 
           <div className="navbar-search d-none d-md-block">
             <i className="bi bi-search"></i>
-            <input 
-              type="text" 
-              className="form-control" 
-              placeholder="Search..." 
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search..."
             />
           </div>
 
           <div className="d-flex align-items-center">
-            <button 
-              className="btn btn-link text-white p-2 me-2 d-lg-none" 
+            <button
+              className="btn btn-link text-white p-2 me-2 d-lg-none"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               aria-label="Toggle sidebar"
             >
-              <i className={`bi ${sidebarOpen ? 'bi-x-lg' : 'bi-list'} fs-5`}></i>
+              <i
+                className={`bi ${sidebarOpen ? "bi-x-lg" : "bi-list"} fs-5`}
+              ></i>
             </button>
-            
+
             <div className="d-none d-lg-flex align-items-center">
-              <button 
-                className="btn btn-link text-white p-2 me-3" 
+              <button
+                className="btn btn-link text-white p-2 me-3"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 title="Toggle Sidebar"
               >
@@ -98,19 +120,19 @@ function App() {
       </nav>
 
       {/* Sidebar Overlay */}
-      <div 
-        className={`sidebar-overlay ${sidebarOpen ? 'show' : ''}`}
+      <div
+        className={`sidebar-overlay ${sidebarOpen ? "show" : ""}`}
         onClick={() => setSidebarOpen(false)}
       ></div>
 
       {/* Sidebar */}
-      <div className={`sidebar ${sidebarOpen ? 'show' : ''}`}>
+      <div className={`sidebar ${sidebarOpen ? "show" : ""}`}>
         <div className="sidebar-menu">
           <div className="menu-section">
             <h6>MAIN</h6>
             <button
-              className={`menu-item ${activeTab === 'dashboard' ? 'active' : ''}`}
-              onClick={() => handleMenuClick('dashboard')}
+              className={`menu-item ${activeTab === "dashboard" ? "active" : ""}`}
+              onClick={() => handleMenuClick("dashboard")}
             >
               <i className="bi bi-speedometer2"></i>
               Dashboard
@@ -120,29 +142,29 @@ function App() {
           <div className="menu-section">
             <h6>DATA ENTRY</h6>
             <button
-              className={`menu-item ${activeTab === 'fare-entry' ? 'active' : ''}`}
-              onClick={() => handleMenuClick('fare-entry')}
+              className={`menu-item ${activeTab === "fare-entry" ? "active" : ""}`}
+              onClick={() => handleMenuClick("fare-entry")}
             >
               <i className="bi bi-ticket-perforated"></i>
               Fare Collection
             </button>
             <button
-              className={`menu-item ${activeTab === 'fuel-entry' ? 'active' : ''}`}
-              onClick={() => handleMenuClick('fuel-entry')}
+              className={`menu-item ${activeTab === "fuel-entry" ? "active" : ""}`}
+              onClick={() => handleMenuClick("fuel-entry")}
             >
               <i className="bi bi-fuel-pump"></i>
               Fuel Expense
             </button>
             <button
-              className={`menu-item ${activeTab === 'adda-fees' ? 'active' : ''}`}
-              onClick={() => handleMenuClick('adda-fees')}
+              className={`menu-item ${activeTab === "adda-fees" ? "active" : ""}`}
+              onClick={() => handleMenuClick("adda-fees")}
             >
               <i className="bi bi-building"></i>
               Adda & Agent Fees
             </button>
             <button
-              className={`menu-item ${activeTab === 'service-entry' ? 'active' : ''}`}
-              onClick={() => handleMenuClick('service-entry')}
+              className={`menu-item ${activeTab === "service-entry" ? "active" : ""}`}
+              onClick={() => handleMenuClick("service-entry")}
             >
               <i className="bi bi-tools"></i>
               Service Expense
@@ -152,8 +174,8 @@ function App() {
           <div className="menu-section">
             <h6>AUTOMATION</h6>
             <button
-              className={`menu-item ${activeTab === 'bonus-calc' ? 'active' : ''}`}
-              onClick={() => handleMenuClick('bonus-calc')}
+              className={`menu-item ${activeTab === "bonus-calc" ? "active" : ""}`}
+              onClick={() => handleMenuClick("bonus-calc")}
             >
               <i className="bi bi-calculator"></i>
               Bonus Calculator
@@ -163,8 +185,8 @@ function App() {
           <div className="menu-section">
             <h6>REPORTS</h6>
             <button
-              className={`menu-item ${activeTab === 'analytics' ? 'active' : ''}`}
-              onClick={() => handleMenuClick('analytics')}
+              className={`menu-item ${activeTab === "analytics" ? "active" : ""}`}
+              onClick={() => handleMenuClick("analytics")}
             >
               <i className="bi bi-graph-up"></i>
               Analytics
@@ -176,13 +198,32 @@ function App() {
       {/* Main Content */}
       <div className="main-content">
         <div className="container-fluid">
-          {activeTab === 'dashboard' && <Dashboard totalEarnings={totalEarnings} totalExpenses={totalExpenses} profit={profit} profitPercentage={profitPercentage} />}
-          {activeTab === 'fare-entry' && <FareEntry fareData={fareData} setFareData={setFareData} setTotalEarnings={setTotalEarnings} />}
-          {activeTab === 'fuel-entry' && <FuelEntry expenseData={expenseData} setExpenseData={setExpenseData} setTotalExpenses={setTotalExpenses} />}
-          {activeTab === 'adda-fees' && <AddaFeesEntry />}
-          {activeTab === 'service-entry' && <ServiceEntry />}
-          {activeTab === 'bonus-calc' && <BonusCalculator />}
-          {activeTab === 'analytics' && <Analytics />}
+          {activeTab === "dashboard" && (
+            <Dashboard
+              totalEarnings={totalEarnings}
+              totalExpenses={totalExpenses}
+              profit={profit}
+              profitPercentage={profitPercentage}
+            />
+          )}
+          {activeTab === "fare-entry" && (
+            <FareEntry
+              fareData={fareData}
+              setFareData={setFareData}
+              setTotalEarnings={setTotalEarnings}
+            />
+          )}
+          {activeTab === "fuel-entry" && (
+            <FuelEntry
+              expenseData={expenseData}
+              setExpenseData={setExpenseData}
+              setTotalExpenses={setTotalExpenses}
+            />
+          )}
+          {activeTab === "adda-fees" && <AddaFeesEntry />}
+          {activeTab === "service-entry" && <ServiceEntry />}
+          {activeTab === "bonus-calc" && <BonusCalculator />}
+          {activeTab === "analytics" && <Analytics />}
         </div>
       </div>
     </div>
@@ -191,24 +232,24 @@ function App() {
 
 function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage }) {
   const lineData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
     datasets: [
       {
-        label: 'Earnings',
+        label: "Earnings",
         data: [12000, 19000, 15000, 25000, 22000, 30000],
-        borderColor: 'rgb(75, 192, 192)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: "rgb(75, 192, 192)",
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
         tension: 0.4,
       },
     ],
   };
 
   const doughnutData = {
-    labels: ['Fare Collection', 'Fuel Expense', 'Service Cost', 'Other'],
+    labels: ["Fare Collection", "Fuel Expense", "Service Cost", "Other"],
     datasets: [
       {
         data: [60, 25, 10, 5],
-        backgroundColor: ['#4CAF50', '#FF5722', '#2196F3', '#FFC107'],
+        backgroundColor: ["#4CAF50", "#FF5722", "#2196F3", "#FFC107"],
       },
     ],
   };
@@ -221,7 +262,9 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage }) {
           Dashboard Overview
         </h2>
         <div className="d-none d-md-block">
-          <small className="text-muted">Last updated: {new Date().toLocaleDateString()}</small>
+          <small className="text-muted">
+            Last updated: {new Date().toLocaleDateString()}
+          </small>
         </div>
       </div>
 
@@ -294,7 +337,10 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage }) {
               <i className="bi bi-graph-up me-2"></i>
               Monthly Earnings Trend
             </h5>
-            <Line data={lineData} options={{ responsive: true, maintainAspectRatio: false }} />
+            <Line
+              data={lineData}
+              options={{ responsive: true, maintainAspectRatio: false }}
+            />
           </div>
         </div>
 
@@ -304,7 +350,10 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage }) {
               <i className="bi bi-pie-chart me-2"></i>
               Expense Breakdown
             </h5>
-            <Doughnut data={doughnutData} options={{ responsive: true, maintainAspectRatio: false }} />
+            <Doughnut
+              data={doughnutData}
+              options={{ responsive: true, maintainAspectRatio: false }}
+            />
           </div>
         </div>
       </div>
@@ -346,20 +395,20 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage }) {
 
 function FareEntry({ fareData, setFareData, setTotalEarnings }) {
   const [formData, setFormData] = useState({
-    route: '',
-    fare: '',
-    passengers: '',
-    date: '',
-    time: ''
+    route: "",
+    fare: "",
+    passengers: "",
+    date: "",
+    time: "",
   });
 
   const routes = [
-    'Ghuraka to Bhaderwah',
-    'Bhaderwah to Pul Doda',
-    'Pul Doda to Thatri',
-    'Thatri to Pul Doda',
-    'Pul Doda to Bhaderwah',
-    'Bhaderwah to Ghuraka'
+    "Ghuraka to Bhaderwah",
+    "Bhaderwah to Pul Doda",
+    "Pul Doda to Thatri",
+    "Thatri to Pul Doda",
+    "Pul Doda to Bhaderwah",
+    "Bhaderwah to Ghuraka",
   ];
 
   const handleSubmit = (e) => {
@@ -367,11 +416,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
     const newEntry = {
       id: Date.now(),
       ...formData,
-      totalAmount: parseInt(formData.fare) * parseInt(formData.passengers)
+      totalAmount: parseInt(formData.fare) * parseInt(formData.passengers),
     };
     setFareData([...fareData, newEntry]);
-    setTotalEarnings(prev => prev + newEntry.totalAmount);
-    setFormData({ route: '', fare: '', passengers: '', date: '', time: '' });
+    setTotalEarnings((prev) => prev + newEntry.totalAmount);
+    setFormData({ route: "", fare: "", passengers: "", date: "", time: "" });
   };
 
   return (
@@ -380,7 +429,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
         <i className="bi bi-ticket-perforated me-2"></i>
         Route-wise Fare Collection
       </h2>
-      
+
       <div className="form-card">
         <h3>Add New Fare Entry</h3>
         <form onSubmit={handleSubmit}>
@@ -390,12 +439,16 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
               <select
                 className="form-select"
                 value={formData.route}
-                onChange={(e) => setFormData({...formData, route: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, route: e.target.value })
+                }
                 required
               >
                 <option value="">Select Route</option>
-                {routes.map(route => (
-                  <option key={route} value={route}>{route}</option>
+                {routes.map((route) => (
+                  <option key={route} value={route}>
+                    {route}
+                  </option>
                 ))}
               </select>
             </div>
@@ -406,7 +459,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                 type="number"
                 className="form-control"
                 value={formData.fare}
-                onChange={(e) => setFormData({...formData, fare: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, fare: e.target.value })
+                }
                 required
               />
             </div>
@@ -417,7 +472,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                 type="number"
                 className="form-control"
                 value={formData.passengers}
-                onChange={(e) => setFormData({...formData, passengers: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, passengers: e.target.value })
+                }
                 required
               />
             </div>
@@ -428,7 +485,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                 type="date"
                 className="form-control"
                 value={formData.date}
-                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, date: e.target.value })
+                }
                 required
               />
             </div>
@@ -439,7 +498,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                 type="time"
                 className="form-control"
                 value={formData.time}
-                onChange={(e) => setFormData({...formData, time: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, time: e.target.value })
+                }
                 required
               />
             </div>
@@ -470,7 +531,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                 </tr>
               </thead>
               <tbody>
-                {fareData.map(entry => (
+                {fareData.map((entry) => (
                   <tr key={entry.id}>
                     <td>{entry.route}</td>
                     <td>₹{entry.fare}</td>
@@ -491,23 +552,23 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
 
 function FuelEntry({ expenseData, setExpenseData, setTotalExpenses }) {
   const [formData, setFormData] = useState({
-    amount: '',
-    liters: '',
-    rate: '',
-    date: '',
-    pumpName: ''
+    amount: "",
+    liters: "",
+    rate: "",
+    date: "",
+    pumpName: "",
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const newEntry = {
       id: Date.now(),
-      type: 'fuel',
-      ...formData
+      type: "fuel",
+      ...formData,
     };
     setExpenseData([...expenseData, newEntry]);
-    setTotalExpenses(prev => prev + parseInt(formData.amount));
-    setFormData({ amount: '', liters: '', rate: '', date: '', pumpName: '' });
+    setTotalExpenses((prev) => prev + parseInt(formData.amount));
+    setFormData({ amount: "", liters: "", rate: "", date: "", pumpName: "" });
   };
 
   return (
@@ -516,7 +577,7 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses }) {
         <i className="bi bi-fuel-pump me-2"></i>
         Fuel Expense Entry
       </h2>
-      
+
       <div className="form-card">
         <h3>Add Fuel Expense</h3>
         <form onSubmit={handleSubmit}>
@@ -527,7 +588,9 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses }) {
                 type="number"
                 className="form-control"
                 value={formData.amount}
-                onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, amount: e.target.value })
+                }
                 required
               />
             </div>
@@ -539,7 +602,9 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses }) {
                 step="0.01"
                 className="form-control"
                 value={formData.liters}
-                onChange={(e) => setFormData({...formData, liters: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, liters: e.target.value })
+                }
                 required
               />
             </div>
@@ -551,7 +616,9 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses }) {
                 step="0.01"
                 className="form-control"
                 value={formData.rate}
-                onChange={(e) => setFormData({...formData, rate: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, rate: e.target.value })
+                }
                 required
               />
             </div>
@@ -562,7 +629,9 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses }) {
                 type="text"
                 className="form-control"
                 value={formData.pumpName}
-                onChange={(e) => setFormData({...formData, pumpName: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, pumpName: e.target.value })
+                }
                 required
               />
             </div>
@@ -573,7 +642,9 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses }) {
                 type="date"
                 className="form-control"
                 value={formData.date}
-                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, date: e.target.value })
+                }
                 required
               />
             </div>
@@ -593,16 +664,16 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses }) {
 
 function AddaFeesEntry() {
   const [formData, setFormData] = useState({
-    type: 'adda',
-    amount: '',
-    description: '',
-    date: ''
+    type: "adda",
+    amount: "",
+    description: "",
+    date: "",
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Adda/Agent fees:', formData);
-    setFormData({ type: 'adda', amount: '', description: '', date: '' });
+    console.log("Adda/Agent fees:", formData);
+    setFormData({ type: "adda", amount: "", description: "", date: "" });
   };
 
   return (
@@ -611,7 +682,7 @@ function AddaFeesEntry() {
         <i className="bi bi-building me-2"></i>
         Adda & Agent Fees
       </h2>
-      
+
       <div className="form-card">
         <h3>Add Fees Entry</h3>
         <form onSubmit={handleSubmit}>
@@ -621,7 +692,9 @@ function AddaFeesEntry() {
               <select
                 className="form-select"
                 value={formData.type}
-                onChange={(e) => setFormData({...formData, type: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, type: e.target.value })
+                }
                 required
               >
                 <option value="adda">Adda Fees</option>
@@ -635,7 +708,9 @@ function AddaFeesEntry() {
                 type="number"
                 className="form-control"
                 value={formData.amount}
-                onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, amount: e.target.value })
+                }
                 required
               />
             </div>
@@ -646,7 +721,9 @@ function AddaFeesEntry() {
                 type="date"
                 className="form-control"
                 value={formData.date}
-                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, date: e.target.value })
+                }
                 required
               />
             </div>
@@ -657,7 +734,9 @@ function AddaFeesEntry() {
                 className="form-control"
                 rows={3}
                 value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 required
               />
             </div>
@@ -677,26 +756,32 @@ function AddaFeesEntry() {
 
 function ServiceEntry() {
   const [formData, setFormData] = useState({
-    serviceType: '',
-    amount: '',
-    description: '',
-    date: '',
-    mechanic: ''
+    serviceType: "",
+    amount: "",
+    description: "",
+    date: "",
+    mechanic: "",
   });
 
   const serviceTypes = [
-    'Engine Service',
-    'Brake Service',
-    'Tire Change',
-    'Oil Change',
-    'General Maintenance',
-    'Repair Work'
+    "Engine Service",
+    "Brake Service",
+    "Tire Change",
+    "Oil Change",
+    "General Maintenance",
+    "Repair Work",
   ];
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Service entry:', formData);
-    setFormData({ serviceType: '', amount: '', description: '', date: '', mechanic: '' });
+    console.log("Service entry:", formData);
+    setFormData({
+      serviceType: "",
+      amount: "",
+      description: "",
+      date: "",
+      mechanic: "",
+    });
   };
 
   return (
@@ -705,7 +790,7 @@ function ServiceEntry() {
         <i className="bi bi-tools me-2"></i>
         Service Expense Entry
       </h2>
-      
+
       <div className="form-card">
         <h3>Add Service Entry</h3>
         <form onSubmit={handleSubmit}>
@@ -715,12 +800,16 @@ function ServiceEntry() {
               <select
                 className="form-select"
                 value={formData.serviceType}
-                onChange={(e) => setFormData({...formData, serviceType: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, serviceType: e.target.value })
+                }
                 required
               >
                 <option value="">Select Service Type</option>
-                {serviceTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
+                {serviceTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
                 ))}
               </select>
             </div>
@@ -731,7 +820,9 @@ function ServiceEntry() {
                 type="number"
                 className="form-control"
                 value={formData.amount}
-                onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, amount: e.target.value })
+                }
                 required
               />
             </div>
@@ -742,7 +833,9 @@ function ServiceEntry() {
                 type="date"
                 className="form-control"
                 value={formData.date}
-                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, date: e.target.value })
+                }
                 required
               />
             </div>
@@ -753,7 +846,9 @@ function ServiceEntry() {
                 type="text"
                 className="form-control"
                 value={formData.mechanic}
-                onChange={(e) => setFormData({...formData, mechanic: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, mechanic: e.target.value })
+                }
                 required
               />
             </div>
@@ -764,7 +859,9 @@ function ServiceEntry() {
                 className="form-control"
                 rows={3}
                 value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 required
               />
             </div>
@@ -783,10 +880,10 @@ function ServiceEntry() {
 }
 
 function BonusCalculator() {
-  const [period, setPeriod] = useState('weekly');
-  const [driverName, setDriverName] = useState('');
-  const [baseSalary, setBaseSalary] = useState('');
-  const [bonusPercentage, setBonusPercentage] = useState('');
+  const [period, setPeriod] = useState("weekly");
+  const [driverName, setDriverName] = useState("");
+  const [baseSalary, setBaseSalary] = useState("");
+  const [bonusPercentage, setBonusPercentage] = useState("");
   const [calculatedBonus, setCalculatedBonus] = useState(0);
 
   const calculateBonus = () => {
@@ -802,15 +899,15 @@ function BonusCalculator() {
         <i className="bi bi-calculator me-2"></i>
         Bonus Calculator
       </h2>
-      
+
       <div className="form-card">
         <h3>Calculate Driver Bonus</h3>
         <div className="row g-3">
           <div className="col-md-6">
             <label className="form-label">Period</label>
-            <select 
+            <select
               className="form-select"
-              value={period} 
+              value={period}
               onChange={(e) => setPeriod(e.target.value)}
             >
               <option value="weekly">Weekly</option>
@@ -858,10 +955,12 @@ function BonusCalculator() {
           {calculatedBonus > 0 && (
             <div className="col-12">
               <div className="alert alert-success">
-                <h5 className="alert-heading">Calculated Bonus: ₹{calculatedBonus.toFixed(2)}</h5>
+                <h5 className="alert-heading">
+                  Calculated Bonus: ₹{calculatedBonus.toFixed(2)}
+                </h5>
                 <p className="mb-0">
-                  <strong>Period:</strong> {period} | 
-                  <strong> Driver:</strong> {driverName}
+                  <strong>Period:</strong> {period} |<strong> Driver:</strong>{" "}
+                  {driverName}
                 </p>
               </div>
             </div>
@@ -874,20 +973,20 @@ function BonusCalculator() {
 
 function Analytics() {
   const profitData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
     datasets: [
       {
-        label: 'Profit',
+        label: "Profit",
         data: [5000, 8000, 6000, 12000, 9000, 15000],
-        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-        borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: "rgba(75, 192, 192, 0.6)",
+        borderColor: "rgba(75, 192, 192, 1)",
         borderWidth: 2,
       },
       {
-        label: 'Loss',
+        label: "Loss",
         data: [2000, 1500, 3000, 1000, 2500, 800],
-        backgroundColor: 'rgba(255, 99, 132, 0.6)',
-        borderColor: 'rgba(255, 99, 132, 1)',
+        backgroundColor: "rgba(255, 99, 132, 0.6)",
+        borderColor: "rgba(255, 99, 132, 1)",
         borderWidth: 2,
       },
     ],
@@ -899,12 +998,15 @@ function Analytics() {
         <i className="bi bi-graph-up me-2"></i>
         Profit & Loss Analysis
       </h2>
-      
+
       <div className="row g-4 mb-4">
         <div className="col-12 col-lg-8">
           <div className="chart-card">
             <h5>Monthly Profit vs Loss</h5>
-            <Bar data={profitData} options={{ responsive: true, maintainAspectRatio: false }} />
+            <Bar
+              data={profitData}
+              options={{ responsive: true, maintainAspectRatio: false }}
+            />
           </div>
         </div>
 
