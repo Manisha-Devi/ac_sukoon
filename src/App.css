@@ -832,6 +832,7 @@ html, body {
   /* Ensure form cards and other elements use full available width */
   .sidebar:not(.show) + .main-content .container-fluid {
     max-width: 100% !important;
+    width: 100% !important;
   }
   
   .sidebar:not(.show) + .main-content .form-card,
@@ -843,6 +844,24 @@ html, body {
   .sidebar:not(.show) + .main-content .insights-card {
     width: 100% !important;
     max-width: 100% !important;
+  }
+  
+  /* Fix dashboard container when sidebar is hidden */
+  .sidebar:not(.show) + .main-content .dashboard-container {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Fix analytics section and rows */
+  .sidebar:not(.show) + .main-content .analytics-section,
+  .sidebar:not(.show) + .main-content .analytics-section .row {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Fix chart containers */
+  .sidebar:not(.show) + .main-content .chart-container {
+    width: 100% !important;
   }
 }
 
