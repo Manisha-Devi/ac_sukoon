@@ -39,58 +39,19 @@ body {
   letter-spacing: -0.5px;
 }
 
-.navbar-toggler {
+.navbar .btn-link {
   border: none;
-  padding: 0.25rem 0.5rem;
-}
-
-.navbar-toggler:focus {
-  box-shadow: none;
-}
-
-.navbar-toggler-icon {
-  background-image: none;
-  width: 24px;
-  height: 24px;
-  position: relative;
-}
-
-.navbar-toggler-icon::before,
-.navbar-toggler-icon::after,
-.navbar-toggler-icon span {
-  content: '';
-  position: absolute;
-  width: 20px;
-  height: 2px;
-  background: white;
-  border-radius: 2px;
+  text-decoration: none;
   transition: all 0.3s ease;
 }
 
-.navbar-toggler-icon::before {
-  top: 6px;
+.navbar .btn-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
 }
 
-.navbar-toggler-icon span {
-  top: 11px;
-}
-
-.navbar-toggler-icon::after {
-  top: 16px;
-}
-
-.navbar-toggler[aria-expanded="true"] .navbar-toggler-icon::before {
-  transform: rotate(45deg);
-  top: 11px;
-}
-
-.navbar-toggler[aria-expanded="true"] .navbar-toggler-icon span {
-  opacity: 0;
-}
-
-.navbar-toggler[aria-expanded="true"] .navbar-toggler-icon::after {
-  transform: rotate(-45deg);
-  top: 11px;
+.navbar .btn-link:focus {
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
 }
 
 /* Search Bar in Navbar */
@@ -148,34 +109,16 @@ body {
   transform: translateX(0);
 }
 
-.sidebar-header {
-  padding: 1.5rem;
-  background: var(--primary-gradient);
-  color: white;
-  text-align: center;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.sidebar-header h3 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.sidebar-header p {
-  margin: 0.25rem 0 0 0;
-  opacity: 0.8;
-  font-size: 0.875rem;
-}
-
 .sidebar-menu {
-  padding: 1rem 0;
+  padding: 1.5rem 0;
 }
 
 .menu-section {
   margin-bottom: 1.5rem;
+}
+
+.menu-section:first-child {
+  margin-top: 0;
 }
 
 .menu-section h6 {
@@ -185,6 +128,13 @@ body {
   text-transform: uppercase;
   letter-spacing: 1px;
   margin: 0 0 0.75rem 1.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.menu-section:first-child h6 {
+  border-top: none;
+  padding-top: 0;
 }
 
 .menu-item {
@@ -451,17 +401,17 @@ body {
 
 /* Responsive Design */
 @media (min-width: 992px) {
-  .sidebar {
+  .sidebar.show {
     transform: translateX(0);
     position: fixed;
   }
 
   .main-content {
-    margin-left: var(--sidebar-width);
+    transition: margin-left 0.3s ease;
   }
 
-  .navbar-toggler {
-    display: none;
+  .sidebar.show + .main-content {
+    margin-left: var(--sidebar-width);
   }
 }
 

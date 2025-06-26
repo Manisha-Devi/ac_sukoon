@@ -59,7 +59,7 @@ function App() {
           
           <a className="navbar-brand mx-auto mx-lg-0" href="#">
             <i className="bi bi-speedometer2 me-2"></i>
-            AC SUKOON
+            AC SUKOON Dashboard System
           </a>
 
           <div className="navbar-search d-none d-md-block">
@@ -71,11 +71,28 @@ function App() {
             />
           </div>
 
-          <div className="d-none d-lg-flex align-items-center">
-            <span className="text-white">
-              <i className="bi bi-person-circle me-2"></i>
-              Admin
-            </span>
+          <div className="d-flex align-items-center">
+            <button 
+              className="btn btn-link text-white p-2 me-2 d-lg-none" 
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              aria-label="Toggle sidebar"
+            >
+              <i className={`bi ${sidebarOpen ? 'bi-x-lg' : 'bi-list'} fs-5`}></i>
+            </button>
+            
+            <div className="d-none d-lg-flex align-items-center">
+              <button 
+                className="btn btn-link text-white p-2 me-3" 
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                title="Toggle Sidebar"
+              >
+                <i className="bi bi-layout-sidebar-inset fs-5"></i>
+              </button>
+              <span className="text-white">
+                <i className="bi bi-person-circle me-2"></i>
+                Admin
+              </span>
+            </div>
           </div>
         </div>
       </nav>
@@ -88,11 +105,6 @@ function App() {
 
       {/* Sidebar */}
       <div className={`sidebar ${sidebarOpen ? 'show' : ''}`}>
-        <div className="sidebar-header">
-          <h3>AC SUKOON</h3>
-          <p>Dashboard System</p>
-        </div>
-        
         <div className="sidebar-menu">
           <div className="menu-section">
             <h6>MAIN</h6>
