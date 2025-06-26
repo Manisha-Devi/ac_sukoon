@@ -12,17 +12,20 @@ function App() {
   const [expenseData, setExpenseData] = useState([]);
   const [totalEarnings, setTotalEarnings] = useState(30200);
   const [totalExpenses, setTotalExpenses] = useState(15600);
-  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth > 768) {
+      if (window.innerWidth >= 992) {
         setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
       }
     };
 
     window.addEventListener('resize', handleResize);
+    handleResize(); // Call once on mount
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -30,121 +33,145 @@ function App() {
   const profit = totalEarnings - totalExpenses;
   const profitPercentage = ((profit / totalExpenses) * 100).toFixed(1);
 
-  // Handle overlay click to close sidebar on mobile
-  const handleOverlayClick = () => {
-    if (window.innerWidth <= 768) {
+  // Handle menu item click
+  const handleMenuClick = (tab) => {
+    setActiveTab(tab);
+    if (window.innerWidth < 992) {
       setSidebarOpen(false);
     }
   };
 
   return (
-    <div className="dashboard-container">
-      {/* Mobile overlay */}
-      {sidebarOpen && window.innerWidth <= 768 && (
-        <div className="sidebar-overlay" onClick={handleOverlayClick}></div>
-      )}
-      
-      <button 
-        className={`mobile-toggle ${sidebarOpen ? 'open' : ''}`}
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-      >
-        <div className="mobile-icon">
-          <span></span>
-        </div>
-      </button>
-      
-      <div className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
-        <div className="sidebar-header">
-          <div className="header-content">
-            <h2>AC SUKOON</h2>
-            <p>Dashboard</p>
-          </div>
+    <div className="app">
+      {/* Bootstrap Navbar */}
+      <nav className="navbar navbar-expand-lg custom-navbar">
+        <div className="container-fluid">
           <button 
-            className="sidebar-toggle"
+            className="navbar-toggler d-lg-none" 
+            type="button"
             onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label="Toggle navigation"
           >
-            <div className="toggle-icon">
+            <span className="navbar-toggler-icon">
               <span></span>
-            </div>
+            </span>
           </button>
+          
+          <a className="navbar-brand mx-auto mx-lg-0" href="#">
+            <i className="bi bi-speedometer2 me-2"></i>
+            AC SUKOON
+          </a>
+
+          <div className="navbar-search d-none d-md-block">
+            <i className="bi bi-search"></i>
+            <input 
+              type="text" 
+              className="form-control" 
+              placeholder="Search..." 
+            />
+          </div>
+
+          <div className="d-none d-lg-flex align-items-center">
+            <span className="text-white">
+              <i className="bi bi-person-circle me-2"></i>
+              Admin
+            </span>
+          </div>
+        </div>
+      </nav>
+
+      {/* Sidebar Overlay */}
+      <div 
+        className={`sidebar-overlay ${sidebarOpen ? 'show' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      ></div>
+
+      {/* Sidebar */}
+      <div className={`sidebar ${sidebarOpen ? 'show' : ''}`}>
+        <div className="sidebar-header">
+          <h3>AC SUKOON</h3>
+          <p>Dashboard System</p>
         </div>
         
         <div className="sidebar-menu">
           <div className="menu-section">
-            <h4>PAGES</h4>
+            <h6>MAIN</h6>
             <button
               className={`menu-item ${activeTab === 'dashboard' ? 'active' : ''}`}
-              onClick={() => setActiveTab('dashboard')}
-              data-tooltip="Dashboard"
+              onClick={() => handleMenuClick('dashboard')}
             >
-              📊 {sidebarOpen && 'Dashboard'}
+              <i className="bi bi-speedometer2"></i>
+              Dashboard
             </button>
           </div>
 
           <div className="menu-section">
-            <h4>ENTRY</h4>
+            <h6>DATA ENTRY</h6>
             <button
               className={`menu-item ${activeTab === 'fare-entry' ? 'active' : ''}`}
-              onClick={() => setActiveTab('fare-entry')}
-              data-tooltip="Fare Collection"
+              onClick={() => handleMenuClick('fare-entry')}
             >
-              🎫 {sidebarOpen && 'Fare Collection'}
+              <i className="bi bi-ticket-perforated"></i>
+              Fare Collection
             </button>
             <button
               className={`menu-item ${activeTab === 'fuel-entry' ? 'active' : ''}`}
-              onClick={() => setActiveTab('fuel-entry')}
-              data-tooltip="Fuel Expense"
+              onClick={() => handleMenuClick('fuel-entry')}
             >
-              ⛽ {sidebarOpen && 'Fuel Expense'}
+              <i className="bi bi-fuel-pump"></i>
+              Fuel Expense
             </button>
             <button
               className={`menu-item ${activeTab === 'adda-fees' ? 'active' : ''}`}
-              onClick={() => setActiveTab('adda-fees')}
-              data-tooltip="Adda & Agent Fees"
+              onClick={() => handleMenuClick('adda-fees')}
             >
-              🏢 {sidebarOpen && 'Adda & Agent Fees'}
+              <i className="bi bi-building"></i>
+              Adda & Agent Fees
             </button>
             <button
               className={`menu-item ${activeTab === 'service-entry' ? 'active' : ''}`}
-              onClick={() => setActiveTab('service-entry')}
-              data-tooltip="Service Expense"
+              onClick={() => handleMenuClick('service-entry')}
             >
-              🔧 {sidebarOpen && 'Service Expense'}
+              <i className="bi bi-tools"></i>
+              Service Expense
             </button>
           </div>
 
           <div className="menu-section">
-            <h4>AUTOMATION</h4>
+            <h6>AUTOMATION</h6>
             <button
               className={`menu-item ${activeTab === 'bonus-calc' ? 'active' : ''}`}
-              onClick={() => setActiveTab('bonus-calc')}
-              data-tooltip="Bonus Calculator"
+              onClick={() => handleMenuClick('bonus-calc')}
             >
-              💰 {sidebarOpen && 'Bonus Calculator'}
+              <i className="bi bi-calculator"></i>
+              Bonus Calculator
             </button>
           </div>
 
           <div className="menu-section">
-            <h4>ANALYSIS</h4>
+            <h6>REPORTS</h6>
             <button
               className={`menu-item ${activeTab === 'analytics' ? 'active' : ''}`}
-              onClick={() => setActiveTab('analytics')}
-              data-tooltip="Analytics"
+              onClick={() => handleMenuClick('analytics')}
             >
-              📈 {sidebarOpen && 'Analytics'}
+              <i className="bi bi-graph-up"></i>
+              Analytics
             </button>
           </div>
         </div>
       </div>
 
-      <div className={`main-content ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
-        {activeTab === 'dashboard' && <Dashboard totalEarnings={totalEarnings} totalExpenses={totalExpenses} profit={profit} profitPercentage={profitPercentage} />}
-        {activeTab === 'fare-entry' && <FareEntry fareData={fareData} setFareData={setFareData} setTotalEarnings={setTotalEarnings} />}
-        {activeTab === 'fuel-entry' && <FuelEntry expenseData={expenseData} setExpenseData={setExpenseData} setTotalExpenses={setTotalExpenses} />}
-        {activeTab === 'adda-fees' && <AddaFeesEntry />}
-        {activeTab === 'service-entry' && <ServiceEntry />}
-        {activeTab === 'bonus-calc' && <BonusCalculator />}
-        {activeTab === 'analytics' && <Analytics />}
+      {/* Main Content */}
+      <div className="main-content">
+        <div className="container-fluid">
+          {activeTab === 'dashboard' && <Dashboard totalEarnings={totalEarnings} totalExpenses={totalExpenses} profit={profit} profitPercentage={profitPercentage} />}
+          {activeTab === 'fare-entry' && <FareEntry fareData={fareData} setFareData={setFareData} setTotalEarnings={setTotalEarnings} />}
+          {activeTab === 'fuel-entry' && <FuelEntry expenseData={expenseData} setExpenseData={setExpenseData} setTotalExpenses={setTotalExpenses} />}
+          {activeTab === 'adda-fees' && <AddaFeesEntry />}
+          {activeTab === 'service-entry' && <ServiceEntry />}
+          {activeTab === 'bonus-calc' && <BonusCalculator />}
+          {activeTab === 'analytics' && <Analytics />}
+        </div>
       </div>
     </div>
   );
@@ -175,79 +202,128 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage }) {
   };
 
   return (
-    <div className="dashboard-content">
-      <div className="dashboard-header">
-        <h1>Dashboard Overview</h1>
-        <div className="search-bar">
-          <input type="text" placeholder="Search..." />
+    <div className="fade-in">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="mb-0">
+          <i className="bi bi-speedometer2 me-2"></i>
+          Dashboard Overview
+        </h2>
+        <div className="d-none d-md-block">
+          <small className="text-muted">Last updated: {new Date().toLocaleDateString()}</small>
         </div>
       </div>
 
-      <div className="stats-grid">
-        <div className="stat-card earnings">
-          <div className="stat-icon">💰</div>
-          <div className="stat-info">
-            <h3>₹{totalEarnings.toLocaleString()}</h3>
-            <p>Total Earnings</p>
-            <div className="stat-change positive">+10% from last month</div>
-          </div>
-        </div>
-
-        <div className="stat-card expenses">
-          <div className="stat-icon">📊</div>
-          <div className="stat-info">
-            <h3>₹{totalExpenses.toLocaleString()}</h3>
-            <p>Total Expenses</p>
-            <div className="stat-change negative">+5% from last month</div>
-          </div>
-        </div>
-
-        <div className="stat-card profit">
-          <div className="stat-icon">📈</div>
-          <div className="stat-info">
-            <h3>₹{profit.toLocaleString()}</h3>
-            <p>Net Profit</p>
-            <div className="stat-change positive">+{profitPercentage}% profit margin</div>
-          </div>
-        </div>
-
-        <div className="stat-card routes">
-          <div className="stat-icon">🚌</div>
-          <div className="stat-info">
-            <h3>12</h3>
-            <p>Active Routes</p>
-            <div className="stat-change">Daily operations</div>
-          </div>
-        </div>
-      </div>
-
-      <div className="charts-grid">
-        <div className="chart-card">
-          <h3>Monthly Earnings Trend</h3>
-          <Line data={lineData} options={{ responsive: true, maintainAspectRatio: false }} />
-        </div>
-
-        <div className="chart-card">
-          <h3>Expense Breakdown</h3>
-          <Doughnut data={doughnutData} options={{ responsive: true, maintainAspectRatio: false }} />
-        </div>
-      </div>
-
-      <div className="recent-activity">
-        <h3>Recent Activity</h3>
-        <div className="activity-list">
-          <div className="activity-item">
-            <span className="activity-icon">🎫</span>
-            <div className="activity-details">
-              <p>Fare collected: Ghuraka to Bhaderwah - ₹2,500</p>
-              <small>2 hours ago</small>
+      {/* Stats Cards */}
+      <div className="row g-4 mb-4">
+        <div className="col-12 col-sm-6 col-lg-3">
+          <div className="stat-card">
+            <div className="card-body">
+              <div className="stat-icon earnings">
+                <i className="bi bi-currency-rupee"></i>
+              </div>
+              <h3 className="stat-value">₹{totalEarnings.toLocaleString()}</h3>
+              <p className="stat-label">Total Earnings</p>
+              <span className="stat-change positive">
+                <i className="bi bi-arrow-up"></i> +10% from last month
+              </span>
             </div>
           </div>
-          <div className="activity-item">
-            <span className="activity-icon">⛽</span>
-            <div className="activity-details">
-              <p>Fuel expense added - ₹3,200</p>
-              <small>4 hours ago</small>
+        </div>
+
+        <div className="col-12 col-sm-6 col-lg-3">
+          <div className="stat-card">
+            <div className="card-body">
+              <div className="stat-icon expenses">
+                <i className="bi bi-graph-down-arrow"></i>
+              </div>
+              <h3 className="stat-value">₹{totalExpenses.toLocaleString()}</h3>
+              <p className="stat-label">Total Expenses</p>
+              <span className="stat-change negative">
+                <i className="bi bi-arrow-up"></i> +5% from last month
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-12 col-sm-6 col-lg-3">
+          <div className="stat-card">
+            <div className="card-body">
+              <div className="stat-icon profit">
+                <i className="bi bi-graph-up-arrow"></i>
+              </div>
+              <h3 className="stat-value">₹{profit.toLocaleString()}</h3>
+              <p className="stat-label">Net Profit</p>
+              <span className="stat-change positive">
+                <i className="bi bi-arrow-up"></i> +{profitPercentage}% margin
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-12 col-sm-6 col-lg-3">
+          <div className="stat-card">
+            <div className="card-body">
+              <div className="stat-icon routes">
+                <i className="bi bi-bus-front"></i>
+              </div>
+              <h3 className="stat-value">12</h3>
+              <p className="stat-label">Active Routes</p>
+              <span className="stat-change">Daily operations</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Charts */}
+      <div className="row g-4 mb-4">
+        <div className="col-12 col-lg-8">
+          <div className="chart-card">
+            <h5>
+              <i className="bi bi-graph-up me-2"></i>
+              Monthly Earnings Trend
+            </h5>
+            <Line data={lineData} options={{ responsive: true, maintainAspectRatio: false }} />
+          </div>
+        </div>
+
+        <div className="col-12 col-lg-4">
+          <div className="chart-card">
+            <h5>
+              <i className="bi bi-pie-chart me-2"></i>
+              Expense Breakdown
+            </h5>
+            <Doughnut data={doughnutData} options={{ responsive: true, maintainAspectRatio: false }} />
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div className="row">
+        <div className="col-12">
+          <div className="card">
+            <div className="card-body">
+              <h5 className="card-title">
+                <i className="bi bi-clock-history me-2"></i>
+                Recent Activity
+              </h5>
+              <div className="activity-item">
+                <div className="activity-icon">
+                  <i className="bi bi-ticket-perforated"></i>
+                </div>
+                <div>
+                  <h6 className="mb-1">Fare collected: Ghuraka to Bhaderwah</h6>
+                  <p className="mb-0 text-muted">₹2,500 - 2 hours ago</p>
+                </div>
+              </div>
+              <div className="activity-item">
+                <div className="activity-icon">
+                  <i className="bi bi-fuel-pump"></i>
+                </div>
+                <div>
+                  <h6 className="mb-1">Fuel expense added</h6>
+                  <p className="mb-0 text-muted">₹3,200 - 4 hours ago</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -287,98 +363,116 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
   };
 
   return (
-    <div className="entry-section">
-      <h2>Route-wise Fare Collection</h2>
+    <div className="fade-in">
+      <h2 className="mb-4">
+        <i className="bi bi-ticket-perforated me-2"></i>
+        Route-wise Fare Collection
+      </h2>
       
-      <form onSubmit={handleSubmit} className="entry-form">
-        <div className="form-group">
-          <label>Route</label>
-          <select
-            value={formData.route}
-            onChange={(e) => setFormData({...formData, route: e.target.value})}
-            required
-          >
-            <option value="">Select Route</option>
-            {routes.map(route => (
-              <option key={route} value={route}>{route}</option>
-            ))}
-          </select>
-        </div>
+      <div className="form-card">
+        <h3>Add New Fare Entry</h3>
+        <form onSubmit={handleSubmit}>
+          <div className="row g-3">
+            <div className="col-12">
+              <label className="form-label">Route</label>
+              <select
+                className="form-select"
+                value={formData.route}
+                onChange={(e) => setFormData({...formData, route: e.target.value})}
+                required
+              >
+                <option value="">Select Route</option>
+                {routes.map(route => (
+                  <option key={route} value={route}>{route}</option>
+                ))}
+              </select>
+            </div>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label>Fare per Passenger (₹)</label>
-            <input
-              type="number"
-              value={formData.fare}
-              onChange={(e) => setFormData({...formData, fare: e.target.value})}
-              required
-            />
+            <div className="col-md-6">
+              <label className="form-label">Fare per Passenger (₹)</label>
+              <input
+                type="number"
+                className="form-control"
+                value={formData.fare}
+                onChange={(e) => setFormData({...formData, fare: e.target.value})}
+                required
+              />
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Number of Passengers</label>
+              <input
+                type="number"
+                className="form-control"
+                value={formData.passengers}
+                onChange={(e) => setFormData({...formData, passengers: e.target.value})}
+                required
+              />
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Date</label>
+              <input
+                type="date"
+                className="form-control"
+                value={formData.date}
+                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                required
+              />
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Time</label>
+              <input
+                type="time"
+                className="form-control"
+                value={formData.time}
+                onChange={(e) => setFormData({...formData, time: e.target.value})}
+                required
+              />
+            </div>
+
+            <div className="col-12">
+              <button type="submit" className="btn btn-primary">
+                <i className="bi bi-plus-circle me-2"></i>
+                Add Fare Entry
+              </button>
+            </div>
           </div>
-
-          <div className="form-group">
-            <label>Number of Passengers</label>
-            <input
-              type="number"
-              value={formData.passengers}
-              onChange={(e) => setFormData({...formData, passengers: e.target.value})}
-              required
-            />
-          </div>
-        </div>
-
-        <div className="form-row">
-          <div className="form-group">
-            <label>Date</label>
-            <input
-              type="date"
-              value={formData.date}
-              onChange={(e) => setFormData({...formData, date: e.target.value})}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Time</label>
-            <input
-              type="time"
-              value={formData.time}
-              onChange={(e) => setFormData({...formData, time: e.target.value})}
-              required
-            />
-          </div>
-        </div>
-
-        <button type="submit" className="submit-btn">Add Fare Entry</button>
-      </form>
-
-      <div className="entries-table">
-        <h3>Recent Fare Entries</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Route</th>
-              <th>Fare</th>
-              <th>Passengers</th>
-              <th>Total Amount</th>
-              <th>Date</th>
-              <th>Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            {fareData.map(entry => (
-              <tr key={entry.id}>
-                <td>{entry.route}</td>
-                <td>₹{entry.fare}</td>
-                <td>{entry.passengers}</td>
-                <td>₹{entry.totalAmount}</td>
-                <td>{entry.date}</td>
-                <td>{entry.time}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        </form>
       </div>
+
+      {fareData.length > 0 && (
+        <div className="table-card">
+          <h5>Recent Fare Entries</h5>
+          <div className="table-responsive">
+            <table className="table table-hover">
+              <thead>
+                <tr>
+                  <th>Route</th>
+                  <th>Fare</th>
+                  <th>Passengers</th>
+                  <th>Total Amount</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {fareData.map(entry => (
+                  <tr key={entry.id}>
+                    <td>{entry.route}</td>
+                    <td>₹{entry.fare}</td>
+                    <td>{entry.passengers}</td>
+                    <td>₹{entry.totalAmount}</td>
+                    <td>{entry.date}</td>
+                    <td>{entry.time}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -405,68 +499,82 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses }) {
   };
 
   return (
-    <div className="entry-section">
-      <h2>Fuel Expense Entry</h2>
+    <div className="fade-in">
+      <h2 className="mb-4">
+        <i className="bi bi-fuel-pump me-2"></i>
+        Fuel Expense Entry
+      </h2>
       
-      <form onSubmit={handleSubmit} className="entry-form">
-        <div className="form-row">
-          <div className="form-group">
-            <label>Amount (₹)</label>
-            <input
-              type="number"
-              value={formData.amount}
-              onChange={(e) => setFormData({...formData, amount: e.target.value})}
-              required
-            />
+      <div className="form-card">
+        <h3>Add Fuel Expense</h3>
+        <form onSubmit={handleSubmit}>
+          <div className="row g-3">
+            <div className="col-md-6">
+              <label className="form-label">Amount (₹)</label>
+              <input
+                type="number"
+                className="form-control"
+                value={formData.amount}
+                onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                required
+              />
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Liters</label>
+              <input
+                type="number"
+                step="0.01"
+                className="form-control"
+                value={formData.liters}
+                onChange={(e) => setFormData({...formData, liters: e.target.value})}
+                required
+              />
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Rate per Liter (₹)</label>
+              <input
+                type="number"
+                step="0.01"
+                className="form-control"
+                value={formData.rate}
+                onChange={(e) => setFormData({...formData, rate: e.target.value})}
+                required
+              />
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Pump Name</label>
+              <input
+                type="text"
+                className="form-control"
+                value={formData.pumpName}
+                onChange={(e) => setFormData({...formData, pumpName: e.target.value})}
+                required
+              />
+            </div>
+
+            <div className="col-12">
+              <label className="form-label">Date</label>
+              <input
+                type="date"
+                className="form-control"
+                value={formData.date}
+                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                required
+              />
+            </div>
+
+            <div className="col-12">
+              <button type="submit" className="btn btn-primary">
+                <i className="bi bi-plus-circle me-2"></i>
+                Add Fuel Entry
+              </button>
+            </div>
           </div>
-
-          <div className="form-group">
-            <label>Liters</label>
-            <input
-              type="number"
-              step="0.01"
-              value={formData.liters}
-              onChange={(e) => setFormData({...formData, liters: e.target.value})}
-              required
-            />
-          </div>
-        </div>
-
-        <div className="form-row">
-          <div className="form-group">
-            <label>Rate per Liter (₹)</label>
-            <input
-              type="number"
-              step="0.01"
-              value={formData.rate}
-              onChange={(e) => setFormData({...formData, rate: e.target.value})}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Pump Name</label>
-            <input
-              type="text"
-              value={formData.pumpName}
-              onChange={(e) => setFormData({...formData, pumpName: e.target.value})}
-              required
-            />
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label>Date</label>
-          <input
-            type="date"
-            value={formData.date}
-            onChange={(e) => setFormData({...formData, date: e.target.value})}
-            required
-          />
-        </div>
-
-        <button type="submit" className="submit-btn">Add Fuel Entry</button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }
@@ -481,62 +589,76 @@ function AddaFeesEntry() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission
     console.log('Adda/Agent fees:', formData);
     setFormData({ type: 'adda', amount: '', description: '', date: '' });
   };
 
   return (
-    <div className="entry-section">
-      <h2>Adda & Agent Fees</h2>
+    <div className="fade-in">
+      <h2 className="mb-4">
+        <i className="bi bi-building me-2"></i>
+        Adda & Agent Fees
+      </h2>
       
-      <form onSubmit={handleSubmit} className="entry-form">
-        <div className="form-group">
-          <label>Type</label>
-          <select
-            value={formData.type}
-            onChange={(e) => setFormData({...formData, type: e.target.value})}
-            required
-          >
-            <option value="adda">Adda Fees</option>
-            <option value="agent">Agent Fees</option>
-          </select>
-        </div>
+      <div className="form-card">
+        <h3>Add Fees Entry</h3>
+        <form onSubmit={handleSubmit}>
+          <div className="row g-3">
+            <div className="col-md-6">
+              <label className="form-label">Type</label>
+              <select
+                className="form-select"
+                value={formData.type}
+                onChange={(e) => setFormData({...formData, type: e.target.value})}
+                required
+              >
+                <option value="adda">Adda Fees</option>
+                <option value="agent">Agent Fees</option>
+              </select>
+            </div>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label>Amount (₹)</label>
-            <input
-              type="number"
-              value={formData.amount}
-              onChange={(e) => setFormData({...formData, amount: e.target.value})}
-              required
-            />
+            <div className="col-md-6">
+              <label className="form-label">Amount (₹)</label>
+              <input
+                type="number"
+                className="form-control"
+                value={formData.amount}
+                onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                required
+              />
+            </div>
+
+            <div className="col-12">
+              <label className="form-label">Date</label>
+              <input
+                type="date"
+                className="form-control"
+                value={formData.date}
+                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                required
+              />
+            </div>
+
+            <div className="col-12">
+              <label className="form-label">Description</label>
+              <textarea
+                className="form-control"
+                rows={3}
+                value={formData.description}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                required
+              />
+            </div>
+
+            <div className="col-12">
+              <button type="submit" className="btn btn-primary">
+                <i className="bi bi-plus-circle me-2"></i>
+                Add Entry
+              </button>
+            </div>
           </div>
-
-          <div className="form-group">
-            <label>Date</label>
-            <input
-              type="date"
-              value={formData.date}
-              onChange={(e) => setFormData({...formData, date: e.target.value})}
-              required
-            />
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label>Description</label>
-          <textarea
-            value={formData.description}
-            onChange={(e) => setFormData({...formData, description: e.target.value})}
-            rows={3}
-            required
-          />
-        </div>
-
-        <button type="submit" className="submit-btn">Add Entry</button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }
@@ -566,68 +688,84 @@ function ServiceEntry() {
   };
 
   return (
-    <div className="entry-section">
-      <h2>Service Expense Entry</h2>
+    <div className="fade-in">
+      <h2 className="mb-4">
+        <i className="bi bi-tools me-2"></i>
+        Service Expense Entry
+      </h2>
       
-      <form onSubmit={handleSubmit} className="entry-form">
-        <div className="form-group">
-          <label>Service Type</label>
-          <select
-            value={formData.serviceType}
-            onChange={(e) => setFormData({...formData, serviceType: e.target.value})}
-            required
-          >
-            <option value="">Select Service Type</option>
-            {serviceTypes.map(type => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
-        </div>
+      <div className="form-card">
+        <h3>Add Service Entry</h3>
+        <form onSubmit={handleSubmit}>
+          <div className="row g-3">
+            <div className="col-md-6">
+              <label className="form-label">Service Type</label>
+              <select
+                className="form-select"
+                value={formData.serviceType}
+                onChange={(e) => setFormData({...formData, serviceType: e.target.value})}
+                required
+              >
+                <option value="">Select Service Type</option>
+                {serviceTypes.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label>Amount (₹)</label>
-            <input
-              type="number"
-              value={formData.amount}
-              onChange={(e) => setFormData({...formData, amount: e.target.value})}
-              required
-            />
+            <div className="col-md-6">
+              <label className="form-label">Amount (₹)</label>
+              <input
+                type="number"
+                className="form-control"
+                value={formData.amount}
+                onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                required
+              />
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Date</label>
+              <input
+                type="date"
+                className="form-control"
+                value={formData.date}
+                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                required
+              />
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Mechanic/Service Center</label>
+              <input
+                type="text"
+                className="form-control"
+                value={formData.mechanic}
+                onChange={(e) => setFormData({...formData, mechanic: e.target.value})}
+                required
+              />
+            </div>
+
+            <div className="col-12">
+              <label className="form-label">Description</label>
+              <textarea
+                className="form-control"
+                rows={3}
+                value={formData.description}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                required
+              />
+            </div>
+
+            <div className="col-12">
+              <button type="submit" className="btn btn-primary">
+                <i className="bi bi-plus-circle me-2"></i>
+                Add Service Entry
+              </button>
+            </div>
           </div>
-
-          <div className="form-group">
-            <label>Date</label>
-            <input
-              type="date"
-              value={formData.date}
-              onChange={(e) => setFormData({...formData, date: e.target.value})}
-              required
-            />
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label>Mechanic/Service Center</label>
-          <input
-            type="text"
-            value={formData.mechanic}
-            onChange={(e) => setFormData({...formData, mechanic: e.target.value})}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Description</label>
-          <textarea
-            value={formData.description}
-            onChange={(e) => setFormData({...formData, description: e.target.value})}
-            rows={3}
-            required
-          />
-        </div>
-
-        <button type="submit" className="submit-btn">Add Service Entry</button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }
@@ -647,58 +785,76 @@ function BonusCalculator() {
   };
 
   return (
-    <div className="entry-section">
-      <h2>Bonus Calculator</h2>
+    <div className="fade-in">
+      <h2 className="mb-4">
+        <i className="bi bi-calculator me-2"></i>
+        Bonus Calculator
+      </h2>
       
-      <div className="bonus-calculator">
-        <div className="form-group">
-          <label>Period</label>
-          <select value={period} onChange={(e) => setPeriod(e.target.value)}>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-          </select>
-        </div>
+      <div className="form-card">
+        <h3>Calculate Driver Bonus</h3>
+        <div className="row g-3">
+          <div className="col-md-6">
+            <label className="form-label">Period</label>
+            <select 
+              className="form-select"
+              value={period} 
+              onChange={(e) => setPeriod(e.target.value)}
+            >
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label>Driver Name</label>
+          <div className="col-md-6">
+            <label className="form-label">Driver Name</label>
             <input
               type="text"
+              className="form-control"
               value={driverName}
               onChange={(e) => setDriverName(e.target.value)}
             />
           </div>
 
-          <div className="form-group">
-            <label>Base Salary (₹)</label>
+          <div className="col-md-6">
+            <label className="form-label">Base Salary (₹)</label>
             <input
               type="number"
+              className="form-control"
               value={baseSalary}
               onChange={(e) => setBaseSalary(e.target.value)}
             />
           </div>
-        </div>
 
-        <div className="form-group">
-          <label>Bonus Percentage (%)</label>
-          <input
-            type="number"
-            value={bonusPercentage}
-            onChange={(e) => setBonusPercentage(e.target.value)}
-          />
-        </div>
-
-        <button onClick={calculateBonus} className="calculate-btn">
-          Calculate Bonus
-        </button>
-
-        {calculatedBonus > 0 && (
-          <div className="bonus-result">
-            <h3>Calculated Bonus: ₹{calculatedBonus.toFixed(2)}</h3>
-            <p>Period: {period}</p>
-            <p>Driver: {driverName}</p>
+          <div className="col-md-6">
+            <label className="form-label">Bonus Percentage (%)</label>
+            <input
+              type="number"
+              className="form-control"
+              value={bonusPercentage}
+              onChange={(e) => setBonusPercentage(e.target.value)}
+            />
           </div>
-        )}
+
+          <div className="col-12">
+            <button onClick={calculateBonus} className="btn btn-primary">
+              <i className="bi bi-calculator me-2"></i>
+              Calculate Bonus
+            </button>
+          </div>
+
+          {calculatedBonus > 0 && (
+            <div className="col-12">
+              <div className="alert alert-success">
+                <h5 className="alert-heading">Calculated Bonus: ₹{calculatedBonus.toFixed(2)}</h5>
+                <p className="mb-0">
+                  <strong>Period:</strong> {period} | 
+                  <strong> Driver:</strong> {driverName}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -726,50 +882,83 @@ function Analytics() {
   };
 
   return (
-    <div className="analytics-section">
-      <h2>Profit & Loss Analysis</h2>
+    <div className="fade-in">
+      <h2 className="mb-4">
+        <i className="bi bi-graph-up me-2"></i>
+        Profit & Loss Analysis
+      </h2>
       
-      <div className="analytics-grid">
-        <div className="chart-card large">
-          <h3>Monthly Profit vs Loss</h3>
-          <Bar data={profitData} options={{ responsive: true, maintainAspectRatio: false }} />
+      <div className="row g-4 mb-4">
+        <div className="col-12 col-lg-8">
+          <div className="chart-card">
+            <h5>Monthly Profit vs Loss</h5>
+            <Bar data={profitData} options={{ responsive: true, maintainAspectRatio: false }} />
+          </div>
         </div>
 
-        <div className="analytics-summary">
-          <div className="summary-card profit">
-            <h4>Total Profit</h4>
-            <p>₹55,000</p>
-            <span className="trend positive">↗ 12% from last period</span>
-          </div>
+        <div className="col-12 col-lg-4">
+          <div className="row g-3">
+            <div className="col-12">
+              <div className="card text-center">
+                <div className="card-body">
+                  <h5 className="card-title text-success">Total Profit</h5>
+                  <h3 className="card-text">₹55,000</h3>
+                  <small className="text-success">
+                    <i className="bi bi-arrow-up"></i> 12% from last period
+                  </small>
+                </div>
+              </div>
+            </div>
 
-          <div className="summary-card loss">
-            <h4>Total Loss</h4>
-            <p>₹10,800</p>
-            <span className="trend negative">↘ 5% from last period</span>
-          </div>
+            <div className="col-12">
+              <div className="card text-center">
+                <div className="card-body">
+                  <h5 className="card-title text-danger">Total Loss</h5>
+                  <h3 className="card-text">₹10,800</h3>
+                  <small className="text-danger">
+                    <i className="bi bi-arrow-down"></i> 5% from last period
+                  </small>
+                </div>
+              </div>
+            </div>
 
-          <div className="summary-card net">
-            <h4>Net Profit</h4>
-            <p>₹44,200</p>
-            <span className="trend positive">↗ 18% from last period</span>
+            <div className="col-12">
+              <div className="card text-center">
+                <div className="card-body">
+                  <h5 className="card-title text-primary">Net Profit</h5>
+                  <h3 className="card-text">₹44,200</h3>
+                  <small className="text-success">
+                    <i className="bi bi-arrow-up"></i> 18% from last period
+                  </small>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="detailed-analysis">
-        <h3>Detailed Analysis</h3>
-        <div className="analysis-metrics">
-          <div className="metric">
-            <span className="metric-label">Best Performing Route:</span>
-            <span className="metric-value">Ghuraka to Bhaderwah</span>
-          </div>
-          <div className="metric">
-            <span className="metric-label">Average Daily Profit:</span>
-            <span className="metric-value">₹1,473</span>
-          </div>
-          <div className="metric">
-            <span className="metric-label">Fuel Efficiency:</span>
-            <span className="metric-value">12.5 km/L</span>
+      <div className="card">
+        <div className="card-body">
+          <h5 className="card-title">Detailed Analysis</h5>
+          <div className="row g-3">
+            <div className="col-md-4">
+              <div className="d-flex justify-content-between">
+                <span>Best Performing Route:</span>
+                <strong>Ghuraka to Bhaderwah</strong>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="d-flex justify-content-between">
+                <span>Average Daily Profit:</span>
+                <strong>₹1,473</strong>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="d-flex justify-content-between">
+                <span>Fuel Efficiency:</span>
+                <strong>12.5 km/L</strong>
+              </div>
+            </div>
           </div>
         </div>
       </div>
