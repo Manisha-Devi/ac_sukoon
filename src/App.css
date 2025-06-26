@@ -245,230 +245,7 @@ html, body {
   }
 }
 
-/* Dashboard Container */
-.dashboard-container {
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
-/* Dashboard Header */
-.dashboard-header {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
-  backdrop-filter: blur(20px);
-  border-radius: var(--border-radius);
-  padding: 2.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: var(--card-shadow);
-  position: relative;
-  overflow: hidden;
-}
-
-.dashboard-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: var(--primary-gradient);
-}
-
-.dashboard-title {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #2d3748;
-  margin: 0;
-  line-height: 1.2;
-}
-
-.dashboard-subtitle {
-  font-size: 1.1rem;
-  color: #64748b;
-  font-weight: 400;
-}
-
-.dashboard-date {
-  background: white;
-  padding: 0.75rem 1.25rem;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #667eea;
-  border: 1px solid rgba(102, 126, 234, 0.1);
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
-}
-
-/* Quick Stats Grid */
-.quick-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-}
-
-.quick-stat-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: var(--border-radius);
-  padding: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: var(--card-shadow);
-  transition: var(--transition);
-  position: relative;
-  overflow: hidden;
-}
-
-.quick-stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  transition: var(--transition);
-}
-
-.quick-stat-card:hover {
-  transform: translateY(-12px) scale(1.02);
-  box-shadow: var(--card-shadow-hover);
-}
-
-.quick-stat-card:hover::before {
-  height: 6px;
-}
-
-.quick-stat-card.earnings::before {
-  background: var(--warning-gradient);
-}
-
-.quick-stat-card.expenses::before {
-  background: var(--danger-gradient);
-}
-
-.quick-stat-card.profit::before {
-  background: var(--success-gradient);
-}
-
-.quick-stat-card.routes::before {
-  background: var(--info-gradient);
-}
-
-.stat-content {
-  display: flex;
-  align-items: flex-start;
-  gap: 1.5rem;
-}
-
-.stat-icon-wrapper {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.75rem;
-  color: white;
-  flex-shrink: 0;
-}
-
-.quick-stat-card.earnings .stat-icon-wrapper {
-  background: var(--warning-gradient);
-  box-shadow: 0 8px 24px rgba(254, 202, 87, 0.3);
-}
-
-.quick-stat-card.expenses .stat-icon-wrapper {
-  background: var(--danger-gradient);
-  box-shadow: 0 8px 24px rgba(255, 107, 107, 0.3);
-}
-
-.quick-stat-card.profit .stat-icon-wrapper {
-  background: var(--success-gradient);
-  box-shadow: 0 8px 24px rgba(38, 222, 129, 0.3);
-}
-
-.quick-stat-card.routes .stat-icon-wrapper {
-  background: var(--info-gradient);
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
-}
-
-.stat-details {
-  flex: 1;
-}
-
-.stat-number {
-  font-size: 2.25rem;
-  font-weight: 800;
-  color: #1a202c;
-  margin: 0 0 0.5rem 0;
-  line-height: 1;
-}
-
-.stat-title {
-  font-size: 0.95rem;
-  color: #64748b;
-  font-weight: 600;
-  margin: 0 0 1rem 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.stat-trend {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: 0.5rem 0.75rem;
-  border-radius: 8px;
-  width: fit-content;
-}
-
-.stat-trend.positive {
-  background: rgba(38, 222, 129, 0.1);
-  color: #20bf6b;
-}
-
-.stat-trend.negative {
-  background: rgba(255, 107, 107, 0.1);
-  color: #ee5a24;
-}
-
-.stat-trend.neutral {
-  background: rgba(102, 126, 234, 0.1);
-  color: #667eea;
-}
-
-.stat-chart-mini {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 80px;
-  height: 40px;
-  opacity: 0.1;
-}
-
-.mini-chart-line {
-  width: 100%;
-  height: 100%;
-  border-radius: 4px 0 20px 0;
-}
-
-.earnings-line {
-  background: linear-gradient(45deg, #feca57, #ff9ff3);
-}
-
-.expenses-line {
-  background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-}
-
-.profit-line {
-  background: linear-gradient(45deg, #26de81, #20bf6b);
-}
-
-.routes-line {
-  background: linear-gradient(45deg, #667eea, #764ba2);
-}
-
-/* Analytics Section */
+/* Analytics Section - General styles only */
 .analytics-section .analytics-card {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
@@ -511,7 +288,7 @@ html, body {
   position: relative;
 }
 
-/* Activity Card */
+/* Activity Card - General styles only */
 .activity-card {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
@@ -547,6 +324,7 @@ html, body {
   padding: 1rem 2rem 2rem 2rem;
 }
 
+/* General activity item styles for shared usage */
 .activity-item {
   display: flex;
   align-items: center;
@@ -557,30 +335,6 @@ html, body {
 
 .activity-item:last-child {
   border-bottom: none;
-}
-
-.activity-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  color: white;
-  flex-shrink: 0;
-}
-
-.activity-icon.success {
-  background: linear-gradient(135deg, #26de81 0%, #20bf6b 100%);
-}
-
-.activity-icon.danger {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-}
-
-.activity-icon.info {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .activity-content {
@@ -770,34 +524,29 @@ html, body {
   background: rgba(102, 126, 234, 0.05);
 }
 
-/* Activity Items */
-.activity-item {
-  display: flex;
-  align-items: center;
-  padding: 1rem;
-  background: white;
-  border-radius: 8px;
-  margin-bottom: 0.75rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e9ecef;
-  transition: transform 0.3s ease;
-}
-
-.activity-item:hover {
-  transform: translateX(5px);
-}
-
+/* Generic activity icon styles */
 .activity-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  background: var(--primary-gradient);
-  color: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 1rem;
   font-size: 1.25rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.activity-icon.success {
+  background: linear-gradient(135deg, #26de81 0%, #20bf6b 100%);
+}
+
+.activity-icon.danger {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+}
+
+.activity-icon.info {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 /* Responsive Design */
