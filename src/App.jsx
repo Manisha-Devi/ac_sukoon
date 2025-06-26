@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 
 // Import all components
-import Dashboard from "./components/Dashboard";
-import FareEntry from "./components/FareEntry";
-import FuelEntry from "./components/FuelEntry";
-import AddaFeesEntry from "./components/AddaFeesEntry";
-import ServiceEntry from "./components/ServiceEntry";
-import BonusCalculator from "./components/BonusCalculator";
-import Analytics from "./components/Analytics";
+import Dashboard from "./components/jsx/Dashboard";
+import FareEntry from "./components/jsx/FareEntry";
+import FuelEntry from "./components/jsx/FuelEntry";
+import AddaFeesEntry from "./components/jsx/AddaFeesEntry";
+import ServiceEntry from "./components/jsx/ServiceEntry";
+import BonusCalculator from "./components/jsx/BonusCalculator";
+import Analytics from "./components/jsx/Analytics";
 
 function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
