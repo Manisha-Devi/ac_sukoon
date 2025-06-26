@@ -66,22 +66,23 @@ function App() {
       {/* Bootstrap Navbar */}
       <nav className="navbar navbar-expand-lg custom-navbar">
         <div className="container-fluid">
-          <button
-            className="navbar-toggler d-lg-none"
-            type="button"
+          {/* Mobile Menu Button - Left Side */}
+          <button 
+            className="btn btn-link text-white p-2 d-lg-none" 
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            aria-label="Toggle navigation"
+            aria-label="Toggle sidebar"
           >
-            <span className="navbar-toggler-icon">
-              <span></span>
-            </span>
+            <i className={`bi ${sidebarOpen ? 'bi-x-lg' : 'bi-list'} fs-4`}></i>
           </button>
 
+          {/* Brand - Center on Mobile, Left on Desktop */}
           <a className="navbar-brand mx-auto mx-lg-0" href="#">
             <i className="bi bi-speedometer2 me-2"></i>
-            A/C SUKOON
+            <span className="d-none d-md-inline">AC SUKOON Dashboard System</span>
+            <span className="d-md-none">AC SUKOON</span>
           </a>
 
+          {/* Search Bar - Hidden on Small Screens */}
           <div className="navbar-search d-none d-md-block">
             <i className="bi bi-search"></i>
             <input
@@ -91,20 +92,12 @@ function App() {
             />
           </div>
 
+          {/* Right Side Controls */}
           <div className="d-flex align-items-center">
-            <button
-              className="btn btn-link text-white p-2 me-2 d-lg-none"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              aria-label="Toggle sidebar"
-            >
-              <i
-                className={`bi ${sidebarOpen ? "bi-x-lg" : "bi-list"} fs-5`}
-              ></i>
-            </button>
-
+            {/* Desktop Toggle and User Info */}
             <div className="d-none d-lg-flex align-items-center">
-              <button
-                className="btn btn-link text-white p-2 me-3"
+              <button 
+                className="btn btn-link text-white p-2 me-3" 
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 title="Toggle Sidebar"
               >
@@ -113,6 +106,13 @@ function App() {
               <span className="text-white">
                 <i className="bi bi-person-circle me-2"></i>
                 Admin
+              </span>
+            </div>
+
+            {/* Mobile User Icon */}
+            <div className="d-lg-none">
+              <span className="text-white">
+                <i className="bi bi-person-circle fs-5"></i>
               </span>
             </div>
           </div>

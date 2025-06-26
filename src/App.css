@@ -37,6 +37,9 @@ body {
   font-weight: 700;
   font-size: 1.5rem;
   letter-spacing: -0.5px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .navbar .btn-link {
@@ -428,6 +431,15 @@ body {
   .navbar-search {
     margin-top: 0.5rem;
   }
+
+  .custom-navbar .container-fluid {
+    padding: 0 0.75rem;
+  }
+
+  .navbar-brand {
+    font-size: 1.25rem;
+    max-width: calc(100vw - 120px);
+  }
 }
 
 @media (max-width: 575.98px) {
@@ -446,6 +458,22 @@ body {
   .chart-card {
     height: 300px;
     padding: 1rem;
+  }
+
+  .custom-navbar .container-fluid {
+    padding: 0 0.5rem;
+  }
+
+  .navbar-brand {
+    font-size: 1.1rem;
+    max-width: calc(100vw - 100px);
+  }
+
+  .navbar .btn-link {
+    padding: 0.5rem !important;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 8px;
   }
 }
 
