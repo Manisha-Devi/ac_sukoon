@@ -220,7 +220,13 @@ function App() {
               setTotalExpenses={setTotalExpenses}
             />
           )}
-          {activeTab === "adda-fees" && <AddaFeesEntry />}
+          {activeTab === "adda-fees" && (
+            <AddaFeesEntry
+              expenseData={expenseData}
+              setExpenseData={setExpenseData}
+              setTotalExpenses={setTotalExpenses}
+            />
+          )}
           {activeTab === "service-entry" && <ServiceEntry />}
           {activeTab === "bonus-calc" && <BonusCalculator />}
           {activeTab === "analytics" && <Analytics />}
