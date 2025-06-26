@@ -687,7 +687,7 @@ html, body {
   line-height: 1.4;
 }
 
-/* General Form Styling for other components */
+/* Form Styling */
 .form-card {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);

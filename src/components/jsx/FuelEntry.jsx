@@ -1,6 +1,5 @@
 
 import React, { useState } from "react";
-import "../css/FuelEntry.css";
 
 function FuelEntry({ expenseData, setExpenseData, setTotalExpenses }) {
   const [formData, setFormData] = useState({
