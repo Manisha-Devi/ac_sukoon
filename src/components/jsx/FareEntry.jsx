@@ -149,7 +149,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                     className={`nav-link ${activeTab === 'daily' ? 'active' : ''}`}
                     onClick={() => setActiveTab('daily')}
                   >
-                    <i className="bi bi-calendar-day"></i> Daily Collection
+                    <i className="bi bi-calendar-day"></i> Daily Fare
                   </button>
                 </li>
                 <li className="nav-item">
@@ -157,7 +157,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                     className={`nav-link ${activeTab === 'booking' ? 'active' : ''}`}
                     onClick={() => setActiveTab('booking')}
                   >
-                    <i className="bi bi-journal-bookmark"></i> Booking Entry
+                    <i className="bi bi-journal-bookmark"></i> Booking 
                   </button>
                 </li>
                 <li className="nav-item">
