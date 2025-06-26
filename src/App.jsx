@@ -7,6 +7,7 @@ import FareEntry from "./components/jsx/FareRecipt";
 import FuelEntry from "./components/jsx/FuelPayment";
 import AddaFeesEntry from "./components/jsx/FeesPayment";
 import ServiceEntry from "./components/jsx/ServicePayment";
+import OtherPayment from "./components/jsx/OtherPayment";
 import BonusCalculator from "./components/jsx/BonusCalculator";
 import Analytics from "./components/jsx/Analytics";
 
@@ -169,6 +170,13 @@ function App() {
               <i className="bi bi-credit-card"></i>
               Service Payment
             </button>
+            <button
+              className={`menu-item ${activeTab === "other-payment" ? "active" : ""}`}
+              onClick={() => handleMenuClick("other-payment")}
+            >
+              <i className="bi bi-credit-card"></i>
+              Other Payment
+            </button>
           </div>
 
           <div className="menu-section">
@@ -229,6 +237,13 @@ function App() {
           )}
           {activeTab === "service-entry" && (
             <ServiceEntry
+              expenseData={expenseData}
+              setExpenseData={setExpenseData}
+              setTotalExpenses={setTotalExpenses}
+            />
+          )}
+          {activeTab === "other-payment" && (
+            <OtherPayment
               expenseData={expenseData}
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
