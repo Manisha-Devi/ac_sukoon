@@ -400,6 +400,25 @@
   margin-left: 8px;
 }
 
+/* Invalid date input styling */
+.date-input.is-invalid {
+  border-color: #dc3545;
+  background: linear-gradient(145deg, #f8d7da, #ffffff);
+}
+
+.date-input.is-invalid:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.invalid-feedback {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875em;
+  color: #dc3545;
+}
+
 @media (max-width: 575.98px) {
   .fare-form-card {
     padding: 1.5rem;

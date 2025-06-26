@@ -24,6 +24,108 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
     reason: "",
   });
 
+  // Function to check if a date is disabled for daily collection
+  const isDailyDateDisabled = (selectedDate, selectedRoute) => {
+    if (!selectedDate || !selectedRoute) return false;
+    
+    // Check if same route and date already exists in daily entries
+    const existingDailyEntry = fareData.find(entry => 
+      entry.type === 'daily' && 
+      entry.date === selectedDate && 
+      entry.route === selectedRoute &&
+      (!editingEntry || entry.id !== editingEntry.id)
+    );
+    
+    // Check if date is used in booking entries
+    const existingBookingEntry = fareData.find(entry => 
+      entry.type === 'booking' && 
+      selectedDate >= entry.dateFrom && 
+      selectedDate <= entry.dateTo &&
+      (!editingEntry || entry.id !== editingEntry.id)
+    );
+    
+    // Check if date is used in off day entries
+    const existingOffEntry = fareData.find(entry => 
+      entry.type === 'off' && 
+      entry.date === selectedDate &&
+      (!editingEntry || entry.id !== editingEntry.id)
+    );
+    
+    return existingDailyEntry || existingBookingEntry || existingOffEntry;
+  };
+
+  // Function to check if a date is disabled for booking
+  const isBookingDateDisabled = (selectedDate) => {
+    if (!selectedDate) return false;
+    
+    // Check if date is used in daily entries
+    const existingDailyEntry = fareData.find(entry => 
+      entry.type === 'daily' && 
+      entry.date === selectedDate &&
+      (!editingEntry || entry.id !== editingEntry.id)
+    );
+    
+    // Check if date is used in off day entries
+    const existingOffEntry = fareData.find(entry => 
+      entry.type === 'off' && 
+      entry.date === selectedDate &&
+      (!editingEntry || entry.id !== editingEntry.id)
+    );
+    
+    return existingDailyEntry || existingOffEntry;
+  };
+
+  // Function to check if a date is disabled for off day
+  const isOffDayDateDisabled = (selectedDate) => {
+    if (!selectedDate) return false;
+    
+    // Check if date is used in daily entries
+    const existingDailyEntry = fareData.find(entry => 
+      entry.type === 'daily' && 
+      entry.date === selectedDate &&
+      (!editingEntry || entry.id !== editingEntry.id)
+    );
+    
+    // Check if date is used in booking entries
+    const existingBookingEntry = fareData.find(entry => 
+      entry.type === 'booking' && 
+      selectedDate >= entry.dateFrom && 
+      selectedDate <= entry.dateTo &&
+      (!editingEntry || entry.id !== editingEntry.id)
+    );
+    
+    return existingDailyEntry || existingBookingEntry;
+  };
+
+  // Function to get min date for date inputs (today)
+  const getTodayDate = () => {
+    return new Date().toISOString().split('T')[0];
+  };
+
+  // Function to get disabled dates for HTML date input
+  const getDisabledDatesForDaily = () => {
+    if (!dailyFareData.route) return [];
+    
+    const disabledDates = [];
+    fareData.forEach(entry => {
+      if (editingEntry && entry.id === editingEntry.id) return;
+      
+      if (entry.type === 'daily' && entry.route === dailyFareData.route) {
+        disabledDates.push(entry.date);
+      } else if (entry.type === 'booking') {
+        const startDate = new Date(entry.dateFrom);
+        const endDate = new Date(entry.dateTo);
+        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+          disabledDates.push(d.toISOString().split('T')[0]);
+        }
+      } else if (entry.type === 'off') {
+        disabledDates.push(entry.date);
+      }
+    });
+    
+    return disabledDates;
+  };
+
   const routes = [
     "Ghuraka to Bhaderwah",
     "Bhaderwah to Pul Doda", 
@@ -35,6 +137,13 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
 
   const handleDailySubmit = (e) => {
     e.preventDefault();
+    
+    // Validate if date is disabled
+    if (isDailyDateDisabled(dailyFareData.date, dailyFareData.route)) {
+      alert('This date is already taken for this route or conflicts with existing bookings/off days!');
+      return;
+    }
+    
     const cashAmount = parseInt(dailyFareData.cashAmount) || 0;
     const bankAmount = parseInt(dailyFareData.bankAmount) || 0;
     const totalAmount = cashAmount + bankAmount;
@@ -76,6 +185,19 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
 
   const handleBookingSubmit = (e) => {
     e.preventDefault();
+    
+    // Validate date range for conflicts
+    const startDate = new Date(bookingData.dateFrom);
+    const endDate = new Date(bookingData.dateTo);
+    
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      const dateStr = d.toISOString().split('T')[0];
+      if (isBookingDateDisabled(dateStr)) {
+        alert(`Date ${dateStr} conflicts with existing daily collection or off day entries!`);
+        return;
+      }
+    }
+    
     const cashAmount = parseInt(bookingData.cashAmount) || 0;
     const bankAmount = parseInt(bookingData.bankAmount) || 0;
     const totalAmount = cashAmount + bankAmount;
@@ -119,6 +241,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
 
   const handleOffDaySubmit = (e) => {
     e.preventDefault();
+    
+    // Validate if date is disabled
+    if (isOffDayDateDisabled(offDayData.date)) {
+      alert('This date conflicts with existing daily collection or booking entries!');
+      return;
+    }
     if (editingEntry) {
       // Update existing entry
       const updatedEntries = fareData.map(entry => 
@@ -293,13 +421,19 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                         <label className="form-label">Date</label>
                         <input
                           type="date"
-                          className="form-control date-input"
+                          className={`form-control date-input ${isDailyDateDisabled(dailyFareData.date, dailyFareData.route) ? 'is-invalid' : ''}`}
                           value={dailyFareData.date}
                           onChange={(e) => setDailyFareData({ ...dailyFareData, date: e.target.value })}
                           onFocus={(e) => e.target.showPicker && e.target.showPicker()}
                           placeholder="Select date"
+                          min={getTodayDate()}
                           required
                         />
+                        {isDailyDateDisabled(dailyFareData.date, dailyFareData.route) && (
+                          <div className="invalid-feedback">
+                            This date is already taken for this route or conflicts with existing entries!
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="row">
@@ -376,25 +510,37 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                         <label className="form-label">From Date</label>
                         <input
                           type="date"
-                          className="form-control date-input"
+                          className={`form-control date-input ${isBookingDateDisabled(bookingData.dateFrom) ? 'is-invalid' : ''}`}
                           value={bookingData.dateFrom}
                           onChange={(e) => setBookingData({ ...bookingData, dateFrom: e.target.value })}
                           onFocus={(e) => e.target.showPicker && e.target.showPicker()}
                           placeholder="Select from date"
+                          min={getTodayDate()}
                           required
                         />
+                        {isBookingDateDisabled(bookingData.dateFrom) && (
+                          <div className="invalid-feedback">
+                            This date conflicts with existing entries!
+                          </div>
+                        )}
                       </div>
                       <div className="col-md-6 mb-3">
                         <label className="form-label">To Date</label>
                         <input
                           type="date"
-                          className="form-control date-input"
+                          className={`form-control date-input ${isBookingDateDisabled(bookingData.dateTo) ? 'is-invalid' : ''}`}
                           value={bookingData.dateTo}
                           onChange={(e) => setBookingData({ ...bookingData, dateTo: e.target.value })}
                           onFocus={(e) => e.target.showPicker && e.target.showPicker()}
                           placeholder="Select to date"
+                          min={bookingData.dateFrom || getTodayDate()}
                           required
                         />
+                        {isBookingDateDisabled(bookingData.dateTo) && (
+                          <div className="invalid-feedback">
+                            This date conflicts with existing entries!
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="row">
@@ -458,13 +604,19 @@ function FareEntry({ fareData, setFareData, setTotalEarnings }) {
                         <label className="form-label">Date</label>
                         <input
                           type="date"
-                          className="form-control date-input"
+                          className={`form-control date-input ${isOffDayDateDisabled(offDayData.date) ? 'is-invalid' : ''}`}
                           value={offDayData.date}
                           onChange={(e) => setOffDayData({ ...offDayData, date: e.target.value })}
                           onFocus={(e) => e.target.showPicker && e.target.showPicker()}
                           placeholder="Select off day date"
+                          min={getTodayDate()}
                           required
                         />
+                        {isOffDayDateDisabled(offDayData.date) && (
+                          <div className="invalid-feedback">
+                            This date conflicts with existing entries!
+                          </div>
+                        )}
                       </div>
                       <div className="col-md-6 mb-3">
                         <label className="form-label">Reason</label>
