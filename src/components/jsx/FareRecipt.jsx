@@ -176,6 +176,13 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     e.preventDefault();
     setIsLoading(true);
 
+    // Check internet connection first
+    if (!navigator.onLine) {
+      alert("No internet connection. Please check your network and try again.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       // Validate if date is disabled
       if (isDailyDateDisabled(dailyFareData.date, dailyFareData.route)) {
@@ -197,7 +204,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           totalAmount: totalAmount,
           date: dailyFareData.date,
         }, fareData);
-        
+
         if (result.success) {
           setFareData(result.data);
           setTotalEarnings((prev) => prev - oldTotal + totalAmount);
@@ -213,9 +220,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           totalAmount: totalAmount,
           date: dailyFareData.date,
         };
-        
+
         const result = await dataService.addFareEntry(newEntryData, fareData);
-        
+
         if (result.success) {
           setFareData(result.data);
           setTotalEarnings((prev) => prev + totalAmount);
@@ -251,6 +258,13 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     e.preventDefault();
     setIsLoading(true);
 
+    // Check internet connection first
+    if (!navigator.onLine) {
+      alert("No internet connection. Please check your network and try again.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       // Validate date range for conflicts
       const startDate = new Date(bookingData.dateFrom);
@@ -279,7 +293,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           dateFrom: bookingData.dateFrom,
           dateTo: bookingData.dateTo,
         }, fareData);
-        
+
         if (result.success) {
           setFareData(result.data);
           setTotalEarnings((prev) => prev - oldTotal + totalAmount);
@@ -296,9 +310,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           dateFrom: bookingData.dateFrom,
           dateTo: bookingData.dateTo,
         };
-        
+
         const result = await dataService.addFareEntry(newEntryData, fareData);
-        
+
         if (result.success) {
           setFareData(result.data);
           setTotalEarnings((prev) => prev + totalAmount);
@@ -334,20 +348,27 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     e.preventDefault();
     setIsLoading(true);
 
+    // Check internet connection first
+    if (!navigator.onLine) {
+      alert("No internet connection. Please check your network and try again.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       // Validate if date is disabled
       if (isOffDayDateDisabled(offDayData.date)) {
         alert('This date conflicts with existing daily collection or booking entries!');
         return;
       }
-      
+
       if (editingEntry) {
         // Update existing entry using hybrid service
         const result = await dataService.updateFareEntry(editingEntry.id, {
           date: offDayData.date,
           reason: offDayData.reason
         }, fareData);
-        
+
         if (result.success) {
           setFareData(result.data);
           setEditingEntry(null);
@@ -362,9 +383,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           bankAmount: 0,
           totalAmount: 0,
         };
-        
+
         const result = await dataService.addFareEntry(newEntryData, fareData);
-        
+
         if (result.success) {
           setFareData(result.data);
         }
@@ -381,12 +402,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
   const handleDeleteEntry = async (entryId) => {
     try {
       const entryToDelete = fareData.find(entry => entry.id === entryId);
-      
+
       const result = await dataService.deleteFareEntry(entryId, fareData);
-      
+
       if (result.success) {
         setFareData(result.data);
-        
+
         if (entryToDelete && entryToDelete.totalAmount) {
           setTotalEarnings((prev) => prev - entryToDelete.totalAmount);
         }
@@ -727,9 +748,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       </div>
                     </div>
                     <div className="button-group">
-                      <button type="submit" className="btn fare-entry-btn">
-                        <i className={editingEntry ? "bi bi-check-circle" : "bi bi-journal-plus"}></i> 
-                        {editingEntry ? "Update Entry" : "Add Booking Entry"}
+                      <button type="submit" className="btn fare-entry-btn"  disabled={isLoading}>
+                        <i className={isLoading ? "bi bi-hourglass-split" : editingEntry ? "bi bi-check-circle" : "bi bi-journal-plus"}></i> 
+                        {isLoading ? "Saving..." : editingEntry ? "Update Entry" : "Add Booking Entry"}
                       </button>
                       {editingEntry && (
                         <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
@@ -777,9 +798,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       </div>
                     </div>
                     <div className="button-group">
-                      <button type="submit" className="btn fare-entry-btn">
-                        <i className="bi bi-check-circle"></i> 
-                        {editingEntry ? "Update Entry" : "Mark Day as Off"}
+                      <button type="submit" className="btn fare-entry-btn"  disabled={isLoading}>
+                        <i className={isLoading ? "bi bi-hourglass-split" : editingEntry ? "bi bi-check-circle" : "bi bi-check-circle"}></i> 
+                        {isLoading ? "Saving..." : editingEntry ? "Update Entry" : "Mark Day as Off"}
                       </button>
                       {editingEntry && (
                         <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
