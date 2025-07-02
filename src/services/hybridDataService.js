@@ -64,27 +64,36 @@ class HybridDataService {
         authService.getOffDays()
       ]);
 
-      // Combine all data with proper type
+      // Combine all data with proper type and sync status
       let allData = [];
 
       if (fareReceipts.success && fareReceipts.data) {
         allData = [...allData, ...fareReceipts.data.map(entry => ({
           ...entry,
-          type: 'daily'
+          type: 'daily',
+          synced: true, // Data from Google Sheets is already synced
+          pendingSync: false,
+          cloudId: entry.id // Store the Google Sheets ID as cloudId
         }))];
       }
 
       if (bookingEntries.success && bookingEntries.data) {
         allData = [...allData, ...bookingEntries.data.map(entry => ({
           ...entry,
-          type: 'booking'
+          type: 'booking',
+          synced: true, // Data from Google Sheets is already synced
+          pendingSync: false,
+          cloudId: entry.id // Store the Google Sheets ID as cloudId
         }))];
       }
 
       if (offDays.success && offDays.data) {
         allData = [...allData, ...offDays.data.map(entry => ({
           ...entry,
-          type: 'off'
+          type: 'off',
+          synced: true, // Data from Google Sheets is already synced
+          pendingSync: false,
+          cloudId: entry.id // Store the Google Sheets ID as cloudId
         }))];
       }
 
@@ -181,11 +190,16 @@ class HybridDataService {
       }
 
       if (result && result.success) {
-        // Mark as synced in localStorage
+        // Mark as synced in localStorage with proper cloudId mapping
         const currentData = localStorageService.loadFareData();
         const updatedData = currentData.map(item => 
           item.id === entry.id 
-            ? { ...item, synced: true, pendingSync: false, cloudId: result.entryId || entry.id }
+            ? { 
+                ...item, 
+                synced: true, 
+                pendingSync: false, 
+                cloudId: result.entryId || entry.id // Map the Google Sheets ID
+              }
             : item
         );
         localStorageService.saveFareData(updatedData);
@@ -247,14 +261,24 @@ class HybridDataService {
   // Sync update to Google Sheets
   async syncUpdateToGoogleSheets(entryId, updatedData, entryType) {
     try {
-      // Get the current entry to check if it has cloudId
+      // Get the current entry to check if it has been synced before
       const currentData = localStorageService.loadFareData();
       const existingEntry = currentData.find(entry => entry.id === entryId);
       
-      // Use cloudId if available, otherwise use local ID
-      const googleSheetsId = existingEntry?.cloudId || entryId;
+      if (!existingEntry) {
+        throw new Error('Entry not found in local storage');
+      }
+
+      // Use the original ID from the entry (either cloudId or the entry's own ID)
+      const googleSheetsId = existingEntry.cloudId || existingEntry.id;
       
-      console.log('🔄 Updating in Google Sheets with ID:', googleSheetsId, 'for local ID:', entryId);
+      console.log('🔄 Updating in Google Sheets with ID:', googleSheetsId, 'for local ID:', entryId, 'Entry synced:', existingEntry.synced);
+
+      // Only try to update if the entry was previously synced to Google Sheets
+      if (!existingEntry.synced && !existingEntry.cloudId) {
+        console.log('⚠️ Entry not yet synced to Google Sheets, skipping update sync');
+        return true; // Return true because local update was successful
+      }
 
       const result = await authService.updateFareEntry(googleSheetsId, updatedData, entryType);
 
@@ -317,10 +341,21 @@ class HybridDataService {
   // Sync delete to Google Sheets
   async syncDeleteToGoogleSheets(entryId, entryType, existingEntry) {
     try {
-      // Use cloudId if available, otherwise use local ID
-      const googleSheetsId = existingEntry?.cloudId || entryId;
+      if (!existingEntry) {
+        console.log('⚠️ No existing entry found for delete sync');
+        return true; // Entry was never synced, so consider it successful
+      }
+
+      // Only try to delete if the entry was previously synced to Google Sheets
+      if (!existingEntry.synced && !existingEntry.cloudId) {
+        console.log('⚠️ Entry not yet synced to Google Sheets, skipping delete sync');
+        return true; // Return true because local delete was successful
+      }
+
+      // Use cloudId if available, otherwise use the entry's original ID
+      const googleSheetsId = existingEntry.cloudId || existingEntry.id;
       
-      console.log('🗑️ Deleting from Google Sheets with ID:', googleSheetsId, 'for local ID:', entryId);
+      console.log('🗑️ Deleting from Google Sheets with ID:', googleSheetsId, 'for local ID:', entryId, 'Entry synced:', existingEntry.synced);
 
       const result = await authService.deleteFareEntry(googleSheetsId, entryType);
 
