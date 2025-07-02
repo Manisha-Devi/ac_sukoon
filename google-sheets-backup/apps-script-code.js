@@ -26,6 +26,12 @@ const SHEET_NAMES = {
 function doOptions(request) {
   const output = ContentService.createTextOutput('');
   output.setMimeType(ContentService.MimeType.TEXT);
+  output.setHeaders({
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Max-Age': '86400'
+  });
   return output;
 }
 
@@ -118,14 +124,24 @@ function doPost(e) {
         result = { success: false, error: 'Invalid action' };
     }
     
-    return ContentService
-      .createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON);
+    const output = ContentService.createTextOutput(JSON.stringify(result));
+    output.setMimeType(ContentService.MimeType.JSON);
+    output.setHeaders({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    });
+    return output;
       
   } catch (error) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ success: false, error: error.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
+    const errorOutput = ContentService.createTextOutput(JSON.stringify({ success: false, error: error.toString() }));
+    errorOutput.setMimeType(ContentService.MimeType.JSON);
+    errorOutput.setHeaders({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    });
+    return errorOutput;
   }
 }
 
@@ -183,8 +199,11 @@ function doGet(e) {
   
   const output = ContentService.createTextOutput(JSON.stringify(result));
   output.setMimeType(ContentService.MimeType.JSON);
-  
-  // Add CORS headers
+  output.setHeaders({
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+  });
   return output;
   
   } catch (error) {
@@ -193,6 +212,11 @@ function doGet(e) {
       error: 'doGet Error: ' + error.toString() 
     }));
     errorOutput.setMimeType(ContentService.MimeType.JSON);
+    errorOutput.setHeaders({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    });
     return errorOutput;
   }
 }
