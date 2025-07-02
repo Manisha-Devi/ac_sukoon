@@ -1,6 +1,7 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../css/Login.css";
+import authService from "../../services/authService";
 
 function Login({ onLogin }) {
   const [formData, setFormData] = useState({
@@ -11,6 +12,16 @@ function Login({ onLogin }) {
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [dbConnected, setDbConnected] = useState(null);
+
+  // Test database connection on component mount
+  useEffect(() => {
+    const testConnection = async () => {
+      const connected = await authService.testConnection();
+      setDbConnected(connected);
+    };
+    testConnection();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -53,33 +64,33 @@ function Login({ onLogin }) {
     
     setIsLoading(true);
     
-    // Demo credentials for different user types
-    const validCredentials = {
-      Admin: { username: "admin", password: "1234" },
-      Manager: { username: "manager", password: "1234" },
-      Conductor: { username: "conductor", password: "1234" }
-    };
-    
-    // Simulate API call with credential validation
-    setTimeout(() => {
+    try {
+      // Authenticate against Google Sheets database
+      const authResult = await authService.authenticateUser(
+        formData.username,
+        formData.password,
+        formData.userType
+      );
+      
       setIsLoading(false);
       
-      const expectedCreds = validCredentials[formData.userType];
-      
-      if (formData.username === expectedCreds.username && formData.password === expectedCreds.password) {
+      if (authResult.success) {
         // Valid credentials - login successful
-        onLogin({
-          username: formData.username,
-          userType: formData.userType,
-          isAuthenticated: true
-        });
+        console.log('✅ Login successful for user:', authResult.user.fullName);
+        onLogin(authResult.user);
       } else {
         // Invalid credentials
         setErrors({
-          password: "Invalid username or password for selected user type"
+          password: authResult.message || "Invalid username or password for selected user type"
         });
       }
-    }, 1000);
+    } catch (error) {
+      setIsLoading(false);
+      console.error('❌ Login error:', error);
+      setErrors({
+        password: "Authentication service error. Please try again."
+      });
+    }
   };
 
   const userTypeInfo = {
@@ -210,14 +221,25 @@ function Login({ onLogin }) {
                       </button>
                     </form>
 
-                    {/* Demo Credentials */}
+                    {/* Database Connection Status */}
                     <div className="demo-info mt-4">
-                      <div className="alert alert-info py-2">
-                        <i className="bi bi-info-circle me-2"></i>
+                      <div className={`alert py-2 ${dbConnected === true ? 'alert-success' : dbConnected === false ? 'alert-danger' : 'alert-warning'}`}>
+                        <i className={`bi ${dbConnected === true ? 'bi-check-circle' : dbConnected === false ? 'bi-x-circle' : 'bi-clock'} me-2`}></i>
                         <small>
-                          <strong>Demo Credentials:</strong> admin/1234, manager/1234, conductor/1234
+                          <strong>Database Status:</strong> 
+                          {dbConnected === true && ' Connected to Google Sheets'}
+                          {dbConnected === false && ' Database connection failed'}
+                          {dbConnected === null && ' Connecting to database...'}
                         </small>
                       </div>
+                      {dbConnected === false && (
+                        <div className="alert alert-warning py-2 mt-2">
+                          <i className="bi bi-exclamation-triangle me-2"></i>
+                          <small>
+                            <strong>Note:</strong> Please configure the Google Apps Script Web App URL in authService.js
+                          </small>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
