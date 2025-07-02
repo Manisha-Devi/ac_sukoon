@@ -71,9 +71,8 @@ class HybridDataService {
         allData = [...allData, ...fareReceipts.data.map(entry => ({
           ...entry,
           type: 'daily',
-          synced: true, // Data from Google Sheets is already synced
-          pendingSync: false,
-          cloudId: entry.id // Store the Google Sheets ID as cloudId
+          synced: true,
+          pendingSync: false
         }))];
       }
 
@@ -81,9 +80,8 @@ class HybridDataService {
         allData = [...allData, ...bookingEntries.data.map(entry => ({
           ...entry,
           type: 'booking',
-          synced: true, // Data from Google Sheets is already synced
-          pendingSync: false,
-          cloudId: entry.id // Store the Google Sheets ID as cloudId
+          synced: true,
+          pendingSync: false
         }))];
       }
 
@@ -91,9 +89,8 @@ class HybridDataService {
         allData = [...allData, ...offDays.data.map(entry => ({
           ...entry,
           type: 'off',
-          synced: true, // Data from Google Sheets is already synced
-          pendingSync: false,
-          cloudId: entry.id // Store the Google Sheets ID as cloudId
+          synced: true,
+          pendingSync: false
         }))];
       }
 
@@ -161,7 +158,7 @@ class HybridDataService {
       // Add to appropriate Google Sheet based on type
       if (entry.type === 'daily') {
         result = await authService.addFareReceipt({
-          id: entry.id, // Send local ID to Google Sheets
+          id: entry.id, // Use local ID directly
           date: entry.date,
           route: entry.route,
           cashAmount: entry.cashAmount || 0,
@@ -171,7 +168,7 @@ class HybridDataService {
         });
       } else if (entry.type === 'booking') {
         result = await authService.addBookingEntry({
-          id: entry.id, // Send local ID to Google Sheets
+          id: entry.id, // Use local ID directly
           bookingDetails: entry.bookingDetails,
           dateFrom: entry.dateFrom,
           dateTo: entry.dateTo,
@@ -182,7 +179,7 @@ class HybridDataService {
         });
       } else if (entry.type === 'off') {
         result = await authService.addOffDay({
-          id: entry.id, // Send local ID to Google Sheets
+          id: entry.id, // Use local ID directly
           date: entry.date,
           reason: entry.reason,
           submittedBy: 'driver'
@@ -190,22 +187,21 @@ class HybridDataService {
       }
 
       if (result && result.success) {
-        // Mark as synced in localStorage with proper cloudId mapping
+        // Mark as synced in localStorage
         const currentData = localStorageService.loadFareData();
         const updatedData = currentData.map(item => 
           item.id === entry.id 
             ? { 
                 ...item, 
                 synced: true, 
-                pendingSync: false, 
-                cloudId: result.entryId || entry.id // Map the Google Sheets ID
+                pendingSync: false
               }
             : item
         );
         localStorageService.saveFareData(updatedData);
         localStorageService.removePendingSync(entry.id);
 
-        console.log('✅ Entry synced to Google Sheets:', entry.id, 'CloudID:', result.entryId || entry.id);
+        console.log('✅ Entry synced to Google Sheets:', entry.id);
         return true;
       } else {
         throw new Error(result?.error || 'Failed to sync to Google Sheets');
@@ -221,6 +217,12 @@ class HybridDataService {
   async updateFareEntry(entryId, updatedData, currentFareData) {
     try {
       console.log('📝 Updating entry with hybrid system...');
+
+      // Find the existing entry
+      const existingEntry = currentFareData.find(entry => entry.id === entryId);
+      if (!existingEntry) {
+        throw new Error('Entry not found');
+      }
 
       // Update in localStorage immediately
       const updatedFareData = currentFareData.map(entry => 
@@ -241,13 +243,10 @@ class HybridDataService {
       console.log('💾 Entry updated in localStorage immediately');
 
       // Try to sync to Google Sheets in background if online
-      if (this.isOnline) {
-        const existingEntry = currentFareData.find(entry => entry.id === entryId);
-        if (existingEntry) {
-          this.syncUpdateToGoogleSheets(entryId, updatedData, existingEntry.type).catch(error => {
-            console.error('⚠️ Background update sync failed:', error);
-          });
-        }
+      if (this.isOnline && existingEntry.synced) {
+        this.syncUpdateToGoogleSheets(entryId, updatedData, existingEntry.type).catch(error => {
+          console.error('⚠️ Background update sync failed:', error);
+        });
       }
 
       return { success: true, data: updatedFareData };
@@ -261,29 +260,13 @@ class HybridDataService {
   // Sync update to Google Sheets
   async syncUpdateToGoogleSheets(entryId, updatedData, entryType) {
     try {
-      // Get the current entry to check if it has been synced before
-      const currentData = localStorageService.loadFareData();
-      const existingEntry = currentData.find(entry => entry.id === entryId);
-      
-      if (!existingEntry) {
-        throw new Error('Entry not found in local storage');
-      }
+      console.log('🔄 Updating in Google Sheets with ID:', entryId);
 
-      // Use the original ID from the entry (either cloudId or the entry's own ID)
-      const googleSheetsId = existingEntry.cloudId || existingEntry.id;
-      
-      console.log('🔄 Updating in Google Sheets with ID:', googleSheetsId, 'for local ID:', entryId, 'Entry synced:', existingEntry.synced);
-
-      // Only try to update if the entry was previously synced to Google Sheets
-      if (!existingEntry.synced && !existingEntry.cloudId) {
-        console.log('⚠️ Entry not yet synced to Google Sheets, skipping update sync');
-        return true; // Return true because local update was successful
-      }
-
-      const result = await authService.updateFareEntry(googleSheetsId, updatedData, entryType);
+      const result = await authService.updateFareEntry(entryId, updatedData, entryType);
 
       if (result && result.success) {
         // Mark as synced in localStorage
+        const currentData = localStorageService.loadFareData();
         const updatedLocalData = currentData.map(item => 
           item.id === entryId 
             ? { ...item, synced: true, pendingSync: false }
@@ -322,7 +305,7 @@ class HybridDataService {
 
       // Try to sync deletion to Google Sheets in background if online
       if (this.isOnline && existingEntry.synced) {
-        this.syncDeleteToGoogleSheets(entryId, existingEntry.type, existingEntry).catch(error => {
+        this.syncDeleteToGoogleSheets(entryId, existingEntry.type).catch(error => {
           console.error('⚠️ Background delete sync failed:', error);
         });
       }
@@ -339,25 +322,11 @@ class HybridDataService {
   }
 
   // Sync delete to Google Sheets
-  async syncDeleteToGoogleSheets(entryId, entryType, existingEntry) {
+  async syncDeleteToGoogleSheets(entryId, entryType) {
     try {
-      if (!existingEntry) {
-        console.log('⚠️ No existing entry found for delete sync');
-        return true; // Entry was never synced, so consider it successful
-      }
+      console.log('🗑️ Deleting from Google Sheets with ID:', entryId);
 
-      // Only try to delete if the entry was previously synced to Google Sheets
-      if (!existingEntry.synced && !existingEntry.cloudId) {
-        console.log('⚠️ Entry not yet synced to Google Sheets, skipping delete sync');
-        return true; // Return true because local delete was successful
-      }
-
-      // Use cloudId if available, otherwise use the entry's original ID
-      const googleSheetsId = existingEntry.cloudId || existingEntry.id;
-      
-      console.log('🗑️ Deleting from Google Sheets with ID:', googleSheetsId, 'for local ID:', entryId, 'Entry synced:', existingEntry.synced);
-
-      const result = await authService.deleteFareEntry(googleSheetsId, entryType);
+      const result = await authService.deleteFareEntry(entryId, entryType);
 
       if (result && result.success) {
         console.log('✅ Delete synced to Google Sheets:', entryId);
