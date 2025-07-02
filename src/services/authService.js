@@ -177,6 +177,7 @@ class AuthService {
         redirect: 'follow',
         body: JSON.stringify({
           action: 'addBookingEntry',
+          id: data.id,
           bookingDetails: data.bookingDetails,
           dateFrom: data.dateFrom,
           dateTo: data.dateTo,
@@ -192,6 +193,171 @@ class AuthService {
       return result;
     } catch (error) {
       console.error('❌ Error adding booking entry:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Update Fare Receipt
+  async updateFareReceipt(data) {
+    try {
+      console.log('📝 Updating fare receipt in Google Sheets:', data);
+      
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'updateFareReceipt',
+          entryId: data.entryId,
+          updatedData: data.updatedData
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Fare receipt update response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating fare receipt:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Update Booking Entry
+  async updateBookingEntry(data) {
+    try {
+      console.log('📝 Updating booking entry in Google Sheets:', data);
+      
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'updateBookingEntry',
+          entryId: data.entryId,
+          updatedData: data.updatedData
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Booking entry update response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating booking entry:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Update Off Day
+  async updateOffDay(data) {
+    try {
+      console.log('📝 Updating off day in Google Sheets:', data);
+      
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'updateOffDay',
+          entryId: data.entryId,
+          updatedData: data.updatedData
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Off day update response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating off day:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Delete Fare Receipt
+  async deleteFareReceipt(data) {
+    try {
+      console.log('🗑️ Deleting fare receipt in Google Sheets:', data);
+      
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'deleteFareReceipt',
+          entryId: data.entryId
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Fare receipt delete response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error deleting fare receipt:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Delete Booking Entry
+  async deleteBookingEntry(data) {
+    try {
+      console.log('🗑️ Deleting booking entry in Google Sheets:', data);
+      
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'deleteBookingEntry',
+          entryId: data.entryId
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Booking entry delete response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error deleting booking entry:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Delete Off Day
+  async deleteOffDay(data) {
+    try {
+      console.log('🗑️ Deleting off day in Google Sheets:', data);
+      
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'deleteOffDay',
+          entryId: data.entryId
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Off day delete response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error deleting off day:', error);
       return { success: false, error: error.message };
     }
   }

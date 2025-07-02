@@ -262,7 +262,25 @@ class HybridDataService {
     try {
       console.log('🔄 Updating in Google Sheets with ID:', entryId);
 
-      const result = await authService.updateFareEntry(entryId, updatedData, entryType);
+      let result;
+
+      // Call appropriate update function based on entry type
+      if (entryType === 'daily') {
+        result = await authService.updateFareReceipt({
+          entryId: entryId,
+          updatedData: updatedData
+        });
+      } else if (entryType === 'booking') {
+        result = await authService.updateBookingEntry({
+          entryId: entryId,
+          updatedData: updatedData
+        });
+      } else if (entryType === 'off') {
+        result = await authService.updateOffDay({
+          entryId: entryId,
+          updatedData: updatedData
+        });
+      }
 
       if (result && result.success) {
         // Mark as synced in localStorage
@@ -326,7 +344,22 @@ class HybridDataService {
     try {
       console.log('🗑️ Deleting from Google Sheets with ID:', entryId);
 
-      const result = await authService.deleteFareEntry(entryId, entryType);
+      let result;
+
+      // Call appropriate delete function based on entry type
+      if (entryType === 'daily') {
+        result = await authService.deleteFareReceipt({
+          entryId: entryId
+        });
+      } else if (entryType === 'booking') {
+        result = await authService.deleteBookingEntry({
+          entryId: entryId
+        });
+      } else if (entryType === 'off') {
+        result = await authService.deleteOffDay({
+          entryId: entryId
+        });
+      }
 
       if (result && result.success) {
         console.log('✅ Delete synced to Google Sheets:', entryId);
@@ -353,8 +386,24 @@ class HybridDataService {
       const pendingEntries = currentData.filter(entry => pendingIds.includes(entry.id));
 
       for (const entry of pendingEntries) {
-        if (!entry.synced) {
-          await this.syncSingleEntry(entry);
+        if (!entry.synced && entry.pendingSync) {
+          // Check if this is a new entry (no previous sync) or an update
+          if (!entry.lastModified) {
+            // New entry - add to Google Sheets
+            await this.syncSingleEntry(entry);
+          } else {
+            // Updated entry - sync the update
+            const updatedData = {
+              date: entry.date,
+              route: entry.route,
+              totalAmount: entry.totalAmount,
+              bookingDetails: entry.bookingDetails,
+              dateFrom: entry.dateFrom,
+              dateTo: entry.dateTo,
+              reason: entry.reason
+            };
+            await this.syncUpdateToGoogleSheets(entry.id, updatedData, entry.type);
+          }
           // Small delay to avoid overwhelming the API
           await new Promise(resolve => setTimeout(resolve, 500));
         }
