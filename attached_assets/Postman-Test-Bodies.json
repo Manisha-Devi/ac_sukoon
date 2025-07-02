@@ -14,6 +14,19 @@
     }
   },
 
+  "test_connection": {
+    "method": "POST",
+    "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "action": "test"
+    }
+  },
+
+  "=== FARE RECEIPTS - CRUD OPERATIONS ===": "Daily Fare Collection",
+
   "add_fare_receipt": {
     "method": "POST",
     "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
@@ -41,6 +54,37 @@
       "action": "getFareReceipts"
     }
   },
+
+  "update_fare_receipt": {
+    "method": "POST",
+    "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "action": "updateFareReceipt",
+      "entryId": "1705123200000",
+      "updatedData": {
+        "date": "2024-01-16",
+        "route": "Bhaderwah to Pul Doda",
+        "totalAmount": 600
+      }
+    }
+  },
+
+  "delete_fare_receipt": {
+    "method": "POST",
+    "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "action": "deleteFareReceipt",
+      "entryId": "1705123200000"
+    }
+  },
+
+  "=== BOOKING ENTRIES - CRUD OPERATIONS ===": "Special Booking Collection",
 
   "add_booking_entry": {
     "method": "POST",
@@ -71,6 +115,38 @@
     }
   },
 
+  "update_booking_entry": {
+    "method": "POST",
+    "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "action": "updateBookingEntry",
+      "entryId": "1705555200000",
+      "updatedData": {
+        "bookingDetails": "Updated wedding booking to Delhi",
+        "dateFrom": "2024-01-21",
+        "dateTo": "2024-01-23",
+        "totalAmount": 18000
+      }
+    }
+  },
+
+  "delete_booking_entry": {
+    "method": "POST",
+    "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "action": "deleteBookingEntry",
+      "entryId": "1705555200000"
+    }
+  },
+
+  "=== OFF DAYS - CRUD OPERATIONS ===": "Vehicle Off Day Records",
+
   "add_off_day": {
     "method": "POST",
     "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
@@ -96,16 +172,68 @@
     }
   },
 
-  "test_connection": {
+  "update_off_day": {
     "method": "POST",
     "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
     "headers": {
       "Content-Type": "application/json"
     },
     "body": {
-      "action": "test"
+      "action": "updateOffDay",
+      "entryId": "1706140800000",
+      "updatedData": {
+        "date": "2024-01-26",
+        "reason": "Vehicle maintenance"
+      }
     }
   },
+
+  "delete_off_day": {
+    "method": "POST",
+    "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "action": "deleteOffDay",
+      "entryId": "1706140800000"
+    }
+  },
+
+  "=== LEGACY FUNCTIONS ===": "For backward compatibility",
+
+  "legacy_update_fare_entry": {
+    "method": "POST",
+    "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "action": "updateFareEntry",
+      "entryId": "1705123200000",
+      "entryType": "daily",
+      "updatedData": {
+        "date": "2024-01-17",
+        "route": "Pul Doda to Thatri",
+        "totalAmount": 750
+      }
+    }
+  },
+
+  "legacy_delete_fare_entry": {
+    "method": "POST",
+    "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "action": "deleteFareEntry",
+      "entryId": "1705123200000",
+      "entryType": "booking"
+    }
+  },
+
+  "=== ADMIN FUNCTIONS ===": "User management",
 
   "get_all_users": {
     "method": "POST",
