@@ -469,47 +469,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                 <div>
                   <h2><i className="bi bi-receipt"></i> Fare Receipt Entry</h2>
                   <p>Record your daily earnings and bookings (Income)</p>
-                  <div className="hybrid-features">
-                    <small>
-                      <i className="bi bi-lightning"></i> Instant Save 
-                      <i className="bi bi-cloud-arrow-up ms-2"></i> Auto Sync 
-                      <i className="bi bi-wifi-off ms-2"></i> Works Offline
-                    </small>
-                  </div>
+                  
                 </div>
                 <div className="sync-status">
-                  <div className={`sync-indicator ${syncStatus.isOnline ? 'online' : 'offline'}`}>
-                    <i className={`bi ${syncStatus.isOnline ? 'bi-wifi' : 'bi-wifi-off'}`}></i>
-                    <span>{syncStatus.isOnline ? 'Online' : 'Offline Mode'}</span>
+                  <div className={`simple-sync-indicator ${syncStatus.pendingSync > 0 || syncStatus.syncInProgress ? 'pending' : 'synced'}`}>
+                    <i className={`bi ${syncStatus.pendingSync > 0 || syncStatus.syncInProgress ? 'bi-arrow-repeat' : 'bi-check-circle'}`}></i>
                   </div>
-                  {syncStatus.pendingSync > 0 && (
-                    <div className="pending-sync">
-                      <i className="bi bi-clock"></i>
-                      <span>{syncStatus.pendingSync} pending sync</span>
-                    </div>
-                  )}
-                  {syncStatus.syncInProgress && (
-                    <div className="sync-progress">
-                      <i className="bi bi-arrow-repeat"></i>
-                      <span>Syncing...</span>
-                    </div>
-                  )}
-                  {syncStatus.isOnline && (
-                    <button 
-                      className="btn btn-sm sync-btn" 
-                      onClick={() => hybridDataService.forceSync()}
-                      disabled={isLoading || syncStatus.syncInProgress}
-                    >
-                      <i className={`bi ${syncStatus.syncInProgress ? 'bi-hourglass-split' : 'bi-arrow-repeat'}`}></i>
-                      {syncStatus.syncInProgress ? 'Syncing...' : 'Force Sync'}
-                    </button>
-                  )}
-                  {syncStatus.lastSync && (
-                    <div className="last-sync">
-                      <i className="bi bi-clock-history"></i>
-                      <small>Last sync: {new Date(syncStatus.lastSync).toLocaleString('en-IN')}</small>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
