@@ -22,12 +22,83 @@
 }
 
 .fare-header {
-  text-align: center;
   margin-bottom: 30px;
   padding: 20px;
   background: rgba(255, 255, 255, 0.9);
   border-radius: var(--border-radius);
   box-shadow: var(--card-shadow);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.header-content > div:first-child {
+  text-align: center;
+  flex: 1;
+}
+
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sync-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.sync-indicator.online {
+  background: #d4edda;
+  color: #155724;
+}
+
+.sync-indicator.offline {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.pending-sync {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background: #fff3cd;
+  color: #856404;
+  border-radius: 15px;
+  font-size: 0.85rem;
+}
+
+.sync-btn {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 5px 15px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.sync-btn:hover {
+  opacity: 0.9;
+}
+
+.sync-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .fare-header h2 {

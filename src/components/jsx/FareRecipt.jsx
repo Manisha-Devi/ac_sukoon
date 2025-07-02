@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../css/FareRecipt.css";
+import dataService from "../../services/dataService.js";
 
 function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries }) {
   const [activeTab, setActiveTab] = useState("daily");
   const [editingEntry, setEditingEntry] = useState(null);
+  const [syncStatus, setSyncStatus] = useState(dataService.getSyncStatus());
+  const [isLoading, setIsLoading] = useState(false);
   const [dailyFareData, setDailyFareData] = useState({
     route: "",
     cashAmount: "",
@@ -23,6 +26,40 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     date: "",
     reason: "",
   });
+
+  // Initialize data and setup sync status updates
+  useEffect(() => {
+    const initializeData = async () => {
+      setIsLoading(true);
+      try {
+        const initialData = await dataService.initializeData();
+        if (initialData.length > 0) {
+          setFareData(initialData);
+          // Calculate total earnings
+          const total = initialData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+          setTotalEarnings(total);
+        }
+      } catch (error) {
+        console.error('Error initializing data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeData();
+  }, [setFareData, setTotalEarnings]);
+
+  // Update sync status periodically
+  useEffect(() => {
+    const updateSyncStatus = () => {
+      setSyncStatus(dataService.getSyncStatus());
+    };
+
+    updateSyncStatus();
+    const interval = setInterval(updateSyncStatus, 5000); // Update every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Function to check if a date is disabled for daily collection
   const isDailyDateDisabled = (selectedDate, selectedRoute) => {
@@ -135,186 +172,232 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     "Bhaderwah to Ghuraka",
   ];
 
-  const handleDailySubmit = (e) => {
+  const handleDailySubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
-    // Validate if date is disabled
-    if (isDailyDateDisabled(dailyFareData.date, dailyFareData.route)) {
-      alert('This date is already taken for this route or conflicts with existing bookings/off days!');
-      return;
-    }
-
-    const cashAmount = parseInt(dailyFareData.cashAmount) || 0;
-    const bankAmount = parseInt(dailyFareData.bankAmount) || 0;
-    const totalAmount = cashAmount + bankAmount;
-
-    if (editingEntry) {
-      // Update existing entry
-      const oldTotal = editingEntry.totalAmount;
-      const updatedEntries = fareData.map(entry => 
-        entry.id === editingEntry.id 
-          ? {
-              ...entry,
-              route: dailyFareData.route,
-              cashAmount: cashAmount,
-              bankAmount: bankAmount,
-              totalAmount: totalAmount,
-              date: dailyFareData.date,
-            }
-          : entry
-      );
-      setFareData(updatedEntries);
-      setTotalEarnings((prev) => prev - oldTotal + totalAmount);
-      setEditingEntry(null);
-    } else {
-      // Create new entry
-      const newEntry = {
-        id: Date.now(),
-        type: "daily",
-        route: dailyFareData.route,
-        cashAmount: cashAmount,
-        bankAmount: bankAmount,
-        totalAmount: totalAmount,
-        date: dailyFareData.date,
-      };
-      setFareData([...fareData, newEntry]);
-      setTotalEarnings((prev) => prev + totalAmount);
-
-      // Add to cash book - receipts go to Dr. side
-      if (cashAmount > 0 || bankAmount > 0) {
-        const cashBookEntry = {
-          id: Date.now() + 1,
-          date: dailyFareData.date,
-          particulars: "Fare",
-          description: `Daily fare collection - ${dailyFareData.route}`,
-          jfNo: `FARE-${Date.now()}`,
-          cashAmount: cashAmount,
-          bankAmount: bankAmount,
-          type: 'dr', // Receipts go to Dr. side
-          timestamp: new Date().toISOString(),
-          source: 'fare-entry'
-        };
-        setCashBookEntries(prev => [cashBookEntry, ...prev]);
-      }
-    }
-    setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
-  };
-
-  const handleBookingSubmit = (e) => {
-    e.preventDefault();
-
-    // Validate date range for conflicts
-    const startDate = new Date(bookingData.dateFrom);
-    const endDate = new Date(bookingData.dateTo);
-
-    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-      const dateStr = d.toISOString().split('T')[0];
-      if (isBookingDateDisabled(dateStr)) {
-        alert(`Date ${dateStr} conflicts with existing daily collection or off day entries!`);
+    try {
+      // Validate if date is disabled
+      if (isDailyDateDisabled(dailyFareData.date, dailyFareData.route)) {
+        alert('This date is already taken for this route or conflicts with existing bookings/off days!');
         return;
       }
-    }
 
-    const cashAmount = parseInt(bookingData.cashAmount) || 0;
-    const bankAmount = parseInt(bookingData.bankAmount) || 0;
-    const totalAmount = cashAmount + bankAmount;
+      const cashAmount = parseInt(dailyFareData.cashAmount) || 0;
+      const bankAmount = parseInt(dailyFareData.bankAmount) || 0;
+      const totalAmount = cashAmount + bankAmount;
 
-    if (editingEntry) {
-      // Update existing entry
-      const oldTotal = editingEntry.totalAmount;
-      const updatedEntries = fareData.map(entry => 
-        entry.id === editingEntry.id 
-          ? {
-              ...entry,
-              bookingDetails: bookingData.bookingDetails,
-              cashAmount: cashAmount,
-              bankAmount: bankAmount,
-              totalAmount: totalAmount,
-              dateFrom: bookingData.dateFrom,
-              dateTo: bookingData.dateTo,
-            }
-          : entry
-      );
-      setFareData(updatedEntries);
-      setTotalEarnings((prev) => prev - oldTotal + totalAmount);
-      setEditingEntry(null);
-    } else {
-      // Create new entry
-      const newEntry = {
-        id: Date.now(),
-        type: "booking",
-        bookingDetails: bookingData.bookingDetails,
-        cashAmount: cashAmount,
-        bankAmount: bankAmount,
-        totalAmount: totalAmount,
-        dateFrom: bookingData.dateFrom,
-        dateTo: bookingData.dateTo,
-      };
-      setFareData([...fareData, newEntry]);
-      setTotalEarnings((prev) => prev + totalAmount);
-
-      // Add to cash book - receipts go to Dr. side  
-      if (cashAmount > 0 || bankAmount > 0) {
-        const cashBookEntry = {
-          id: Date.now() + 1,
-          date: bookingData.dateFrom,
-          particulars: "Fare",
-          description: `Booking fare - ${bookingData.bookingDetails}`,
-          jfNo: `BOOKING-${Date.now()}`,
+      if (editingEntry) {
+        // Update existing entry using hybrid service
+        const oldTotal = editingEntry.totalAmount;
+        const result = await dataService.updateFareEntry(editingEntry.id, {
+          route: dailyFareData.route,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
-          type: 'dr', // Receipts go to Dr. side
-          timestamp: new Date().toISOString(),
-          source: 'fare-entry'
+          totalAmount: totalAmount,
+          date: dailyFareData.date,
+        }, fareData);
+        
+        if (result.success) {
+          setFareData(result.data);
+          setTotalEarnings((prev) => prev - oldTotal + totalAmount);
+          setEditingEntry(null);
+        }
+      } else {
+        // Create new entry using hybrid service
+        const newEntryData = {
+          type: "daily",
+          route: dailyFareData.route,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
+          totalAmount: totalAmount,
+          date: dailyFareData.date,
         };
-        setCashBookEntries(prev => [cashBookEntry, ...prev]);
+        
+        const result = await dataService.addFareEntry(newEntryData, fareData);
+        
+        if (result.success) {
+          setFareData(result.data);
+          setTotalEarnings((prev) => prev + totalAmount);
+
+          // Add to cash book - receipts go to Dr. side
+          if (cashAmount > 0 || bankAmount > 0) {
+            const cashBookEntry = {
+              id: Date.now() + 1,
+              date: dailyFareData.date,
+              particulars: "Fare",
+              description: `Daily fare collection - ${dailyFareData.route}`,
+              jfNo: `FARE-${Date.now()}`,
+              cashAmount: cashAmount,
+              bankAmount: bankAmount,
+              type: 'dr', // Receipts go to Dr. side
+              timestamp: new Date().toISOString(),
+              source: 'fare-entry'
+            };
+            setCashBookEntries(prev => [cashBookEntry, ...prev]);
+          }
+        }
       }
+      setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
+    } catch (error) {
+      console.error('Error submitting daily fare:', error);
+      alert('Error saving data. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-    setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
   };
 
-  const handleOffDaySubmit = (e) => {
+  const handleBookingSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
-    // Validate if date is disabled
-    if (isOffDayDateDisabled(offDayData.date)) {
-      alert('This date conflicts with existing daily collection or booking entries!');
-      return;
+    try {
+      // Validate date range for conflicts
+      const startDate = new Date(bookingData.dateFrom);
+      const endDate = new Date(bookingData.dateTo);
+
+      for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+        const dateStr = d.toISOString().split('T')[0];
+        if (isBookingDateDisabled(dateStr)) {
+          alert(`Date ${dateStr} conflicts with existing daily collection or off day entries!`);
+          return;
+        }
+      }
+
+      const cashAmount = parseInt(bookingData.cashAmount) || 0;
+      const bankAmount = parseInt(bookingData.bankAmount) || 0;
+      const totalAmount = cashAmount + bankAmount;
+
+      if (editingEntry) {
+        // Update existing entry using hybrid service
+        const oldTotal = editingEntry.totalAmount;
+        const result = await dataService.updateFareEntry(editingEntry.id, {
+          bookingDetails: bookingData.bookingDetails,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
+          totalAmount: totalAmount,
+          dateFrom: bookingData.dateFrom,
+          dateTo: bookingData.dateTo,
+        }, fareData);
+        
+        if (result.success) {
+          setFareData(result.data);
+          setTotalEarnings((prev) => prev - oldTotal + totalAmount);
+          setEditingEntry(null);
+        }
+      } else {
+        // Create new entry using hybrid service
+        const newEntryData = {
+          type: "booking",
+          bookingDetails: bookingData.bookingDetails,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
+          totalAmount: totalAmount,
+          dateFrom: bookingData.dateFrom,
+          dateTo: bookingData.dateTo,
+        };
+        
+        const result = await dataService.addFareEntry(newEntryData, fareData);
+        
+        if (result.success) {
+          setFareData(result.data);
+          setTotalEarnings((prev) => prev + totalAmount);
+
+          // Add to cash book - receipts go to Dr. side  
+          if (cashAmount > 0 || bankAmount > 0) {
+            const cashBookEntry = {
+              id: Date.now() + 1,
+              date: bookingData.dateFrom,
+              particulars: "Fare",
+              description: `Booking fare - ${bookingData.bookingDetails}`,
+              jfNo: `BOOKING-${Date.now()}`,
+              cashAmount: cashAmount,
+              bankAmount: bankAmount,
+              type: 'dr', // Receipts go to Dr. side
+              timestamp: new Date().toISOString(),
+              source: 'fare-entry'
+            };
+            setCashBookEntries(prev => [cashBookEntry, ...prev]);
+          }
+        }
+      }
+      setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
+    } catch (error) {
+      console.error('Error submitting booking entry:', error);
+      alert('Error saving data. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-    if (editingEntry) {
-      // Update existing entry
-      const updatedEntries = fareData.map(entry => 
-        entry.id === editingEntry.id 
-          ? { ...entry, date: offDayData.date, reason: offDayData.reason }
-          : entry
-      );
-      setFareData(updatedEntries);
-      setEditingEntry(null);
-    } else {
-      // Create new entry
-      const newEntry = {
-        id: Date.now(),
-        type: "off",
-        date: offDayData.date,
-        reason: offDayData.reason,
-        cashAmount: 0,
-        bankAmount: 0,
-        totalAmount: 0,
-      };
-      setFareData([...fareData, newEntry]);
-    }
-    setOffDayData({ date: "", reason: "" });
   };
 
-  const handleDeleteEntry = (entryId) => {
-    const entryToDelete = fareData.find(entry => entry.id === entryId);
-    if (entryToDelete && entryToDelete.totalAmount) {
-      setTotalEarnings((prev) => prev - entryToDelete.totalAmount);
-    }
-    setFareData(fareData.filter(entry => entry.id !== entryId));
+  const handleOffDaySubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-    // Remove corresponding cash book entry
-    setCashBookEntries(prev => prev.filter(entry => entry.source === 'fare-entry' && !entry.jfNo?.includes(entryId.toString())));
+    try {
+      // Validate if date is disabled
+      if (isOffDayDateDisabled(offDayData.date)) {
+        alert('This date conflicts with existing daily collection or booking entries!');
+        return;
+      }
+      
+      if (editingEntry) {
+        // Update existing entry using hybrid service
+        const result = await dataService.updateFareEntry(editingEntry.id, {
+          date: offDayData.date,
+          reason: offDayData.reason
+        }, fareData);
+        
+        if (result.success) {
+          setFareData(result.data);
+          setEditingEntry(null);
+        }
+      } else {
+        // Create new entry using hybrid service
+        const newEntryData = {
+          type: "off",
+          date: offDayData.date,
+          reason: offDayData.reason,
+          cashAmount: 0,
+          bankAmount: 0,
+          totalAmount: 0,
+        };
+        
+        const result = await dataService.addFareEntry(newEntryData, fareData);
+        
+        if (result.success) {
+          setFareData(result.data);
+        }
+      }
+      setOffDayData({ date: "", reason: "" });
+    } catch (error) {
+      console.error('Error submitting off day:', error);
+      alert('Error saving data. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteEntry = async (entryId) => {
+    try {
+      const entryToDelete = fareData.find(entry => entry.id === entryId);
+      
+      const result = await dataService.deleteFareEntry(entryId, fareData);
+      
+      if (result.success) {
+        setFareData(result.data);
+        
+        if (entryToDelete && entryToDelete.totalAmount) {
+          setTotalEarnings((prev) => prev - entryToDelete.totalAmount);
+        }
+
+        // Remove corresponding cash book entry
+        setCashBookEntries(prev => prev.filter(entry => entry.source === 'fare-entry' && !entry.jfNo?.includes(entryId.toString())));
+      }
+    } catch (error) {
+      console.error('Error deleting entry:', error);
+      alert('Error deleting entry. Please try again.');
+    }
   };
 
   const handleEditEntry = (entry) => {
@@ -361,8 +444,34 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     <div className="fare-entry-container">
       <div className="container-fluid">
             <div className="fare-header">
-              <h2><i className="bi bi-receipt"></i> Fare Receipt Entry</h2>
-              <p>Record your daily earnings and bookings (Income)</p>
+              <div className="header-content">
+                <div>
+                  <h2><i className="bi bi-receipt"></i> Fare Receipt Entry</h2>
+                  <p>Record your daily earnings and bookings (Income)</p>
+                </div>
+                <div className="sync-status">
+                  <div className={`sync-indicator ${syncStatus.isOnline ? 'online' : 'offline'}`}>
+                    <i className={`bi ${syncStatus.isOnline ? 'bi-wifi' : 'bi-wifi-off'}`}></i>
+                    <span>{syncStatus.isOnline ? 'Online' : 'Offline'}</span>
+                  </div>
+                  {syncStatus.pendingSync > 0 && (
+                    <div className="pending-sync">
+                      <i className="bi bi-clock"></i>
+                      <span>{syncStatus.pendingSync} pending</span>
+                    </div>
+                  )}
+                  {syncStatus.isOnline && (
+                    <button 
+                      className="btn btn-sm sync-btn" 
+                      onClick={() => dataService.forcSync()}
+                      disabled={isLoading}
+                    >
+                      <i className="bi bi-arrow-repeat"></i>
+                      Sync
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Summary Cards */}
@@ -511,9 +620,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       </div>
                     </div>
                     <div className="button-group">
-                      <button type="submit" className="btn fare-entry-btn">
-                        <i className={editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
-                        {editingEntry ? "Update Entry" : "Add Daily Entry"}
+                      <button type="submit" className="btn fare-entry-btn" disabled={isLoading}>
+                        <i className={isLoading ? "bi bi-hourglass-split" : editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
+                        {isLoading ? "Saving..." : editingEntry ? "Update Entry" : "Add Daily Entry"}
                       </button>
                       {editingEntry && (
                         <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>

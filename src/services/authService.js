@@ -131,6 +131,178 @@ class AuthService {
     }
   }
 
+  // Add Fare Receipt to Google Sheets
+  async addFareReceipt(data) {
+    try {
+      console.log('📝 Adding fare receipt to Google Sheets:', data);
+      
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'addFareReceipt',
+          date: data.date,
+          route: data.route,
+          cashAmount: data.cashAmount || 0,
+          bankAmount: data.bankAmount || 0,
+          totalAmount: data.totalAmount || 0,
+          submittedBy: data.submittedBy || 'driver'
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Fare receipt response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error adding fare receipt:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Add Booking Entry to Google Sheets
+  async addBookingEntry(data) {
+    try {
+      console.log('📝 Adding booking entry to Google Sheets:', data);
+      
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'addBookingEntry',
+          bookingDetails: data.bookingDetails,
+          dateFrom: data.dateFrom,
+          dateTo: data.dateTo,
+          cashAmount: data.cashAmount || 0,
+          bankAmount: data.bankAmount || 0,
+          totalAmount: data.totalAmount || 0,
+          submittedBy: data.submittedBy || 'driver'
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Booking entry response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error adding booking entry:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Add Off Day to Google Sheets
+  async addOffDay(data) {
+    try {
+      console.log('📝 Adding off day to Google Sheets:', data);
+      
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'addOffDay',
+          date: data.date,
+          reason: data.reason,
+          submittedBy: data.submittedBy || 'driver'
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Off day response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error adding off day:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Get all Fare Receipts from Google Sheets
+  async getFareReceipts() {
+    try {
+      console.log('📋 Fetching fare receipts from Google Sheets...');
+      
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'getFareReceipts'
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Fare receipts fetched:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error fetching fare receipts:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Get Booking Entries from Google Sheets
+  async getBookingEntries() {
+    try {
+      console.log('📋 Fetching booking entries from Google Sheets...');
+      
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'getBookingEntries'
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Booking entries fetched:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error fetching booking entries:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Get Off Days from Google Sheets
+  async getOffDays() {
+    try {
+      console.log('📋 Fetching off days from Google Sheets...');
+      
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'getOffDays'
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Off days fetched:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error fetching off days:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // Test connection to Google Sheets database
   async testConnection() {
     try {
