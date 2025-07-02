@@ -261,6 +261,20 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                 </div>
               </div>
             </div>
+            {expenseData.filter(entry => entry.type === 'fees').length > 0 && (
+              <div className="recent-entries-preview">
+                <h6>Recent Entries:</h6>
+                {expenseData.filter(entry => entry.type === 'fees').slice(-3).map((entry) => (
+                  <div key={entry.id} className="entry-preview">
+                    <span className="entry-type">Adda</span>
+                    <span className="entry-detail">
+                      {entry.description} - {entry.date}
+                    </span>
+                    <span className="entry-amount">₹{entry.totalAmount}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Service Payment Summary */}
