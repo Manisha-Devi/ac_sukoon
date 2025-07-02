@@ -1,219 +1,230 @@
 
-// =============================================================================
-// Google Apps Script - Complete Fare Receipt Management System
-// =============================================================================
+// AC Sukoon Transport Management - Google Apps Script API
+// Organized by Entry Types with Complete CRUD Operations
 
-// Configuration - Update these IDs with your actual Google Sheets
-const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID_HERE'; // Replace with your actual spreadsheet ID
+// IMPORTANT: Replace this with your actual Google Sheets ID
+const SPREADSHEET_ID = "1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidEmhzgM";
 
+// Sheet names - must match exactly
 const SHEET_NAMES = {
-  USERS: 'Users',
-  FARE_RECEIPTS: 'Fare Receipts',
-  BOOKING_ENTRIES: 'Booking Entries',
-  OFF_DAYS: 'Off Days'
+  USERS: "Users",
+  FARE_RECEIPTS: "FareReceipts",
+  BOOKING_ENTRIES: "BookingEntries",
+  OFF_DAYS: "OffDays",
 };
 
-// =============================================================================
-// MAIN ENTRY POINT - Handle all incoming requests
-// =============================================================================
+// ======= MAIN HANDLERS =======
+
+// Handle OPTIONS requests for CORS
+function doOptions() {
+  return ContentService.createTextOutput("").setMimeType(
+    ContentService.MimeType.TEXT,
+  );
+}
+
+// Main POST handler
 function doPost(e) {
   try {
-    console.log('📥 Incoming request:', e.postData.contents);
-    
+    if (!e || !e.postData || !e.postData.contents) {
+      throw new Error("No data received");
+    }
+
     const data = JSON.parse(e.postData.contents);
     const action = data.action;
-
-    console.log('🎯 Action requested:', action);
+    let result;
 
     switch (action) {
       // Authentication
-      case 'login':
-        return ContentService
-          .createTextOutput(JSON.stringify(authenticateUser(data)))
-          .setMimeType(ContentService.MimeType.JSON);
-      
-      case 'updateLastLogin':
-        return ContentService
-          .createTextOutput(JSON.stringify(updateLastLogin(data)))
-          .setMimeType(ContentService.MimeType.JSON);
+      case "login":
+        result = handleLogin(data);
+        break;
+      case "test":
+        result = testConnection();
+        break;
 
-      // Fare Receipts (Daily)
-      case 'addFareReceipt':
-        return ContentService
-          .createTextOutput(JSON.stringify(addFareReceipt(data)))
-          .setMimeType(ContentService.MimeType.JSON);
-      
-      case 'getFareReceipts':
-        return ContentService
-          .createTextOutput(JSON.stringify(getFareReceipts()))
-          .setMimeType(ContentService.MimeType.JSON);
-      
-      case 'updateFareReceipt':
-        return ContentService
-          .createTextOutput(JSON.stringify(updateFareReceipt(data)))
-          .setMimeType(ContentService.MimeType.JSON);
-      
-      case 'deleteFareReceipt':
-        return ContentService
-          .createTextOutput(JSON.stringify(deleteFareReceipt(data)))
-          .setMimeType(ContentService.MimeType.JSON);
+      // Fare Receipts (Daily Entries) - Complete CRUD
+      case "addFareReceipt":
+        result = addFareReceipt(data);
+        break;
+      case "getFareReceipts":
+        result = getFareReceipts();
+        break;
+      case "updateFareReceipt":
+        result = updateFareReceipt(data);
+        break;
+      case "deleteFareReceipt":
+        result = deleteFareReceipt(data);
+        break;
 
-      // Booking Entries
-      case 'addBookingEntry':
-        return ContentService
-          .createTextOutput(JSON.stringify(addBookingEntry(data)))
-          .setMimeType(ContentService.MimeType.JSON);
-      
-      case 'getBookingEntries':
-        return ContentService
-          .createTextOutput(JSON.stringify(getBookingEntries()))
-          .setMimeType(ContentService.MimeType.JSON);
-      
-      case 'updateBookingEntry':
-        return ContentService
-          .createTextOutput(JSON.stringify(updateBookingEntry(data)))
-          .setMimeType(ContentService.MimeType.JSON);
-      
-      case 'deleteBookingEntry':
-        return ContentService
-          .createTextOutput(JSON.stringify(deleteBookingEntry(data)))
-          .setMimeType(ContentService.MimeType.JSON);
+      // Booking Entries - Complete CRUD
+      case "addBookingEntry":
+        result = addBookingEntry(data);
+        break;
+      case "getBookingEntries":
+        result = getBookingEntries();
+        break;
+      case "updateBookingEntry":
+        result = updateBookingEntry(data);
+        break;
+      case "deleteBookingEntry":
+        result = deleteBookingEntry(data);
+        break;
 
-      // Off Days
-      case 'addOffDay':
-        return ContentService
-          .createTextOutput(JSON.stringify(addOffDay(data)))
-          .setMimeType(ContentService.MimeType.JSON);
-      
-      case 'getOffDays':
-        return ContentService
-          .createTextOutput(JSON.stringify(getOffDays()))
-          .setMimeType(ContentService.MimeType.JSON);
-      
-      case 'updateOffDay':
-        return ContentService
-          .createTextOutput(JSON.stringify(updateOffDay(data)))
-          .setMimeType(ContentService.MimeType.JSON);
-      
-      case 'deleteOffDay':
-        return ContentService
-          .createTextOutput(JSON.stringify(deleteOffDay(data)))
-          .setMimeType(ContentService.MimeType.JSON);
+      // Off Days - Complete CRUD
+      case "addOffDay":
+        result = addOffDay(data);
+        break;
+      case "getOffDays":
+        result = getOffDays();
+        break;
+      case "updateOffDay":
+        result = updateOffDay(data);
+        break;
+      case "deleteOffDay":
+        result = deleteOffDay(data);
+        break;
 
-      // Legacy Functions (for backward compatibility)
-      case 'updateFareEntry':
-        return ContentService
-          .createTextOutput(JSON.stringify(updateFareEntryLegacy(data)))
-          .setMimeType(ContentService.MimeType.JSON);
-      
-      case 'deleteFareEntry':
-        return ContentService
-          .createTextOutput(JSON.stringify(deleteFareEntryLegacy(data)))
-          .setMimeType(ContentService.MimeType.JSON);
-
-      // Test connection
-      case 'test':
-        return ContentService
-          .createTextOutput(JSON.stringify({
-            success: true,
-            message: 'Google Apps Script is working!',
-            timestamp: new Date().toISOString()
-          }))
-          .setMimeType(ContentService.MimeType.JSON);
+      // Legacy Update/Delete (for backward compatibility)
+      case "updateFareEntry":
+        result = updateFareEntryLegacy(data);
+        break;
+      case "deleteFareEntry":
+        result = deleteFareEntryLegacy(data);
+        break;
 
       default:
-        return ContentService
-          .createTextOutput(JSON.stringify({
-            success: false,
-            error: 'Unknown action: ' + action
-          }))
-          .setMimeType(ContentService.MimeType.JSON);
+        result = { success: false, error: "Invalid action: " + action };
     }
 
+    return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(
+      ContentService.MimeType.JSON,
+    );
   } catch (error) {
-    console.error('❌ Main error:', error);
-    return ContentService
-      .createTextOutput(JSON.stringify({
+    return ContentService.createTextOutput(
+      JSON.stringify({
         success: false,
-        error: 'Server error: ' + error.toString()
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
+        error: "Server Error: " + error.toString(),
+      }),
+    ).setMimeType(ContentService.MimeType.JSON);
   }
 }
 
-// =============================================================================
-// AUTHENTICATION FUNCTIONS
-// =============================================================================
-
-/**
- * Authenticate user against Users sheet
- */
-function authenticateUser(data) {
+// Main GET handler
+function doGet(e) {
   try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.USERS);
+    if (!e || !e.parameter || !e.parameter.action) {
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          success: false,
+          error: "No action parameter provided",
+        }),
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const action = e.parameter.action;
+    let result;
+
+    switch (action) {
+      case "test":
+        result = testConnection();
+        break;
+      case "getFareReceipts":
+        result = getFareReceipts();
+        break;
+      case "getBookingEntries":
+        result = getBookingEntries();
+        break;
+      case "getOffDays":
+        result = getOffDays();
+        break;
+      default:
+        result = { success: false, error: "Invalid GET action: " + action };
+    }
+
+    return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(
+      ContentService.MimeType.JSON,
+    );
+  } catch (error) {
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: false,
+        error: "GET Error: " + error.toString(),
+      }),
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// ======= AUTHENTICATION & UTILITY =======
+
+// Test Connection
+function testConnection() {
+  try {
+    return {
+      success: true,
+      message: "Google Apps Script is working!",
+      timestamp: new Date().toISOString()
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: "Test connection error: " + error.toString()
+    };
+  }
+}
+
+// User Authentication
+function handleLogin(data) {
+  try {
+    console.log("Login attempt:", data);
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(
+      SHEET_NAMES.USERS,
+    );
     const values = sheet.getDataRange().getValues();
 
-    // Skip header row
     for (let i = 1; i < values.length; i++) {
-      const row = values[i];
-      if (row[0] === data.username && row[1] === data.password && row[2] === data.userType) {
+      const sheetUsername = String(values[i][0]).trim();
+      const sheetPassword = String(values[i][1]).trim();
+      const inputUsername = String(data.username).trim();
+      const inputPassword = String(data.password).trim();
+
+      if (sheetUsername === inputUsername && sheetPassword === inputPassword) {
+        // Update last login
+        sheet.getRange(i + 1, 7).setValue(new Date());
+
         return {
           success: true,
-          message: 'Login successful',
+          message: "Login successful",
           user: {
-            username: row[0],
-            userType: row[2],
-            fullName: row[3] || row[0],
-            status: row[4] || 'Active'
-          }
+            username: values[i][0],
+            userType: values[i][2],
+            fullName: values[i][3],
+            status: values[i][4],
+          },
         };
       }
     }
 
     return {
       success: false,
-      message: 'Invalid credentials'
+      error: "Invalid username or password"
     };
-
   } catch (error) {
-    return {
-      success: false,
-      error: 'Authentication error: ' + error.toString()
-    };
+    return { success: false, error: "Login error: " + error.toString() };
   }
 }
 
-/**
- * Update last login timestamp
- */
-function updateLastLogin(data) {
-  try {
-    // Implementation can be added if needed
-    return {
-      success: true,
-      message: 'Last login updated'
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: 'Update last login error: ' + error.toString()
-    };
-  }
-}
-
-// =============================================================================
-// FARE RECEIPTS (DAILY) - COMPLETE CRUD OPERATIONS
-// =============================================================================
+// ======= FARE RECEIPTS (DAILY ENTRIES) - COMPLETE CRUD =======
 
 /**
- * Add new Fare Receipt
+ * Add new Fare Receipt (Daily Entry)
  * Columns: A=Timestamp, B=Date, C=Route, D=CashAmount, E=BankAmount, F=TotalAmount, G=EntryType, H=EntryId, I=SubmittedBy
  */
 function addFareReceipt(data) {
   try {
-    console.log('📝 Adding fare receipt:', data);
-    
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(
+      SHEET_NAMES.FARE_RECEIPTS,
+    );
+
     const entryId = data.id || Date.now();
 
     sheet.appendRow([
@@ -225,31 +236,30 @@ function addFareReceipt(data) {
       data.totalAmount || 0, // F: TotalAmount
       "daily", // G: EntryType
       entryId, // H: EntryId
-      data.submittedBy || "driver" // I: SubmittedBy
+      data.submittedBy || "", // I: SubmittedBy
     ]);
 
-    return {
-      success: true,
-      message: "Fare receipt added successfully",
+    return { 
+      success: true, 
+      message: "Daily fare receipt added successfully",
       entryId: entryId
     };
   } catch (error) {
-    console.error('❌ Add fare receipt error:', error);
     return {
       success: false,
-      error: "Add fare receipt error: " + error.toString()
+      error: "Add fare receipt error: " + error.toString(),
     };
   }
 }
 
 /**
- * Get all Fare Receipts
+ * Get all Fare Receipts (Daily Entries)
  */
 function getFareReceipts() {
   try {
-    console.log('📋 Getting fare receipts...');
-    
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(
+      SHEET_NAMES.FARE_RECEIPTS,
+    );
     const values = sheet.getDataRange().getValues();
 
     if (values.length <= 1) return { success: true, data: [] };
@@ -264,28 +274,27 @@ function getFareReceipts() {
       totalAmount: row[5], // F: TotalAmount
       entryType: row[6], // G: EntryType
       submittedBy: row[8], // I: SubmittedBy
-      rowIndex: index + 2 // Store actual row index for updates
+      rowIndex: index + 2, // Store actual row index for updates
     }));
 
     return { success: true, data: data.reverse() };
   } catch (error) {
-    console.error('❌ Get fare receipts error:', error);
     return {
       success: false,
-      error: "Get fare receipts error: " + error.toString()
+      error: "Get fare receipts error: " + error.toString(),
     };
   }
 }
 
 /**
- * Update existing Fare Receipt
+ * Update existing Fare Receipt (Daily Entry)
  */
 function updateFareReceipt(data) {
   try {
     const entryId = data.entryId;
     const updatedData = data.updatedData;
 
-    console.log('📝 Updating fare receipt:', { entryId, updatedData });
+    console.log('Updating fare receipt:', { entryId, updatedData });
 
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
     const entryIdColumn = 8; // Column H
@@ -306,16 +315,16 @@ function updateFareReceipt(data) {
     }
 
     // Update specific columns for Fare Receipt
-    if (updatedData.date !== undefined) {
+    if (updatedData.date) {
       sheet.getRange(rowIndex, 2).setValue(updatedData.date); // B: Date
     }
-    if (updatedData.route !== undefined) {
+    if (updatedData.route) {
       sheet.getRange(rowIndex, 3).setValue(updatedData.route); // C: Route
     }
     if (updatedData.totalAmount !== undefined) {
       sheet.getRange(rowIndex, 6).setValue(updatedData.totalAmount); // F: TotalAmount
     }
-    // Update timestamp
+    // Update timestamp to show when it was modified
     sheet.getRange(rowIndex, 1).setValue(new Date()); // A: Timestamp
 
     return {
@@ -326,7 +335,7 @@ function updateFareReceipt(data) {
     };
 
   } catch (error) {
-    console.error('❌ Update fare receipt error:', error);
+    console.error('Update fare receipt error:', error);
     return {
       success: false,
       error: 'Update fare receipt error: ' + error.toString()
@@ -335,13 +344,13 @@ function updateFareReceipt(data) {
 }
 
 /**
- * Delete Fare Receipt
+ * Delete Fare Receipt (Daily Entry)
  */
 function deleteFareReceipt(data) {
   try {
     const entryId = data.entryId;
 
-    console.log('🗑️ Deleting fare receipt:', { entryId });
+    console.log('Deleting fare receipt:', { entryId });
 
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
     const entryIdColumn = 8; // Column H
@@ -372,7 +381,7 @@ function deleteFareReceipt(data) {
     };
 
   } catch (error) {
-    console.error('❌ Delete fare receipt error:', error);
+    console.error('Delete fare receipt error:', error);
     return {
       success: false,
       error: 'Delete fare receipt error: ' + error.toString()
@@ -380,9 +389,7 @@ function deleteFareReceipt(data) {
   }
 }
 
-// =============================================================================
-// BOOKING ENTRIES - COMPLETE CRUD OPERATIONS
-// =============================================================================
+// ======= BOOKING ENTRIES - COMPLETE CRUD =======
 
 /**
  * Add new Booking Entry
@@ -390,14 +397,15 @@ function deleteFareReceipt(data) {
  */
 function addBookingEntry(data) {
   try {
-    console.log('📝 Adding booking entry:', data);
-    
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(
+      SHEET_NAMES.BOOKING_ENTRIES,
+    );
+
     const entryId = data.id || Date.now();
 
     sheet.appendRow([
       new Date(), // A: Timestamp
-      data.bookingDetails, // B: BookingDetails
+      data.bookingDetails || "", // B: BookingDetails
       data.dateFrom, // C: DateFrom
       data.dateTo, // D: DateTo
       data.cashAmount || 0, // E: CashAmount (Always 0 as per requirement)
@@ -405,7 +413,7 @@ function addBookingEntry(data) {
       data.totalAmount || 0, // G: TotalAmount
       "booking", // H: EntryType
       entryId, // I: EntryId
-      data.submittedBy || "driver" // J: SubmittedBy
+      data.submittedBy || "", // J: SubmittedBy
     ]);
 
     return { 
@@ -414,10 +422,9 @@ function addBookingEntry(data) {
       entryId: entryId
     };
   } catch (error) {
-    console.error('❌ Add booking entry error:', error);
     return {
       success: false,
-      error: "Add booking entry error: " + error.toString()
+      error: "Add booking entry error: " + error.toString(),
     };
   }
 }
@@ -427,9 +434,9 @@ function addBookingEntry(data) {
  */
 function getBookingEntries() {
   try {
-    console.log('📋 Getting booking entries...');
-    
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(
+      SHEET_NAMES.BOOKING_ENTRIES,
+    );
     const values = sheet.getDataRange().getValues();
 
     if (values.length <= 1) return { success: true, data: [] };
@@ -445,15 +452,14 @@ function getBookingEntries() {
       totalAmount: row[6], // G: TotalAmount
       entryType: row[7], // H: EntryType
       submittedBy: row[9], // J: SubmittedBy
-      rowIndex: index + 2 // Store actual row index for updates
+      rowIndex: index + 2, // Store actual row index for updates
     }));
 
     return { success: true, data: data.reverse() };
   } catch (error) {
-    console.error('❌ Get booking entries error:', error);
     return {
       success: false,
-      error: "Get booking entries error: " + error.toString()
+      error: "Get booking entries error: " + error.toString(),
     };
   }
 }
@@ -466,7 +472,7 @@ function updateBookingEntry(data) {
     const entryId = data.entryId;
     const updatedData = data.updatedData;
 
-    console.log('📝 Updating booking entry:', { entryId, updatedData });
+    console.log('Updating booking entry:', { entryId, updatedData });
 
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
     const entryIdColumn = 9; // Column I
@@ -487,13 +493,13 @@ function updateBookingEntry(data) {
     }
 
     // Update specific columns for Booking Entry
-    if (updatedData.bookingDetails !== undefined) {
+    if (updatedData.bookingDetails) {
       sheet.getRange(rowIndex, 2).setValue(updatedData.bookingDetails); // B: BookingDetails
     }
-    if (updatedData.dateFrom !== undefined) {
+    if (updatedData.dateFrom) {
       sheet.getRange(rowIndex, 3).setValue(updatedData.dateFrom); // C: DateFrom
     }
-    if (updatedData.dateTo !== undefined) {
+    if (updatedData.dateTo) {
       sheet.getRange(rowIndex, 4).setValue(updatedData.dateTo); // D: DateTo
     }
     if (updatedData.totalAmount !== undefined) {
@@ -510,7 +516,7 @@ function updateBookingEntry(data) {
     };
 
   } catch (error) {
-    console.error('❌ Update booking entry error:', error);
+    console.error('Update booking entry error:', error);
     return {
       success: false,
       error: 'Update booking entry error: ' + error.toString()
@@ -525,7 +531,7 @@ function deleteBookingEntry(data) {
   try {
     const entryId = data.entryId;
 
-    console.log('🗑️ Deleting booking entry:', { entryId });
+    console.log('Deleting booking entry:', { entryId });
 
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
     const entryIdColumn = 9; // Column I
@@ -556,7 +562,7 @@ function deleteBookingEntry(data) {
     };
 
   } catch (error) {
-    console.error('❌ Delete booking entry error:', error);
+    console.error('Delete booking entry error:', error);
     return {
       success: false,
       error: 'Delete booking entry error: ' + error.toString()
@@ -564,9 +570,7 @@ function deleteBookingEntry(data) {
   }
 }
 
-// =============================================================================
-// OFF DAYS - COMPLETE CRUD OPERATIONS
-// =============================================================================
+// ======= OFF DAYS - COMPLETE CRUD =======
 
 /**
  * Add new Off Day
@@ -574,9 +578,10 @@ function deleteBookingEntry(data) {
  */
 function addOffDay(data) {
   try {
-    console.log('📝 Adding off day:', data);
-    
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OFF_DAYS);
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(
+      SHEET_NAMES.OFF_DAYS,
+    );
+
     const entryId = data.id || Date.now();
 
     sheet.appendRow([
@@ -585,7 +590,7 @@ function addOffDay(data) {
       data.reason || "", // C: Reason (Required as per user request)
       "off", // D: EntryType
       entryId, // E: EntryId
-      data.submittedBy || "driver" // F: SubmittedBy
+      data.submittedBy || "", // F: SubmittedBy
     ]);
 
     return { 
@@ -594,11 +599,7 @@ function addOffDay(data) {
       entryId: entryId
     };
   } catch (error) {
-    console.error('❌ Add off day error:', error);
-    return { 
-      success: false, 
-      error: "Add off day error: " + error.toString() 
-    };
+    return { success: false, error: "Add off day error: " + error.toString() };
   }
 }
 
@@ -607,9 +608,9 @@ function addOffDay(data) {
  */
 function getOffDays() {
   try {
-    console.log('📋 Getting off days...');
-    
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OFF_DAYS);
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(
+      SHEET_NAMES.OFF_DAYS,
+    );
     const values = sheet.getDataRange().getValues();
 
     if (values.length <= 1) return { success: true, data: [] };
@@ -621,16 +622,12 @@ function getOffDays() {
       reason: row[2], // C: Reason
       entryType: row[3], // D: EntryType
       submittedBy: row[5], // F: SubmittedBy
-      rowIndex: index + 2 // Store actual row index for updates
+      rowIndex: index + 2, // Store actual row index for updates
     }));
 
     return { success: true, data: data.reverse() };
   } catch (error) {
-    console.error('❌ Get off days error:', error);
-    return { 
-      success: false, 
-      error: "Get off days error: " + error.toString() 
-    };
+    return { success: false, error: "Get off days error: " + error.toString() };
   }
 }
 
@@ -642,7 +639,7 @@ function updateOffDay(data) {
     const entryId = data.entryId;
     const updatedData = data.updatedData;
 
-    console.log('📝 Updating off day:', { entryId, updatedData });
+    console.log('Updating off day:', { entryId, updatedData });
 
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OFF_DAYS);
     const entryIdColumn = 5; // Column E
@@ -663,10 +660,10 @@ function updateOffDay(data) {
     }
 
     // Update specific columns for Off Day
-    if (updatedData.date !== undefined) {
+    if (updatedData.date) {
       sheet.getRange(rowIndex, 2).setValue(updatedData.date); // B: Date
     }
-    if (updatedData.reason !== undefined) {
+    if (updatedData.reason) {
       sheet.getRange(rowIndex, 3).setValue(updatedData.reason); // C: Reason
     }
     // Update timestamp
@@ -680,7 +677,7 @@ function updateOffDay(data) {
     };
 
   } catch (error) {
-    console.error('❌ Update off day error:', error);
+    console.error('Update off day error:', error);
     return {
       success: false,
       error: 'Update off day error: ' + error.toString()
@@ -695,7 +692,7 @@ function deleteOffDay(data) {
   try {
     const entryId = data.entryId;
 
-    console.log('🗑️ Deleting off day:', { entryId });
+    console.log('Deleting off day:', { entryId });
 
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OFF_DAYS);
     const entryIdColumn = 5; // Column E
@@ -726,7 +723,7 @@ function deleteOffDay(data) {
     };
 
   } catch (error) {
-    console.error('❌ Delete off day error:', error);
+    console.error('Delete off day error:', error);
     return {
       success: false,
       error: 'Delete off day error: ' + error.toString()
@@ -734,9 +731,7 @@ function deleteOffDay(data) {
   }
 }
 
-// =============================================================================
-// LEGACY FUNCTIONS (For Backward Compatibility)
-// =============================================================================
+// ======= LEGACY FUNCTIONS (For Backward Compatibility) =======
 
 /**
  * Legacy Universal Update Function (for backward compatibility)
@@ -782,100 +777,6 @@ function deleteFareEntryLegacy(data) {
     return {
       success: false,
       error: 'Legacy delete error: ' + error.toString()
-    };
-  }
-}
-
-// =============================================================================
-// UTILITY FUNCTIONS
-// =============================================================================
-
-/**
- * Get all users (for admin purposes)
- */
-function getAllUsers() {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.USERS);
-    const values = sheet.getDataRange().getValues();
-
-    if (values.length <= 1) return { success: true, data: [] };
-
-    const users = values.slice(1).map(row => ({
-      username: row[0],
-      userType: row[2],
-      fullName: row[3] || row[0],
-      status: row[4] || 'Active'
-    }));
-
-    return { success: true, data: users };
-  } catch (error) {
-    return {
-      success: false,
-      error: 'Get users error: ' + error.toString()
-    };
-  }
-}
-
-// =============================================================================
-// SETUP FUNCTIONS (Run once to create sheets structure)
-// =============================================================================
-
-/**
- * Setup function to create all required sheets with proper headers
- * Run this function once after creating the spreadsheet
- */
-function setupSheets() {
-  try {
-    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-
-    // Create Users sheet
-    let usersSheet = spreadsheet.getSheetByName(SHEET_NAMES.USERS);
-    if (!usersSheet) {
-      usersSheet = spreadsheet.insertSheet(SHEET_NAMES.USERS);
-      usersSheet.appendRow(['Username', 'Password', 'UserType', 'FullName', 'Status', 'LastLogin']);
-      
-      // Add sample user
-      usersSheet.appendRow(['driver', 'password123', 'driver', 'Driver User', 'Active', '']);
-    }
-
-    // Create Fare Receipts sheet
-    let fareSheet = spreadsheet.getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
-    if (!fareSheet) {
-      fareSheet = spreadsheet.insertSheet(SHEET_NAMES.FARE_RECEIPTS);
-      fareSheet.appendRow([
-        'Timestamp', 'Date', 'Route', 'CashAmount', 'BankAmount', 
-        'TotalAmount', 'EntryType', 'EntryId', 'SubmittedBy'
-      ]);
-    }
-
-    // Create Booking Entries sheet
-    let bookingSheet = spreadsheet.getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
-    if (!bookingSheet) {
-      bookingSheet = spreadsheet.insertSheet(SHEET_NAMES.BOOKING_ENTRIES);
-      bookingSheet.appendRow([
-        'Timestamp', 'BookingDetails', 'DateFrom', 'DateTo', 'CashAmount', 
-        'BankAmount', 'TotalAmount', 'EntryType', 'EntryId', 'SubmittedBy'
-      ]);
-    }
-
-    // Create Off Days sheet
-    let offDaysSheet = spreadsheet.getSheetByName(SHEET_NAMES.OFF_DAYS);
-    if (!offDaysSheet) {
-      offDaysSheet = spreadsheet.insertSheet(SHEET_NAMES.OFF_DAYS);
-      offDaysSheet.appendRow([
-        'Timestamp', 'Date', 'Reason', 'EntryType', 'EntryId', 'SubmittedBy'
-      ]);
-    }
-
-    return {
-      success: true,
-      message: 'All sheets created successfully!'
-    };
-
-  } catch (error) {
-    return {
-      success: false,
-      error: 'Setup error: ' + error.toString()
     };
   }
 }
