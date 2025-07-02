@@ -1,4 +1,3 @@
-
 // AC Sukoon Transport Management - Google Apps Script API
 // Organized by Entry Types with Complete CRUD Operations
 
@@ -225,8 +224,7 @@ function addFareReceipt(data) {
       SHEET_NAMES.FARE_RECEIPTS,
     );
 
-    // Use the provided ID directly from the client
-    const entryId = data.id;
+    const entryId = data.entryId;
 
     sheet.appendRow([
       new Date(), // A: Timestamp
@@ -402,8 +400,7 @@ function addBookingEntry(data) {
       SHEET_NAMES.BOOKING_ENTRIES,
     );
 
-    // Use the provided ID directly from the client
-    const entryId = data.id;
+    const entryId = data.entryId;
 
     sheet.appendRow([
       new Date(), // A: Timestamp
@@ -584,8 +581,7 @@ function addOffDay(data) {
       SHEET_NAMES.OFF_DAYS,
     );
 
-    // Use the provided ID directly from the client
-    const entryId = data.id;
+    const entryId = data.entryId;
 
     sheet.appendRow([
       new Date(), // A: Timestamp

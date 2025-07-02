@@ -158,7 +158,7 @@ class HybridDataService {
       // Add to appropriate Google Sheet based on type
       if (entry.type === 'daily') {
         result = await authService.addFareReceipt({
-          id: entry.id, // Use local ID directly
+          entryId: entry.entryId,
           date: entry.date,
           route: entry.route,
           cashAmount: entry.cashAmount || 0,
@@ -168,7 +168,7 @@ class HybridDataService {
         });
       } else if (entry.type === 'booking') {
         result = await authService.addBookingEntry({
-          id: entry.id, // Use local ID directly
+          entryId: entry.entryId,
           bookingDetails: entry.bookingDetails,
           dateFrom: entry.dateFrom,
           dateTo: entry.dateTo,
@@ -179,7 +179,7 @@ class HybridDataService {
         });
       } else if (entry.type === 'off') {
         result = await authService.addOffDay({
-          id: entry.id, // Use local ID directly
+          entryId: entry.entryId,
           date: entry.date,
           reason: entry.reason,
           submittedBy: 'driver'

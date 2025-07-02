@@ -145,6 +145,7 @@ class AuthService {
         redirect: 'follow',
         body: JSON.stringify({
           action: 'addFareReceipt',
+          entryId: data.entryId,
           date: data.date,
           route: data.route,
           cashAmount: data.cashAmount || 0,
@@ -177,7 +178,7 @@ class AuthService {
         redirect: 'follow',
         body: JSON.stringify({
           action: 'addBookingEntry',
-          id: data.id,
+          entryId: data.entryId,
           bookingDetails: data.bookingDetails,
           dateFrom: data.dateFrom,
           dateTo: data.dateTo,
@@ -376,6 +377,7 @@ class AuthService {
         redirect: 'follow',
         body: JSON.stringify({
           action: 'addOffDay',
+          entryId: data.entryId,
           date: data.date,
           reason: data.reason,
           submittedBy: data.submittedBy || 'driver'
