@@ -1,6 +1,6 @@
 
 // AC Sukoon Transport Management - Google Apps Script API
-// Complete Clean Code with Update & Delete Features
+// Organized by Entry Types with Complete CRUD Operations
 
 // IMPORTANT: Replace this with your actual Google Sheets ID
 const SPREADSHEET_ID = "1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidEmhzgM";
@@ -12,6 +12,8 @@ const SHEET_NAMES = {
   BOOKING_ENTRIES: "BookingEntries",
   OFF_DAYS: "OffDays",
 };
+
+// ======= MAIN HANDLERS =======
 
 // Handle OPTIONS requests for CORS
 function doOptions() {
@@ -32,35 +34,62 @@ function doPost(e) {
     let result;
 
     switch (action) {
+      // Authentication
       case "login":
         result = handleLogin(data);
         break;
+      case "test":
+        result = testConnection();
+        break;
+
+      // Fare Receipts (Daily Entries) - Complete CRUD
       case "addFareReceipt":
         result = addFareReceipt(data);
         break;
       case "getFareReceipts":
         result = getFareReceipts();
         break;
+      case "updateFareReceipt":
+        result = updateFareReceipt(data);
+        break;
+      case "deleteFareReceipt":
+        result = deleteFareReceipt(data);
+        break;
+
+      // Booking Entries - Complete CRUD
       case "addBookingEntry":
         result = addBookingEntry(data);
         break;
       case "getBookingEntries":
         result = getBookingEntries();
         break;
+      case "updateBookingEntry":
+        result = updateBookingEntry(data);
+        break;
+      case "deleteBookingEntry":
+        result = deleteBookingEntry(data);
+        break;
+
+      // Off Days - Complete CRUD
       case "addOffDay":
         result = addOffDay(data);
         break;
       case "getOffDays":
         result = getOffDays();
         break;
+      case "updateOffDay":
+        result = updateOffDay(data);
+        break;
+      case "deleteOffDay":
+        result = deleteOffDay(data);
+        break;
+
+      // Legacy Update/Delete (for backward compatibility)
       case "updateFareEntry":
-        result = updateFareEntry(data);
+        result = updateFareEntryLegacy(data);
         break;
       case "deleteFareEntry":
-        result = deleteFareEntry(data);
-        break;
-      case "test":
-        result = testConnection();
+        result = deleteFareEntryLegacy(data);
         break;
 
       default:
@@ -108,7 +137,6 @@ function doGet(e) {
       case "getOffDays":
         result = getOffDays();
         break;
-
       default:
         result = { success: false, error: "Invalid GET action: " + action };
     }
@@ -126,6 +154,8 @@ function doGet(e) {
   }
 }
 
+// ======= AUTHENTICATION & UTILITY =======
+
 // Test Connection
 function testConnection() {
   try {
@@ -142,7 +172,7 @@ function testConnection() {
   }
 }
 
-// Authentication
+// User Authentication
 function handleLogin(data) {
   try {
     console.log("Login attempt:", data);
@@ -151,33 +181,11 @@ function handleLogin(data) {
     );
     const values = sheet.getDataRange().getValues();
 
-    console.log("Sheet data:", values);
-    console.log(
-      "Looking for username:",
-      data.username,
-      "password:",
-      data.password,
-    );
-
     for (let i = 1; i < values.length; i++) {
-      console.log("Checking row", i, ":", values[i][0], values[i][1]);
-
-      // Convert to string and trim whitespace
       const sheetUsername = String(values[i][0]).trim();
       const sheetPassword = String(values[i][1]).trim();
       const inputUsername = String(data.username).trim();
       const inputPassword = String(data.password).trim();
-
-      console.log(
-        "Comparing:",
-        sheetUsername,
-        "===",
-        inputUsername,
-        "&&",
-        sheetPassword,
-        "===",
-        inputPassword,
-      );
 
       if (sheetUsername === inputUsername && sheetPassword === inputPassword) {
         // Update last login
@@ -198,23 +206,19 @@ function handleLogin(data) {
 
     return {
       success: false,
-      error: "Invalid username or password",
-      debug: {
-        receivedUsername: data.username,
-        receivedPassword: data.password,
-        sheetData: values
-          .slice(1)
-          .map((row) => ({ username: row[0], password: row[1] })),
-      },
+      error: "Invalid username or password"
     };
   } catch (error) {
     return { success: false, error: "Login error: " + error.toString() };
   }
 }
 
-// ======= FARE RECEIPTS FUNCTIONS =======
+// ======= FARE RECEIPTS (DAILY ENTRIES) - COMPLETE CRUD =======
 
-// Add Fare Receipt
+/**
+ * Add new Fare Receipt (Daily Entry)
+ * Columns: A=Timestamp, B=Date, C=Route, D=CashAmount, E=BankAmount, F=TotalAmount, G=EntryType, H=EntryId, I=SubmittedBy
+ */
 function addFareReceipt(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(
@@ -237,7 +241,7 @@ function addFareReceipt(data) {
 
     return { 
       success: true, 
-      message: "Fare receipt added successfully",
+      message: "Daily fare receipt added successfully",
       entryId: entryId
     };
   } catch (error) {
@@ -248,7 +252,9 @@ function addFareReceipt(data) {
   }
 }
 
-// Get Fare Receipts
+/**
+ * Get all Fare Receipts (Daily Entries)
+ */
 function getFareReceipts() {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(
@@ -280,9 +286,115 @@ function getFareReceipts() {
   }
 }
 
-// ======= BOOKING ENTRIES FUNCTIONS =======
+/**
+ * Update existing Fare Receipt (Daily Entry)
+ */
+function updateFareReceipt(data) {
+  try {
+    const entryId = data.entryId;
+    const updatedData = data.updatedData;
+    
+    console.log('Updating fare receipt:', { entryId, updatedData });
 
-// Add Booking Entry
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
+    const entryIdColumn = 8; // Column H
+
+    // Find the row with matching entryId
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+    
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1; // +1 because sheet rows are 1-indexed
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error('Fare receipt not found with ID: ' + entryId);
+    }
+
+    // Update specific columns for Fare Receipt
+    if (updatedData.date) {
+      sheet.getRange(rowIndex, 2).setValue(updatedData.date); // B: Date
+    }
+    if (updatedData.route) {
+      sheet.getRange(rowIndex, 3).setValue(updatedData.route); // C: Route
+    }
+    if (updatedData.totalAmount !== undefined) {
+      sheet.getRange(rowIndex, 6).setValue(updatedData.totalAmount); // F: TotalAmount
+    }
+    // Update timestamp to show when it was modified
+    sheet.getRange(rowIndex, 1).setValue(new Date()); // A: Timestamp
+
+    return {
+      success: true,
+      message: 'Fare receipt updated successfully',
+      entryId: entryId,
+      rowIndex: rowIndex
+    };
+
+  } catch (error) {
+    console.error('Update fare receipt error:', error);
+    return {
+      success: false,
+      error: 'Update fare receipt error: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Delete Fare Receipt (Daily Entry)
+ */
+function deleteFareReceipt(data) {
+  try {
+    const entryId = data.entryId;
+    
+    console.log('Deleting fare receipt:', { entryId });
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
+    const entryIdColumn = 8; // Column H
+
+    // Find the row with matching entryId
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+    
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1; // +1 because sheet rows are 1-indexed
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error('Fare receipt not found with ID: ' + entryId);
+    }
+
+    // Delete the row
+    sheet.deleteRow(rowIndex);
+
+    return {
+      success: true,
+      message: 'Fare receipt deleted successfully',
+      entryId: entryId,
+      deletedRow: rowIndex
+    };
+
+  } catch (error) {
+    console.error('Delete fare receipt error:', error);
+    return {
+      success: false,
+      error: 'Delete fare receipt error: ' + error.toString()
+    };
+  }
+}
+
+// ======= BOOKING ENTRIES - COMPLETE CRUD =======
+
+/**
+ * Add new Booking Entry
+ * Columns: A=Timestamp, B=BookingDetails, C=DateFrom, D=DateTo, E=CashAmount, F=BankAmount, G=TotalAmount, H=EntryType, I=EntryId, J=SubmittedBy
+ */
 function addBookingEntry(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(
@@ -317,7 +429,9 @@ function addBookingEntry(data) {
   }
 }
 
-// Get Booking Entries
+/**
+ * Get all Booking Entries
+ */
 function getBookingEntries() {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(
@@ -350,9 +464,118 @@ function getBookingEntries() {
   }
 }
 
-// ======= OFF DAYS FUNCTIONS =======
+/**
+ * Update existing Booking Entry
+ */
+function updateBookingEntry(data) {
+  try {
+    const entryId = data.entryId;
+    const updatedData = data.updatedData;
+    
+    console.log('Updating booking entry:', { entryId, updatedData });
 
-// Add Off Day
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
+    const entryIdColumn = 9; // Column I
+
+    // Find the row with matching entryId
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+    
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1; // +1 because sheet rows are 1-indexed
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error('Booking entry not found with ID: ' + entryId);
+    }
+
+    // Update specific columns for Booking Entry
+    if (updatedData.bookingDetails) {
+      sheet.getRange(rowIndex, 2).setValue(updatedData.bookingDetails); // B: BookingDetails
+    }
+    if (updatedData.dateFrom) {
+      sheet.getRange(rowIndex, 3).setValue(updatedData.dateFrom); // C: DateFrom
+    }
+    if (updatedData.dateTo) {
+      sheet.getRange(rowIndex, 4).setValue(updatedData.dateTo); // D: DateTo
+    }
+    if (updatedData.totalAmount !== undefined) {
+      sheet.getRange(rowIndex, 7).setValue(updatedData.totalAmount); // G: TotalAmount
+    }
+    // Update timestamp
+    sheet.getRange(rowIndex, 1).setValue(new Date()); // A: Timestamp
+
+    return {
+      success: true,
+      message: 'Booking entry updated successfully',
+      entryId: entryId,
+      rowIndex: rowIndex
+    };
+
+  } catch (error) {
+    console.error('Update booking entry error:', error);
+    return {
+      success: false,
+      error: 'Update booking entry error: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Delete Booking Entry
+ */
+function deleteBookingEntry(data) {
+  try {
+    const entryId = data.entryId;
+    
+    console.log('Deleting booking entry:', { entryId });
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
+    const entryIdColumn = 9; // Column I
+
+    // Find the row with matching entryId
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+    
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1; // +1 because sheet rows are 1-indexed
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error('Booking entry not found with ID: ' + entryId);
+    }
+
+    // Delete the row
+    sheet.deleteRow(rowIndex);
+
+    return {
+      success: true,
+      message: 'Booking entry deleted successfully',
+      entryId: entryId,
+      deletedRow: rowIndex
+    };
+
+  } catch (error) {
+    console.error('Delete booking entry error:', error);
+    return {
+      success: false,
+      error: 'Delete booking entry error: ' + error.toString()
+    };
+  }
+}
+
+// ======= OFF DAYS - COMPLETE CRUD =======
+
+/**
+ * Add new Off Day
+ * Columns: A=Timestamp, B=Date, C=Reason, D=EntryType, E=EntryId, F=SubmittedBy
+ */
 function addOffDay(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(
@@ -380,7 +603,9 @@ function addOffDay(data) {
   }
 }
 
-// Get Off Days
+/**
+ * Get all Off Days
+ */
 function getOffDays() {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(
@@ -406,37 +631,18 @@ function getOffDays() {
   }
 }
 
-// ======= UPDATE FUNCTIONS =======
-
-// Universal Update Function
-function updateFareEntry(data) {
+/**
+ * Update existing Off Day
+ */
+function updateOffDay(data) {
   try {
     const entryId = data.entryId;
     const updatedData = data.updatedData;
-    const entryType = data.entryType;
     
-    console.log('Updating entry:', { entryId, entryType, updatedData });
+    console.log('Updating off day:', { entryId, updatedData });
 
-    let sheet;
-    let entryIdColumn;
-    let updateFunction;
-
-    // Determine which sheet and update function to use
-    if (entryType === 'daily') {
-      sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
-      entryIdColumn = 8; // Column H
-      updateFunction = updateFareReceiptRow;
-    } else if (entryType === 'booking') {
-      sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
-      entryIdColumn = 9; // Column I
-      updateFunction = updateBookingEntryRow;
-    } else if (entryType === 'off') {
-      sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OFF_DAYS);
-      entryIdColumn = 5; // Column E
-      updateFunction = updateOffDayRow;
-    } else {
-      throw new Error('Invalid entry type: ' + entryType);
-    }
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OFF_DAYS);
+    const entryIdColumn = 5; // Column E
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
@@ -450,102 +656,46 @@ function updateFareEntry(data) {
     }
 
     if (rowIndex === -1) {
-      throw new Error('Entry not found with ID: ' + entryId);
+      throw new Error('Off day not found with ID: ' + entryId);
     }
 
-    // Update the specific row using the appropriate function
-    updateFunction(sheet, rowIndex, updatedData);
+    // Update specific columns for Off Day
+    if (updatedData.date) {
+      sheet.getRange(rowIndex, 2).setValue(updatedData.date); // B: Date
+    }
+    if (updatedData.reason) {
+      sheet.getRange(rowIndex, 3).setValue(updatedData.reason); // C: Reason
+    }
+    // Update timestamp
+    sheet.getRange(rowIndex, 1).setValue(new Date()); // A: Timestamp
 
     return {
       success: true,
-      message: 'Entry updated successfully',
+      message: 'Off day updated successfully',
       entryId: entryId,
       rowIndex: rowIndex
     };
 
   } catch (error) {
-    console.error('Update error:', error);
+    console.error('Update off day error:', error);
     return {
       success: false,
-      error: 'Update entry error: ' + error.toString()
+      error: 'Update off day error: ' + error.toString()
     };
   }
 }
 
-// Update Fare Receipt Row
-function updateFareReceiptRow(sheet, rowIndex, updatedData) {
-  // Update specific columns for Fare Receipt
-  if (updatedData.date) {
-    sheet.getRange(rowIndex, 2).setValue(updatedData.date); // B: Date
-  }
-  if (updatedData.route) {
-    sheet.getRange(rowIndex, 3).setValue(updatedData.route); // C: Route
-  }
-  if (updatedData.totalAmount !== undefined) {
-    sheet.getRange(rowIndex, 6).setValue(updatedData.totalAmount); // F: TotalAmount
-  }
-  // Update timestamp to show when it was modified
-  sheet.getRange(rowIndex, 1).setValue(new Date()); // A: Timestamp
-}
-
-// Update Booking Entry Row
-function updateBookingEntryRow(sheet, rowIndex, updatedData) {
-  // Update specific columns for Booking Entry
-  if (updatedData.bookingDetails) {
-    sheet.getRange(rowIndex, 2).setValue(updatedData.bookingDetails); // B: BookingDetails
-  }
-  if (updatedData.dateFrom) {
-    sheet.getRange(rowIndex, 3).setValue(updatedData.dateFrom); // C: DateFrom
-  }
-  if (updatedData.dateTo) {
-    sheet.getRange(rowIndex, 4).setValue(updatedData.dateTo); // D: DateTo
-  }
-  if (updatedData.totalAmount !== undefined) {
-    sheet.getRange(rowIndex, 7).setValue(updatedData.totalAmount); // G: TotalAmount
-  }
-  // Update timestamp
-  sheet.getRange(rowIndex, 1).setValue(new Date()); // A: Timestamp
-}
-
-// Update Off Day Row
-function updateOffDayRow(sheet, rowIndex, updatedData) {
-  // Update specific columns for Off Day
-  if (updatedData.date) {
-    sheet.getRange(rowIndex, 2).setValue(updatedData.date); // B: Date
-  }
-  if (updatedData.reason) {
-    sheet.getRange(rowIndex, 3).setValue(updatedData.reason); // C: Reason
-  }
-  // Update timestamp
-  sheet.getRange(rowIndex, 1).setValue(new Date()); // A: Timestamp
-}
-
-// ======= DELETE FUNCTIONS =======
-
-// Universal Delete Function
-function deleteFareEntry(data) {
+/**
+ * Delete Off Day
+ */
+function deleteOffDay(data) {
   try {
     const entryId = data.entryId;
-    const entryType = data.entryType;
     
-    console.log('Deleting entry:', { entryId, entryType });
+    console.log('Deleting off day:', { entryId });
 
-    let sheet;
-    let entryIdColumn;
-
-    // Determine which sheet to use
-    if (entryType === 'daily') {
-      sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
-      entryIdColumn = 8; // Column H
-    } else if (entryType === 'booking') {
-      sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
-      entryIdColumn = 9; // Column I
-    } else if (entryType === 'off') {
-      sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OFF_DAYS);
-      entryIdColumn = 5; // Column E
-    } else {
-      throw new Error('Invalid entry type: ' + entryType);
-    }
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OFF_DAYS);
+    const entryIdColumn = 5; // Column E
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
@@ -559,7 +709,7 @@ function deleteFareEntry(data) {
     }
 
     if (rowIndex === -1) {
-      throw new Error('Entry not found with ID: ' + entryId);
+      throw new Error('Off day not found with ID: ' + entryId);
     }
 
     // Delete the row
@@ -567,16 +717,66 @@ function deleteFareEntry(data) {
 
     return {
       success: true,
-      message: 'Entry deleted successfully',
+      message: 'Off day deleted successfully',
       entryId: entryId,
       deletedRow: rowIndex
     };
 
   } catch (error) {
-    console.error('Delete error:', error);
+    console.error('Delete off day error:', error);
     return {
       success: false,
-      error: 'Delete entry error: ' + error.toString()
+      error: 'Delete off day error: ' + error.toString()
+    };
+  }
+}
+
+// ======= LEGACY FUNCTIONS (For Backward Compatibility) =======
+
+/**
+ * Legacy Universal Update Function (for backward compatibility)
+ */
+function updateFareEntryLegacy(data) {
+  try {
+    const entryType = data.entryType;
+    
+    if (entryType === 'daily') {
+      return updateFareReceipt(data);
+    } else if (entryType === 'booking') {
+      return updateBookingEntry(data);
+    } else if (entryType === 'off') {
+      return updateOffDay(data);
+    } else {
+      throw new Error('Invalid entry type: ' + entryType);
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Legacy update error: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Legacy Universal Delete Function (for backward compatibility)
+ */
+function deleteFareEntryLegacy(data) {
+  try {
+    const entryType = data.entryType;
+    
+    if (entryType === 'daily') {
+      return deleteFareReceipt(data);
+    } else if (entryType === 'booking') {
+      return deleteBookingEntry(data);
+    } else if (entryType === 'off') {
+      return deleteOffDay(data);
+    } else {
+      throw new Error('Invalid entry type: ' + entryType);
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Legacy delete error: ' + error.toString()
     };
   }
 }
