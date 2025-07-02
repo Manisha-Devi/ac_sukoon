@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import "../css/OtherPayment.css";
 import { addOtherPayment, getOtherPayments } from "../../services/googleSheetsAPI";
@@ -10,8 +11,7 @@ const OtherPayment = () => {
     cashAmount: '',
     bankAmount: '',
     totalAmount: '',
-    category: '',
-    remarks: ''
+    category: ''
   });
 
   const [payments, setPayments] = useState([]);
@@ -83,8 +83,7 @@ const OtherPayment = () => {
           cashAmount: '',
           bankAmount: '',
           totalAmount: '',
-          category: '',
-          remarks: ''
+          category: ''
         });
         loadPayments();
       } else {
@@ -98,205 +97,175 @@ const OtherPayment = () => {
   };
 
   return (
-    <div className="other-payment-container">
-      <div className="header">
-        <h2><i className="bi bi-wallet2"></i> Other Payment Management</h2>
+    <div className="fade-in">
+      <h2 className="mb-4">
+        <i className="bi bi-currency-rupee me-2"></i>
+        Other Payment Entry
+      </h2>
+
+      <div className="form-card">
+        <h3>Add New Other Payment</h3>
+        
+        {error && <div className="alert alert-danger">{error}</div>}
+        {success && <div className="alert alert-success">{success}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <div className="row g-3">
+            <div className="col-md-6">
+              <label className="form-label">Date</label>
+              <input
+                type="date"
+                className="form-control"
+                name="date"
+                value={formData.date}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">Payment Type</label>
+              <input
+                type="text"
+                className="form-control"
+                name="paymentType"
+                value={formData.paymentType}
+                onChange={handleInputChange}
+                placeholder="Enter payment type"
+                required
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">Category</label>
+              <select
+                className="form-control"
+                name="category"
+                value={formData.category}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select Category</option>
+                <option value="Office Expenses">Office Expenses</option>
+                <option value="Insurance">Insurance</option>
+                <option value="License & Permits">License & Permits</option>
+                <option value="Parking">Parking</option>
+                <option value="Toll">Toll</option>
+                <option value="Emergency">Emergency</option>
+                <option value="Miscellaneous">Miscellaneous</option>
+              </select>
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">Description</label>
+              <input
+                type="text"
+                className="form-control"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="Enter description"
+                required
+              />
+            </div>
+            <div className="col-md-4">
+              <label className="form-label">Cash Amount</label>
+              <input
+                type="number"
+                className="form-control"
+                name="cashAmount"
+                value={formData.cashAmount}
+                onChange={handleInputChange}
+                placeholder="0.00"
+                step="0.01"
+              />
+            </div>
+            <div className="col-md-4">
+              <label className="form-label">Bank Amount</label>
+              <input
+                type="number"
+                className="form-control"
+                name="bankAmount"
+                value={formData.bankAmount}
+                onChange={handleInputChange}
+                placeholder="0.00"
+                step="0.01"
+              />
+            </div>
+            <div className="col-md-4">
+              <label className="form-label">Total Amount</label>
+              <input
+                type="number"
+                className="form-control"
+                name="totalAmount"
+                value={formData.totalAmount}
+                onChange={handleInputChange}
+                placeholder="0.00"
+                step="0.01"
+                readOnly
+              />
+            </div>
+            <div className="col-12">
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2"></span>
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-plus-circle me-2"></i>
+                    Add Payment
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
 
-      {/* Add Payment Form */}
-      <div className="card mb-4">
-        <div className="card-header">
-          <h5><i className="bi bi-plus-circle"></i> Add New Other Payment</h5>
-        </div>
-        <div className="card-body">
-          {error && <div className="alert alert-danger">{error}</div>}
-          {success && <div className="alert alert-success">{success}</div>}
-
-          <form onSubmit={handleSubmit}>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label">Date</label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label">Payment Type</label>
-                  <select
-                    className="form-control"
-                    name="paymentType"
-                    value={formData.paymentType}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Select Payment Type</option>
-                    <option value="Insurance">Insurance</option>
-                    <option value="License Fee">License Fee</option>
-                    <option value="Permit Fee">Permit Fee</option>
-                    <option value="Fine/Penalty">Fine/Penalty</option>
-                    <option value="Parking Fee">Parking Fee</option>
-                    <option value="Toll Tax">Toll Tax</option>
-                    <option value="Office Expense">Office Expense</option>
-                    <option value="Emergency Expense">Emergency Expense</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label">Description</label>
-                  <textarea
-                    className="form-control"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    rows="2"
-                    placeholder="Enter payment description"
-                    required
-                  ></textarea>
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label">Category</label>
-                  <select
-                    className="form-control"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Select Category</option>
-                    <option value="Vehicle Related">Vehicle Related</option>
-                    <option value="Legal/Compliance">Legal/Compliance</option>
-                    <option value="Administrative">Administrative</option>
-                    <option value="Emergency">Emergency</option>
-                    <option value="Miscellaneous">Miscellaneous</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="col-md-4">
-                <div className="mb-3">
-                  <label className="form-label">Cash Amount</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="cashAmount"
-                    value={formData.cashAmount}
-                    onChange={handleInputChange}
-                    placeholder="0.00"
-                    step="0.01"
-                  />
-                </div>
-              </div>
-              <div className="col-md-4">
-                <div className="mb-3">
-                  <label className="form-label">Bank Amount</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="bankAmount"
-                    value={formData.bankAmount}
-                    onChange={handleInputChange}
-                    placeholder="0.00"
-                    step="0.01"
-                  />
-                </div>
-              </div>
-              <div className="col-md-4">
-                <div className="mb-3">
-                  <label className="form-label">Total Amount</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="totalAmount"
-                    value={formData.totalAmount}
-                    onChange={handleInputChange}
-                    placeholder="0.00"
-                    step="0.01"
-                    readOnly
-                  />
-                </div>
-              </div>
-            </div>
-
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2"></span>
-                  Adding...
-                </>
-              ) : (
-                <>
-                  <i className="bi bi-plus-circle me-2"></i>
-                  Add Payment
-                </>
-              )}
-            </button>
-          </form>
-        </div>
-      </div>
-
-      {/* Payments List */}
-      <div className="card">
-        <div className="card-header d-flex justify-content-between align-items-center">
-          <h5><i className="bi bi-list"></i> Recent Other Payments</h5>
+      {/* Recent Entries */}
+      <div className="form-card mt-4">
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h3>Recent Entries</h3>
           <button className="btn btn-outline-primary btn-sm" onClick={loadPayments}>
             <i className="bi bi-arrow-clockwise"></i> Refresh
           </button>
         </div>
-        <div className="card-body">
-          {loading && <div className="text-center">Loading...</div>}
+        
+        {loading && <div className="text-center">Loading...</div>}
 
-          {payments.length === 0 && !loading ? (
-            <div className="text-center text-muted">No other payments found</div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Type</th>
-                    <th>Description</th>
-                    <th>Category</th>
-                    <th>Cash</th>
-                    <th>Bank</th>
-                    <th>Total</th>
-                    <th>Submitted By</th>
+        {payments.length === 0 && !loading ? (
+          <div className="text-center text-muted">No other payments found</div>
+        ) : (
+          <div className="table-responsive">
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Cash</th>
+                  <th>Bank</th>
+                  <th>Total</th>
+                  <th>Submitted By</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.map((payment, index) => (
+                  <tr key={payment.id || index}>
+                    <td>{new Date(payment.date).toLocaleDateString()}</td>
+                    <td>{payment.paymentType}</td>
+                    <td>{payment.category}</td>
+                    <td>{payment.description}</td>
+                    <td>₹{payment.cashAmount}</td>
+                    <td>₹{payment.bankAmount}</td>
+                    <td><strong>₹{payment.totalAmount}</strong></td>
+                    <td>{payment.submittedBy}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {payments.map((payment, index) => (
-                    <tr key={payment.id || index}>
-                      <td>{new Date(payment.date).toLocaleDateString()}</td>
-                      <td>{payment.paymentType}</td>
-                      <td>{payment.description}</td>
-                      <td>{payment.category}</td>
-                      <td>₹{payment.cashAmount}</td>
-                      <td>₹{payment.bankAmount}</td>
-                      <td><strong>₹{payment.totalAmount}</strong></td>
-                      <td>{payment.submittedBy}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

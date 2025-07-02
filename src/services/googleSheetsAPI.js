@@ -1,5 +1,3 @@
-
-
 // Google Sheets API Integration Service
 const API_URL = 'https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec';
 
@@ -7,10 +5,10 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_S
 const apiCall = async (data, method = 'POST') => {
   try {
     console.log('Making API call:', { data, method, url: API_URL });
-    
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-    
+
     const options = {
       method: method,
       headers: {
@@ -22,7 +20,7 @@ const apiCall = async (data, method = 'POST') => {
     };
 
     let url = API_URL;
-    
+
     if (method === 'POST') {
       options.body = JSON.stringify(data);
     } else if (method === 'GET') {
@@ -35,22 +33,22 @@ const apiCall = async (data, method = 'POST') => {
       });
       url = `${API_URL}?${params.toString()}`;
     }
-    
+
     const response = await fetch(url, options);
     clearTimeout(timeoutId);
-    
+
     console.log('Response status:', response.status);
     console.log('Response headers:', [...response.headers.entries()]);
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error('HTTP Error Response:', errorText);
       throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
     }
-    
+
     const contentType = response.headers.get('content-type');
     let result;
-    
+
     if (contentType && contentType.includes('application/json')) {
       result = await response.json();
     } else {
@@ -63,37 +61,37 @@ const apiCall = async (data, method = 'POST') => {
         throw new Error(`Invalid JSON response: ${textResult}`);
       }
     }
-    
+
     console.log('API response:', result);
     return result;
   } catch (error) {
     console.error('API Call Error:', error);
-    
+
     if (error.name === 'AbortError') {
       return { success: false, error: 'Request timeout - please try again' };
     }
-    
+
     if (error.message && error.message.includes('Failed to fetch')) {
       return { 
         success: false, 
         error: 'Cannot connect to server. Please check if the Google Apps Script is deployed properly.' 
       };
     }
-    
+
     if (error.message && error.message.includes('NetworkError')) {
       return { 
         success: false, 
         error: 'Network error. Please check your internet connection and ensure Google Apps Script is properly deployed.' 
       };
     }
-    
+
     if (error.message && error.message.includes('CORS')) {
       return { 
         success: false, 
         error: 'CORS error. Please verify Google Apps Script deployment settings.' 
       };
     }
-    
+
     // Handle cases where error is not properly populated
     const errorMessage = error.message || error.toString() || 'Unknown error occurred';
     return { success: false, error: errorMessage };
@@ -234,13 +232,13 @@ export const testConnection = async () => {
   try {
     console.log('🔍 Testing Google Apps Script connection...');
     console.log('📍 API URL:', API_URL);
-    
+
     const result = await apiCall({ action: 'test' }, 'GET');
-    
+
     if (result.success) {
       console.log('✅ API Connection successful!');
       console.log('📊 Test Results:', result);
-      
+
       // Check if all required components are working
       if (result.tests) {
         Object.keys(result.tests).forEach(testName => {
@@ -251,7 +249,7 @@ export const testConnection = async () => {
     } else {
       console.log('❌ API Connection failed:', result.error);
     }
-    
+
     return result;
   } catch (error) {
     console.error('🚨 Connection test error:', error);
@@ -280,6 +278,3 @@ export const deleteEntry = async (sheetName, rowId) => {
     rowId: rowId
   });
 };
-
-
-

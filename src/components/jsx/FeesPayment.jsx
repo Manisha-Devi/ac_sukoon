@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import "../css/FeesPayment.css";
 import { addAddaPayment, getAddaPayments } from "../../services/googleSheetsAPI";
@@ -94,98 +95,81 @@ const FeesPayment = () => {
   };
 
   return (
-    <div className="fees-payment-container">
-      <div className="header">
-        <h2><i className="bi bi-building"></i> Adda/Terminal Fees Payment</h2>
-      </div>
+    <div className="fade-in">
+      <h2 className="mb-4">
+        <i className="bi bi-building me-2"></i>
+        Adda Payment Entry
+      </h2>
 
-      {/* Add Payment Form */}
-      <div className="card mb-4">
-        <div className="card-header">
-          <h5><i className="bi bi-plus-circle"></i> Add New Adda Payment</h5>
-        </div>
-        <div className="card-body">
-          {error && <div className="alert alert-danger">{error}</div>}
-          {success && <div className="alert alert-success">{success}</div>}
+      <div className="form-card">
+        <h3>Add New Adda Payment</h3>
+        
+        {error && <div className="alert alert-danger">{error}</div>}
+        {success && <div className="alert alert-success">{success}</div>}
 
-          <form onSubmit={handleSubmit}>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label">Date</label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label">Adda/Terminal Name</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="addaName"
-                    value={formData.addaName}
-                    onChange={handleInputChange}
-                    placeholder="Enter adda or terminal name"
-                    required
-                  />
-                </div>
-              </div>
+        <form onSubmit={handleSubmit}>
+          <div className="row g-3">
+            <div className="col-md-6">
+              <label className="form-label">Date</label>
+              <input
+                type="date"
+                className="form-control"
+                name="date"
+                value={formData.date}
+                onChange={handleInputChange}
+                required
+              />
             </div>
-
-            <div className="row">
-              <div className="col-md-4">
-                <div className="mb-3">
-                  <label className="form-label">Cash Amount</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="cashAmount"
-                    value={formData.cashAmount}
-                    onChange={handleInputChange}
-                    placeholder="0.00"
-                    step="0.01"
-                  />
-                </div>
-              </div>
-              <div className="col-md-4">
-                <div className="mb-3">
-                  <label className="form-label">Bank Amount</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="bankAmount"
-                    value={formData.bankAmount}
-                    onChange={handleInputChange}
-                    placeholder="0.00"
-                    step="0.01"
-                  />
-                </div>
-              </div>
-              <div className="col-md-4">
-                <div className="mb-3">
-                  <label className="form-label">Total Amount</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="totalAmount"
-                    value={formData.totalAmount}
-                    onChange={handleInputChange}
-                    placeholder="0.00"
-                    step="0.01"
-                    readOnly
-                  />
-                </div>
-              </div>
+            <div className="col-md-6">
+              <label className="form-label">Adda Name</label>
+              <input
+                type="text"
+                className="form-control"
+                name="addaName"
+                value={formData.addaName}
+                onChange={handleInputChange}
+                placeholder="Enter adda name"
+                required
+              />
             </div>
-
-            <div className="mb-3">
+            <div className="col-md-4">
+              <label className="form-label">Cash Amount</label>
+              <input
+                type="number"
+                className="form-control"
+                name="cashAmount"
+                value={formData.cashAmount}
+                onChange={handleInputChange}
+                placeholder="0.00"
+                step="0.01"
+              />
+            </div>
+            <div className="col-md-4">
+              <label className="form-label">Bank Amount</label>
+              <input
+                type="number"
+                className="form-control"
+                name="bankAmount"
+                value={formData.bankAmount}
+                onChange={handleInputChange}
+                placeholder="0.00"
+                step="0.01"
+              />
+            </div>
+            <div className="col-md-4">
+              <label className="form-label">Total Amount</label>
+              <input
+                type="number"
+                className="form-control"
+                name="totalAmount"
+                value={formData.totalAmount}
+                onChange={handleInputChange}
+                placeholder="0.00"
+                step="0.01"
+                readOnly
+              />
+            </div>
+            <div className="col-12">
               <label className="form-label">Remarks</label>
               <textarea
                 className="form-control"
@@ -196,68 +180,68 @@ const FeesPayment = () => {
                 placeholder="Enter any remarks"
               ></textarea>
             </div>
-
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2"></span>
-                  Adding...
-                </>
-              ) : (
-                <>
-                  <i className="bi bi-plus-circle me-2"></i>
-                  Add Payment
-                </>
-              )}
-            </button>
-          </form>
-        </div>
+            <div className="col-12">
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2"></span>
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-plus-circle me-2"></i>
+                    Add Payment
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
 
-      {/* Payments List */}
-      <div className="card">
-        <div className="card-header d-flex justify-content-between align-items-center">
-          <h5><i className="bi bi-list"></i> Recent Adda Payments</h5>
+      {/* Recent Entries */}
+      <div className="form-card mt-4">
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h3>Recent Entries</h3>
           <button className="btn btn-outline-primary btn-sm" onClick={loadPayments}>
             <i className="bi bi-arrow-clockwise"></i> Refresh
           </button>
         </div>
-        <div className="card-body">
-          {loading && <div className="text-center">Loading...</div>}
+        
+        {loading && <div className="text-center">Loading...</div>}
 
-          {payments.length === 0 && !loading ? (
-            <div className="text-center text-muted">No adda payments found</div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Adda/Terminal</th>
-                    <th>Cash</th>
-                    <th>Bank</th>
-                    <th>Total</th>
-                    <th>Submitted By</th>
-                    <th>Remarks</th>
+        {payments.length === 0 && !loading ? (
+          <div className="text-center text-muted">No adda payments found</div>
+        ) : (
+          <div className="table-responsive">
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Adda Name</th>
+                  <th>Cash</th>
+                  <th>Bank</th>
+                  <th>Total</th>
+                  <th>Submitted By</th>
+                  <th>Remarks</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.map((payment, index) => (
+                  <tr key={payment.id || index}>
+                    <td>{new Date(payment.date).toLocaleDateString()}</td>
+                    <td>{payment.addaName}</td>
+                    <td>₹{payment.cashAmount}</td>
+                    <td>₹{payment.bankAmount}</td>
+                    <td><strong>₹{payment.totalAmount}</strong></td>
+                    <td>{payment.submittedBy}</td>
+                    <td>{payment.remarks}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {payments.map((payment, index) => (
-                    <tr key={payment.id || index}>
-                      <td>{new Date(payment.date).toLocaleDateString()}</td>
-                      <td>{payment.addaName}</td>
-                      <td>₹{payment.cashAmount}</td>
-                      <td>₹{payment.bankAmount}</td>
-                      <td><strong>₹{payment.totalAmount}</strong></td>
-                      <td>{payment.submittedBy}</td>
-                      <td>{payment.remarks}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
