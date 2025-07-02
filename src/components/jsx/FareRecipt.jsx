@@ -70,7 +70,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       entry.type === 'daily' && 
       entry.date === selectedDate && 
       entry.route === selectedRoute &&
-      (!editingEntry || entry.id !== editingEntry.id)
+      (!editingEntry || entry.entryId !== editingEntry.entryId)
     );
 
     // Check if date is used in booking entries
@@ -78,14 +78,14 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       entry.type === 'booking' && 
       selectedDate >= entry.dateFrom && 
       selectedDate <= entry.dateTo &&
-      (!editingEntry || entry.id !== editingEntry.id)
+      (!editingEntry || entry.entryId !== editingEntry.entryId)
     );
 
     // Check if date is used in off day entries
     const existingOffEntry = fareData.find(entry => 
       entry.type === 'off' && 
       entry.date === selectedDate &&
-      (!editingEntry || entry.id !== editingEntry.id)
+      (!editingEntry || entry.entryId !== editingEntry.entryId)
     );
 
     return existingDailyEntry || existingBookingEntry || existingOffEntry;
@@ -99,14 +99,14 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     const existingDailyEntry = fareData.find(entry => 
       entry.type === 'daily' && 
       entry.date === selectedDate &&
-      (!editingEntry || entry.id !== editingEntry.id)
+      (!editingEntry || entry.entryId !== editingEntry.entryId)
     );
 
     // Check if date is used in off day entries
     const existingOffEntry = fareData.find(entry => 
       entry.type === 'off' && 
       entry.date === selectedDate &&
-      (!editingEntry || entry.id !== editingEntry.id)
+      (!editingEntry || entry.entryId !== editingEntry.entryId)
     );
 
     return existingDailyEntry || existingOffEntry;
@@ -120,7 +120,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     const existingDailyEntry = fareData.find(entry => 
       entry.type === 'daily' && 
       entry.date === selectedDate &&
-      (!editingEntry || entry.id !== editingEntry.id)
+      (!editingEntry || entry.entryId !== editingEntry.entryId)
     );
 
     // Check if date is used in booking entries
@@ -128,7 +128,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       entry.type === 'booking' && 
       selectedDate >= entry.dateFrom && 
       selectedDate <= entry.dateTo &&
-      (!editingEntry || entry.id !== editingEntry.id)
+      (!editingEntry || entry.entryId !== editingEntry.entryId)
     );
 
     return existingDailyEntry || existingBookingEntry;
@@ -145,7 +145,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
     const disabledDates = [];
     fareData.forEach(entry => {
-      if (editingEntry && entry.id === editingEntry.id) return;
+      if (editingEntry && entry.entryId === editingEntry.entryId) return;
 
       if (entry.type === 'daily' && entry.route === dailyFareData.route) {
         disabledDates.push(entry.date);
@@ -197,7 +197,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       if (editingEntry) {
         // Update existing entry using hybrid service
         const oldTotal = editingEntry.totalAmount;
-        const result = await hybridDataService.updateFareEntry(editingEntry.id, {
+        const result = await hybridDataService.updateFareEntry(editingEntry.entryId, {
           route: dailyFareData.route,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
@@ -285,7 +285,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       if (editingEntry) {
         // Update existing entry using hybrid service
         const oldTotal = editingEntry.totalAmount;
-        const result = await hybridDataService.updateFareEntry(editingEntry.id, {
+        const result = await hybridDataService.updateFareEntry(editingEntry.entryId, {
           bookingDetails: bookingData.bookingDetails,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
@@ -364,7 +364,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
       if (editingEntry) {
         // Update existing entry using hybrid service
-        const result = await hybridDataService.updateFareEntry(editingEntry.id, {
+        const result = await hybridDataService.updateFareEntry(editingEntry.entryId, {
           date: offDayData.date,
           reason: offDayData.reason
         }, fareData);
@@ -819,7 +819,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                 <h4>Recent Entries</h4>
                 <div className="row">
                   {fareData.slice(-6).reverse().map((entry) => (
-                    <div key={entry.id} className="col-md-6 col-lg-4 mb-3">
+                    <div key={entry.entryId} className="col-md-6 col-lg-4 mb-3">
                       <div className="entry-card">
                         <div className="card-body">
                           <div className="entry-header">

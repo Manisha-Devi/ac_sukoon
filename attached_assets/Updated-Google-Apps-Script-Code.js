@@ -238,14 +238,12 @@ function addFareReceipt(data) {
       data.submittedBy || "", // I: SubmittedBy
     ]);
 
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: true,
-        entryId: entryId,
-        message: "Fare receipt added successfully",
-        timestamp: new Date().toISOString(),
-      }),
-    );
+    return {
+      success: true,
+      entryId: entryId,
+      message: "Fare receipt added successfully",
+      timestamp: new Date().toISOString(),
+    };
   } catch (error) {
     return {
       success: false,

@@ -1,0 +1,1 @@
+console.log('✅ Entry synced to Google Sheets:', entry.entryId);

@@ -70,6 +70,7 @@ class HybridDataService {
       if (fareReceipts.success && fareReceipts.data) {
         allData = [...allData, ...fareReceipts.data.map(entry => ({
           ...entry,
+          entryId: entry.entryId || entry.id,
           type: 'daily',
           synced: true,
           pendingSync: false
@@ -79,6 +80,7 @@ class HybridDataService {
       if (bookingEntries.success && bookingEntries.data) {
         allData = [...allData, ...bookingEntries.data.map(entry => ({
           ...entry,
+          entryId: entry.entryId || entry.id,
           type: 'booking',
           synced: true,
           pendingSync: false
@@ -88,6 +90,7 @@ class HybridDataService {
       if (offDays.success && offDays.data) {
         allData = [...allData, ...offDays.data.map(entry => ({
           ...entry,
+          entryId: entry.entryId || entry.id,
           type: 'off',
           synced: true,
           pendingSync: false
@@ -138,7 +141,7 @@ class HybridDataService {
       // Try to sync to Google Sheets in background if online
       if (this.isOnline) {
         this.syncSingleEntry(newEntry).catch(error => {
-          console.error('⚠️ Background sync failed for entry:', newEntry.id, error);
+          console.error('⚠️ Background sync failed for entry:', newEntry.entryId, error);
         });
       }
 
