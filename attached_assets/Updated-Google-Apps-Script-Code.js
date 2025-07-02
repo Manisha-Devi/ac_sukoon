@@ -225,7 +225,7 @@ function addFareReceipt(data) {
       SHEET_NAMES.FARE_RECEIPTS,
     );
 
-    const entryId = data.id || Date.now();
+    const entryId = data.entryId;
 
     sheet.appendRow([
       new Date(), // A: Timestamp
@@ -401,7 +401,7 @@ function addBookingEntry(data) {
       SHEET_NAMES.BOOKING_ENTRIES,
     );
 
-    const entryId = data.id || Date.now();
+    const entryId = data.entryId;
 
     sheet.appendRow([
       new Date(), // A: Timestamp
@@ -582,7 +582,7 @@ function addOffDay(data) {
       SHEET_NAMES.OFF_DAYS,
     );
 
-    const entryId = data.id || Date.now();
+    const entryId = data.entryId;
 
     sheet.appendRow([
       new Date(), // A: Timestamp

@@ -114,9 +114,11 @@ class HybridDataService {
     try {
       console.log('📝 Adding entry with hybrid system...');
 
+      const entryId = Date.now();
       const newEntry = {
         ...entryData,
-        id: Date.now(),
+        id: entryId,
+        entryId: entryId,
         timestamp: new Date().toISOString(),
         synced: false,
         pendingSync: true
@@ -152,6 +154,7 @@ class HybridDataService {
       // Add to appropriate Google Sheet based on type
       if (entry.type === 'daily') {
         result = await authService.addFareReceipt({
+          entryId: entry.entryId,
           date: entry.date,
           route: entry.route,
           cashAmount: entry.cashAmount || 0,
@@ -161,6 +164,7 @@ class HybridDataService {
         });
       } else if (entry.type === 'booking') {
         result = await authService.addBookingEntry({
+          entryId: entry.entryId,
           bookingDetails: entry.bookingDetails,
           dateFrom: entry.dateFrom,
           dateTo: entry.dateTo,
@@ -171,6 +175,7 @@ class HybridDataService {
         });
       } else if (entry.type === 'off') {
         result = await authService.addOffDay({
+          entryId: entry.entryId,
           date: entry.date,
           reason: entry.reason,
           submittedBy: 'driver'
