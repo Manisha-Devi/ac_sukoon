@@ -182,6 +182,11 @@ export const getApprovalData = async () => {
   return await apiCall({ action: 'getApprovalData' }, 'GET');
 };
 
+// Test API connection
+export const testConnection = async () => {
+  return await apiCall({ action: 'test' }, 'GET');
+};
+
 // Generic Update/Delete functions
 export const updateEntry = async (sheetName, rowId, updates) => {
   return await apiCall({

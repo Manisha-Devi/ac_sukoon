@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import "../css/Login.css";
-import { login } from "../../services/googleSheetsAPI";
+import { login, testConnection } from "../../services/googleSheetsAPI";
 
 function Login({ onLogin }) {
   const [formData, setFormData] = useState({
@@ -55,6 +55,16 @@ function Login({ onLogin }) {
     setIsLoading(true);
     
     try {
+      // Test API connection first
+      console.log('Testing API connection...');
+      const testResult = await testConnection();
+      
+      if (!testResult.success) {
+        throw new Error('Cannot connect to Google Apps Script. Please check deployment.');
+      }
+      
+      console.log('API connection successful:', testResult);
+      
       // Call Google Sheets API for authentication
       const result = await login(formData.username, formData.password);
       
