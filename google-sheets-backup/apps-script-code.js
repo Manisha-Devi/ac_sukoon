@@ -27,7 +27,7 @@ function doOptions(request) {
   const output = ContentService.createTextOutput('');
   output.setMimeType(ContentService.MimeType.TEXT);
   output.setHeaders({
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': 'https://bb948baf-d71d-4183-882c-dfc8b9ee2094-00-vj1xcz5mfci9.pike.replit.dev',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Max-Age': '86400'
@@ -127,7 +127,7 @@ function doPost(e) {
     const output = ContentService.createTextOutput(JSON.stringify(result));
     output.setMimeType(ContentService.MimeType.JSON);
     output.setHeaders({
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': 'https://bb948baf-d71d-4183-882c-dfc8b9ee2094-00-vj1xcz5mfci9.pike.replit.dev',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type'
     });
@@ -137,7 +137,7 @@ function doPost(e) {
     const errorOutput = ContentService.createTextOutput(JSON.stringify({ success: false, error: error.toString() }));
     errorOutput.setMimeType(ContentService.MimeType.JSON);
     errorOutput.setHeaders({
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': 'https://bb948baf-d71d-4183-882c-dfc8b9ee2094-00-vj1xcz5mfci9.pike.replit.dev',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type'
     });
@@ -200,7 +200,7 @@ function doGet(e) {
   const output = ContentService.createTextOutput(JSON.stringify(result));
   output.setMimeType(ContentService.MimeType.JSON);
   output.setHeaders({
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': 'https://bb948baf-d71d-4183-882c-dfc8b9ee2094-00-vj1xcz5mfci9.pike.replit.dev',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type'
   });
@@ -213,7 +213,7 @@ function doGet(e) {
     }));
     errorOutput.setMimeType(ContentService.MimeType.JSON);
     errorOutput.setHeaders({
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': 'https://bb948baf-d71d-4183-882c-dfc8b9ee2094-00-vj1xcz5mfci9.pike.replit.dev',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type'
     });
