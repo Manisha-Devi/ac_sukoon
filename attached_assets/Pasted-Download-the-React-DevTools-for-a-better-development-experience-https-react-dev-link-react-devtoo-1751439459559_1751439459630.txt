@@ -1,0 +1,23 @@
+Download the React DevTools for a better development experience: https://react.dev/link/react-devtools
+Login.jsx:59 Testing API connection...
+googleSheetsAPI.js:8 Making API call: Objectdata: {action: 'test'}method: "GET"url: "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec"[[Prototype]]: Object
+bb948baf-d71d-4183-882c-dfc8b9ee2094-00-vj1xcz5mfci9.pike.replit.dev/:1 Access to fetch at 'https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec?action=test' from origin 'https://bb948baf-d71d-4183-882c-dfc8b9ee2094-00-vj1xcz5mfci9.pike.replit.dev' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.Understand this error
+script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec?action=test:1 
+            
+            
+           Failed to load resource: net::ERR_FAILEDUnderstand this error
+googleSheetsAPI.js:42 API Call Error: TypeError: Failed to fetch
+    at apiCall (googleSheetsAPI.js:28:28)
+    at testConnection (googleSheetsAPI.js:187:16)
+    at handleSubmit (Login.jsx:60:32)
+    at executeDispatch (react-dom_client.js?v=270ab2c0:11736:11)
+    at runWithFiberInDEV (react-dom_client.js?v=270ab2c0:1485:72)
+    at processDispatchQueue (react-dom_client.js?v=270ab2c0:11772:37)
+    at react-dom_client.js?v=270ab2c0:12182:11
+    at batchedUpdates$1 (react-dom_client.js?v=270ab2c0:2628:42)
+    at dispatchEventForPluginEventSystem (react-dom_client.js?v=270ab2c0:11877:9)
+    at dispatchEvent (react-dom_client.js?v=270ab2c0:14792:13)
+apiCall @ googleSheetsAPI.js:42Understand this error
+Login.jsx:92 Login error: Error: Cannot connect to Google Apps Script. Please check deployment.
+    at handleSubmit (Login.jsx:63:15)
+handleSubmit @ Login.jsx:92Understand this error
