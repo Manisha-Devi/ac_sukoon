@@ -8,7 +8,7 @@
 
 .fare-entry-container {
   padding: 20px 0;
-  background: transparent;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   min-height: 100vh;
   width: 100%;
   max-width: 100%;
@@ -24,9 +24,9 @@
 .fare-header {
   margin-bottom: 30px;
   padding: 20px;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.9);
   border-radius: var(--border-radius);
-  box-shadow: none;
+  box-shadow: var(--card-shadow);
 }
 
 .header-content {
@@ -54,13 +54,15 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: transparent;
-  font-size: 1.5rem;
+  border-radius: 50%;
+  font-size: 1.2rem;
   transition: all 0.3s ease;
 }
 
 .simple-sync-indicator.pending {
+  background: rgba(220, 53, 69, 0.15);
   color: #dc3545;
+  border: 2px solid rgba(220, 53, 69, 0.3);
 }
 
 .simple-sync-indicator.pending i {
@@ -68,7 +70,9 @@
 }
 
 .simple-sync-indicator.synced {
+  background: rgba(40, 167, 69, 0.15);
   color: #28a745;
+  border: 2px solid rgba(40, 167, 69, 0.3);
 }
 
 @keyframes spin {
@@ -164,11 +168,11 @@
 
 /* Summary Cards */
 .summary-card {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: var(--border-radius);
-  box-shadow: none;
+  box-shadow: var(--card-shadow);
   transition: var(--transition);
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .summary-card:hover {
@@ -214,10 +218,10 @@
 /* Tab Navigation */
 .tab-navigation .nav-tabs {
   border: none;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.9);
   border-radius: var(--border-radius);
   padding: 10px;
-  box-shadow: none;
+  box-shadow: var(--card-shadow);
 }
 
 .tab-navigation .nav-link {
@@ -247,11 +251,11 @@
 
 /* Form Card */
 .fare-form-card {
-  background: transparent;
-  backdrop-filter: none;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
   border-radius: var(--border-radius);
-  box-shadow: none;
-  border: none;
+  box-shadow: var(--card-shadow);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 30px;
   margin-bottom: 30px;
   transition: var(--transition);
@@ -344,11 +348,11 @@
 }
 
 .entry-card {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: var(--border-radius);
-  box-shadow: none;
+  box-shadow: var(--card-shadow);
   transition: var(--transition);
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   height: 100%;
 }
 

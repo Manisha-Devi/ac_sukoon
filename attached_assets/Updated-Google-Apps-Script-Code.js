@@ -317,18 +317,12 @@ function updateFareReceipt(data) {
       throw new Error('Fare receipt not found with ID: ' + entryId);
     }
 
-    // Update all columns for Fare Receipt
-    if (updatedData.date !== undefined) {
+    // Update specific columns for Fare Receipt
+    if (updatedData.date) {
       sheet.getRange(rowIndex, 2).setValue(updatedData.date); // B: Date
     }
-    if (updatedData.route !== undefined) {
+    if (updatedData.route) {
       sheet.getRange(rowIndex, 3).setValue(updatedData.route); // C: Route
-    }
-    if (updatedData.cashAmount !== undefined) {
-      sheet.getRange(rowIndex, 4).setValue(updatedData.cashAmount); // D: CashAmount
-    }
-    if (updatedData.bankAmount !== undefined) {
-      sheet.getRange(rowIndex, 5).setValue(updatedData.bankAmount); // E: BankAmount
     }
     if (updatedData.totalAmount !== undefined) {
       sheet.getRange(rowIndex, 6).setValue(updatedData.totalAmount); // F: TotalAmount
@@ -507,21 +501,15 @@ function updateBookingEntry(data) {
       throw new Error('Booking entry not found with ID: ' + entryId);
     }
 
-    // Update all columns for Booking Entry
-    if (updatedData.bookingDetails !== undefined) {
+    // Update specific columns for Booking Entry
+    if (updatedData.bookingDetails) {
       sheet.getRange(rowIndex, 2).setValue(updatedData.bookingDetails); // B: BookingDetails
     }
-    if (updatedData.dateFrom !== undefined) {
+    if (updatedData.dateFrom) {
       sheet.getRange(rowIndex, 3).setValue(updatedData.dateFrom); // C: DateFrom
     }
-    if (updatedData.dateTo !== undefined) {
+    if (updatedData.dateTo) {
       sheet.getRange(rowIndex, 4).setValue(updatedData.dateTo); // D: DateTo
-    }
-    if (updatedData.cashAmount !== undefined) {
-      sheet.getRange(rowIndex, 5).setValue(updatedData.cashAmount); // E: CashAmount
-    }
-    if (updatedData.bankAmount !== undefined) {
-      sheet.getRange(rowIndex, 6).setValue(updatedData.bankAmount); // F: BankAmount
     }
     if (updatedData.totalAmount !== undefined) {
       sheet.getRange(rowIndex, 7).setValue(updatedData.totalAmount); // G: TotalAmount
@@ -686,11 +674,11 @@ function updateOffDay(data) {
       throw new Error('Off day not found with ID: ' + entryId);
     }
 
-    // Update all columns for Off Day
-    if (updatedData.date !== undefined) {
+    // Update specific columns for Off Day
+    if (updatedData.date) {
       sheet.getRange(rowIndex, 2).setValue(updatedData.date); // B: Date
     }
-    if (updatedData.reason !== undefined) {
+    if (updatedData.reason) {
       sheet.getRange(rowIndex, 3).setValue(updatedData.reason); // C: Reason
     }
     // Update timestamp
