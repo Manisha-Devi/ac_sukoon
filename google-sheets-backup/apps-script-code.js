@@ -1,4 +1,5 @@
 
+
 // AC Sukoon Transport Management - Google Apps Script API
 // Created for React App Integration
 
@@ -23,15 +24,9 @@ const SHEET_NAMES = {
 
 // CORS handler for React app
 function doOptions(request) {
-  const output = ContentService.createTextOutput('');
-  output.setMimeType(ContentService.MimeType.TEXT);
-  output.setHeaders({
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Max-Age': '86400'
-  });
-  return output;
+  return ContentService
+    .createTextOutput('')
+    .setMimeType(ContentService.MimeType.TEXT);
 }
 
 // Main API handler
@@ -123,22 +118,14 @@ function doPost(e) {
         result = { success: false, error: 'Invalid action' };
     }
     
-    const output = ContentService.createTextOutput(JSON.stringify(result));
-    output.setMimeType(ContentService.MimeType.JSON);
-    output.setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    });
-    return output;
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
       
   } catch (error) {
-    const output = ContentService.createTextOutput(JSON.stringify({ success: false, error: error.toString() }));
-    output.setMimeType(ContentService.MimeType.JSON);
-    output.setHeaders({
-      'Access-Control-Allow-Origin': '*'
-    });
-    return output;
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, error: error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
@@ -183,12 +170,9 @@ function doGet(e) {
       result = { success: false, error: 'Invalid action' };
   }
   
-  const output = ContentService.createTextOutput(JSON.stringify(result));
-  output.setMimeType(ContentService.MimeType.JSON);
-  output.setHeaders({
-    'Access-Control-Allow-Origin': '*'
-  });
-  return output;
+  return ContentService
+    .createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 // Authentication function
@@ -741,3 +725,4 @@ function deleteEntry(data) {
     return { success: false, error: error.toString() };
   }
 }
+
