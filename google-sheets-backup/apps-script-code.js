@@ -22,14 +22,14 @@ const SHEET_NAMES = {
   APPROVAL_DATA: 'ApprovalData'
 };
 
-// CORS handler for React app
-function doOptions(request) {
+// CORS handler for React app - handles preflight OPTIONS requests
+function doOptions(e) {
   const output = ContentService.createTextOutput('');
   output.setMimeType(ContentService.MimeType.TEXT);
   output.setHeaders({
     'Access-Control-Allow-Origin': 'https://bb948baf-d71d-4183-882c-dfc8b9ee2094-00-vj1xcz5mfci9.pike.replit.dev',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Max-Age': '86400'
   });
   return output;
