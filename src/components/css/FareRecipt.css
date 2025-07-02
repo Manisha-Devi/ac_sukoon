@@ -60,9 +60,9 @@
 }
 
 .simple-sync-indicator.pending {
-  background: rgba(220, 53, 69, 0.15);
+  background: transparent;
   color: #dc3545;
-  border: 2px solid rgba(220, 53, 69, 0.3);
+  border: none;
 }
 
 .simple-sync-indicator.pending i {
@@ -70,9 +70,9 @@
 }
 
 .simple-sync-indicator.synced {
-  background: rgba(40, 167, 69, 0.15);
+  background: transparent;
   color: #28a745;
-  border: 2px solid rgba(40, 167, 69, 0.3);
+  border: none;
 }
 
 @keyframes spin {
