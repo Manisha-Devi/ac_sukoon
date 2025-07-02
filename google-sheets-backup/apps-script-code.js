@@ -21,9 +21,13 @@ const SHEET_NAMES = {
 
 // Handle OPTIONS requests for CORS
 function doOptions() {
-  return ContentService.createTextOutput("").setMimeType(
-    ContentService.MimeType.TEXT,
-  );
+  return ContentService.createTextOutput("")
+    .setMimeType(ContentService.MimeType.TEXT)
+    .setHeaders({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    });
 }
 
 // Main POST handler
@@ -105,16 +109,25 @@ function doPost(e) {
         result = { success: false, error: "Invalid action: " + action };
     }
 
-    return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(
-      ContentService.MimeType.JSON,
-    );
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeaders({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      });
   } catch (error) {
     return ContentService.createTextOutput(
       JSON.stringify({
         success: false,
         error: "Server Error: " + error.toString(),
       }),
-    ).setMimeType(ContentService.MimeType.JSON);
+    ).setMimeType(ContentService.MimeType.JSON)
+    .setHeaders({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    });
   }
 }
 
@@ -127,7 +140,12 @@ function doGet(e) {
           success: false,
           error: "No action parameter provided",
         }),
-      ).setMimeType(ContentService.MimeType.JSON);
+      ).setMimeType(ContentService.MimeType.JSON)
+    .setHeaders({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    });
     }
 
     const action = e.parameter.action;
@@ -171,16 +189,25 @@ function doGet(e) {
         result = { success: false, error: "Invalid GET action: " + action };
     }
 
-    return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(
-      ContentService.MimeType.JSON,
-    );
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeaders({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      });
   } catch (error) {
     return ContentService.createTextOutput(
       JSON.stringify({
         success: false,
         error: "GET Error: " + error.toString(),
       }),
-    ).setMimeType(ContentService.MimeType.JSON);
+    ).setMimeType(ContentService.MimeType.JSON)
+    .setHeaders({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    });
   }
 }
 
