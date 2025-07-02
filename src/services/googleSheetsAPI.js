@@ -2,7 +2,7 @@
 
 // Google Sheets API Integration Service
 // IMPORTANT: Replace this with your new Web App URL after deployment
-const API_URL = 'https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec';
+const API_URL = 'YOUR_NEW_WEB_APP_URL_HERE';
 
 // Generic API call function with better error handling
 const apiCall = async (data, method = 'POST') => {
