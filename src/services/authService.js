@@ -2,8 +2,8 @@
 // Authentication service for Google Sheets database
 class AuthService {
   constructor() {
-    // Replace this with your actual Google Apps Script Web App URL
-    this.API_URL = 'YOUR_ACTUAL_WEB_APP_URL_HERE';
+    // Google Apps Script Web App URL
+    this.API_URL = 'https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec';
   }
 
   // Authenticate user against Google Sheets database
