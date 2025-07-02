@@ -1,7 +1,5 @@
-
-
 // AC Sukoon Transport Management - Google Apps Script API
-// Complete Clean Code with CORS Fix
+// Complete Clean Code
 
 // IMPORTANT: Replace this with your actual Google Sheets ID
 const SPREADSHEET_ID = "1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidEmhzgM";
@@ -21,19 +19,14 @@ const SHEET_NAMES = {
   APPROVAL_DATA: "ApprovalData",
 };
 
-// Handle OPTIONS requests for CORS preflight
+// Handle OPTIONS requests for CORS
 function doOptions() {
-  return ContentService.createTextOutput("")
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Max-Age': '86400'
-    });
+  return ContentService.createTextOutput("").setMimeType(
+    ContentService.MimeType.TEXT,
+  );
 }
 
-// Main POST handler with CORS fix
+// Main POST handler
 function doPost(e) {
   try {
     if (!e || !e.postData || !e.postData.contents) {
@@ -112,29 +105,20 @@ function doPost(e) {
         result = { success: false, error: "Invalid action: " + action };
     }
 
-    return ContentService.createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeaders({
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      });
+    return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(
+      ContentService.MimeType.JSON,
+    );
   } catch (error) {
     return ContentService.createTextOutput(
       JSON.stringify({
         success: false,
         error: "Server Error: " + error.toString(),
       }),
-    ).setMimeType(ContentService.MimeType.JSON)
-    .setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    });
+    ).setMimeType(ContentService.MimeType.JSON);
   }
 }
 
-// Main GET handler with CORS fix
+// Main GET handler
 function doGet(e) {
   try {
     if (!e || !e.parameter || !e.parameter.action) {
@@ -143,12 +127,7 @@ function doGet(e) {
           success: false,
           error: "No action parameter provided",
         }),
-      ).setMimeType(ContentService.MimeType.JSON)
-      .setHeaders({
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      });
+      ).setMimeType(ContentService.MimeType.JSON);
     }
 
     const action = e.parameter.action;
@@ -192,25 +171,16 @@ function doGet(e) {
         result = { success: false, error: "Invalid GET action: " + action };
     }
 
-    return ContentService.createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeaders({
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      });
+    return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(
+      ContentService.MimeType.JSON,
+    );
   } catch (error) {
     return ContentService.createTextOutput(
       JSON.stringify({
         success: false,
         error: "GET Error: " + error.toString(),
       }),
-    ).setMimeType(ContentService.MimeType.JSON)
-    .setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    });
+    ).setMimeType(ContentService.MimeType.JSON);
   }
 }
 
