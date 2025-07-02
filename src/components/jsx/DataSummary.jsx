@@ -85,6 +85,12 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
           bankExpense: expenseData.filter(entry => entry.type === 'service').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
           totalExpense: expenseData.filter(entry => entry.type === 'service').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
         },
+        unionPayments: {
+          totalEntries: expenseData.filter(entry => entry.type === 'union').length,
+          cashExpense: expenseData.filter(entry => entry.type === 'union').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
+          bankExpense: expenseData.filter(entry => entry.type === 'union').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
+          totalExpense: expenseData.filter(entry => entry.type === 'union').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
+        },
         otherPayments: {
           totalEntries: expenseData.filter(entry => entry.type === 'other').length,
           cashExpense: expenseData.filter(entry => entry.type === 'other').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
@@ -295,6 +301,51 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                     <span className="entry-detail">
                       {entry.serviceType || entry.description} - {entry.date}
                       {entry.vendor && ` (${entry.vendor})`}
+                    </span>
+                    <span className="entry-amount">₹{entry.totalAmount}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Union Payment Summary */}
+          <div className="section-summary-card">
+            <h5><i className="bi bi-people"></i> Union Payment Summary</h5>
+            <div className="row">
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Total Entries</h6>
+                  <h5>{expenseData.filter(entry => entry.type === 'union').length}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Cash Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'union').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Bank Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'union').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card total">
+                  <h6>Total Union Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'union').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+            </div>
+            {expenseData.filter(entry => entry.type === 'union').length > 0 && (
+              <div className="recent-entries-preview">
+                <h6>Recent Entries:</h6>
+                {expenseData.filter(entry => entry.type === 'union').slice(-3).map((entry) => (
+                  <div key={entry.id} className="entry-preview">
+                    <span className="entry-type">Union</span>
+                    <span className="entry-detail">
+                      {entry.description} - {entry.date}
                     </span>
                     <span className="entry-amount">₹{entry.totalAmount}</span>
                   </div>

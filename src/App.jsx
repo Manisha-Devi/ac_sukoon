@@ -7,6 +7,7 @@ import Dashboard from "./components/jsx/Dashboard";
 import FareEntry from "./components/jsx/FareRecipt";
 import FuelEntry from "./components/jsx/FuelPayment";
 import AddaFeesEntry from "./components/jsx/FeesPayment";
+import UnionPayment from "./components/jsx/UnionPayment";
 import ServiceEntry from "./components/jsx/ServicePayment";
 import OtherPayment from "./components/jsx/OtherPayment";
 import BonusCalculator from "./components/jsx/BonusCalculator";
@@ -191,6 +192,13 @@ function App() {
               Adda Payment
             </button>
             <button
+              className={`menu-item ${activeTab === "union-payment" ? "active" : ""}`}
+              onClick={() => handleMenuClick("union-payment")}
+            >
+              <i className="bi bi-credit-card"></i>
+              Union Payment
+            </button>
+            <button
               className={`menu-item ${activeTab === "service-entry" ? "active" : ""}`}
               onClick={() => handleMenuClick("service-entry")}
             >
@@ -279,6 +287,14 @@ function App() {
           )}
           {activeTab === "adda-fees" && (
             <AddaFeesEntry
+              expenseData={expenseData}
+              setExpenseData={setExpenseData}
+              setTotalExpenses={setTotalExpenses}
+              setCashBookEntries={setCashBookEntries}
+            />
+          )}
+           {activeTab === "union-payment" && (
+            <UnionPayment
               expenseData={expenseData}
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
