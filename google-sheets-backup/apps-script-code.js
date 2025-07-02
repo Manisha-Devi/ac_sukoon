@@ -24,25 +24,14 @@ const SHEET_NAMES = {
 function doOptions() {
   return ContentService
     .createTextOutput('')
-    .setMimeType(ContentService.MimeType.TEXT)
-    .setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Max-Age': '3600'
-    });
+    .setMimeType(ContentService.MimeType.TEXT);
 }
 
-// Helper function to create response with CORS headers
+// Helper function to create JSON response
 function createResponse(data) {
   return ContentService
     .createTextOutput(JSON.stringify(data))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-    });
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 // Main GET handler
@@ -102,10 +91,14 @@ function doGet(e) {
 // Main POST handler
 function doPost(e) {
   try {
+    if (!e || !e.postData || !e.postData.contents) {
+      return createResponse({ success: false, error: 'No data received' });
+    }
+
     const data = JSON.parse(e.postData.contents);
     
     if (!data || !data.action) {
-      return createResponse({ success: false, error: 'No data or action received' });
+      return createResponse({ success: false, error: 'No action received' });
     }
 
     let result;
