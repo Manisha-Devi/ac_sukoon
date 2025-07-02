@@ -3,6 +3,383 @@ import "../css/FuelPayment.css";
 import { addFuelPayment, getFuelPayments } from "../../services/googleSheetsAPI";
 
 function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
+  const [formData, setFormData] = useState({
+    date: new Date().toISOString().split('T')[0],
+    pumpName: "",
+    liters: "",
+    ratePerLiter: "",
+    cashAmount: "",
+    bankAmount: "",
+    totalAmount: "",
+    remarks: ""
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
+  const [entries, setEntries] = useState([]);
+  const [loadingEntries, setLoadingEntries] = useState(true);
+
+  useEffect(() => {
+    loadFuelPayments();
+  }, []);
+
+  const loadFuelPayments = async () => {
+    try {
+      setLoadingEntries(true);
+      const result = await getFuelPayments();
+      
+      if (result.success) {
+        setEntries(result.data || []);
+        
+        // Update expense data
+        const currentExpenses = expenseData.filter(expense => expense.category !== 'Fuel');
+        const fuelExpenses = (result.data || []).map(entry => ({
+          id: entry.id,
+          date: entry.date,
+          type: 'Fuel Payment',
+          amount: parseFloat(entry.totalAmount) || 0,
+          category: 'Fuel',
+          description: `${entry.pumpName} - ${entry.liters}L @ Rs.${entry.ratePerLiter}`,
+          submittedBy: entry.submittedBy
+        }));
+        
+        const updatedExpenses = [...currentExpenses, ...fuelExpenses];
+        setExpenseData(updatedExpenses);
+        
+        const total = updatedExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+        setTotalExpenses(total);
+      }
+    } catch (error) {
+      console.error('Error loading fuel payments:', error);
+    } finally {
+      setLoadingEntries(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => {
+      const updated = { ...prev, [name]: value };
+      
+      // Auto-calculate total amount
+      if (name === 'liters' || name === 'ratePerLiter') {
+        const liters = parseFloat(name === 'liters' ? value : updated.liters) || 0;
+        const rate = parseFloat(name === 'ratePerLiter' ? value : updated.ratePerLiter) || 0;
+        const calculatedTotal = liters * rate;
+        updated.totalAmount = calculatedTotal.toString();
+        updated.cashAmount = calculatedTotal.toString();
+        updated.bankAmount = "0";
+      }
+      
+      if (name === 'cashAmount' || name === 'bankAmount') {
+        const cash = parseFloat(name === 'cashAmount' ? value : updated.cashAmount) || 0;
+        const bank = parseFloat(name === 'bankAmount' ? value : updated.bankAmount) || 0;
+        updated.totalAmount = (cash + bank).toString();
+      }
+      
+      return updated;
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.pumpName || !formData.totalAmount) {
+      setSubmitStatus({ type: 'error', message: 'Please fill in all required fields' });
+      return;
+    }
+
+    setIsLoading(true);
+    setSubmitStatus(null);
+
+    try {
+      const submittedBy = localStorage.getItem('username') || 'Unknown';
+      
+      const dataToSubmit = {
+        ...formData,
+        liters: parseFloat(formData.liters) || 0,
+        ratePerLiter: parseFloat(formData.ratePerLiter) || 0,
+        cashAmount: parseFloat(formData.cashAmount) || 0,
+        bankAmount: parseFloat(formData.bankAmount) || 0,
+        totalAmount: parseFloat(formData.totalAmount) || 0,
+        submittedBy: submittedBy
+      };
+
+      const result = await addFuelPayment(dataToSubmit);
+
+      if (result.success) {
+        setSubmitStatus({ type: 'success', message: 'Fuel payment added successfully!' });
+        
+        // Reset form
+        setFormData({
+          date: new Date().toISOString().split('T')[0],
+          pumpName: "",
+          liters: "",
+          ratePerLiter: "",
+          cashAmount: "",
+          bankAmount: "",
+          totalAmount: "",
+          remarks: ""
+        });
+
+        // Reload entries
+        await loadFuelPayments();
+
+        // Add to cash book
+        setCashBookEntries(prev => [...prev, {
+          id: Date.now(),
+          date: formData.date,
+          type: 'Expense',
+          description: `Fuel Payment - ${formData.pumpName}`,
+          cashAmount: dataToSubmit.cashAmount,
+          bankAmount: dataToSubmit.bankAmount,
+          category: 'Fuel',
+          submittedBy: submittedBy
+        }]);
+
+      } else {
+        setSubmitStatus({ type: 'error', message: result.error || 'Failed to add fuel payment' });
+      }
+    } catch (error) {
+      setSubmitStatus({ type: 'error', message: 'Error submitting data: ' + error.message });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="fuel-entry">
+      <div className="row">
+        {/* Form Section */}
+        <div className="col-lg-4 col-md-12 mb-4">
+          <div className="card">
+            <div className="card-header">
+              <h5 className="card-title mb-0">
+                <i className="bi bi-fuel-pump me-2"></i>
+                Add Fuel Payment
+              </h5>
+            </div>
+            <div className="card-body">
+              <form onSubmit={handleSubmit}>
+                <div className="mb-3">
+                  <label className="form-label">Date</label>
+                  <input
+                    type="date"
+                    name="date"
+                    className="form-control"
+                    value={formData.date}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label">Pump Name</label>
+                  <input
+                    type="text"
+                    name="pumpName"
+                    className="form-control"
+                    value={formData.pumpName}
+                    onChange={handleInputChange}
+                    placeholder="e.g., PSO Station"
+                    required
+                  />
+                </div>
+
+                <div className="row">
+                  <div className="col-6">
+                    <div className="mb-3">
+                      <label className="form-label">Liters</label>
+                      <input
+                        type="number"
+                        name="liters"
+                        className="form-control"
+                        value={formData.liters}
+                        onChange={handleInputChange}
+                        placeholder="0"
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="mb-3">
+                      <label className="form-label">Rate/Liter</label>
+                      <input
+                        type="number"
+                        name="ratePerLiter"
+                        className="form-control"
+                        value={formData.ratePerLiter}
+                        onChange={handleInputChange}
+                        placeholder="0"
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-6">
+                    <div className="mb-3">
+                      <label className="form-label">Cash Amount</label>
+                      <input
+                        type="number"
+                        name="cashAmount"
+                        className="form-control"
+                        value={formData.cashAmount}
+                        onChange={handleInputChange}
+                        placeholder="0"
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="mb-3">
+                      <label className="form-label">Bank Amount</label>
+                      <input
+                        type="number"
+                        name="bankAmount"
+                        className="form-control"
+                        value={formData.bankAmount}
+                        onChange={handleInputChange}
+                        placeholder="0"
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label">Total Amount</label>
+                  <input
+                    type="number"
+                    name="totalAmount"
+                    className="form-control"
+                    value={formData.totalAmount}
+                    onChange={handleInputChange}
+                    placeholder="0"
+                    min="0"
+                    step="0.01"
+                    required
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label">Remarks</label>
+                  <textarea
+                    name="remarks"
+                    className="form-control"
+                    value={formData.remarks}
+                    onChange={handleInputChange}
+                    rows="3"
+                    placeholder="Optional remarks..."
+                  ></textarea>
+                </div>
+
+                <button
+                  type="submit"
+                  className="btn btn-primary w-100"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2"></span>
+                      Adding...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-plus-circle me-2"></i>
+                      Add Fuel Payment
+                    </>
+                  )}
+                </button>
+              </form>
+
+              {submitStatus && (
+                <div className={`alert alert-${submitStatus.type === 'success' ? 'success' : 'danger'} mt-3`}>
+                  {submitStatus.message}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Entries List */}
+        <div className="col-lg-8 col-md-12">
+          <div className="card">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h5 className="card-title mb-0">
+                <i className="bi bi-list-ul me-2"></i>
+                Recent Fuel Payments
+              </h5>
+              <button 
+                className="btn btn-outline-primary btn-sm"
+                onClick={loadFuelPayments}
+                disabled={loadingEntries}
+              >
+                <i className="bi bi-arrow-clockwise me-1"></i>
+                Refresh
+              </button>
+            </div>
+            <div className="card-body">
+              {loadingEntries ? (
+                <div className="text-center py-4">
+                  <div className="spinner-border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                  <p className="mt-2">Loading fuel payments...</p>
+                </div>
+              ) : entries.length === 0 ? (
+                <div className="text-center py-4">
+                  <i className="bi bi-inbox display-4 text-muted"></i>
+                  <p className="text-muted mt-2">No fuel payments found</p>
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Pump</th>
+                        <th>Liters</th>
+                        <th>Rate/L</th>
+                        <th>Cash</th>
+                        <th>Bank</th>
+                        <th>Total</th>
+                        <th>By</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {entries.map((entry) => (
+                        <tr key={entry.id}>
+                          <td>{new Date(entry.date).toLocaleDateString()}</td>
+                          <td>{entry.pumpName}</td>
+                          <td>{parseFloat(entry.liters || 0).toFixed(2)}L</td>
+                          <td>Rs. {parseFloat(entry.ratePerLiter || 0).toFixed(2)}</td>
+                          <td>Rs. {parseFloat(entry.cashAmount || 0).toLocaleString()}</td>
+                          <td>Rs. {parseFloat(entry.bankAmount || 0).toLocaleString()}</td>
+                          <td className="fw-bold">Rs. {parseFloat(entry.totalAmount || 0).toLocaleString()}</td>
+                          <td><small>{entry.submittedBy}</small></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default FuelEntry;
+
+function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
   const [editingEntry, setEditingEntry] = useState(null);
   const [formData, setFormData] = useState({
     cashAmount: "",
