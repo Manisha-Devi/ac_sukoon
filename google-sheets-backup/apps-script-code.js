@@ -24,9 +24,9 @@ const SHEET_NAMES = {
 
 // CORS handler for React app
 function doOptions(request) {
-  return ContentService
-    .createTextOutput('')
-    .setMimeType(ContentService.MimeType.TEXT);
+  const output = ContentService.createTextOutput('');
+  output.setMimeType(ContentService.MimeType.TEXT);
+  return output;
 }
 
 // Main API handler
@@ -131,14 +131,22 @@ function doPost(e) {
 
 // GET handler
 function doGet(e) {
-  const action = e.parameter.action;
-  
-  let result;
-  
-  switch(action) {
-    case 'test':
-      result = { success: true, message: 'API is working properly!', timestamp: new Date() };
-      break;
+  try {
+    // Handle case when no parameters are passed
+    if (!e || !e.parameter) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ success: false, error: 'No parameters provided' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const action = e.parameter.action;
+    
+    let result;
+    
+    switch(action) {
+      case 'test':
+        result = { success: true, message: 'API is working properly!', timestamp: new Date() };
+        break;
     case 'getFareReceipts':
       result = getFareReceipts();
       break;
@@ -173,9 +181,20 @@ function doGet(e) {
       result = { success: false, error: 'Invalid action' };
   }
   
-  return ContentService
-    .createTextOutput(JSON.stringify(result))
-    .setMimeType(ContentService.MimeType.JSON);
+  const output = ContentService.createTextOutput(JSON.stringify(result));
+  output.setMimeType(ContentService.MimeType.JSON);
+  
+  // Add CORS headers
+  return output;
+  
+  } catch (error) {
+    const errorOutput = ContentService.createTextOutput(JSON.stringify({ 
+      success: false, 
+      error: 'doGet Error: ' + error.toString() 
+    }));
+    errorOutput.setMimeType(ContentService.MimeType.JSON);
+    return errorOutput;
+  }
 }
 
 // Authentication function

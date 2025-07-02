@@ -15,7 +15,7 @@ const apiCall = async (data, method = 'POST') => {
       headers: {
         'Content-Type': 'application/json',
       },
-      mode: 'cors',
+      mode: 'no-cors',
       signal: controller.signal
     };
 
