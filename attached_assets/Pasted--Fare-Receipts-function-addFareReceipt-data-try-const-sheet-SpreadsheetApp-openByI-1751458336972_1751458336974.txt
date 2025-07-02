@@ -1,0 +1,134 @@
+// Fare Receipts
+function addFareReceipt(data) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
+    
+    sheet.appendRow([
+      new Date(),
+      data.date,
+      data.route,
+      data.cashAmount || 0,
+      data.bankAmount || 0,
+      data.totalAmount || 0,
+      data.remarks || '',
+      data.submittedBy || ''
+    ]);
+
+    return { success: true, message: 'Fare receipt added successfully' };
+  } catch (error) {
+    return { success: false, error: 'Add fare receipt error: ' + error.toString() };
+  }
+}
+
+function getFareReceipts() {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
+    const values = sheet.getDataRange().getValues();
+
+    if (values.length <= 1) return { success: true, data: [] };
+
+    const data = values.slice(1).map((row, index) => ({
+      id: index + 2,
+      timestamp: row[0],
+      date: row[1],
+      route: row[2],
+      cashAmount: row[3],
+      bankAmount: row[4],
+      totalAmount: row[5],
+      remarks: row[6],
+      submittedBy: row[7]
+    }));
+
+    return { success: true, data: data.reverse() };
+  } catch (error) {
+    return { success: false, error: 'Get fare receipts error: ' + error.toString() };
+  }
+}
+
+// Booking Entries
+function addBookingEntry(data) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
+    
+    sheet.appendRow([
+      new Date(),
+      data.bookingDetails || '',
+      data.dateFrom,
+      data.dateTo,
+      data.cashAmount || 0,
+      data.bankAmount || 0,
+      data.totalAmount || 0,
+      data.remarks || '',
+      data.submittedBy || ''
+    ]);
+
+    return { success: true, message: 'Booking entry added successfully' };
+  } catch (error) {
+    return { success: false, error: 'Add booking entry error: ' + error.toString() };
+  }
+}
+
+function getBookingEntries() {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
+    const values = sheet.getDataRange().getValues();
+
+    if (values.length <= 1) return { success: true, data: [] };
+
+    const data = values.slice(1).map((row, index) => ({
+      id: index + 2,
+      timestamp: row[0],
+      bookingDetails: row[1],
+      dateFrom: row[2],
+      dateTo: row[3],
+      cashAmount: row[4],
+      bankAmount: row[5],
+      totalAmount: row[6],
+      remarks: row[7],
+      submittedBy: row[8]
+    }));
+
+    return { success: true, data: data.reverse() };
+  } catch (error) {
+    return { success: false, error: 'Get booking entries error: ' + error.toString() };
+  }
+}
+
+// Off Days
+function addOffDay(data) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OFF_DAYS);
+    
+    sheet.appendRow([
+      new Date(),
+      data.date,
+      data.reason || '',
+      data.submittedBy || ''
+    ]);
+
+    return { success: true, message: 'Off day added successfully' };
+  } catch (error) {
+    return { success: false, error: 'Add off day error: ' + error.toString() };
+  }
+}
+
+function getOffDays() {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OFF_DAYS);
+    const values = sheet.getDataRange().getValues();
+
+    if (values.length <= 1) return { success: true, data: [] };
+
+    const data = values.slice(1).map((row, index) => ({
+      id: index + 2,
+      timestamp: row[0],
+      date: row[1],
+      reason: row[2],
+      submittedBy: row[3]
+    }));
+
+    return { success: true, data: data.reverse() };
+  } catch (error) {
+    return { success: false, error: 'Get off days error: ' + error.toString() };
+  }
+}
