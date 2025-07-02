@@ -84,7 +84,7 @@ class DataService {
       let result;
       const newEntry = {
         ...entryData,
-        id: Date.now(),
+        entryId: Date.now(),
         timestamp: new Date().toISOString()
       };
 
@@ -137,7 +137,7 @@ class DataService {
       this.checkOnlineStatus();
 
       // Find the entry to get its type
-      const existingEntry = currentFareData.find(entry => entry.id === entryId);
+      const existingEntry = currentFareData.find(entry => entry.entryId === entryId);
       if (!existingEntry) {
         throw new Error('Entry not found');
       }
@@ -148,7 +148,7 @@ class DataService {
       if (result && result.success) {
         // Update local data for immediate UI refresh
         const updatedFareData = currentFareData.map(entry => 
-          entry.id === entryId 
+          entry.entryId === entryId 
             ? { ...entry, ...updatedData, lastModified: new Date().toISOString() }
             : entry
         );
@@ -171,7 +171,7 @@ class DataService {
       this.checkOnlineStatus();
 
       // Find the entry to get its type
-      const existingEntry = currentFareData.find(entry => entry.id === entryId);
+      const existingEntry = currentFareData.find(entry => entry.entryId === entryId);
       if (!existingEntry) {
         throw new Error('Entry not found');
       }
@@ -181,7 +181,7 @@ class DataService {
 
       if (result && result.success) {
         // Remove from local data for immediate UI update
-        const updatedData = currentFareData.filter(entry => entry.id !== entryId);
+        const updatedData = currentFareData.filter(entry => entry.entryId !== entryId);
 
         console.log('✅ Entry deleted from Google Sheets successfully');
         return { success: true, data: updatedData };

@@ -122,7 +122,7 @@ class HybridDataService {
 
       const newEntry = {
         ...entryData,
-        id: Date.now(),
+        entryId: Date.now(),
         timestamp: new Date().toISOString(),
         synced: false,
         pendingSync: true
@@ -131,7 +131,7 @@ class HybridDataService {
       // Save to localStorage immediately for instant response
       const updatedData = [newEntry, ...currentFareData];
       localStorageService.saveFareData(updatedData);
-      localStorageService.markPendingSync(newEntry.id);
+      localStorageService.markPendingSync(newEntry.entryId);
 
       console.log('💾 Entry saved to localStorage immediately');
 
@@ -190,7 +190,7 @@ class HybridDataService {
         // Mark as synced in localStorage
         const currentData = localStorageService.loadFareData();
         const updatedData = currentData.map(item => 
-          item.id === entry.id 
+          item.entryId === entry.entryId 
             ? { 
                 ...item, 
                 synced: true, 
@@ -199,7 +199,7 @@ class HybridDataService {
             : item
         );
         localStorageService.saveFareData(updatedData);
-        localStorageService.removePendingSync(entry.id);
+        localStorageService.removePendingSync(entry.entryId);
 
         console.log('✅ Entry synced to Google Sheets:', entry.id);
         return true;
@@ -219,14 +219,14 @@ class HybridDataService {
       console.log('📝 Updating entry with hybrid system...');
 
       // Find the existing entry
-      const existingEntry = currentFareData.find(entry => entry.id === entryId);
+      const existingEntry = currentFareData.find(entry => entry.entryId === entryId);
       if (!existingEntry) {
         throw new Error('Entry not found');
       }
 
       // Update in localStorage immediately
       const updatedFareData = currentFareData.map(entry => 
-        entry.id === entryId 
+        entry.entryId === entryId 
           ? { 
               ...entry, 
               ...updatedData, 
@@ -286,7 +286,7 @@ class HybridDataService {
         // Mark as synced in localStorage
         const currentData = localStorageService.loadFareData();
         const updatedLocalData = currentData.map(item => 
-          item.id === entryId 
+          item.entryId === entryId 
             ? { ...item, synced: true, pendingSync: false }
             : item
         );
@@ -310,13 +310,13 @@ class HybridDataService {
     try {
       console.log('🗑️ Deleting entry with hybrid system...');
 
-      const existingEntry = currentFareData.find(entry => entry.id === entryId);
+      const existingEntry = currentFareData.find(entry => entry.entryId === entryId);
       if (!existingEntry) {
         throw new Error('Entry not found');
       }
 
       // Remove from localStorage immediately
-      const updatedData = currentFareData.filter(entry => entry.id !== entryId);
+      const updatedData = currentFareData.filter(entry => entry.entryId !== entryId);
       localStorageService.saveFareData(updatedData);
 
       console.log('💾 Entry deleted from localStorage immediately');
@@ -383,7 +383,7 @@ class HybridDataService {
       console.log('🔄 Syncing pending entries:', pendingIds.length);
 
       const currentData = localStorageService.loadFareData();
-      const pendingEntries = currentData.filter(entry => pendingIds.includes(entry.id));
+      const pendingEntries = currentData.filter(entry => pendingIds.includes(entry.entryId));
 
       for (const entry of pendingEntries) {
         if (!entry.synced && entry.pendingSync) {
@@ -402,7 +402,7 @@ class HybridDataService {
               dateTo: entry.dateTo,
               reason: entry.reason
             };
-            await this.syncUpdateToGoogleSheets(entry.id, updatedData, entry.type);
+            await this.syncUpdateToGoogleSheets(entry.entryId, updatedData, entry.type);
           }
           // Small delay to avoid overwhelming the API
           await new Promise(resolve => setTimeout(resolve, 500));

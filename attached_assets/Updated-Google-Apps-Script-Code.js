@@ -238,11 +238,14 @@ function addFareReceipt(data) {
       data.submittedBy || "", // I: SubmittedBy
     ]);
 
-    return { 
-      success: true, 
-      message: "Daily fare receipt added successfully",
-      entryId: entryId
-    };
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: true,
+        entryId: entryId,
+        message: "Fare receipt added successfully",
+        timestamp: new Date().toISOString(),
+      }),
+    );
   } catch (error) {
     return {
       success: false,
@@ -263,18 +266,21 @@ function getFareReceipts() {
 
     if (values.length <= 1) return { success: true, data: [] };
 
-    const data = values.slice(1).map((row, index) => ({
-      id: row[7] || (index + 2), // H: EntryId
-      timestamp: row[0], // A: Timestamp
-      date: row[1], // B: Date
-      route: row[2], // C: Route
-      cashAmount: row[3], // D: CashAmount
-      bankAmount: row[4], // E: BankAmount
-      totalAmount: row[5], // F: TotalAmount
-      entryType: row[6], // G: EntryType
-      submittedBy: row[8], // I: SubmittedBy
-      rowIndex: index + 2, // Store actual row index for updates
-    }));
+    const data = values.slice(1).map((row, index) => {
+        const rowData = {
+          entryId: row[7], // Entry ID from column H
+          timestamp: row[0], // Timestamp from column A
+          date: row[1], // Date from column B
+          route: row[2], // Route from column C
+          cashAmount: row[3], // Cash amount from column D
+          bankAmount: row[4], // Bank amount from column E
+          totalAmount: row[5], // Total amount from column F
+          entryType: row[6], // Static entry type
+          submittedBy: row[8], // Submitted by from column I
+          rowIndex: index + 2, // Store row index for updates/deletes
+        };
+      return rowData;
+    });
 
     return { success: true, data: data.reverse() };
   } catch (error) {
@@ -415,11 +421,14 @@ function addBookingEntry(data) {
       data.submittedBy || "", // J: SubmittedBy
     ]);
 
-    return { 
-      success: true, 
-      message: "Booking entry added successfully",
-      entryId: entryId
-    };
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: true,
+        entryId: entryId,
+        message: "Booking entry added successfully",
+        timestamp: new Date().toISOString(),
+      }),
+    );
   } catch (error) {
     return {
       success: false,
@@ -440,19 +449,22 @@ function getBookingEntries() {
 
     if (values.length <= 1) return { success: true, data: [] };
 
-    const data = values.slice(1).map((row, index) => ({
-      id: row[8] || (index + 2), // I: EntryId
-      timestamp: row[0], // A: Timestamp
-      bookingDetails: row[1], // B: BookingDetails
-      dateFrom: row[2], // C: DateFrom
-      dateTo: row[3], // D: DateTo
-      cashAmount: row[4], // E: CashAmount
-      bankAmount: row[5], // F: BankAmount
-      totalAmount: row[6], // G: TotalAmount
-      entryType: row[7], // H: EntryType
-      submittedBy: row[9], // J: SubmittedBy
-      rowIndex: index + 2, // Store actual row index for updates
-    }));
+    const data = values.slice(1).map((row, index) => {
+        const rowData = {
+          entryId: row[8], // Entry ID from column I
+          timestamp: row[0], // Timestamp from column A
+          bookingDetails: row[1], // Booking details from column B
+          dateFrom: row[2], // Date from from column C
+          dateTo: row[3], // Date to from column D
+          cashAmount: row[4], // Cash amount from column E
+          bankAmount: row[5], // Bank amount from column F
+          totalAmount: row[6], // Total amount from column G
+          entryType: row[7], // Static entry type
+          submittedBy: row[9], // Submitted by from column J
+          rowIndex: index + 2, // Store row index for updates/deletes
+        };
+      return rowData;
+    });
 
     return { success: true, data: data.reverse() };
   } catch (error) {
@@ -592,11 +604,14 @@ function addOffDay(data) {
       data.submittedBy || "", // F: SubmittedBy
     ]);
 
-    return { 
-      success: true, 
-      message: "Off day added successfully",
-      entryId: entryId
-    };
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: true,
+        entryId: entryId,
+        message: "Off day added successfully",
+        timestamp: new Date().toISOString(),
+      }),
+    );
   } catch (error) {
     return { success: false, error: "Add off day error: " + error.toString() };
   }
@@ -614,15 +629,18 @@ function getOffDays() {
 
     if (values.length <= 1) return { success: true, data: [] };
 
-    const data = values.slice(1).map((row, index) => ({
-      id: row[4] || (index + 2), // E: EntryId
-      timestamp: row[0], // A: Timestamp
-      date: row[1], // B: Date
-      reason: row[2], // C: Reason
-      entryType: row[3], // D: EntryType
-      submittedBy: row[5], // F: SubmittedBy
-      rowIndex: index + 2, // Store actual row index for updates
-    }));
+    const data = values.slice(1).map((row, index) => {
+      const rowData = {
+        entryId: row[4], // Entry ID from column E
+        timestamp: row[0], // Timestamp from column A
+        date: row[1], // Date from column B
+        reason: row[2], // Reason from column C
+        entryType: row[3], // Static entry type
+        submittedBy: row[5], // Submitted by from column F
+        rowIndex: index + 2, // Store row index for updates/deletes
+      };
+      return rowData;
+    });
 
     return { success: true, data: data.reverse() };
   } catch (error) {
