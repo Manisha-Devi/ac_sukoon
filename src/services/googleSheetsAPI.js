@@ -1,8 +1,9 @@
 
+
 // Google Sheets API Integration Service
 const API_URL = 'https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec';
 
-// Generic API call function
+// Generic API call function with better error handling
 const apiCall = async (data, method = 'POST') => {
   try {
     console.log('Making API call:', { data, method, url: API_URL });
@@ -15,26 +16,53 @@ const apiCall = async (data, method = 'POST') => {
       headers: {
         'Content-Type': 'application/json',
       },
-      signal: controller.signal
+      signal: controller.signal,
+      mode: 'cors' // Explicitly set CORS mode
     };
 
+    let url = API_URL;
+    
     if (method === 'POST') {
       options.body = JSON.stringify(data);
+    } else if (method === 'GET') {
+      // For GET requests, append parameters to URL
+      const params = new URLSearchParams();
+      Object.keys(data).forEach(key => {
+        if (data[key] !== undefined && data[key] !== null) {
+          params.append(key, data[key]);
+        }
+      });
+      url = `${API_URL}?${params.toString()}`;
     }
-
-    const url = method === 'GET' ? `${API_URL}?${new URLSearchParams(data)}` : API_URL;
     
     const response = await fetch(url, options);
     clearTimeout(timeoutId);
     
     console.log('Response status:', response.status);
+    console.log('Response headers:', [...response.headers.entries()]);
     
     if (!response.ok) {
       const errorText = await response.text();
+      console.error('HTTP Error Response:', errorText);
       throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
     }
     
-    const result = await response.json();
+    const contentType = response.headers.get('content-type');
+    let result;
+    
+    if (contentType && contentType.includes('application/json')) {
+      result = await response.json();
+    } else {
+      const textResult = await response.text();
+      console.log('Non-JSON response:', textResult);
+      // Try to parse as JSON anyway in case the content-type is wrong
+      try {
+        result = JSON.parse(textResult);
+      } catch (parseError) {
+        throw new Error(`Invalid JSON response: ${textResult}`);
+      }
+    }
+    
     console.log('API response:', result);
     return result;
   } catch (error) {
@@ -44,8 +72,18 @@ const apiCall = async (data, method = 'POST') => {
       return { success: false, error: 'Request timeout - please try again' };
     }
     
-    if (error.message.includes('Failed to fetch')) {
-      return { success: false, error: 'Cannot connect to server. Please check if the Google Apps Script is deployed properly.' };
+    if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+      return { 
+        success: false, 
+        error: 'Network error. Please check your internet connection and ensure Google Apps Script is properly deployed.' 
+      };
+    }
+    
+    if (error.message.includes('CORS')) {
+      return { 
+        success: false, 
+        error: 'CORS error. Please verify Google Apps Script deployment settings.' 
+      };
     }
     
     return { success: false, error: error.message };
@@ -232,3 +270,4 @@ export const deleteEntry = async (sheetName, rowId) => {
     rowId: rowId
   });
 };
+
