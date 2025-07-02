@@ -136,6 +136,9 @@ function doGet(e) {
   let result;
   
   switch(action) {
+    case 'test':
+      result = { success: true, message: 'API is working properly!', timestamp: new Date() };
+      break;
     case 'getFareReceipts':
       result = getFareReceipts();
       break;
