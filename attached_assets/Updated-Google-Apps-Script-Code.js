@@ -317,12 +317,18 @@ function updateFareReceipt(data) {
       throw new Error('Fare receipt not found with ID: ' + entryId);
     }
 
-    // Update specific columns for Fare Receipt
+    // Update all columns for Fare Receipt
     if (updatedData.date) {
       sheet.getRange(rowIndex, 2).setValue(updatedData.date); // B: Date
     }
     if (updatedData.route) {
       sheet.getRange(rowIndex, 3).setValue(updatedData.route); // C: Route
+    }
+    if (updatedData.cashAmount !== undefined) {
+      sheet.getRange(rowIndex, 4).setValue(updatedData.cashAmount); // D: CashAmount
+    }
+    if (updatedData.bankAmount !== undefined) {
+      sheet.getRange(rowIndex, 5).setValue(updatedData.bankAmount); // E: BankAmount
     }
     if (updatedData.totalAmount !== undefined) {
       sheet.getRange(rowIndex, 6).setValue(updatedData.totalAmount); // F: TotalAmount
@@ -501,7 +507,7 @@ function updateBookingEntry(data) {
       throw new Error('Booking entry not found with ID: ' + entryId);
     }
 
-    // Update specific columns for Booking Entry
+    // Update all columns for Booking Entry
     if (updatedData.bookingDetails) {
       sheet.getRange(rowIndex, 2).setValue(updatedData.bookingDetails); // B: BookingDetails
     }
@@ -510,6 +516,12 @@ function updateBookingEntry(data) {
     }
     if (updatedData.dateTo) {
       sheet.getRange(rowIndex, 4).setValue(updatedData.dateTo); // D: DateTo
+    }
+    if (updatedData.cashAmount !== undefined) {
+      sheet.getRange(rowIndex, 5).setValue(updatedData.cashAmount); // E: CashAmount
+    }
+    if (updatedData.bankAmount !== undefined) {
+      sheet.getRange(rowIndex, 6).setValue(updatedData.bankAmount); // F: BankAmount
     }
     if (updatedData.totalAmount !== undefined) {
       sheet.getRange(rowIndex, 7).setValue(updatedData.totalAmount); // G: TotalAmount

@@ -302,7 +302,14 @@ class HybridDataService {
       if (this.isOnline) {
         console.log('🔄 Attempting immediate sync after update...');
         try {
-          const syncResult = await this.syncUpdateToGoogleSheets(entryId, updatedData, existingEntry.type);
+          // Send complete entry data for update
+          const completeUpdateData = {
+            ...updatedData,
+            cashAmount: updatedData.cashAmount,
+            bankAmount: updatedData.bankAmount,
+            totalAmount: updatedData.totalAmount
+          };
+          const syncResult = await this.syncUpdateToGoogleSheets(entryId, completeUpdateData, existingEntry.type);
           if (syncResult) {
             console.log('✅ Update synced immediately to Google Sheets');
             // Update the local data to mark as synced
@@ -463,10 +470,12 @@ class HybridDataService {
             // New entry - add to Google Sheets
             await this.syncSingleEntry(entry);
           } else {
-            // Updated entry - sync the update
+            // Updated entry - sync the update with complete data
             const updatedData = {
               date: entry.date,
               route: entry.route,
+              cashAmount: entry.cashAmount,
+              bankAmount: entry.bankAmount,
               totalAmount: entry.totalAmount,
               bookingDetails: entry.bookingDetails,
               dateFrom: entry.dateFrom,
