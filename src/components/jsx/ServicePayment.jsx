@@ -1,257 +1,349 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "../css/ServicePayment.css";
-import { addServicePayment, getServicePayments } from "../../services/googleSheetsAPI";
 
-const ServicePayment = () => {
+function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
+  const [editingEntry, setEditingEntry] = useState(null);
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
-    serviceType: '',
-    cashAmount: '',
-    bankAmount: '',
-    totalAmount: '',
-    serviceDetails: ''
+    serviceDetails: "",
+    cashAmount: "",
+    bankAmount: "",
+    description: "",
+    date: "",
+    mechanic: "",
   });
 
-  const [payments, setPayments] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-
-  const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-
-  useEffect(() => {
-    loadPayments();
-  }, []);
-
-  const loadPayments = async () => {
-    try {
-      setLoading(true);
-      const response = await getServicePayments();
-      if (response.success) {
-        setPayments(response.data || []);
-      } else {
-        setError(response.error || 'Failed to load service payments');
-      }
-    } catch (error) {
-      setError('Error loading payments: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
+  // Function to get min date for date inputs (today)
+  const getTodayDate = () => {
+    return new Date().toISOString().split('T')[0];
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => {
-      const updated = { ...prev, [name]: value };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    const cashAmount = parseInt(formData.cashAmount) || 0;
+    const bankAmount = parseInt(formData.bankAmount) || 0;
+    const totalAmount = cashAmount + bankAmount;
 
-      // Auto calculate total amount
-      if (name === 'cashAmount' || name === 'bankAmount') {
-        const cash = parseFloat(name === 'cashAmount' ? value : updated.cashAmount) || 0;
-        const bank = parseFloat(name === 'bankAmount' ? value : updated.bankAmount) || 0;
-        updated.totalAmount = (cash + bank).toString();
+    if (editingEntry) {
+      // Update existing entry
+      const oldTotal = editingEntry.totalAmount;
+      const updatedEntries = expenseData.map(entry => 
+        entry.id === editingEntry.id 
+          ? {
+              ...entry,
+              serviceDetails: formData.serviceDetails,
+              cashAmount: cashAmount,
+              bankAmount: bankAmount,
+              totalAmount: totalAmount,
+              description: formData.description,
+              date: formData.date,
+              mechanic: formData.mechanic,
+            }
+          : entry
+      );
+      setExpenseData(updatedEntries);
+      setTotalExpenses((prev) => prev - oldTotal + totalAmount);
+      setEditingEntry(null);
+    } else {
+      // Create new entry
+      const newEntry = {
+        id: Date.now(),
+        type: "service",
+        serviceDetails: formData.serviceDetails,
+        cashAmount: cashAmount,
+        bankAmount: bankAmount,
+        totalAmount: totalAmount,
+        description: formData.description,
+        date: formData.date,
+        mechanic: formData.mechanic,
+      };
+      setExpenseData([...expenseData, newEntry]);
+      setTotalExpenses((prev) => prev + totalAmount);
+      
+      // Add to cash book - payments go to Cr. side
+      if (cashAmount > 0 || bankAmount > 0) {
+        const cashBookEntry = {
+          id: Date.now() + 1,
+          date: formData.date,
+          particulars: "Service",
+          description: `Service expense - ${formData.serviceDetails}${formData.mechanic ? ` at ${formData.mechanic}` : ''}`,
+          jfNo: `SERVICE-${Date.now()}`,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
+          type: 'cr', // Payments go to Cr. side
+          timestamp: new Date().toISOString(),
+          source: 'service-payment'
+        };
+        setCashBookEntries(prev => [cashBookEntry, ...prev]);
       }
-
-      return updated;
+    }
+    
+    setFormData({
+      serviceDetails: "",
+      cashAmount: "",
+      bankAmount: "",
+      description: "",
+      date: "",
+      mechanic: "",
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setSuccess('');
-
-    try {
-      const submitData = {
-        ...formData,
-        cashAmount: parseFloat(formData.cashAmount) || 0,
-        bankAmount: parseFloat(formData.bankAmount) || 0,
-        totalAmount: parseFloat(formData.totalAmount) || 0,
-        submittedBy: currentUser.fullName || 'Unknown User'
-      };
-
-      const response = await addServicePayment(submitData);
-
-      if (response.success) {
-        setSuccess('Service payment added successfully!');
-        setFormData({
-          date: new Date().toISOString().split('T')[0],
-          serviceType: '',
-          cashAmount: '',
-          bankAmount: '',
-          totalAmount: '',
-          serviceDetails: ''
-        });
-        loadPayments();
-      } else {
-        setError(response.error || 'Failed to add service payment');
-      }
-    } catch (error) {
-      setError('Error: ' + error.message);
-    } finally {
-      setLoading(false);
+  const handleDeleteEntry = (entryId) => {
+    const entryToDelete = expenseData.find(entry => entry.id === entryId);
+    if (entryToDelete && entryToDelete.totalAmount) {
+      setTotalExpenses((prev) => prev - entryToDelete.totalAmount);
     }
+    setExpenseData(expenseData.filter(entry => entry.id !== entryId));
+    
+    // Remove corresponding cash book entry
+    setCashBookEntries(prev => prev.filter(entry => entry.source === 'service-payment' && !entry.jfNo?.includes(entryId.toString())));
   };
 
+  const handleEditEntry = (entry) => {
+    setEditingEntry(entry);
+    setFormData({
+      serviceDetails: entry.serviceDetails,
+      cashAmount: entry.cashAmount.toString(),
+      bankAmount: entry.bankAmount.toString(),
+      description: entry.description,
+      date: entry.date,
+      mechanic: entry.mechanic || "",
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingEntry(null);
+    setFormData({
+      serviceDetails: "",
+      cashAmount: "",
+      bankAmount: "",
+      description: "",
+      date: "",
+      mechanic: "",
+    });
+  };
+
+  // Filter service entries
+  const serviceEntries = expenseData.filter(entry => entry.type === "service");
+
+  // Calculate totals for summary
+  const totalCash = serviceEntries.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
+  const totalBank = serviceEntries.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+  const grandTotal = totalCash + totalBank;
+
   return (
-    <div className="fade-in">
-      <h2 className="mb-4">
-        <i className="bi bi-tools me-2"></i>
-        Service Payment Entry
-      </h2>
+    <div className="service-entry-container">
+      <div className="container-fluid">
+        <div className="service-header">
+          <h2><i className="bi bi-credit-card"></i> Service Payment Entry</h2>
+          <p>Record your vehicle service and maintenance expenses (Payment)</p>
+        </div>
 
-      <div className="form-card">
-        <h3>Add New Service Payment</h3>
-        
-        {error && <div className="alert alert-danger">{error}</div>}
-        {success && <div className="alert alert-success">{success}</div>}
-
-        <form onSubmit={handleSubmit}>
-          <div className="row g-3">
-            <div className="col-md-6">
-              <label className="form-label">Date</label>
-              <input
-                type="date"
-                className="form-control"
-                name="date"
-                value={formData.date}
-                onChange={handleInputChange}
-                required
-              />
+        {/* Summary Cards */}
+        {serviceEntries.length > 0 && (
+          <div className="row mb-4">
+            <div className="col-md-3 col-sm-6 mb-3">
+              <div className="summary-card cash-card">
+                <div className="card-body">
+                  <h6>Cash Expenses</h6>
+                  <h4>₹{totalCash.toLocaleString('en-IN')}</h4>
+                </div>
+              </div>
             </div>
-            <div className="col-md-6">
-              <label className="form-label">Service Type</label>
-              <select
-                className="form-control"
-                name="serviceType"
-                value={formData.serviceType}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Select Service Type</option>
-                <option value="Vehicle Maintenance">Vehicle Maintenance</option>
-                <option value="Tire Service">Tire Service</option>
-                <option value="Engine Service">Engine Service</option>
-                <option value="Body Work">Body Work</option>
-                <option value="Electrical">Electrical</option>
-                <option value="AC Service">AC Service</option>
-                <option value="Other">Other</option>
-              </select>
+            <div className="col-md-3 col-sm-6 mb-3">
+              <div className="summary-card bank-card">
+                <div className="card-body">
+                  <h6>Bank Expenses</h6>
+                  <h4>₹{totalBank.toLocaleString('en-IN')}</h4>
+                </div>
+              </div>
             </div>
-            <div className="col-md-4">
-              <label className="form-label">Cash Amount</label>
-              <input
-                type="number"
-                className="form-control"
-                name="cashAmount"
-                value={formData.cashAmount}
-                onChange={handleInputChange}
-                placeholder="0.00"
-                step="0.01"
-              />
+            <div className="col-md-3 col-sm-6 mb-3">
+              <div className="summary-card total-card">
+                <div className="card-body">
+                  <h6>Total Expenses</h6>
+                  <h4>₹{grandTotal.toLocaleString('en-IN')}</h4>
+                </div>
+              </div>
             </div>
-            <div className="col-md-4">
-              <label className="form-label">Bank Amount</label>
-              <input
-                type="number"
-                className="form-control"
-                name="bankAmount"
-                value={formData.bankAmount}
-                onChange={handleInputChange}
-                placeholder="0.00"
-                step="0.01"
-              />
-            </div>
-            <div className="col-md-4">
-              <label className="form-label">Total Amount</label>
-              <input
-                type="number"
-                className="form-control"
-                name="totalAmount"
-                value={formData.totalAmount}
-                onChange={handleInputChange}
-                placeholder="0.00"
-                step="0.01"
-                readOnly
-              />
-            </div>
-            <div className="col-12">
-              <label className="form-label">Service Details</label>
-              <textarea
-                className="form-control"
-                name="serviceDetails"
-                value={formData.serviceDetails}
-                onChange={handleInputChange}
-                rows="3"
-                placeholder="Enter service details"
-              ></textarea>
-            </div>
-            <div className="col-12">
-              <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? (
-                  <>
-                    <span className="spinner-border spinner-border-sm me-2"></span>
-                    Adding...
-                  </>
-                ) : (
-                  <>
-                    <i className="bi bi-plus-circle me-2"></i>
-                    Add Payment
-                  </>
-                )}
-              </button>
+            <div className="col-md-3 col-sm-6 mb-3">
+              <div className="summary-card entries-card">
+                <div className="card-body">
+                  <h6>Total Entries</h6>
+                  <h4>{serviceEntries.length}</h4>
+                </div>
+              </div>
             </div>
           </div>
-        </form>
-      </div>
+        )}
 
-      {/* Recent Entries */}
-      <div className="form-card mt-4">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h3>Recent Entries</h3>
-          <button className="btn btn-outline-primary btn-sm" onClick={loadPayments}>
-            <i className="bi bi-arrow-clockwise"></i> Refresh
-          </button>
+        {/* Service Entry Form */}
+        <div className="service-form-card">
+          <h4><i className="bi bi-tools"></i> Service Details</h4>
+          <form onSubmit={handleSubmit}>
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Service Details</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.serviceDetails}
+                  onChange={(e) => setFormData({ ...formData, serviceDetails: e.target.value })}
+                  placeholder="Enter service details"
+                  required
+                />
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Date</label>
+                <input
+                  type="date"
+                  className="form-control date-input"
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+                  placeholder="Select date"
+                  min={getTodayDate()}
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="row">
+              <div className="col-12 mb-3">
+                <label className="form-label">Description</label>
+                <textarea
+                  className="form-control"
+                  rows={3}
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Enter detailed description of service work"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Mechanic/Service Center (Optional)</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.mechanic}
+                  onChange={(e) => setFormData({ ...formData, mechanic: e.target.value })}
+                  placeholder="Enter mechanic or service center name"
+                />
+              </div>
+            </div>
+            
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Cash Amount (₹)</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={formData.cashAmount}
+                  onChange={(e) => setFormData({ ...formData, cashAmount: e.target.value })}
+                  placeholder="Enter cash amount"
+                  min="0"
+                />
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Bank Amount (₹)</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={formData.bankAmount}
+                  onChange={(e) => setFormData({ ...formData, bankAmount: e.target.value })}
+                  placeholder="Enter bank amount"
+                  min="0"
+                />
+              </div>
+            </div>
+            
+            <div className="amount-summary mb-3">
+              <div className="row">
+                <div className="col-4">
+                  <span>Cash: ₹{parseInt(formData.cashAmount) || 0}</span>
+                </div>
+                <div className="col-4">
+                  <span>Bank: ₹{parseInt(formData.bankAmount) || 0}</span>
+                </div>
+                <div className="col-4">
+                  <strong>Total: ₹{(parseInt(formData.cashAmount) || 0) + (parseInt(formData.bankAmount) || 0)}</strong>
+                </div>
+              </div>
+            </div>
+            
+            <div className="button-group">
+              <button type="submit" className="btn service-entry-btn">
+                <i className={editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
+                {editingEntry ? "Update Entry" : "Add Service Entry"}
+              </button>
+              {editingEntry && (
+                <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
+                  <i className="bi bi-x-circle"></i> Cancel
+                </button>
+              )}
+            </div>
+          </form>
         </div>
-        
-        {loading && <div className="text-center">Loading...</div>}
 
-        {payments.length === 0 && !loading ? (
-          <div className="text-center text-muted">No service payments found</div>
-        ) : (
-          <div className="table-responsive">
-            <table className="table table-striped">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Service Type</th>
-                  <th>Cash</th>
-                  <th>Bank</th>
-                  <th>Total</th>
-                  <th>Details</th>
-                  <th>Submitted By</th>
-                </tr>
-              </thead>
-              <tbody>
-                {payments.map((payment, index) => (
-                  <tr key={payment.id || index}>
-                    <td>{new Date(payment.date).toLocaleDateString()}</td>
-                    <td>{payment.serviceType}</td>
-                    <td>₹{payment.cashAmount}</td>
-                    <td>₹{payment.bankAmount}</td>
-                    <td><strong>₹{payment.totalAmount}</strong></td>
-                    <td>{payment.serviceDetails}</td>
-                    <td>{payment.submittedBy}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* Recent Entries */}
+        {serviceEntries.length > 0 && (
+          <div className="recent-entries mt-4">
+            <h4>Recent Entries</h4>
+            <div className="row">
+              {serviceEntries.slice(-6).reverse().map((entry) => (
+                <div key={entry.id} className="col-md-6 col-lg-4 mb-3">
+                  <div className="entry-card">
+                    <div className="card-body">
+                      <div className="entry-header">
+                        <span className="entry-type service">Service</span>
+                        <div className="entry-actions">
+                          <button 
+                            className="btn btn-sm btn-edit" 
+                            onClick={() => handleEditEntry(entry)}
+                            title="Edit Entry"
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                          <button 
+                            className="btn btn-sm btn-delete" 
+                            onClick={() => handleDeleteEntry(entry.id)}
+                            title="Delete Entry"
+                          >
+                            <i className="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                      <div className="entry-date">
+                        <small className="text-muted">{entry.date}</small>
+                      </div>
+                      <div className="entry-content">
+                        <p><strong>{entry.serviceDetails}</strong></p>
+                        <p>{entry.description?.substring(0, 60)}...</p>
+                        {entry.mechanic && <p><small>At: {entry.mechanic}</small></p>}
+                      </div>
+                      <div className="entry-amounts">
+                        <div className="amount-row">
+                          <span>Cash: ₹{entry.cashAmount}</span>
+                          <span>Bank: ₹{entry.bankAmount}</span>
+                        </div>
+                        <div className="total-amount">
+                          <strong>Total: ₹{entry.totalAmount}</strong>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
     </div>
   );
-};
+}
 
-export default ServicePayment;
+export default ServiceEntry;

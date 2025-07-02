@@ -1,250 +1,309 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "../css/FeesPayment.css";
-import { addAddaPayment, getAddaPayments } from "../../services/googleSheetsAPI";
 
-const FeesPayment = () => {
+function AddaFeesEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
+  const [editingEntry, setEditingEntry] = useState(null);
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
-    addaName: '',
-    cashAmount: '',
-    bankAmount: '',
-    totalAmount: '',
-    remarks: ''
+    cashAmount: "",
+    bankAmount: "",
+    description: "",
+    date: "",
   });
 
-  const [payments, setPayments] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-
-  const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-
-  useEffect(() => {
-    loadPayments();
-  }, []);
-
-  const loadPayments = async () => {
-    try {
-      setLoading(true);
-      const response = await getAddaPayments();
-      if (response.success) {
-        setPayments(response.data || []);
-      } else {
-        setError(response.error || 'Failed to load adda payments');
-      }
-    } catch (error) {
-      setError('Error loading payments: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
+  // Function to get min date for date inputs (today)
+  const getTodayDate = () => {
+    return new Date().toISOString().split('T')[0];
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => {
-      const updated = { ...prev, [name]: value };
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-      // Auto calculate total amount
-      if (name === 'cashAmount' || name === 'bankAmount') {
-        const cash = parseFloat(name === 'cashAmount' ? value : updated.cashAmount) || 0;
-        const bank = parseFloat(name === 'bankAmount' ? value : updated.bankAmount) || 0;
-        updated.totalAmount = (cash + bank).toString();
+    const cashAmount = parseInt(formData.cashAmount) || 0;
+    const bankAmount = parseInt(formData.bankAmount) || 0;
+    const totalAmount = cashAmount + bankAmount;
+
+    if (editingEntry) {
+      // Update existing entry
+      const oldTotal = editingEntry.totalAmount;
+      const updatedEntries = expenseData.map(entry => 
+        entry.id === editingEntry.id 
+          ? {
+              ...entry,
+              cashAmount: cashAmount,
+              bankAmount: bankAmount,
+              totalAmount: totalAmount,
+              description: formData.description,
+              date: formData.date,
+            }
+          : entry
+      );
+      setExpenseData(updatedEntries);
+      setTotalExpenses((prev) => prev - oldTotal + totalAmount);
+      setEditingEntry(null);
+    } else {
+      // Create new entry
+      const newEntry = {
+        id: Date.now(),
+        type: "fees",
+        cashAmount: cashAmount,
+        bankAmount: bankAmount,
+        totalAmount: totalAmount,
+        description: formData.description,
+        date: formData.date,
+      };
+      setExpenseData([...expenseData, newEntry]);
+      setTotalExpenses((prev) => prev + totalAmount);
+      
+      // Add to cash book - payments go to Cr. side
+      if (cashAmount > 0 || bankAmount > 0) {
+        const cashBookEntry = {
+          id: Date.now() + 1,
+          date: formData.date,
+          particulars: "Adda Fees",
+          description: `Adda fees payment - ${formData.description}`,
+          jfNo: `ADDA-${Date.now()}`,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
+          type: 'cr', // Payments go to Cr. side
+          timestamp: new Date().toISOString(),
+          source: 'fees-payment'
+        };
+        setCashBookEntries(prev => [cashBookEntry, ...prev]);
       }
+    }
+    setFormData({ cashAmount: "", bankAmount: "", description: "", date: "" });
+  };
 
-      return updated;
+  const handleDeleteEntry = (entryId) => {
+    const entryToDelete = expenseData.find(entry => entry.id === entryId);
+    if (entryToDelete && entryToDelete.totalAmount) {
+      setTotalExpenses((prev) => prev - entryToDelete.totalAmount);
+    }
+    setExpenseData(expenseData.filter(entry => entry.id !== entryId));
+    
+    // Remove corresponding cash book entry
+    setCashBookEntries(prev => prev.filter(entry => entry.source === 'fees-payment' && !entry.jfNo?.includes(entryId.toString())));
+  };
+
+  const handleEditEntry = (entry) => {
+    setEditingEntry(entry);
+    setFormData({
+      cashAmount: entry.cashAmount.toString(),
+      bankAmount: entry.bankAmount.toString(),
+      description: entry.description,
+      date: entry.date,
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setSuccess('');
+  const handleCancelEdit = () => {
+    setEditingEntry(null);
+    setFormData({ cashAmount: "", bankAmount: "", description: "", date: "" });
+  };
 
-    try {
-      const submitData = {
-        ...formData,
-        cashAmount: parseFloat(formData.cashAmount) || 0,
-        bankAmount: parseFloat(formData.bankAmount) || 0,
-        totalAmount: parseFloat(formData.totalAmount) || 0,
-        submittedBy: currentUser.fullName || 'Unknown User'
-      };
+  // Filter adda entries and calculate totals for summary
+  const addaEntries = expenseData.filter(entry => entry.type === "fees");
+  const totalCash = addaEntries.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
+  const totalBank = addaEntries.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+  const grandTotal = totalCash + totalBank;
 
-      const response = await addAddaPayment(submitData);
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this entry?")) {
+      const expenseToDelete = expenseData.find(expense => expense.id === id);
+      setExpenseData(expenseData.filter(expense => expense.id !== id));
 
-      if (response.success) {
-        setSuccess('Adda payment added successfully!');
-        setFormData({
-          date: new Date().toISOString().split('T')[0],
-          addaName: '',
-          cashAmount: '',
-          bankAmount: '',
-          totalAmount: '',
-          remarks: ''
-        });
-        loadPayments();
-      } else {
-        setError(response.error || 'Failed to add adda payment');
+      // Remove corresponding cash book entry
+      if (expenseToDelete && setCashBookEntries) {
+        setCashBookEntries(prev => prev.filter(entry => 
+          !(entry.source === 'fees-payment' && entry.id === expenseToDelete.id + 1)
+        ));
       }
-    } catch (error) {
-      setError('Error: ' + error.message);
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <div className="fade-in">
-      <h2 className="mb-4">
-        <i className="bi bi-building me-2"></i>
-        Adda Payment Entry
-      </h2>
+    <div className="adda-entry-container">
+      <div className="container-fluid">
+        <div className="adda-header">
+          <h2><i className="bi bi-credit-card"></i> Adda Fees Payment Entry</h2>
+          <p>Record your adda fees expenses (Payment)</p>
+        </div>
 
-      <div className="form-card">
-        <h3>Add New Adda Payment</h3>
-        
-        {error && <div className="alert alert-danger">{error}</div>}
-        {success && <div className="alert alert-success">{success}</div>}
-
-        <form onSubmit={handleSubmit}>
-          <div className="row g-3">
-            <div className="col-md-6">
-              <label className="form-label">Date</label>
-              <input
-                type="date"
-                className="form-control"
-                name="date"
-                value={formData.date}
-                onChange={handleInputChange}
-                required
-              />
+        {/* Summary Cards */}
+        {addaEntries.length > 0 && (
+          <div className="row mb-4">
+            <div className="col-md-3 col-sm-6 mb-3">
+              <div className="summary-card cash-card">
+                <div className="card-body">
+                  <h6>Cash Expense</h6>
+                  <h4>₹{totalCash.toLocaleString('en-IN')}</h4>
+                </div>
+              </div>
             </div>
-            <div className="col-md-6">
-              <label className="form-label">Adda Name</label>
-              <input
-                type="text"
-                className="form-control"
-                name="addaName"
-                value={formData.addaName}
-                onChange={handleInputChange}
-                placeholder="Enter adda name"
-                required
-              />
+            <div className="col-md-3 col-sm-6 mb-3">
+              <div className="summary-card bank-card">
+                <div className="card-body">
+                  <h6>Bank Transfer</h6>
+                  <h4>₹{totalBank.toLocaleString('en-IN')}</h4>
+                </div>
+              </div>
             </div>
-            <div className="col-md-4">
-              <label className="form-label">Cash Amount</label>
-              <input
-                type="number"
-                className="form-control"
-                name="cashAmount"
-                value={formData.cashAmount}
-                onChange={handleInputChange}
-                placeholder="0.00"
-                step="0.01"
-              />
+            <div className="col-md-3 col-sm-6 mb-3">
+              <div className="summary-card total-card">
+                <div className="card-body">
+                  <h6>Total Expenses</h6>
+                  <h4>₹{grandTotal.toLocaleString('en-IN')}</h4>
+                </div>
+              </div>
             </div>
-            <div className="col-md-4">
-              <label className="form-label">Bank Amount</label>
-              <input
-                type="number"
-                className="form-control"
-                name="bankAmount"
-                value={formData.bankAmount}
-                onChange={handleInputChange}
-                placeholder="0.00"
-                step="0.01"
-              />
-            </div>
-            <div className="col-md-4">
-              <label className="form-label">Total Amount</label>
-              <input
-                type="number"
-                className="form-control"
-                name="totalAmount"
-                value={formData.totalAmount}
-                onChange={handleInputChange}
-                placeholder="0.00"
-                step="0.01"
-                readOnly
-              />
-            </div>
-            <div className="col-12">
-              <label className="form-label">Remarks</label>
-              <textarea
-                className="form-control"
-                name="remarks"
-                value={formData.remarks}
-                onChange={handleInputChange}
-                rows="3"
-                placeholder="Enter any remarks"
-              ></textarea>
-            </div>
-            <div className="col-12">
-              <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? (
-                  <>
-                    <span className="spinner-border spinner-border-sm me-2"></span>
-                    Adding...
-                  </>
-                ) : (
-                  <>
-                    <i className="bi bi-plus-circle me-2"></i>
-                    Add Payment
-                  </>
-                )}
-              </button>
+            <div className="col-md-3 col-sm-6 mb-3">
+              <div className="summary-card entries-card">
+                <div className="card-body">
+                  <h6>Total Entries</h6>
+                  <h4>{addaEntries.length}</h4>
+                </div>
+              </div>
             </div>
           </div>
-        </form>
-      </div>
+        )}
 
-      {/* Recent Entries */}
-      <div className="form-card mt-4">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h3>Recent Entries</h3>
-          <button className="btn btn-outline-primary btn-sm" onClick={loadPayments}>
-            <i className="bi bi-arrow-clockwise"></i> Refresh
-          </button>
+        <div className="adda-form-card">
+          <h4><i className="bi bi-building"></i> {editingEntry ? "Edit Adda Fees" : "Add Adda Fees"}</h4>
+          <form onSubmit={handleSubmit}>
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Date</label>
+                <input
+                  type="date"
+                  className="form-control date-input"
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+                  placeholder="Select date"
+                  min={getTodayDate()}
+                  required
+                />
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Description</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Enter description"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Cash Amount (₹)</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={formData.cashAmount}
+                  onChange={(e) => setFormData({ ...formData, cashAmount: e.target.value })}
+                  placeholder="Enter cash amount"
+                  min="0"
+                />
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Bank Amount (₹)</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={formData.bankAmount}
+                  onChange={(e) => setFormData({ ...formData, bankAmount: e.target.value })}
+                  placeholder="Enter bank amount"
+                  min="0"
+                />
+              </div>
+            </div>
+
+            <div className="amount-summary mb-3">
+              <div className="row">
+                <div className="col-4">
+                  <span>Cash: ₹{parseInt(formData.cashAmount) || 0}</span>
+                </div>
+                <div className="col-4">
+                  <span>Bank: ₹{parseInt(formData.bankAmount) || 0}</span>
+                </div>
+                <div className="col-4">
+                  <strong>Total: ₹{(parseInt(formData.cashAmount) || 0) + (parseInt(formData.bankAmount) || 0)}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="button-group">
+              <button type="submit" className="btn adda-entry-btn">
+                <i className={editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
+                {editingEntry ? "Update Entry" : "Add Adda Entry"}
+              </button>
+              {editingEntry && (
+                <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
+                  <i className="bi bi-x-circle"></i> Cancel
+                </button>
+              )}
+            </div>
+          </form>
         </div>
-        
-        {loading && <div className="text-center">Loading...</div>}
 
-        {payments.length === 0 && !loading ? (
-          <div className="text-center text-muted">No adda payments found</div>
-        ) : (
-          <div className="table-responsive">
-            <table className="table table-striped">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Adda Name</th>
-                  <th>Cash</th>
-                  <th>Bank</th>
-                  <th>Total</th>
-                  <th>Submitted By</th>
-                  <th>Remarks</th>
-                </tr>
-              </thead>
-              <tbody>
-                {payments.map((payment, index) => (
-                  <tr key={payment.id || index}>
-                    <td>{new Date(payment.date).toLocaleDateString()}</td>
-                    <td>{payment.addaName}</td>
-                    <td>₹{payment.cashAmount}</td>
-                    <td>₹{payment.bankAmount}</td>
-                    <td><strong>₹{payment.totalAmount}</strong></td>
-                    <td>{payment.submittedBy}</td>
-                    <td>{payment.remarks}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* Recent Entries */}
+        {addaEntries.length > 0 && (
+          <div className="recent-entries mt-4">
+            <h4>Recent Entries</h4>
+            <div className="row">
+              {addaEntries.slice(-6).reverse().map((entry) => (
+                <div key={entry.id} className="col-md-6 col-lg-4 mb-3">
+                  <div className="entry-card">
+                    <div className="card-body">
+                      <div className="entry-header">
+                        <span className="entry-type adda">
+                          Adda Fees
+                        </span>
+                        <div className="entry-actions">
+                          <button 
+                            className="btn btn-sm btn-edit" 
+                            onClick={() => handleEditEntry(entry)}
+                            title="Edit Entry"
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                          <button 
+                            className="btn btn-sm btn-delete" 
+                            onClick={() => handleDelete(entry.id)}
+                            title="Delete Entry"
+                          >
+                            <i className="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                      <div className="entry-date">
+                        <small className="text-muted">{entry.date}</small>
+                      </div>
+                      <div className="entry-content">
+                        <p><strong>Description:</strong> {entry.description}</p>
+                      </div>
+                      <div className="entry-amounts">
+                        <div className="amount-row">
+                          <span>Cash: ₹{entry.cashAmount}</span>
+                          <span>Bank: ₹{entry.bankAmount}</span>
+                        </div>
+                        <div className="total-amount">
+                          <strong>Total: ₹{entry.totalAmount}</strong>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
     </div>
   );
-};
+}
 
-export default FeesPayment;
+export default AddaFeesEntry;

@@ -1,357 +1,579 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "../css/Approval.css";
-import { 
-  addApprovalData, 
-  getApprovalData,
-  getFareReceipts,
-  getFuelPayments,
-  getAddaPayments,
-  getUnionPayments,
-  getServicePayments,
-  getOtherPayments
-} from "../../services/googleSheetsAPI";
 
-const Approval = () => {
-  const [formData, setFormData] = useState({
-    submissionDate: new Date().toISOString().split('T')[0],
-    managerName: '',
-    cashHandover: '',
-    bankAmount: '',
-    remarks: '',
-    status: 'Pending'
+function Approval({ fareData, expenseData, cashBookEntries }) {
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [settlementData, setSettlementData] = useState({
+    cashSettlement: "",
+    bankSettlement: "",
+    settlementWith: "",
+    remarks: ""
   });
 
-  const [approvalData, setApprovalData] = useState([]);
-  const [summary, setSummary] = useState({
-    totalCashReceipts: 0,
-    totalCashPayments: 0,
-    totalBankReceipts: 0,
-    totalBankPayments: 0,
-    cashBalance: 0,
-    bankBalance: 0
-  });
-  
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  // Calculate totals from cashBookEntries
+  const calculateTotals = () => {
+    let totalCashReceipts = 0;
+    let totalCashPayments = 0;
+    let totalBankReceipts = 0;
+    let totalBankPayments = 0;
 
-  const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-
-  useEffect(() => {
-    loadApprovalData();
-    calculateSummary();
-  }, []);
-
-  const loadApprovalData = async () => {
-    try {
-      setLoading(true);
-      const response = await getApprovalData();
-      if (response.success) {
-        setApprovalData(response.data || []);
-      } else {
-        setError(response.error || 'Failed to load approval data');
+    cashBookEntries.forEach(entry => {
+      if (entry.type === 'dr') {
+        totalCashReceipts += entry.cashAmount || 0;
+        totalBankReceipts += entry.bankAmount || 0;
+      } else if (entry.type === 'cr') {
+        totalCashPayments += entry.cashAmount || 0;
+        totalBankPayments += entry.bankAmount || 0;
       }
-    } catch (error) {
-      setError('Error loading approval data: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
+    });
+
+    const cashBalance = totalCashReceipts - totalCashPayments;
+    const bankBalance = totalBankReceipts - totalBankPayments;
+
+    return {
+      totalCashReceipts,
+      totalCashPayments,
+      totalBankReceipts,
+      totalBankPayments,
+      cashBalance,
+      bankBalance
+    };
   };
 
-  const calculateSummary = async () => {
-    try {
-      // Fetch all data from different sheets
-      const [fareResponse, fuelResponse, addaResponse, unionResponse, serviceResponse, otherResponse] = await Promise.all([
-        getFareReceipts(),
-        getFuelPayments(),
-        getAddaPayments(),
-        getUnionPayments(),
-        getServicePayments(),
-        getOtherPayments()
-      ]);
+  const totals = calculateTotals();
 
-      let totalCashReceipts = 0;
-      let totalBankReceipts = 0;
-      let totalCashPayments = 0;
-      let totalBankPayments = 0;
-
-      // Calculate receipts (income)
-      if (fareResponse.success && fareResponse.data) {
-        fareResponse.data.forEach(item => {
-          totalCashReceipts += item.cashAmount || 0;
-          totalBankReceipts += item.bankAmount || 0;
-        });
-      }
-
-      // Calculate payments (expenses)
-      const paymentResponses = [fuelResponse, addaResponse, unionResponse, serviceResponse, otherResponse];
-      paymentResponses.forEach(response => {
-        if (response.success && response.data) {
-          response.data.forEach(item => {
-            totalCashPayments += item.cashAmount || 0;
-            totalBankPayments += item.bankAmount || 0;
-          });
-        }
-      });
-
-      setSummary({
-        totalCashReceipts,
-        totalBankReceipts,
-        totalCashPayments,
-        totalBankPayments,
-        cashBalance: totalCashReceipts - totalCashPayments,
-        bankBalance: totalBankReceipts - totalBankPayments
-      });
-
-    } catch (error) {
-      console.error('Error calculating summary:', error);
-    }
+  const handleSendForApproval = () => {
+    setShowApprovalModal(true);
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
+  const handleApprovalSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-    setSuccess('');
 
-    try {
-      const submitData = {
-        ...formData,
-        cashHandover: parseFloat(formData.cashHandover) || 0,
-        bankAmount: parseFloat(formData.bankAmount) || 0,
-        totalCashReceipts: summary.totalCashReceipts,
-        totalCashPayments: summary.totalCashPayments,
-        totalBankReceipts: summary.totalBankReceipts,
-        totalBankPayments: summary.totalBankPayments,
-        cashBalance: summary.cashBalance,
-        bankBalance: summary.bankBalance,
-        submittedBy: currentUser.fullName || 'Unknown User'
-      };
-
-      const response = await addApprovalData(submitData);
-
-      if (response.success) {
-        setSuccess('Approval data submitted successfully!');
-        setFormData({
-          submissionDate: new Date().toISOString().split('T')[0],
-          managerName: '',
-          cashHandover: '',
-          bankAmount: '',
-          remarks: '',
-          status: 'Pending'
-        });
-        loadApprovalData();
-      } else {
-        setError(response.error || 'Failed to submit approval data');
-      }
-    } catch (error) {
-      setError('Error: ' + error.message);
-    } finally {
-      setLoading(false);
+    // Validation
+    if (!settlementData.settlementWith.trim()) {
+      alert("Please enter manager name");
+      return;
     }
+
+    const submissionData = {
+      timestamp: new Date().toISOString(),
+      totals,
+      settlementData,
+      summaryData: {
+        fareReceipts: {
+          totalEntries: fareData.length,
+          cashCollection: fareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
+          bankCollection: fareData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
+          totalIncome: fareData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
+        },
+        fuelPayments: {
+          totalEntries: expenseData.filter(entry => entry.type === 'fuel').length,
+          cashExpense: expenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
+          bankExpense: expenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
+          totalExpense: expenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
+        },
+        addaPayments: {
+          totalEntries: expenseData.filter(entry => entry.type === 'fees').length,
+          cashExpense: expenseData.filter(entry => entry.type === 'fees').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
+          bankExpense: expenseData.filter(entry => entry.type === 'fees').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
+          totalExpense: expenseData.filter(entry => entry.type === 'fees').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
+        },
+        servicePayments: {
+          totalEntries: expenseData.filter(entry => entry.type === 'service').length,
+          cashExpense: expenseData.filter(entry => entry.type === 'service').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
+          bankExpense: expenseData.filter(entry => entry.type === 'service').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
+          totalExpense: expenseData.filter(entry => entry.type === 'service').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
+        },
+        unionPayments: {
+          totalEntries: expenseData.filter(entry => entry.type === 'union').length,
+          cashExpense: expenseData.filter(entry => entry.type === 'union').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
+          bankExpense: expenseData.filter(entry => entry.type === 'union').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
+          totalExpense: expenseData.filter(entry => entry.type === 'union').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
+        },
+        otherPayments: {
+          totalEntries: expenseData.filter(entry => entry.type === 'other').length,
+          cashExpense: expenseData.filter(entry => entry.type === 'other').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
+          bankExpense: expenseData.filter(entry => entry.type === 'other').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
+          totalExpense: expenseData.filter(entry => entry.type === 'other').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
+        }
+      }
+    };
+
+    // Here you can handle the approval submission
+    console.log("Approval submitted:", submissionData);
+
+    let successMessage = "Data sent for approval successfully!";
+    if (settlementData.cashSettlement && parseFloat(settlementData.cashSettlement) > 0) {
+      successMessage += `\n\nCash Handover: ₹${parseFloat(settlementData.cashSettlement).toLocaleString()} to ${settlementData.settlementWith}`;
+    }
+
+    alert(successMessage);
+
+    setShowApprovalModal(false);
+    setSettlementData({
+      cashSettlement: "",
+      bankSettlement: "",
+      settlementWith: "",
+      remarks: ""
+    });
+  };
+
+  const handleCloseModal = () => {
+    setShowApprovalModal(false);
+    setSettlementData({
+      cashSettlement: "",
+      bankSettlement: "",
+      settlementWith: "",
+      remarks: ""
+    });
   };
 
   return (
-    <div className="fade-in">
-      <h2 className="mb-4">
-        <i className="bi bi-check-circle me-2"></i>
-        Manager Approval
-      </h2>
+    <div className="approval-container">
+      <div className="container-fluid">
+        <div className="approval-header">
+          <h2><i className="bi bi-check-circle"></i> Data Summary & Approval</h2>
+          <p>Review your financial data and send for approval</p>
+        </div>
 
-      {/* Summary Cards */}
-      <div className="row mb-4">
-        <div className="col-md-3 col-sm-6 mb-3">
-          <div className="summary-card">
-            <h6>Cash Receipts</h6>
-            <h4 className="text-success">₹{summary.totalCashReceipts.toLocaleString('en-IN')}</h4>
+        {/* Detailed Section Summaries */}
+        <div className="section-summaries mb-4">
+          {/* Fare Receipt Summary */}
+          <div className="section-summary-card">
+            <h5><i className="bi bi-receipt"></i> Fare Receipt Summary</h5>
+            <div className="row">
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Total Entries</h6>
+                  <h5>{fareData.length}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Cash Collection</h6>
+                  <h5>₹{fareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Bank Collection</h6>
+                  <h5>₹{fareData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card total">
+                  <h6>Total Fare Income</h6>
+                  <h5>₹{fareData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+            </div>
+            {fareData.length > 0 && (
+              <div className="recent-entries-preview">
+                <h6>Recent Entries:</h6>
+                {fareData.slice(-3).map((entry) => (
+                  <div key={entry.id} className="entry-preview">
+                    <span className="entry-type">{entry.type === 'daily' ? 'Daily' : entry.type === 'booking' ? 'Booking' : 'Off Day'}</span>
+                    <span className="entry-detail">
+                      {entry.type === 'daily' && `${entry.route} - ${entry.date}`}
+                      {entry.type === 'booking' && `${entry.bookingDetails?.substring(0, 30)}... - ${entry.dateFrom} to ${entry.dateTo}`}
+                      {entry.type === 'off' && `${entry.reason} - ${entry.date}`}
+                    </span>
+                    {entry.type !== 'off' && <span className="entry-amount">₹{entry.totalAmount}</span>}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-        <div className="col-md-3 col-sm-6 mb-3">
-          <div className="summary-card">
-            <h6>Bank Receipts</h6>
-            <h4 className="text-primary">₹{summary.totalBankReceipts.toLocaleString('en-IN')}</h4>
-          </div>
-        </div>
-        <div className="col-md-3 col-sm-6 mb-3">
-          <div className="summary-card">
-            <h6>Cash Payments</h6>
-            <h4 className="text-danger">₹{summary.totalCashPayments.toLocaleString('en-IN')}</h4>
-          </div>
-        </div>
-        <div className="col-md-3 col-sm-6 mb-3">
-          <div className="summary-card">
-            <h6>Bank Payments</h6>
-            <h4 className="text-warning">₹{summary.totalBankPayments.toLocaleString('en-IN')}</h4>
-          </div>
-        </div>
-      </div>
 
-      <div className="row mb-4">
-        <div className="col-md-6 mb-3">
-          <div className="summary-card">
-            <h6>Cash Balance</h6>
-            <h4 className={summary.cashBalance >= 0 ? 'text-success' : 'text-danger'}>
-              ₹{summary.cashBalance.toLocaleString('en-IN')}
-            </h4>
+          {/* Fuel Payment Summary */}
+          <div className="section-summary-card">
+            <h5><i className="bi bi-fuel-pump"></i> Fuel Payment Summary</h5>
+            <div className="row">
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Total Entries</h6>
+                  <h5>{expenseData.filter(entry => entry.type === 'fuel').length}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Cash Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Bank Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card total">
+                  <h6>Total Fuel Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+            </div>
+            {expenseData.filter(entry => entry.type === 'fuel').length > 0 && (
+              <div className="recent-entries-preview">
+                <h6>Recent Entries:</h6>
+                {expenseData.filter(entry => entry.type === 'fuel').slice(-3).map((entry) => (
+                  <div key={entry.id} className="entry-preview">
+                    <span className="entry-type">Fuel</span>
+                    <span className="entry-detail">
+                      {entry.pumpName || 'Fuel Station'} - {entry.date}
+                      {entry.liters && ` (${entry.liters}L)`}
+                    </span>
+                    <span className="entry-amount">₹{entry.totalAmount}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Adda Payment Summary */}
+          <div className="section-summary-card">
+            <h5><i className="bi bi-building"></i> Adda Payment Summary</h5>
+            <div className="row">
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Total Entries</h6>
+                  <h5>{expenseData.filter(entry => entry.type === 'fees').length}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Cash Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'fees').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Bank Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'fees').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card total">
+                  <h6>Total Adda Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'fees').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+            </div>
+            {expenseData.filter(entry => entry.type === 'fees').length > 0 && (
+              <div className="recent-entries-preview">
+                <h6>Recent Entries:</h6>
+                {expenseData.filter(entry => entry.type === 'fees').slice(-3).map((entry) => (
+                  <div key={entry.id} className="entry-preview">
+                    <span className="entry-type">Adda</span>
+                    <span className="entry-detail">
+                      {entry.description} - {entry.date}
+                    </span>
+                    <span className="entry-amount">₹{entry.totalAmount}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Service Payment Summary */}
+          <div className="section-summary-card">
+            <h5><i className="bi bi-tools"></i> Service Payment Summary</h5>
+            <div className="row">
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Total Entries</h6>
+                  <h5>{expenseData.filter(entry => entry.type === 'service').length}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Cash Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'service').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Bank Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'service').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card total">
+                  <h6>Total Service Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'service').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+            </div>
+            {expenseData.filter(entry => entry.type === 'service').length > 0 && (
+              <div className="recent-entries-preview">
+                <h6>Recent Entries:</h6>
+                {expenseData.filter(entry => entry.type === 'service').slice(-3).map((entry) => (
+                  <div key={entry.id} className="entry-preview">
+                    <span className="entry-type">Service</span>
+                    <span className="entry-detail">
+                      {entry.serviceType || entry.description} - {entry.date}
+                      {entry.vendor && ` (${entry.vendor})`}
+                    </span>
+                    <span className="entry-amount">₹{entry.totalAmount}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Union Payment Summary */}
+          <div className="section-summary-card">
+            <h5><i className="bi bi-people"></i> Union Payment Summary</h5>
+            <div className="row">
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Total Entries</h6>
+                  <h5>{expenseData.filter(entry => entry.type === 'union').length}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Cash Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'union').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Bank Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'union').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card total">
+                  <h6>Total Union Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'union').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+            </div>
+            {expenseData.filter(entry => entry.type === 'union').length > 0 && (
+              <div className="recent-entries-preview">
+                <h6>Recent Entries:</h6>
+                {expenseData.filter(entry => entry.type === 'union').slice(-3).map((entry) => (
+                  <div key={entry.id} className="entry-preview">
+                    <span className="entry-type">Union</span>
+                    <span className="entry-detail">
+                      {entry.description} - {entry.date}
+                    </span>
+                    <span className="entry-amount">₹{entry.totalAmount}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Other Payment Summary */}
+          <div className="section-summary-card">
+            <h5><i className="bi bi-credit-card"></i> Other Payment Summary</h5>
+            <div className="row">
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Total Entries</h6>
+                  <h5>{expenseData.filter(entry => entry.type === 'other').length}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Cash Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'other').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card">
+                  <h6>Bank Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'other').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="mini-card total">
+                  <h6>Total Other Expense</h6>
+                  <h5>₹{expenseData.filter(entry => entry.type === 'other').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</h5>
+                </div>
+              </div>
+            </div>
+            {expenseData.filter(entry => entry.type === 'other').length > 0 && (
+              <div className="recent-entries-preview">
+                <h6>Recent Entries:</h6>
+                {expenseData.filter(entry => entry.type === 'other').slice(-3).map((entry) => (
+                  <div key={entry.id} className="entry-preview">
+                    <span className="entry-type">Other</span>
+                    <span className="entry-detail">
+                      {entry.paymentDetails} - {entry.date}
+                      {entry.vendor && ` (${entry.vendor})`}
+                    </span>
+                    <span className="entry-amount">₹{entry.totalAmount}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-        <div className="col-md-6 mb-3">
-          <div className="summary-card">
-            <h6>Bank Balance</h6>
-            <h4 className={summary.bankBalance >= 0 ? 'text-success' : 'text-danger'}>
-              ₹{summary.bankBalance.toLocaleString('en-IN')}
-            </h4>
+
+        {/* Overall Summary Cards */}
+        <div className="row mb-4">
+          <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div className="summary-card cash-receipts">
+              <div className="card-body">
+                <h6>Total Cash Receipts</h6>
+                <h4>₹{totals.totalCashReceipts.toLocaleString()}</h4>
+              </div>
+            </div>
+          </div>
+          <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div className="summary-card cash-payments">
+              <div className="card-body">
+                <h6>Total Cash Payments</h6>
+                <h4>₹{totals.totalCashPayments.toLocaleString()}</h4>
+              </div>
+            </div>
+          </div>
+          <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div className="summary-card bank-receipts">
+              <div className="card-body">
+                <h6>Total Bank Receipts</h6>
+                <h4>₹{totals.totalBankReceipts.toLocaleString()}</h4>
+              </div>
+            </div>
+          </div>
+          <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div className="summary-card bank-payments">
+              <div className="card-body">
+                <h6>Total Bank Payments</h6>
+                <h4>₹{totals.totalBankPayments.toLocaleString()}</h4>
+              </div>
+            </div>
+          </div>
+          <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div className="summary-card cash-balance">
+              <div className="card-body">
+                <h6>Cash Balance</h6>
+                <h4>₹{totals.cashBalance.toLocaleString()}</h4>
+              </div>
+            </div>
+          </div>
+          <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div className="summary-card bank-balance">
+              <div className="card-body">
+                <h6>Bank Balance</h6>
+                <h4>₹{totals.bankBalance.toLocaleString()}</h4>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="form-card">
-        <h3>Submit for Approval</h3>
-        
-        {error && <div className="alert alert-danger">{error}</div>}
-        {success && <div className="alert alert-success">{success}</div>}
 
-        <form onSubmit={handleSubmit}>
-          <div className="row g-3">
-            <div className="col-md-6">
-              <label className="form-label">Submission Date</label>
-              <input
-                type="date"
-                className="form-control"
-                name="submissionDate"
-                value={formData.submissionDate}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div className="col-md-6">
-              <label className="form-label">Manager Name</label>
-              <input
-                type="text"
-                className="form-control"
-                name="managerName"
-                value={formData.managerName}
-                onChange={handleInputChange}
-                placeholder="Enter manager name"
-                required
-              />
-            </div>
-            <div className="col-md-6">
-              <label className="form-label">Cash Handover Amount</label>
-              <input
-                type="number"
-                className="form-control"
-                name="cashHandover"
-                value={formData.cashHandover}
-                onChange={handleInputChange}
-                placeholder="0.00"
-                step="0.01"
-              />
-            </div>
-            <div className="col-md-6">
-              <label className="form-label">Bank Amount</label>
-              <input
-                type="number"
-                className="form-control"
-                name="bankAmount"
-                value={formData.bankAmount}
-                onChange={handleInputChange}
-                placeholder="0.00"
-                step="0.01"
-              />
-            </div>
-            <div className="col-12">
-              <label className="form-label">Remarks</label>
-              <textarea
-                className="form-control"
-                name="remarks"
-                value={formData.remarks}
-                onChange={handleInputChange}
-                rows="3"
-                placeholder="Enter any remarks"
-              ></textarea>
-            </div>
-            <div className="col-12">
-              <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? (
-                  <>
-                    <span className="spinner-border spinner-border-sm me-2"></span>
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <i className="bi bi-check-circle me-2"></i>
-                    Submit for Approval
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
 
-      {/* Approval History */}
-      <div className="form-card mt-4">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h3>Approval History</h3>
-          <button className="btn btn-outline-primary btn-sm" onClick={loadApprovalData}>
-            <i className="bi bi-arrow-clockwise"></i> Refresh
+        {/* Send for Approval Button */}
+        <div className="text-center">
+          <button 
+            className="btn btn-lg approval-btn"
+            onClick={handleSendForApproval}
+          >
+            <i className="bi bi-send"></i>
+            Send for Approval
           </button>
         </div>
-        
-        {loading && <div className="text-center">Loading...</div>}
 
-        {approvalData.length === 0 && !loading ? (
-          <div className="text-center text-muted">No approval data found</div>
-        ) : (
-          <div className="table-responsive">
-            <table className="table table-striped">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Manager</th>
-                  <th>Cash Handover</th>
-                  <th>Bank Amount</th>
-                  <th>Cash Balance</th>
-                  <th>Bank Balance</th>
-                  <th>Status</th>
-                  <th>Submitted By</th>
-                </tr>
-              </thead>
-              <tbody>
-                {approvalData.map((item, index) => (
-                  <tr key={item.id || index}>
-                    <td>{new Date(item.submissionDate).toLocaleDateString()}</td>
-                    <td>{item.managerName}</td>
-                    <td>₹{item.cashHandover}</td>
-                    <td>₹{item.bankAmount}</td>
-                    <td className={item.cashBalance >= 0 ? 'text-success' : 'text-danger'}>
-                      ₹{item.cashBalance}
-                    </td>
-                    <td className={item.bankBalance >= 0 ? 'text-success' : 'text-danger'}>
-                      ₹{item.bankBalance}
-                    </td>
-                    <td>
-                      <span className={`badge ${item.status === 'Approved' ? 'bg-success' : item.status === 'Rejected' ? 'bg-danger' : 'bg-warning'}`}>
-                        {item.status}
-                      </span>
-                    </td>
-                    <td>{item.submittedBy}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* Approval Modal */}
+        {showApprovalModal && (
+          <div className="modal-overlay" onClick={handleCloseModal}>
+            <div className="approval-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h5><i className="bi bi-check-circle"></i> Send for Approval</h5>
+                <button className="btn-close" onClick={handleCloseModal}>
+                  <i className="bi bi-x"></i>
+                </button>
+              </div>
+              <div className="modal-body">
+                <form onSubmit={handleApprovalSubmit}>
+                  {/* Cash Handover Section */}
+                  <div className="settlement-section mb-4">
+                    <h6 className="mb-3"><i className="bi bi-cash-stack"></i> Cash Handover to Manager</h6>
+                    <div className="cash-handover-info p-3 mb-3" style={{backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #dee2e6'}}>
+                      <div className="row">
+                        <div className="col-md-6">
+                          <p><strong>Available Cash Balance:</strong> ₹{totals.cashBalance.toLocaleString()}</p>
+                        </div>
+                        <div className="col-md-6">
+                          <p><strong>Available Bank Balance:</strong> ₹{totals.bankBalance.toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="row">
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Cash Amount to Handover</label>
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={settlementData.cashSettlement}
+                          onChange={(e) => setSettlementData({...settlementData, cashSettlement: e.target.value})}
+                          placeholder="Enter cash amount"
+                          max={Math.max(0, totals.cashBalance)}
+                        />
+                        <small className="text-muted">Maximum: ₹{Math.max(0, totals.cashBalance).toLocaleString()}</small>
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Bank Amount Information</label>
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={settlementData.bankSettlement}
+                          onChange={(e) => setSettlementData({...settlementData, bankSettlement: e.target.value})}
+                          placeholder="Bank amount (for record)"
+                          max={Math.max(0, totals.bankBalance)}
+                        />
+                        <small className="text-muted">For record keeping: ₹{Math.max(0, totals.bankBalance).toLocaleString()}</small>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-12 mb-3">
+                        <label className="form-label">Manager Name</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={settlementData.settlementWith}
+                          onChange={(e) => setSettlementData({...settlementData, settlementWith: e.target.value})}
+                          placeholder="Enter manager name"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label">Remarks</label>
+                    <textarea
+                      className="form-control"
+                      rows="3"
+                      value={settlementData.remarks}
+                      onChange={(e) => setSettlementData({...settlementData, remarks: e.target.value})}
+                      placeholder="Add any additional remarks..."
+                    ></textarea>
+                  </div>
+
+                  <div className="modal-footer">
+                    <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
+                      Cancel
+                    </button>
+                    <button type="submit" className="btn btn-primary">
+                      <i className="bi bi-send"></i>
+                      Submit for Approval
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
         )}
       </div>
     </div>
   );
-};
+}
 
 export default Approval;

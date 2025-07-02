@@ -1,7 +1,6 @@
 
 import React, { useState } from "react";
 import "../css/Login.css";
-import { login, testConnection } from "../../services/googleSheetsAPI";
 
 function Login({ onLogin }) {
   const [formData, setFormData] = useState({
@@ -54,43 +53,33 @@ function Login({ onLogin }) {
     
     setIsLoading(true);
     
-    try {
-      // Test API connection first
-      console.log('Testing API connection...');
-      const testResult = await testConnection();
-      
-      if (!testResult.success) {
-        throw new Error('Cannot connect to Google Apps Script. Please check deployment.');
-      }
-      
-      console.log('API connection successful:', testResult);
-      
-      // Call Google Sheets API for authentication
-      const result = await login(formData.username, formData.password);
-      
+    // Demo credentials for different user types
+    const validCredentials = {
+      Admin: { username: "admin", password: "1234" },
+      Manager: { username: "manager", password: "1234" },
+      Conductor: { username: "conductor", password: "1234" }
+    };
+    
+    // Simulate API call with credential validation
+    setTimeout(() => {
       setIsLoading(false);
       
-      if (result.success) {
-        // Login successful
+      const expectedCreds = validCredentials[formData.userType];
+      
+      if (formData.username === expectedCreds.username && formData.password === expectedCreds.password) {
+        // Valid credentials - login successful
         onLogin({
-          username: result.user.username,
-          userType: result.user.userType,
-          fullName: result.user.fullName,
+          username: formData.username,
+          userType: formData.userType,
           isAuthenticated: true
         });
       } else {
-        // Login failed
+        // Invalid credentials
         setErrors({
-          password: result.error || "Invalid username or password"
+          password: "Invalid username or password for selected user type"
         });
       }
-    } catch (error) {
-      setIsLoading(false);
-      setErrors({
-        password: "Login failed. Please check your connection and try again."
-      });
-      console.error('Login error:', error);
-    }
+    }, 1000);
   };
 
   const userTypeInfo = {
