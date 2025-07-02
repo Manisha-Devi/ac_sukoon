@@ -243,11 +243,25 @@ function testConnection() {
 // Authentication
 function handleLogin(data) {
   try {
+    console.log('Login attempt:', data);
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.USERS);
     const values = sheet.getDataRange().getValues();
+    
+    console.log('Sheet data:', values);
+    console.log('Looking for username:', data.username, 'password:', data.password);
 
     for (let i = 1; i < values.length; i++) {
-      if (values[i][0] === data.username && values[i][1] === data.password) {
+      console.log('Checking row', i, ':', values[i][0], values[i][1]);
+      
+      // Convert to string and trim whitespace
+      const sheetUsername = String(values[i][0]).trim();
+      const sheetPassword = String(values[i][1]).trim();
+      const inputUsername = String(data.username).trim();
+      const inputPassword = String(data.password).trim();
+      
+      console.log('Comparing:', sheetUsername, '===', inputUsername, '&&', sheetPassword, '===', inputPassword);
+      
+      if (sheetUsername === inputUsername && sheetPassword === inputPassword) {
         // Update last login
         sheet.getRange(i + 1, 7).setValue(new Date());
 
@@ -264,7 +278,15 @@ function handleLogin(data) {
       }
     }
 
-    return { success: false, error: 'Invalid username or password' };
+    return { 
+      success: false, 
+      error: 'Invalid username or password',
+      debug: {
+        receivedUsername: data.username,
+        receivedPassword: data.password,
+        sheetData: values.slice(1).map(row => ({username: row[0], password: row[1]}))
+      }
+    };
   } catch (error) {
     return { success: false, error: 'Login error: ' + error.toString() };
   }
