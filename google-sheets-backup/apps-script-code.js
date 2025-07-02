@@ -26,12 +26,6 @@ const SHEET_NAMES = {
 function doOptions(request) {
   const output = ContentService.createTextOutput('');
   output.setMimeType(ContentService.MimeType.TEXT);
-  output.setHeaders({
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Max-Age': '86400'
-  });
   return output;
 }
 
@@ -124,49 +118,28 @@ function doPost(e) {
         result = { success: false, error: 'Invalid action' };
     }
     
-    const output = ContentService.createTextOutput(JSON.stringify(result));
-    output.setMimeType(ContentService.MimeType.JSON);
-    output.setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    });
-    return output;
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
       
   } catch (error) {
-    const errorOutput = ContentService.createTextOutput(JSON.stringify({ success: false, error: error.toString() }));
-    errorOutput.setMimeType(ContentService.MimeType.JSON);
-    errorOutput.setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    });
-    return errorOutput;
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, error: error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
 // GET handler
 function doGet(e) {
   try {
-    console.log('doGet called with parameters:', e);
-    
     // Handle case when no parameters are passed
     if (!e || !e.parameter) {
-      const errorOutput = ContentService.createTextOutput(JSON.stringify({ 
-        success: false, 
-        error: 'No parameters provided' 
-      }));
-      errorOutput.setMimeType(ContentService.MimeType.JSON);
-      errorOutput.setHeaders({
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      });
-      return errorOutput;
+      return ContentService
+        .createTextOutput(JSON.stringify({ success: false, error: 'No parameters provided' }))
+        .setMimeType(ContentService.MimeType.JSON);
     }
     
-    const action = e.parameter.action || e.parameters.action;
-    console.log('Action:', action);
+    const action = e.parameter.action;
     
     let result;
     
@@ -174,62 +147,52 @@ function doGet(e) {
       case 'test':
         result = { success: true, message: 'API is working properly!', timestamp: new Date() };
         break;
-      case 'getFareReceipts':
-        result = getFareReceipts();
-        break;
-      case 'getBookingEntries':
-        result = getBookingEntries();
-        break;
-      case 'getOffDays':
-        result = getOffDays();
-        break;
-      case 'getFuelPayments':
-        result = getFuelPayments();
-        break;
-      case 'getAddaPayments':
-        result = getAddaPayments();
-        break;
-      case 'getUnionPayments':
-        result = getUnionPayments();
-        break;
-      case 'getServicePayments':
-        result = getServicePayments();
-        break;
-      case 'getOtherPayments':
-        result = getOtherPayments();
-        break;
-      case 'getCashBookEntries':
-        result = getCashBookEntries();
-        break;
-      case 'getApprovalData':
-        result = getApprovalData();
-        break;
-      default:
-        result = { success: false, error: 'Invalid action: ' + action };
-    }
-    
-    const output = ContentService.createTextOutput(JSON.stringify(result));
-    output.setMimeType(ContentService.MimeType.JSON);
-    output.setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    });
-    
-    return output;
-    
+    case 'getFareReceipts':
+      result = getFareReceipts();
+      break;
+    case 'getBookingEntries':
+      result = getBookingEntries();
+      break;
+    case 'getOffDays':
+      result = getOffDays();
+      break;
+    case 'getFuelPayments':
+      result = getFuelPayments();
+      break;
+    case 'getAddaPayments':
+      result = getAddaPayments();
+      break;
+    case 'getUnionPayments':
+      result = getUnionPayments();
+      break;
+    case 'getServicePayments':
+      result = getServicePayments();
+      break;
+    case 'getOtherPayments':
+      result = getOtherPayments();
+      break;
+    case 'getCashBookEntries':
+      result = getCashBookEntries();
+      break;
+    case 'getApprovalData':
+      result = getApprovalData();
+      break;
+    default:
+      result = { success: false, error: 'Invalid action' };
+  }
+  
+  const output = ContentService.createTextOutput(JSON.stringify(result));
+  output.setMimeType(ContentService.MimeType.JSON);
+  
+  // Add CORS headers
+  return output;
+  
   } catch (error) {
-    console.error('doGet Error:', error);
     const errorOutput = ContentService.createTextOutput(JSON.stringify({ 
       success: false, 
       error: 'doGet Error: ' + error.toString() 
     }));
     errorOutput.setMimeType(ContentService.MimeType.JSON);
-    errorOutput.setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    });
     return errorOutput;
   }
 }
