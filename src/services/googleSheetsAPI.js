@@ -280,15 +280,5 @@ export const deleteEntry = async (sheetName, rowId) => {
   });
 };
 
-// Bank Book Entries
-export const addBankBookEntry = async (data) => {
-  return await apiCall({
-    action: 'addBankBookEntry',
-    ...data
-  });
-};
 
-export const getBankBookEntries = async () => {
-  return await apiCall({ action: 'getBankBookEntries' }, 'GET');
-};
 
