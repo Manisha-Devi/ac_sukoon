@@ -141,13 +141,3 @@ function getOffDays() {
   }
 }
 
-// Sheet Names Configuration
-const SHEET_NAMES = {
-  FARE_RECEIPTS: 'FareReceipts',
-  BOOKING_ENTRIES: 'BookingEntries',
-  OFF_DAYS: 'OffDays',
-  USERS: 'Users'
-};
-
-// Add your SPREADSHEET_ID here
-const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID_HERE';
