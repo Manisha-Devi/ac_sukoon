@@ -1,6 +1,309 @@
 
 import React, { useState, useEffect } from "react";
 import "../css/CashBook.css";
+import { addCashBookEntry, getCashBookEntries } from "../../services/googleSheetsAPI";
+
+const CashBook = () => {
+  const [formData, setFormData] = useState({
+    date: new Date().toISOString().split('T')[0],
+    type: '',
+    description: '',
+    cashAmount: '',
+    bankAmount: '',
+    category: ''
+  });
+  
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+  useEffect(() => {
+    loadEntries();
+  }, []);
+
+  const loadEntries = async () => {
+    try {
+      setLoading(true);
+      const response = await getCashBookEntries();
+      if (response.success) {
+        setEntries(response.data || []);
+      } else {
+        setError(response.error || 'Failed to load cash book entries');
+      }
+    } catch (error) {
+      setError('Error loading entries: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const submitData = {
+        ...formData,
+        cashAmount: parseFloat(formData.cashAmount) || 0,
+        bankAmount: parseFloat(formData.bankAmount) || 0,
+        submittedBy: currentUser.fullName || 'Unknown User'
+      };
+
+      const response = await addCashBookEntry(submitData);
+      
+      if (response.success) {
+        setSuccess('Cash book entry added successfully!');
+        setFormData({
+          date: new Date().toISOString().split('T')[0],
+          type: '',
+          description: '',
+          cashAmount: '',
+          bankAmount: '',
+          category: ''
+        });
+        loadEntries();
+      } else {
+        setError(response.error || 'Failed to add cash book entry');
+      }
+    } catch (error) {
+      setError('Error: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const calculateBalance = () => {
+    let cashBalance = 0;
+    let bankBalance = 0;
+    
+    entries.forEach(entry => {
+      if (entry.type === 'Income') {
+        cashBalance += entry.cashAmount || 0;
+        bankBalance += entry.bankAmount || 0;
+      } else {
+        cashBalance -= entry.cashAmount || 0;
+        bankBalance -= entry.bankAmount || 0;
+      }
+    });
+    
+    return { cashBalance, bankBalance };
+  };
+
+  const { cashBalance, bankBalance } = calculateBalance();
+
+  return (
+    <div className="cash-book-container">
+      <div className="header">
+        <h2><i className="bi bi-book"></i> Cash Book Management</h2>
+      </div>
+
+      {/* Balance Summary */}
+      <div className="row mb-4">
+        <div className="col-md-6">
+          <div className="card bg-success text-white">
+            <div className="card-body">
+              <h5><i className="bi bi-cash-stack"></i> Cash Balance</h5>
+              <h3>₹{cashBalance.toFixed(2)}</h3>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-6">
+          <div className="card bg-primary text-white">
+            <div className="card-body">
+              <h5><i className="bi bi-bank"></i> Bank Balance</h5>
+              <h3>₹{bankBalance.toFixed(2)}</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Add Entry Form */}
+      <div className="card mb-4">
+        <div className="card-header">
+          <h5><i className="bi bi-plus-circle"></i> Add New Cash Book Entry</h5>
+        </div>
+        <div className="card-body">
+          {error && <div className="alert alert-danger">{error}</div>}
+          {success && <div className="alert alert-success">{success}</div>}
+          
+          <form onSubmit={handleSubmit}>
+            <div className="row">
+              <div className="col-md-6">
+                <div className="mb-3">
+                  <label className="form-label">Date</label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    name="date"
+                    value={formData.date}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="mb-3">
+                  <label className="form-label">Type</label>
+                  <select
+                    className="form-control"
+                    name="type"
+                    value={formData.type}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select Type</option>
+                    <option value="Income">Income</option>
+                    <option value="Expense">Expense</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mb-3">
+              <label className="form-label">Description</label>
+              <textarea
+                className="form-control"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                rows="2"
+                placeholder="Enter description"
+                required
+              ></textarea>
+            </div>
+            
+            <div className="row">
+              <div className="col-md-4">
+                <div className="mb-3">
+                  <label className="form-label">Cash Amount</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    name="cashAmount"
+                    value={formData.cashAmount}
+                    onChange={handleInputChange}
+                    placeholder="0.00"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+              <div className="col-md-4">
+                <div className="mb-3">
+                  <label className="form-label">Bank Amount</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    name="bankAmount"
+                    value={formData.bankAmount}
+                    onChange={handleInputChange}
+                    placeholder="0.00"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+              <div className="col-md-4">
+                <div className="mb-3">
+                  <label className="form-label">Category</label>
+                  <select
+                    className="form-control"
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    <option value="Fare Collection">Fare Collection</option>
+                    <option value="Fuel Expense">Fuel Expense</option>
+                    <option value="Service Expense">Service Expense</option>
+                    <option value="Administrative">Administrative</option>
+                    <option value="Emergency">Emergency</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2"></span>
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-plus-circle me-2"></i>
+                  Add Entry
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* Entries List */}
+      <div className="card">
+        <div className="card-header d-flex justify-content-between align-items-center">
+          <h5><i className="bi bi-list"></i> Recent Cash Book Entries</h5>
+          <button className="btn btn-outline-primary btn-sm" onClick={loadEntries}>
+            <i className="bi bi-arrow-clockwise"></i> Refresh
+          </button>
+        </div>
+        <div className="card-body">
+          {loading && <div className="text-center">Loading...</div>}
+          
+          {entries.length === 0 && !loading ? (
+            <div className="text-center text-muted">No cash book entries found</div>
+          ) : (
+            <div className="table-responsive">
+              <table className="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Cash</th>
+                    <th>Bank</th>
+                    <th>Submitted By</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {entries.map((entry, index) => (
+                    <tr key={entry.id || index} className={entry.type === 'Income' ? 'table-success' : 'table-danger'}>
+                      <td>{new Date(entry.date).toLocaleDateString()}</td>
+                      <td>
+                        <span className={`badge ${entry.type === 'Income' ? 'bg-success' : 'bg-danger'}`}>
+                          {entry.type}
+                        </span>
+                      </td>
+                      <td>{entry.description}</td>
+                      <td>{entry.category}</td>
+                      <td>₹{entry.cashAmount}</td>
+                      <td>₹{entry.bankAmount}</td>
+                      <td>{entry.submittedBy}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CashBook;
 
 const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
   
