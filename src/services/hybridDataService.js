@@ -138,11 +138,26 @@ class HybridDataService {
 
       console.log('💾 Entry saved to localStorage immediately');
 
-      // Try to sync to Google Sheets in background if online
+      // Try to sync to Google Sheets immediately if online
       if (this.isOnline) {
-        this.syncSingleEntry(newEntry).catch(error => {
-          console.error('⚠️ Background sync failed for entry:', newEntry.entryId, error);
-        });
+        console.log('🔄 Attempting immediate sync after add...');
+        try {
+          const syncResult = await this.syncSingleEntry(newEntry);
+          if (syncResult) {
+            console.log('✅ Entry synced immediately to Google Sheets');
+            // Update the local data to mark as synced
+            const finalData = updatedData.map(entry => 
+              entry.entryId === newEntry.entryId 
+                ? { ...entry, synced: true, pendingSync: false }
+                : entry
+            );
+            localStorageService.saveFareData(finalData);
+            localStorageService.removePendingSync(newEntry.entryId);
+            return { success: true, data: finalData, entry: { ...newEntry, synced: true, pendingSync: false } };
+          }
+        } catch (syncError) {
+          console.error('⚠️ Immediate sync failed, will retry later:', syncError);
+        }
       }
 
       return { success: true, data: updatedData, entry: newEntry };
@@ -204,7 +219,7 @@ class HybridDataService {
         localStorageService.saveFareData(updatedData);
         localStorageService.removePendingSync(entry.entryId);
 
-        console.log('✅ Entry synced to Google Sheets:', entry.id);
+        console.log('✅ Entry synced to Google Sheets:', entry.entryId);
         return true;
       } else {
         throw new Error(result?.error || 'Failed to sync to Google Sheets');
@@ -245,11 +260,26 @@ class HybridDataService {
 
       console.log('💾 Entry updated in localStorage immediately');
 
-      // Try to sync to Google Sheets in background if online
-      if (this.isOnline && existingEntry.synced) {
-        this.syncUpdateToGoogleSheets(entryId, updatedData, existingEntry.type).catch(error => {
-          console.error('⚠️ Background update sync failed:', error);
-        });
+      // Try to sync to Google Sheets immediately if online
+      if (this.isOnline) {
+        console.log('🔄 Attempting immediate sync after update...');
+        try {
+          const syncResult = await this.syncUpdateToGoogleSheets(entryId, updatedData, existingEntry.type);
+          if (syncResult) {
+            console.log('✅ Update synced immediately to Google Sheets');
+            // Update the local data to mark as synced
+            const finalData = updatedFareData.map(entry => 
+              entry.entryId === entryId 
+                ? { ...entry, synced: true, pendingSync: false }
+                : entry
+            );
+            localStorageService.saveFareData(finalData);
+            localStorageService.removePendingSync(entryId);
+            return { success: true, data: finalData };
+          }
+        } catch (syncError) {
+          console.error('⚠️ Immediate sync failed, will retry later:', syncError);
+        }
       }
 
       return { success: true, data: updatedFareData };
