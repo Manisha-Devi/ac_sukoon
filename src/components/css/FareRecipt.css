@@ -71,6 +71,49 @@
   border: 1px solid rgba(220, 53, 69, 0.3);
 }
 
+.pending-sync {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.sync-btn {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 5px 15px;
+  font-size: 0.85rem;
+  transition: var(--transition);
+}
+
+.sync-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.sync-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.entry-pending {
+  border-left: 4px solid #ffc107;
+  background: rgba(255, 193, 7, 0.05);
+}
+
+.entry-synced {
+  border-left: 4px solid #28a745;
+}
+
 .offline-warning {
   display: flex;
   align-items: center;

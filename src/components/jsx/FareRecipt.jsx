@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "../css/FareRecipt.css";
-import dataService from "../../services/dataService.js";
+import hybridDataService from '../../services/hybridDataService.js';
 
 function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries }) {
   const [activeTab, setActiveTab] = useState("daily");
   const [editingEntry, setEditingEntry] = useState(null);
-  const [syncStatus, setSyncStatus] = useState(dataService.getSyncStatus());
+  const [syncStatus, setSyncStatus] = useState(hybridDataService.getSyncStatus());
   const [isLoading, setIsLoading] = useState(false);
   const [dailyFareData, setDailyFareData] = useState({
     route: "",
@@ -32,7 +32,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     const initializeData = async () => {
       setIsLoading(true);
       try {
-        const initialData = await dataService.initializeData();
+        const initialData = await hybridDataService.initializeData();
         if (initialData.length > 0) {
           setFareData(initialData);
           // Calculate total earnings
@@ -52,7 +52,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
   // Update sync status periodically
   useEffect(() => {
     const updateSyncStatus = () => {
-      setSyncStatus(dataService.getSyncStatus());
+      setSyncStatus(hybridDataService.getSyncStatus());
     };
 
     updateSyncStatus();
@@ -197,7 +197,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       if (editingEntry) {
         // Update existing entry using hybrid service
         const oldTotal = editingEntry.totalAmount;
-        const result = await dataService.updateFareEntry(editingEntry.id, {
+        const result = await hybridDataService.updateFareEntry(editingEntry.id, {
           route: dailyFareData.route,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
@@ -221,7 +221,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           date: dailyFareData.date,
         };
 
-        const result = await dataService.addFareEntry(newEntryData, fareData);
+        const result = await hybridDataService.addFareEntry(newEntryData, fareData);
 
         if (result.success) {
           setFareData(result.data);
@@ -285,7 +285,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       if (editingEntry) {
         // Update existing entry using hybrid service
         const oldTotal = editingEntry.totalAmount;
-        const result = await dataService.updateFareEntry(editingEntry.id, {
+        const result = await hybridDataService.updateFareEntry(editingEntry.id, {
           bookingDetails: bookingData.bookingDetails,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
@@ -311,7 +311,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           dateTo: bookingData.dateTo,
         };
 
-        const result = await dataService.addFareEntry(newEntryData, fareData);
+        const result = await hybridDataService.addFareEntry(newEntryData, fareData);
 
         if (result.success) {
           setFareData(result.data);
@@ -364,7 +364,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
       if (editingEntry) {
         // Update existing entry using hybrid service
-        const result = await dataService.updateFareEntry(editingEntry.id, {
+        const result = await hybridDataService.updateFareEntry(editingEntry.id, {
           date: offDayData.date,
           reason: offDayData.reason
         }, fareData);
@@ -384,7 +384,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           totalAmount: 0,
         };
 
-        const result = await dataService.addFareEntry(newEntryData, fareData);
+        const result = await hybridDataService.addFareEntry(newEntryData, fareData);
 
         if (result.success) {
           setFareData(result.data);
@@ -403,7 +403,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     try {
       const entryToDelete = fareData.find(entry => entry.id === entryId);
 
-      const result = await dataService.deleteFareEntry(entryId, fareData);
+      const result = await hybridDataService.deleteFareEntry(entryId, fareData);
 
       if (result.success) {
         setFareData(result.data);
@@ -484,7 +484,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                   {syncStatus.isOnline && (
                     <button 
                       className="btn btn-sm sync-btn" 
-                      onClick={() => dataService.forcSync()}
+                      onClick={() => hybridDataService.forcSync()}
                       disabled={isLoading}
                     >
                       <i className="bi bi-arrow-repeat"></i>
