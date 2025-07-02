@@ -181,9 +181,38 @@ export const getApprovalData = async () => {
   return await apiCall({ action: 'getApprovalData' }, 'GET');
 };
 
-// Test API connection
+// Test API connection with detailed diagnostics
 export const testConnection = async () => {
-  return await apiCall({ action: 'test' }, 'GET');
+  try {
+    console.log('🔍 Testing Google Apps Script connection...');
+    console.log('📍 API URL:', API_URL);
+    
+    const result = await apiCall({ action: 'test' }, 'GET');
+    
+    if (result.success) {
+      console.log('✅ API Connection successful!');
+      console.log('📊 Test Results:', result);
+      
+      // Check if all required components are working
+      if (result.tests) {
+        Object.keys(result.tests).forEach(testName => {
+          const test = result.tests[testName];
+          console.log(`${test.success ? '✅' : '❌'} ${testName}:`, test);
+        });
+      }
+    } else {
+      console.log('❌ API Connection failed:', result.error);
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('🚨 Connection test error:', error);
+    return { 
+      success: false, 
+      error: error.message,
+      details: 'Failed to reach Google Apps Script endpoint'
+    };
+  }
 };
 
 // Generic Update/Delete functions

@@ -146,7 +146,7 @@ function doGet(e) {
     
     switch(action) {
       case 'test':
-        result = { success: true, message: 'API is working properly!', timestamp: new Date() };
+        result = testApiConnection();
         break;
     case 'getFareReceipts':
       result = getFareReceipts();
@@ -744,6 +744,90 @@ function deleteEntry(data) {
     return { success: true, message: 'Entry deleted successfully' };
   } catch (error) {
     return { success: false, error: error.toString() };
+  }
+}
+
+// Comprehensive Test Function
+function testApiConnection() {
+  try {
+    console.log('Starting API test...');
+    
+    // Test 1: Basic response
+    const testResult = {
+      success: true,
+      message: 'Google Apps Script API is working!',
+      timestamp: new Date().toISOString(),
+      tests: {}
+    };
+    
+    // Test 2: Spreadsheet connection
+    try {
+      const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+      testResult.tests.spreadsheet = {
+        success: true,
+        name: spreadsheet.getName(),
+        id: SPREADSHEET_ID
+      };
+      console.log('Spreadsheet connection: SUCCESS');
+    } catch (error) {
+      testResult.tests.spreadsheet = {
+        success: false,
+        error: error.toString()
+      };
+      console.log('Spreadsheet connection: FAILED - ' + error.toString());
+    }
+    
+    // Test 3: Check all required sheets
+    try {
+      const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+      const sheets = spreadsheet.getSheets();
+      const sheetNames = sheets.map(sheet => sheet.getName());
+      
+      const requiredSheets = Object.values(SHEET_NAMES);
+      const missingSheets = requiredSheets.filter(name => !sheetNames.includes(name));
+      
+      testResult.tests.sheets = {
+        success: missingSheets.length === 0,
+        available: sheetNames,
+        required: requiredSheets,
+        missing: missingSheets
+      };
+      console.log('Sheets check: ' + (missingSheets.length === 0 ? 'SUCCESS' : 'FAILED'));
+    } catch (error) {
+      testResult.tests.sheets = {
+        success: false,
+        error: error.toString()
+      };
+    }
+    
+    // Test 4: Test Users sheet (for login)
+    try {
+      const usersSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.USERS);
+      const userData = usersSheet.getDataRange().getValues();
+      
+      testResult.tests.users = {
+        success: true,
+        userCount: userData.length - 1, // Minus header row
+        hasHeaders: userData.length > 0
+      };
+      console.log('Users sheet test: SUCCESS');
+    } catch (error) {
+      testResult.tests.users = {
+        success: false,
+        error: error.toString()
+      };
+    }
+    
+    console.log('API test completed');
+    return testResult;
+    
+  } catch (error) {
+    console.log('API test failed: ' + error.toString());
+    return {
+      success: false,
+      error: 'Test function failed: ' + error.toString(),
+      timestamp: new Date().toISOString()
+    };
   }
 }
 
