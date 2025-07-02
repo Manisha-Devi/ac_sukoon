@@ -105,7 +105,7 @@ export const login = async (username, password) => {
     action: 'login',
     username: username,
     password: password
-  });
+  }, 'POST');
 };
 
 // Fare Receipts
@@ -113,7 +113,7 @@ export const addFareReceipt = async (data) => {
   return await apiCall({
     action: 'addFareReceipt',
     ...data
-  });
+  }, 'POST');
 };
 
 export const getFareReceipts = async () => {
@@ -125,7 +125,7 @@ export const addBookingEntry = async (data) => {
   return await apiCall({
     action: 'addBookingEntry',
     ...data
-  });
+  }, 'POST');
 };
 
 export const getBookingEntries = async () => {
@@ -137,7 +137,7 @@ export const addOffDay = async (data) => {
   return await apiCall({
     action: 'addOffDay',
     ...data
-  });
+  }, 'POST');
 };
 
 export const getOffDays = async () => {
@@ -149,7 +149,7 @@ export const addFuelPayment = async (data) => {
   return await apiCall({
     action: 'addFuelPayment',
     ...data
-  });
+  }, 'POST');
 };
 
 export const getFuelPayments = async () => {
@@ -161,7 +161,7 @@ export const addAddaPayment = async (data) => {
   return await apiCall({
     action: 'addAddaPayment',
     ...data
-  });
+  }, 'POST');
 };
 
 export const getAddaPayments = async () => {
@@ -173,7 +173,7 @@ export const addUnionPayment = async (data) => {
   return await apiCall({
     action: 'addUnionPayment',
     ...data
-  });
+  }, 'POST');
 };
 
 export const getUnionPayments = async () => {
@@ -185,7 +185,7 @@ export const addServicePayment = async (data) => {
   return await apiCall({
     action: 'addServicePayment',
     ...data
-  });
+  }, 'POST');
 };
 
 export const getServicePayments = async () => {
@@ -197,7 +197,7 @@ export const addOtherPayment = async (data) => {
   return await apiCall({
     action: 'addOtherPayment',
     ...data
-  });
+  }, 'POST');
 };
 
 export const getOtherPayments = async () => {
@@ -209,7 +209,7 @@ export const addCashBookEntry = async (data) => {
   return await apiCall({
     action: 'addCashBookEntry',
     ...data
-  });
+  }, 'POST');
 };
 
 export const getCashBookEntries = async () => {
@@ -221,7 +221,7 @@ export const addApprovalData = async (data) => {
   return await apiCall({
     action: 'addApprovalData',
     ...data
-  });
+  }, 'POST');
 };
 
 export const getApprovalData = async () => {
