@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import "../css/FuelPayment.css";
 import { addFuelPayment, getFuelPayments } from "../../services/googleSheetsAPI";
@@ -113,131 +114,107 @@ const FuelPayment = () => {
   };
 
   return (
-    <div className="fuel-payment-container">
-      <div className="header">
-        <h2><i className="bi bi-fuel-pump"></i> Fuel Payment Management</h2>
-      </div>
+    <div className="fade-in">
+      <h2 className="mb-4">
+        <i className="bi bi-fuel-pump me-2"></i>
+        Fuel Payment Entry
+      </h2>
 
-      {/* Add Payment Form */}
-      <div className="card mb-4">
-        <div className="card-header">
-          <h5><i className="bi bi-plus-circle"></i> Add New Fuel Payment</h5>
-        </div>
-        <div className="card-body">
-          {error && <div className="alert alert-danger">{error}</div>}
-          {success && <div className="alert alert-success">{success}</div>}
+      <div className="form-card">
+        <h3>Add New Fuel Payment</h3>
+        
+        {error && <div className="alert alert-danger">{error}</div>}
+        {success && <div className="alert alert-success">{success}</div>}
 
-          <form onSubmit={handleSubmit}>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label">Date</label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label">Pump Name</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="pumpName"
-                    value={formData.pumpName}
-                    onChange={handleInputChange}
-                    placeholder="Enter petrol pump name"
-                    required
-                  />
-                </div>
-              </div>
+        <form onSubmit={handleSubmit}>
+          <div className="row g-3">
+            <div className="col-md-6">
+              <label className="form-label">Date</label>
+              <input
+                type="date"
+                className="form-control"
+                name="date"
+                value={formData.date}
+                onChange={handleInputChange}
+                required
+              />
             </div>
-
-            <div className="row">
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label">Liters</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="liters"
-                    value={formData.liters}
-                    onChange={handleInputChange}
-                    placeholder="Enter liters"
-                    step="0.01"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label">Rate per Liter</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="ratePerLiter"
-                    value={formData.ratePerLiter}
-                    onChange={handleInputChange}
-                    placeholder="Enter rate"
-                    step="0.01"
-                    required
-                  />
-                </div>
-              </div>
+            <div className="col-md-6">
+              <label className="form-label">Pump Name</label>
+              <input
+                type="text"
+                className="form-control"
+                name="pumpName"
+                value={formData.pumpName}
+                onChange={handleInputChange}
+                placeholder="Enter petrol pump name"
+                required
+              />
             </div>
-
-            <div className="row">
-              <div className="col-md-4">
-                <div className="mb-3">
-                  <label className="form-label">Cash Amount</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="cashAmount"
-                    value={formData.cashAmount}
-                    onChange={handleInputChange}
-                    placeholder="0.00"
-                    step="0.01"
-                  />
-                </div>
-              </div>
-              <div className="col-md-4">
-                <div className="mb-3">
-                  <label className="form-label">Bank Amount</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="bankAmount"
-                    value={formData.bankAmount}
-                    onChange={handleInputChange}
-                    placeholder="0.00"
-                    step="0.01"
-                  />
-                </div>
-              </div>
-              <div className="col-md-4">
-                <div className="mb-3">
-                  <label className="form-label">Total Amount</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="totalAmount"
-                    value={formData.totalAmount}
-                    onChange={handleInputChange}
-                    placeholder="0.00"
-                    step="0.01"
-                    readOnly
-                  />
-                </div>
-              </div>
+            <div className="col-md-6">
+              <label className="form-label">Liters</label>
+              <input
+                type="number"
+                className="form-control"
+                name="liters"
+                value={formData.liters}
+                onChange={handleInputChange}
+                placeholder="Enter liters"
+                step="0.01"
+                required
+              />
             </div>
-
-            <div className="mb-3">
+            <div className="col-md-6">
+              <label className="form-label">Rate per Liter</label>
+              <input
+                type="number"
+                className="form-control"
+                name="ratePerLiter"
+                value={formData.ratePerLiter}
+                onChange={handleInputChange}
+                placeholder="Enter rate"
+                step="0.01"
+                required
+              />
+            </div>
+            <div className="col-md-4">
+              <label className="form-label">Cash Amount</label>
+              <input
+                type="number"
+                className="form-control"
+                name="cashAmount"
+                value={formData.cashAmount}
+                onChange={handleInputChange}
+                placeholder="0.00"
+                step="0.01"
+              />
+            </div>
+            <div className="col-md-4">
+              <label className="form-label">Bank Amount</label>
+              <input
+                type="number"
+                className="form-control"
+                name="bankAmount"
+                value={formData.bankAmount}
+                onChange={handleInputChange}
+                placeholder="0.00"
+                step="0.01"
+              />
+            </div>
+            <div className="col-md-4">
+              <label className="form-label">Total Amount</label>
+              <input
+                type="number"
+                className="form-control"
+                name="totalAmount"
+                value={formData.totalAmount}
+                onChange={handleInputChange}
+                placeholder="0.00"
+                step="0.01"
+                readOnly
+              />
+            </div>
+            <div className="col-12">
               <label className="form-label">Remarks</label>
               <textarea
                 className="form-control"
@@ -248,70 +225,70 @@ const FuelPayment = () => {
                 placeholder="Enter any remarks"
               ></textarea>
             </div>
-
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2"></span>
-                  Adding...
-                </>
-              ) : (
-                <>
-                  <i className="bi bi-plus-circle me-2"></i>
-                  Add Payment
-                </>
-              )}
-            </button>
-          </form>
-        </div>
+            <div className="col-12">
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2"></span>
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-plus-circle me-2"></i>
+                    Add Payment
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
 
-      {/* Payments List */}
-      <div className="card">
-        <div className="card-header d-flex justify-content-between align-items-center">
-          <h5><i className="bi bi-list"></i> Recent Fuel Payments</h5>
+      {/* Recent Entries */}
+      <div className="form-card mt-4">
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h3>Recent Entries</h3>
           <button className="btn btn-outline-primary btn-sm" onClick={loadPayments}>
             <i className="bi bi-arrow-clockwise"></i> Refresh
           </button>
         </div>
-        <div className="card-body">
-          {loading && <div className="text-center">Loading...</div>}
+        
+        {loading && <div className="text-center">Loading...</div>}
 
-          {payments.length === 0 && !loading ? (
-            <div className="text-center text-muted">No fuel payments found</div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Pump Name</th>
-                    <th>Liters</th>
-                    <th>Rate/L</th>
-                    <th>Cash</th>
-                    <th>Bank</th>
-                    <th>Total</th>
-                    <th>Submitted By</th>
+        {payments.length === 0 && !loading ? (
+          <div className="text-center text-muted">No fuel payments found</div>
+        ) : (
+          <div className="table-responsive">
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Pump Name</th>
+                  <th>Liters</th>
+                  <th>Rate/L</th>
+                  <th>Cash</th>
+                  <th>Bank</th>
+                  <th>Total</th>
+                  <th>Submitted By</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.map((payment, index) => (
+                  <tr key={payment.id || index}>
+                    <td>{new Date(payment.date).toLocaleDateString()}</td>
+                    <td>{payment.pumpName}</td>
+                    <td>{payment.liters}L</td>
+                    <td>₹{payment.ratePerLiter}</td>
+                    <td>₹{payment.cashAmount}</td>
+                    <td>₹{payment.bankAmount}</td>
+                    <td><strong>₹{payment.totalAmount}</strong></td>
+                    <td>{payment.submittedBy}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {payments.map((payment, index) => (
-                    <tr key={payment.id || index}>
-                      <td>{new Date(payment.date).toLocaleDateString()}</td>
-                      <td>{payment.pumpName}</td>
-                      <td>{payment.liters}L</td>
-                      <td>₹{payment.ratePerLiter}</td>
-                      <td>₹{payment.cashAmount}</td>
-                      <td>₹{payment.bankAmount}</td>
-                      <td><strong>₹{payment.totalAmount}</strong></td>
-                      <td>{payment.submittedBy}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

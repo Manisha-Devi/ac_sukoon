@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import "../css/FareRecipt.css";
 import { addFareReceipt, getFareReceipts } from "../../services/googleSheetsAPI";
@@ -95,98 +96,81 @@ const FareReceipt = () => {
   };
 
   return (
-    <div className="fare-receipt-container">
-      <div className="header">
-        <h2><i className="bi bi-receipt"></i> Fare Receipt Management</h2>
-      </div>
+    <div className="fade-in">
+      <h2 className="mb-4">
+        <i className="bi bi-receipt me-2"></i>
+        Fare Receipt Entry
+      </h2>
 
-      {/* Add Receipt Form */}
-      <div className="card mb-4">
-        <div className="card-header">
-          <h5><i className="bi bi-plus-circle"></i> Add New Fare Receipt</h5>
-        </div>
-        <div className="card-body">
-          {error && <div className="alert alert-danger">{error}</div>}
-          {success && <div className="alert alert-success">{success}</div>}
+      <div className="form-card">
+        <h3>Add New Fare Receipt</h3>
+        
+        {error && <div className="alert alert-danger">{error}</div>}
+        {success && <div className="alert alert-success">{success}</div>}
 
-          <form onSubmit={handleSubmit}>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label">Date</label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label">Route</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="route"
-                    value={formData.route}
-                    onChange={handleInputChange}
-                    placeholder="Enter route details"
-                    required
-                  />
-                </div>
-              </div>
+        <form onSubmit={handleSubmit}>
+          <div className="row g-3">
+            <div className="col-md-6">
+              <label className="form-label">Date</label>
+              <input
+                type="date"
+                className="form-control"
+                name="date"
+                value={formData.date}
+                onChange={handleInputChange}
+                required
+              />
             </div>
-
-            <div className="row">
-              <div className="col-md-4">
-                <div className="mb-3">
-                  <label className="form-label">Cash Amount</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="cashAmount"
-                    value={formData.cashAmount}
-                    onChange={handleInputChange}
-                    placeholder="0.00"
-                    step="0.01"
-                  />
-                </div>
-              </div>
-              <div className="col-md-4">
-                <div className="mb-3">
-                  <label className="form-label">Bank Amount</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="bankAmount"
-                    value={formData.bankAmount}
-                    onChange={handleInputChange}
-                    placeholder="0.00"
-                    step="0.01"
-                  />
-                </div>
-              </div>
-              <div className="col-md-4">
-                <div className="mb-3">
-                  <label className="form-label">Total Amount</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="totalAmount"
-                    value={formData.totalAmount}
-                    onChange={handleInputChange}
-                    placeholder="0.00"
-                    step="0.01"
-                    readOnly
-                  />
-                </div>
-              </div>
+            <div className="col-md-6">
+              <label className="form-label">Route</label>
+              <input
+                type="text"
+                className="form-control"
+                name="route"
+                value={formData.route}
+                onChange={handleInputChange}
+                placeholder="Enter route details"
+                required
+              />
             </div>
-
-            <div className="mb-3">
+            <div className="col-md-4">
+              <label className="form-label">Cash Amount</label>
+              <input
+                type="number"
+                className="form-control"
+                name="cashAmount"
+                value={formData.cashAmount}
+                onChange={handleInputChange}
+                placeholder="0.00"
+                step="0.01"
+              />
+            </div>
+            <div className="col-md-4">
+              <label className="form-label">Bank Amount</label>
+              <input
+                type="number"
+                className="form-control"
+                name="bankAmount"
+                value={formData.bankAmount}
+                onChange={handleInputChange}
+                placeholder="0.00"
+                step="0.01"
+              />
+            </div>
+            <div className="col-md-4">
+              <label className="form-label">Total Amount</label>
+              <input
+                type="number"
+                className="form-control"
+                name="totalAmount"
+                value={formData.totalAmount}
+                onChange={handleInputChange}
+                placeholder="0.00"
+                step="0.01"
+                readOnly
+              />
+            </div>
+            <div className="col-12">
               <label className="form-label">Remarks</label>
               <textarea
                 className="form-control"
@@ -197,68 +181,68 @@ const FareReceipt = () => {
                 placeholder="Enter any remarks"
               ></textarea>
             </div>
-
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2"></span>
-                  Adding...
-                </>
-              ) : (
-                <>
-                  <i className="bi bi-plus-circle me-2"></i>
-                  Add Receipt
-                </>
-              )}
-            </button>
-          </form>
-        </div>
+            <div className="col-12">
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2"></span>
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-plus-circle me-2"></i>
+                    Add Receipt
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
 
-      {/* Receipts List */}
-      <div className="card">
-        <div className="card-header d-flex justify-content-between align-items-center">
-          <h5><i className="bi bi-list"></i> Recent Fare Receipts</h5>
+      {/* Recent Entries */}
+      <div className="form-card mt-4">
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h3>Recent Entries</h3>
           <button className="btn btn-outline-primary btn-sm" onClick={loadReceipts}>
             <i className="bi bi-arrow-clockwise"></i> Refresh
           </button>
         </div>
-        <div className="card-body">
-          {loading && <div className="text-center">Loading...</div>}
+        
+        {loading && <div className="text-center">Loading...</div>}
 
-          {receipts.length === 0 && !loading ? (
-            <div className="text-center text-muted">No fare receipts found</div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Route</th>
-                    <th>Cash</th>
-                    <th>Bank</th>
-                    <th>Total</th>
-                    <th>Submitted By</th>
-                    <th>Remarks</th>
+        {receipts.length === 0 && !loading ? (
+          <div className="text-center text-muted">No fare receipts found</div>
+        ) : (
+          <div className="table-responsive">
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Route</th>
+                  <th>Cash</th>
+                  <th>Bank</th>
+                  <th>Total</th>
+                  <th>Submitted By</th>
+                  <th>Remarks</th>
+                </tr>
+              </thead>
+              <tbody>
+                {receipts.map((receipt, index) => (
+                  <tr key={receipt.id || index}>
+                    <td>{new Date(receipt.date).toLocaleDateString()}</td>
+                    <td>{receipt.route}</td>
+                    <td>₹{receipt.cashAmount}</td>
+                    <td>₹{receipt.bankAmount}</td>
+                    <td><strong>₹{receipt.totalAmount}</strong></td>
+                    <td>{receipt.submittedBy}</td>
+                    <td>{receipt.remarks}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {receipts.map((receipt, index) => (
-                    <tr key={receipt.id || index}>
-                      <td>{new Date(receipt.date).toLocaleDateString()}</td>
-                      <td>{receipt.route}</td>
-                      <td>₹{receipt.cashAmount}</td>
-                      <td>₹{receipt.bankAmount}</td>
-                      <td><strong>₹{receipt.totalAmount}</strong></td>
-                      <td>{receipt.submittedBy}</td>
-                      <td>{receipt.remarks}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
