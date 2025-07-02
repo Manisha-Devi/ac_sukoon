@@ -1,6 +1,6 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../css/FuelPayment.css";
+import { addFuelPayment, getFuelPayments } from "../../services/googleSheetsAPI";
 
 function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
   const [editingEntry, setEditingEntry] = useState(null);
@@ -18,9 +18,9 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookE
     return new Date().toISOString().split('T')[0];
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const cashAmount = parseInt(formData.cashAmount) || 0;
     const bankAmount = parseInt(formData.bankAmount) || 0;
     const totalAmount = cashAmount + bankAmount;
@@ -60,7 +60,7 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookE
       };
       setExpenseData([...expenseData, newEntry]);
       setTotalExpenses((prev) => prev + totalAmount);
-      
+
       // Add to cash book - payments go to Cr. side
       if (cashAmount > 0 || bankAmount > 0) {
         const cashBookEntry = {
@@ -77,6 +77,9 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookE
         };
         setCashBookEntries(prev => [cashBookEntry, ...prev]);
       }
+
+        // Integrate with Google Sheets
+        await addFuelPayment(newEntry);
     }
     setFormData({ cashAmount: "", bankAmount: "", liters: "", rate: "", date: "", pumpName: "" });
   };
@@ -87,7 +90,7 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookE
       setTotalExpenses((prev) => prev - entryToDelete.totalAmount);
     }
     setExpenseData(expenseData.filter(entry => entry.id !== entryId));
-    
+
     // Remove corresponding cash book entry
     setCashBookEntries(prev => prev.filter(entry => entry.source === 'fuel-payment' && !entry.jfNo?.includes(entryId.toString())));
   };
@@ -189,7 +192,7 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookE
                 />
               </div>
             </div>
-            
+
             <div className="row">
               <div className="col-md-6 mb-3">
                 <label className="form-label">Liters (Optional)</label>
@@ -216,7 +219,7 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookE
                 />
               </div>
             </div>
-            
+
             <div className="row">
               <div className="col-md-6 mb-3">
                 <label className="form-label">Cash Amount (₹)</label>
@@ -241,7 +244,7 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookE
                 />
               </div>
             </div>
-            
+
             <div className="amount-summary mb-3">
               <div className="row">
                 <div className="col-4">
@@ -255,7 +258,7 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookE
                 </div>
               </div>
             </div>
-            
+
             <div className="button-group">
               <button type="submit" className="btn fuel-entry-btn">
                 <i className={editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../css/FareRecipt.css";
+import { addFareReceipt, getFareReceipts } from "../../services/googleSheetsAPI";
 
 function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries }) {
   const [activeTab, setActiveTab] = useState("daily");
@@ -23,6 +24,10 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     date: "",
     reason: "",
   });
+
+  const [fareEntries, setFareEntries] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   // Function to check if a date is disabled for daily collection
   const isDailyDateDisabled = (selectedDate, selectedRoute) => {
@@ -135,7 +140,32 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     "Bhaderwah to Ghuraka",
   ];
 
-  const handleDailySubmit = (e) => {
+  useEffect(() => {
+    updateTotals();
+    loadFareData();
+  }, []);
+
+  useEffect(() => {
+    updateTotals();
+  }, [fareEntries]);
+
+  const loadFareData = async () => {
+    setIsLoading(true);
+    try {
+      const result = await getFareReceipts();
+      if (result.success) {
+        setFareEntries(result.data || []);
+        setApiError("");
+      } else {
+        setApiError("Failed to load fare data: " + result.error);
+      }
+    } catch (error) {
+      setApiError("Error loading data: " + error.message);
+    }
+    setIsLoading(false);
+  };
+
+  const handleDailySubmit = async (e) => {
     e.preventDefault();
 
     // Validate if date is disabled
@@ -167,7 +197,24 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       setTotalEarnings((prev) => prev - oldTotal + totalAmount);
       setEditingEntry(null);
     } else {
-      // Create new entry
+    setIsLoading(true);
+    setApiError("");
+
+    try {
+      // Prepare data for API
+      const apiData = {
+        date: dailyFareData.date,
+        route: dailyFareData.route,
+        cashAmount: cashAmount,
+        bankAmount: bankAmount,
+        totalAmount: totalAmount,
+        remarks: '',
+        submittedBy: localStorage.getItem('username') || 'Unknown'
+      };
+
+      // Submit to Google Sheets
+      const result = await addFareReceipt(apiData);
+         // Create new entry
       const newEntry = {
         id: Date.now(),
         type: "daily",
@@ -196,6 +243,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         };
         setCashBookEntries(prev => [cashBookEntry, ...prev]);
       }
+    }  catch (error) {
+      setApiError("Error saving data: " + error.message);
+    }
+
+    setIsLoading(false);
     }
     setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
   };
@@ -438,7 +490,20 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
               {activeTab === 'daily' && (
                 <div className="fare-form-card">
                   <h4><i className="bi bi-calendar-day"></i> Daily Collection</h4>
-                  <form onSubmit={handleDailySubmit}>
+                  {apiError && (
+          <div className="alert alert-danger alert-dismissible fade show" role="alert">
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+            {apiError}
+            <button 
+              type="button" 
+              className="btn-close" 
+              onClick={() => setApiError("")}
+            ></button>
+          </div>
+        )}
+
+        <form onSubmit={handleDailySubmit}>
+          <div className="row g-3"></div>
                     <div className="row">
                       <div className="col-md-6 mb-3">
                         <label className="form-label">Route</label>
@@ -511,10 +576,23 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       </div>
                     </div>
                     <div className="button-group">
-                      <button type="submit" className="btn fare-entry-btn">
+                      <button 
+              type="submit" 
+              className="btn fare-entry-btn"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2"></span>
+                  Processing...
+                </>
+              ) : (
+               <>
                         <i className={editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
                         {editingEntry ? "Update Entry" : "Add Daily Entry"}
-                      </button>
+                         </>
+              )}
+            </button>
                       {editingEntry && (
                         <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
                           <i className="bi bi-x-circle"></i> Cancel
