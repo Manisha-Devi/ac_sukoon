@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import "../css/BankBook.css";
+import { addBankBookEntry, getBankBookEntries } from "../../services/googleSheetsAPI";
 
 const BankBook = ({ bankBookEntries, setBankBookEntries }) => {
   const [formData, setFormData] = useState({
@@ -12,6 +13,12 @@ const BankBook = ({ bankBookEntries, setBankBookEntries }) => {
     credit: ""
   });
   const [editingEntry, setEditingEntry] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
+
+  useEffect(() => {
+    loadBankData();
+  }, []);
 
   useEffect(() => {
     const savedEntries = localStorage.getItem('bankBookEntries');
@@ -24,13 +31,42 @@ const BankBook = ({ bankBookEntries, setBankBookEntries }) => {
     localStorage.setItem('bankBookEntries', JSON.stringify(bankBookEntries));
   }, [bankBookEntries]);
 
-  const handleSubmit = (e) => {
+  const loadBankData = async () => {
+    setIsLoading(true);
+    try {
+      const result = await getBankBookEntries();
+      if (result.success) {
+        setBankBookEntries(result.data || []);
+        setApiError("");
+      } else {
+        setApiError("Failed to load bank data: " + result.error);
+        // Fallback to local storage if API fails
+        const savedEntries = localStorage.getItem('bankBookEntries');
+        if (savedEntries) {
+          setBankBookEntries(JSON.parse(savedEntries));
+        }
+      }
+    } catch (error) {
+      setApiError("Error loading data: " + error.message);
+      // Fallback to local storage if API fails
+      const savedEntries = localStorage.getItem('bankBookEntries');
+      if (savedEntries) {
+        setBankBookEntries(JSON.parse(savedEntries));
+      }
+    }
+    setIsLoading(false);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!formData.particulars || (!formData.debit && !formData.credit)) {
       alert("Please fill in all required fields");
       return;
     }
+
+    setIsLoading(true);
+    setApiError("");
 
     const entryData = {
       id: editingEntry ? editingEntry.id : Date.now(),
@@ -49,8 +85,34 @@ const BankBook = ({ bankBookEntries, setBankBookEntries }) => {
       ));
       setEditingEntry(null);
     } else {
-      setBankBookEntries([entryData, ...bankBookEntries]);
+      try {
+        // Submit to Google Sheets
+        const apiData = {
+          date: formData.date,
+          particulars: formData.particulars,
+          description: formData.description,
+          chequeNo: formData.chequeNo,
+          debit: parseFloat(formData.debit) || 0,
+          credit: parseFloat(formData.credit) || 0,
+          submittedBy: localStorage.getItem('username') || 'Unknown'
+        };
+
+        const result = await addBankBookEntry(apiData);
+        
+        if (result.success) {
+          setBankBookEntries([entryData, ...bankBookEntries]);
+          setApiError("");
+        } else {
+          setApiError("Failed to save to server, but saved locally: " + result.error);
+          setBankBookEntries([entryData, ...bankBookEntries]);
+        }
+      } catch (error) {
+        setApiError("Error saving to server, but saved locally: " + error.message);
+        setBankBookEntries([entryData, ...bankBookEntries]);
+      }
     }
+
+    setIsLoading(false);
 
     setFormData({
       date: new Date().toISOString().split('T')[0],
@@ -110,6 +172,19 @@ const BankBook = ({ bankBookEntries, setBankBookEntries }) => {
           <h2><i className="bi bi-bank"></i> Bank Book</h2>
           <p>Record your bank transactions (Dr/Cr)</p>
         </div>
+
+        {/* API Error Display */}
+        {apiError && (
+          <div className="alert alert-warning alert-dismissible fade show" role="alert">
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+            {apiError}
+            <button 
+              type="button" 
+              className="btn-close" 
+              onClick={() => setApiError("")}
+            ></button>
+          </div>
+        )}
 
         {/* Form Card */}
         <div className="row mb-4">
@@ -190,9 +265,22 @@ const BankBook = ({ bankBookEntries, setBankBookEntries }) => {
                   </div>
 
                   <div className="button-group">
-                    <button type="submit" className="btn bank-entry-btn">
-                      <i className={editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
-                      {editingEntry ? "Update Entry" : "Add Bank Entry"}
+                    <button 
+                      type="submit" 
+                      className="btn bank-entry-btn"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-2"></span>
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <i className={editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
+                          {editingEntry ? "Update Entry" : "Add Bank Entry"}
+                        </>
+                      )}
                     </button>
                     {editingEntry && (
                       <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>

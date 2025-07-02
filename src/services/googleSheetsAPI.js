@@ -72,21 +72,30 @@ const apiCall = async (data, method = 'POST') => {
       return { success: false, error: 'Request timeout - please try again' };
     }
     
-    if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+    if (error.message && error.message.includes('Failed to fetch')) {
+      return { 
+        success: false, 
+        error: 'Cannot connect to server. Please check if the Google Apps Script is deployed properly.' 
+      };
+    }
+    
+    if (error.message && error.message.includes('NetworkError')) {
       return { 
         success: false, 
         error: 'Network error. Please check your internet connection and ensure Google Apps Script is properly deployed.' 
       };
     }
     
-    if (error.message.includes('CORS')) {
+    if (error.message && error.message.includes('CORS')) {
       return { 
         success: false, 
         error: 'CORS error. Please verify Google Apps Script deployment settings.' 
       };
     }
     
-    return { success: false, error: error.message };
+    // Handle cases where error is not properly populated
+    const errorMessage = error.message || error.toString() || 'Unknown error occurred';
+    return { success: false, error: errorMessage };
   }
 };
 
@@ -269,5 +278,17 @@ export const deleteEntry = async (sheetName, rowId) => {
     sheetName: sheetName,
     rowId: rowId
   });
+};
+
+// Bank Book Entries
+export const addBankBookEntry = async (data) => {
+  return await apiCall({
+    action: 'addBankBookEntry',
+    ...data
+  });
+};
+
+export const getBankBookEntries = async () => {
+  return await apiCall({ action: 'getBankBookEntries' }, 'GET');
 };
 
