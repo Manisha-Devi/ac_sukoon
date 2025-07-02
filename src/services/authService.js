@@ -24,12 +24,21 @@ class AuthService {
         })
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      // In no-cors mode, we can't read the response directly
+      // We'll need to handle this differently or ensure CORS is properly set up on the server
+      let result;
+      try {
+        if (response.type === 'opaque') {
+          // For no-cors requests, we can't read the response
+          // You'll need to set up proper CORS on your Google Apps Script
+          throw new Error('CORS not properly configured on Google Apps Script');
+        }
+        result = await response.json();
+        console.log('🔍 Authentication response:', result);
+      } catch (error) {
+        console.error('Response parsing error:', error);
+        throw new Error('Unable to parse response. Please configure CORS on Google Apps Script.');
       }
-
-      const result = await response.json();
-      console.log('🔍 Authentication response:', result);
 
       if (result.success) {
         // Update last login timestamp
