@@ -45,8 +45,33 @@
 .sync-status {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 1rem;
   flex-wrap: wrap;
+}
+
+.sync-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #007bff;
+  font-size: 0.9rem;
+}
+
+.sync-progress i {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.last-sync {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6c757d;
+  font-size: 0.8rem;
 }
 
 .sync-indicator {
@@ -74,14 +99,18 @@
 .pending-sync {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  border-radius: 15px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  background: rgba(255, 193, 7, 0.1);
+  gap: 0.5rem;
   color: #ffc107;
-  border: 1px solid rgba(255, 193, 7, 0.3);
+  font-size: 0.9rem;
+}
+
+.hybrid-features {
+  margin-top: 0.5rem;
+  color: #28a745;
+}
+
+.hybrid-features i {
+  margin-right: 0.25rem;
 }
 
 .sync-btn {

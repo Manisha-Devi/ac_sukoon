@@ -73,7 +73,16 @@ class HybridDataService {
           entryId: entry.entryId || entry.id,
           type: 'daily',
           synced: true,
-          pendingSync: false
+          pendingSync: false,
+          // Ensure date is date only (YYYY-MM-DD format)
+          date: entry.date ? new Date(entry.date).toISOString().split('T')[0] : entry.date,
+          // Ensure timestamp is time only
+          timestamp: entry.timestamp || new Date().toLocaleTimeString('en-IN', { 
+            hour12: false, 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+          })
         }))];
       }
 
@@ -83,7 +92,17 @@ class HybridDataService {
           entryId: entry.entryId || entry.id,
           type: 'booking',
           synced: true,
-          pendingSync: false
+          pendingSync: false,
+          // Ensure dates are date only (YYYY-MM-DD format)
+          dateFrom: entry.dateFrom ? new Date(entry.dateFrom).toISOString().split('T')[0] : entry.dateFrom,
+          dateTo: entry.dateTo ? new Date(entry.dateTo).toISOString().split('T')[0] : entry.dateTo,
+          // Ensure timestamp is time only
+          timestamp: entry.timestamp || new Date().toLocaleTimeString('en-IN', { 
+            hour12: false, 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+          })
         }))];
       }
 
@@ -93,12 +112,21 @@ class HybridDataService {
           entryId: entry.entryId || entry.id,
           type: 'off',
           synced: true,
-          pendingSync: false
+          pendingSync: false,
+          // Ensure date is date only (YYYY-MM-DD format)
+          date: entry.date ? new Date(entry.date).toISOString().split('T')[0] : entry.date,
+          // Ensure timestamp is time only
+          timestamp: entry.timestamp || new Date().toLocaleTimeString('en-IN', { 
+            hour12: false, 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+          })
         }))];
       }
 
-      // Sort by timestamp (newest first)
-      allData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      // Sort by entry ID (newest first) since timestamp is now time only
+      allData.sort((a, b) => (b.entryId || 0) - (a.entryId || 0));
 
       // Save to localStorage
       localStorageService.saveFareData(allData);
@@ -126,7 +154,12 @@ class HybridDataService {
       const newEntry = {
         ...entryData,
         entryId: Date.now(),
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toLocaleTimeString('en-IN', { 
+          hour12: false, 
+          hour: '2-digit', 
+          minute: '2-digit', 
+          second: '2-digit' 
+        }),
         synced: false,
         pendingSync: true
       };
@@ -248,7 +281,12 @@ class HybridDataService {
           ? { 
               ...entry, 
               ...updatedData, 
-              lastModified: new Date().toISOString(),
+              lastModified: new Date().toLocaleTimeString('en-IN', { 
+                hour12: false, 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+              }),
               synced: false,
               pendingSync: true
             }
