@@ -3,7 +3,8 @@
 // Created for React App Integration
 
 // Get your Google Sheets ID from the URL
-const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID_HERE'; // Replace with actual ID
+// IMPORTANT: Replace this with your actual Google Sheets ID
+const SPREADSHEET_ID = 'YOUR_ACTUAL_SPREADSHEET_ID_FROM_URL'; // Get from your Google Sheets URL
 
 // Sheet names - exact match required
 const SHEET_NAMES = {
@@ -23,12 +24,12 @@ const SHEET_NAMES = {
 // CORS handler for React app
 function doOptions(request) {
   return ContentService
-    .createTextOutput()
-    .setMimeType(ContentService.MimeType.JSON)
+    .createTextOutput('')
+    .setMimeType(ContentService.MimeType.TEXT)
     .setHeaders({
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400'
     });
 }
@@ -36,6 +37,13 @@ function doOptions(request) {
 // Main API handler
 function doPost(e) {
   try {
+    // Add basic logging
+    console.log('Received POST request:', e);
+    
+    if (!e || !e.postData || !e.postData.contents) {
+      throw new Error('No data received');
+    }
+    
     const data = JSON.parse(e.postData.contents);
     const action = data.action;
     

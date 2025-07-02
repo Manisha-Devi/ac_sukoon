@@ -5,12 +5,18 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_S
 // Generic API call function
 const apiCall = async (data, method = 'POST') => {
   try {
+    console.log('Making API call:', { data, method, url: API_URL });
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
     const options = {
       method: method,
       headers: {
         'Content-Type': 'application/json',
       },
-      mode: 'cors'
+      mode: 'cors',
+      signal: controller.signal
     };
 
     if (method === 'POST') {
@@ -18,16 +24,31 @@ const apiCall = async (data, method = 'POST') => {
     }
 
     const url = method === 'GET' ? `${API_URL}?${new URLSearchParams(data)}` : API_URL;
+    
     const response = await fetch(url, options);
+    clearTimeout(timeoutId);
+    
+    console.log('Response status:', response.status);
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
     }
     
     const result = await response.json();
+    console.log('API response:', result);
     return result;
   } catch (error) {
     console.error('API Call Error:', error);
+    
+    if (error.name === 'AbortError') {
+      return { success: false, error: 'Request timeout - please try again' };
+    }
+    
+    if (error.message.includes('Failed to fetch')) {
+      return { success: false, error: 'Cannot connect to server. Please check if the Google Apps Script is deployed properly.' };
+    }
+    
     return { success: false, error: error.message };
   }
 };
