@@ -4,7 +4,7 @@
 
 // Get your Google Sheets ID from the URL
 // IMPORTANT: Replace this with your actual Google Sheets ID
-const SPREADSHEET_ID = 'YOUR_ACTUAL_SPREADSHEET_ID_FROM_URL'; // Get from your Google Sheets URL
+const SPREADSHEET_ID = '1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidEmhzgM'; // Your actual Google Sheets ID
 
 // Sheet names - exact match required
 const SHEET_NAMES = {
@@ -23,15 +23,15 @@ const SHEET_NAMES = {
 
 // CORS handler for React app
 function doOptions(request) {
-  return ContentService
-    .createTextOutput('')
-    .setMimeType(ContentService.MimeType.TEXT)
-    .setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Max-Age': '86400'
-    });
+  const output = ContentService.createTextOutput('');
+  output.setMimeType(ContentService.MimeType.TEXT);
+  output.setHeaders({
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '86400'
+  });
+  return output;
 }
 
 // Main API handler
@@ -123,22 +123,22 @@ function doPost(e) {
         result = { success: false, error: 'Invalid action' };
     }
     
-    return ContentService
-      .createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeaders({
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      });
+    const output = ContentService.createTextOutput(JSON.stringify(result));
+    output.setMimeType(ContentService.MimeType.JSON);
+    output.setHeaders({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    });
+    return output;
       
   } catch (error) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ success: false, error: error.toString() }))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeaders({
-        'Access-Control-Allow-Origin': '*'
-      });
+    const output = ContentService.createTextOutput(JSON.stringify({ success: false, error: error.toString() }));
+    output.setMimeType(ContentService.MimeType.JSON);
+    output.setHeaders({
+      'Access-Control-Allow-Origin': '*'
+    });
+    return output;
   }
 }
 
@@ -183,12 +183,12 @@ function doGet(e) {
       result = { success: false, error: 'Invalid action' };
   }
   
-  return ContentService
-    .createTextOutput(JSON.stringify(result))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeaders({
-      'Access-Control-Allow-Origin': '*'
-    });
+  const output = ContentService.createTextOutput(JSON.stringify(result));
+  output.setMimeType(ContentService.MimeType.JSON);
+  output.setHeaders({
+    'Access-Control-Allow-Origin': '*'
+  });
+  return output;
 }
 
 // Authentication function
