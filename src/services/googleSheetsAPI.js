@@ -15,10 +15,11 @@ const apiCall = async (data, method = 'POST') => {
     const options = {
       method: method,
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'text/plain;charset=utf-8',
       },
       signal: controller.signal,
-      mode: 'cors' // Explicitly set CORS mode
+      redirect: 'follow',
+      mode: 'cors'
     };
 
     let url = API_URL;
