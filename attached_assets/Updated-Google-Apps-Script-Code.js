@@ -225,17 +225,18 @@ function addFareReceipt(data) {
       SHEET_NAMES.FARE_RECEIPTS,
     );
 
-    const entryId = data.entryId;
+    // Use the provided ID directly from the client
+    const entryId = data.id;
 
     sheet.appendRow([
       new Date(), // A: Timestamp
       data.date, // B: Date
       data.route, // C: Route
-      data.cashAmount || 0, // D: CashAmount (Always 0 as per requirement)
-      data.bankAmount || 0, // E: BankAmount (Always 0 as per requirement)
+      data.cashAmount || 0, // D: CashAmount
+      data.bankAmount || 0, // E: BankAmount
       data.totalAmount || 0, // F: TotalAmount
       "daily", // G: EntryType
-      entryId, // H: EntryId
+      entryId, // H: EntryId (use provided ID)
       data.submittedBy || "", // I: SubmittedBy
     ]);
 
@@ -401,18 +402,19 @@ function addBookingEntry(data) {
       SHEET_NAMES.BOOKING_ENTRIES,
     );
 
-    const entryId = data.entryId;
+    // Use the provided ID directly from the client
+    const entryId = data.id;
 
     sheet.appendRow([
       new Date(), // A: Timestamp
       data.bookingDetails || "", // B: BookingDetails
       data.dateFrom, // C: DateFrom
       data.dateTo, // D: DateTo
-      data.cashAmount || 0, // E: CashAmount (Always 0 as per requirement)
-      data.bankAmount || 0, // F: BankAmount (Always 0 as per requirement)
+      data.cashAmount || 0, // E: CashAmount
+      data.bankAmount || 0, // F: BankAmount
       data.totalAmount || 0, // G: TotalAmount
       "booking", // H: EntryType
-      entryId, // I: EntryId
+      entryId, // I: EntryId (use provided ID)
       data.submittedBy || "", // J: SubmittedBy
     ]);
 
@@ -582,14 +584,15 @@ function addOffDay(data) {
       SHEET_NAMES.OFF_DAYS,
     );
 
-    const entryId = data.entryId;
+    // Use the provided ID directly from the client
+    const entryId = data.id;
 
     sheet.appendRow([
       new Date(), // A: Timestamp
       data.date, // B: Date
-      data.reason || "", // C: Reason (Required as per user request)
+      data.reason || "", // C: Reason
       "off", // D: EntryType
-      entryId, // E: EntryId
+      entryId, // E: EntryId (use provided ID)
       data.submittedBy || "", // F: SubmittedBy
     ]);
 
@@ -780,16 +783,3 @@ function deleteFareEntryLegacy(data) {
     };
   }
 }
-,,,,""
-      ,
-    """","""",""
-      ,
-    """","""",,""
-      ,
-    """","""",""
-      ,
-    """","""",,""
-      ,
-    """","""",""
-      ,
-    """","""","""""""""","""""""""",

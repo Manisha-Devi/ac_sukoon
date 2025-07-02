@@ -64,27 +64,33 @@ class HybridDataService {
         authService.getOffDays()
       ]);
 
-      // Combine all data with proper type
+      // Combine all data with proper type and sync status
       let allData = [];
 
       if (fareReceipts.success && fareReceipts.data) {
         allData = [...allData, ...fareReceipts.data.map(entry => ({
           ...entry,
-          type: 'daily'
+          type: 'daily',
+          synced: true,
+          pendingSync: false
         }))];
       }
 
       if (bookingEntries.success && bookingEntries.data) {
         allData = [...allData, ...bookingEntries.data.map(entry => ({
           ...entry,
-          type: 'booking'
+          type: 'booking',
+          synced: true,
+          pendingSync: false
         }))];
       }
 
       if (offDays.success && offDays.data) {
         allData = [...allData, ...offDays.data.map(entry => ({
           ...entry,
-          type: 'off'
+          type: 'off',
+          synced: true,
+          pendingSync: false
         }))];
       }
 
@@ -114,11 +120,9 @@ class HybridDataService {
     try {
       console.log('📝 Adding entry with hybrid system...');
 
-      const entryId = Date.now();
       const newEntry = {
         ...entryData,
-        id: entryId,
-        entryId: entryId,
+        id: Date.now(),
         timestamp: new Date().toISOString(),
         synced: false,
         pendingSync: true
@@ -154,7 +158,7 @@ class HybridDataService {
       // Add to appropriate Google Sheet based on type
       if (entry.type === 'daily') {
         result = await authService.addFareReceipt({
-          entryId: entry.entryId,
+          id: entry.id, // Use local ID directly
           date: entry.date,
           route: entry.route,
           cashAmount: entry.cashAmount || 0,
@@ -164,7 +168,7 @@ class HybridDataService {
         });
       } else if (entry.type === 'booking') {
         result = await authService.addBookingEntry({
-          entryId: entry.entryId,
+          id: entry.id, // Use local ID directly
           bookingDetails: entry.bookingDetails,
           dateFrom: entry.dateFrom,
           dateTo: entry.dateTo,
@@ -175,7 +179,7 @@ class HybridDataService {
         });
       } else if (entry.type === 'off') {
         result = await authService.addOffDay({
-          entryId: entry.entryId,
+          id: entry.id, // Use local ID directly
           date: entry.date,
           reason: entry.reason,
           submittedBy: 'driver'
@@ -187,7 +191,11 @@ class HybridDataService {
         const currentData = localStorageService.loadFareData();
         const updatedData = currentData.map(item => 
           item.id === entry.id 
-            ? { ...item, synced: true, pendingSync: false, cloudId: result.entryId }
+            ? { 
+                ...item, 
+                synced: true, 
+                pendingSync: false
+              }
             : item
         );
         localStorageService.saveFareData(updatedData);
@@ -210,6 +218,12 @@ class HybridDataService {
     try {
       console.log('📝 Updating entry with hybrid system...');
 
+      // Find the existing entry
+      const existingEntry = currentFareData.find(entry => entry.id === entryId);
+      if (!existingEntry) {
+        throw new Error('Entry not found');
+      }
+
       // Update in localStorage immediately
       const updatedFareData = currentFareData.map(entry => 
         entry.id === entryId 
@@ -229,13 +243,10 @@ class HybridDataService {
       console.log('💾 Entry updated in localStorage immediately');
 
       // Try to sync to Google Sheets in background if online
-      if (this.isOnline) {
-        const existingEntry = currentFareData.find(entry => entry.id === entryId);
-        if (existingEntry) {
-          this.syncUpdateToGoogleSheets(entryId, updatedData, existingEntry.type).catch(error => {
-            console.error('⚠️ Background update sync failed:', error);
-          });
-        }
+      if (this.isOnline && existingEntry.synced) {
+        this.syncUpdateToGoogleSheets(entryId, updatedData, existingEntry.type).catch(error => {
+          console.error('⚠️ Background update sync failed:', error);
+        });
       }
 
       return { success: true, data: updatedFareData };
@@ -249,7 +260,27 @@ class HybridDataService {
   // Sync update to Google Sheets
   async syncUpdateToGoogleSheets(entryId, updatedData, entryType) {
     try {
-      const result = await authService.updateFareEntry(entryId, updatedData, entryType);
+      console.log('🔄 Updating in Google Sheets with ID:', entryId);
+
+      let result;
+
+      // Call appropriate update function based on entry type
+      if (entryType === 'daily') {
+        result = await authService.updateFareReceipt({
+          entryId: entryId,
+          updatedData: updatedData
+        });
+      } else if (entryType === 'booking') {
+        result = await authService.updateBookingEntry({
+          entryId: entryId,
+          updatedData: updatedData
+        });
+      } else if (entryType === 'off') {
+        result = await authService.updateOffDay({
+          entryId: entryId,
+          updatedData: updatedData
+        });
+      }
 
       if (result && result.success) {
         // Mark as synced in localStorage
@@ -311,7 +342,24 @@ class HybridDataService {
   // Sync delete to Google Sheets
   async syncDeleteToGoogleSheets(entryId, entryType) {
     try {
-      const result = await authService.deleteFareEntry(entryId, entryType);
+      console.log('🗑️ Deleting from Google Sheets with ID:', entryId);
+
+      let result;
+
+      // Call appropriate delete function based on entry type
+      if (entryType === 'daily') {
+        result = await authService.deleteFareReceipt({
+          entryId: entryId
+        });
+      } else if (entryType === 'booking') {
+        result = await authService.deleteBookingEntry({
+          entryId: entryId
+        });
+      } else if (entryType === 'off') {
+        result = await authService.deleteOffDay({
+          entryId: entryId
+        });
+      }
 
       if (result && result.success) {
         console.log('✅ Delete synced to Google Sheets:', entryId);
@@ -338,8 +386,24 @@ class HybridDataService {
       const pendingEntries = currentData.filter(entry => pendingIds.includes(entry.id));
 
       for (const entry of pendingEntries) {
-        if (!entry.synced) {
-          await this.syncSingleEntry(entry);
+        if (!entry.synced && entry.pendingSync) {
+          // Check if this is a new entry (no previous sync) or an update
+          if (!entry.lastModified) {
+            // New entry - add to Google Sheets
+            await this.syncSingleEntry(entry);
+          } else {
+            // Updated entry - sync the update
+            const updatedData = {
+              date: entry.date,
+              route: entry.route,
+              totalAmount: entry.totalAmount,
+              bookingDetails: entry.bookingDetails,
+              dateFrom: entry.dateFrom,
+              dateTo: entry.dateTo,
+              reason: entry.reason
+            };
+            await this.syncUpdateToGoogleSheets(entry.id, updatedData, entry.type);
+          }
           // Small delay to avoid overwhelming the API
           await new Promise(resolve => setTimeout(resolve, 500));
         }
