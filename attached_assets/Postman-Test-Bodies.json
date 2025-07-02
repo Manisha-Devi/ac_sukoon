@@ -1,0 +1,133 @@
+
+{
+  "authentication_test": {
+    "method": "POST",
+    "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "action": "login",
+      "username": "testuser",
+      "password": "testpass",
+      "userType": "driver"
+    }
+  },
+
+  "add_fare_receipt": {
+    "method": "POST",
+    "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "action": "addFareReceipt",
+      "date": "2024-01-15",
+      "route": "Ghuraka to Bhaderwah",
+      "cashAmount": 0,
+      "bankAmount": 0,
+      "totalAmount": 500,
+      "submittedBy": "testdriver"
+    }
+  },
+
+  "get_fare_receipts": {
+    "method": "POST",
+    "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "action": "getFareReceipts"
+    }
+  },
+
+  "add_booking_entry": {
+    "method": "POST",
+    "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "action": "addBookingEntry",
+      "bookingDetails": "Wedding booking from Bhaderwah to Jammu",
+      "dateFrom": "2024-01-20",
+      "dateTo": "2024-01-22",
+      "cashAmount": 0,
+      "bankAmount": 0,
+      "totalAmount": 15000,
+      "submittedBy": "testdriver"
+    }
+  },
+
+  "get_booking_entries": {
+    "method": "POST",
+    "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "action": "getBookingEntries"
+    }
+  },
+
+  "add_off_day": {
+    "method": "POST",
+    "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "action": "addOffDay",
+      "date": "2024-01-25",
+      "reason": "Sick leave",
+      "submittedBy": "testdriver"
+    }
+  },
+
+  "get_off_days": {
+    "method": "POST",
+    "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "action": "getOffDays"
+    }
+  },
+
+  "test_connection": {
+    "method": "POST",
+    "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "action": "test"
+    }
+  },
+
+  "get_all_users": {
+    "method": "POST",
+    "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "action": "getAllUsers"
+    }
+  },
+
+  "update_last_login": {
+    "method": "POST",
+    "url": "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "action": "updateLastLogin",
+      "username": "testuser",
+      "timestamp": "2024-01-15T10:30:00.000Z"
+    }
+  }
+}
