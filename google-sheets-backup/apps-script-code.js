@@ -1,5 +1,6 @@
 
 
+
 // AC Sukoon Transport Management - Google Apps Script API
 // Created for React App Integration
 
@@ -24,13 +25,9 @@ const SHEET_NAMES = {
 
 // CORS handler for React app - handles preflight OPTIONS requests
 function doOptions(e) {
-  return ContentService
-    .createTextOutput('')
-    .setMimeType(ContentService.MimeType.TEXT)
-    .setHeader('Access-Control-Allow-Origin', 'https://bb948baf-d71d-4183-882c-dfc8b9ee2094-00-vj1xcz5mfci9.pike.replit.dev')
-    .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-    .setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    .setHeader('Access-Control-Max-Age', '86400');
+  const output = ContentService.createTextOutput('');
+  output.setMimeType(ContentService.MimeType.TEXT);
+  return output;
 }
 
 // Main API handler
@@ -122,20 +119,14 @@ function doPost(e) {
         result = { success: false, error: 'Invalid action' };
     }
     
-    return ContentService
-      .createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeader('Access-Control-Allow-Origin', 'https://bb948baf-d71d-4183-882c-dfc8b9ee2094-00-vj1xcz5mfci9.pike.replit.dev')
-      .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-      .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    const output = ContentService.createTextOutput(JSON.stringify(result));
+    output.setMimeType(ContentService.MimeType.JSON);
+    return output;
       
   } catch (error) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ success: false, error: error.toString() }))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeader('Access-Control-Allow-Origin', 'https://bb948baf-d71d-4183-882c-dfc8b9ee2094-00-vj1xcz5mfci9.pike.replit.dev')
-      .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-      .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    const errorOutput = ContentService.createTextOutput(JSON.stringify({ success: false, error: error.toString() }));
+    errorOutput.setMimeType(ContentService.MimeType.JSON);
+    return errorOutput;
   }
 }
 
@@ -144,9 +135,9 @@ function doGet(e) {
   try {
     // Handle case when no parameters are passed
     if (!e || !e.parameter) {
-      return ContentService
-        .createTextOutput(JSON.stringify({ success: false, error: 'No parameters provided' }))
-        .setMimeType(ContentService.MimeType.JSON);
+      const output = ContentService.createTextOutput(JSON.stringify({ success: false, error: 'No parameters provided' }));
+      output.setMimeType(ContentService.MimeType.JSON);
+      return output;
     }
     
     const action = e.parameter.action;
@@ -191,23 +182,17 @@ function doGet(e) {
       result = { success: false, error: 'Invalid action' };
   }
   
-  return ContentService
-    .createTextOutput(JSON.stringify(result))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeader('Access-Control-Allow-Origin', 'https://bb948baf-d71d-4183-882c-dfc8b9ee2094-00-vj1xcz5mfci9.pike.replit.dev')
-    .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-    .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  const output = ContentService.createTextOutput(JSON.stringify(result));
+  output.setMimeType(ContentService.MimeType.JSON);
+  return output;
   
   } catch (error) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ 
-        success: false, 
-        error: 'doGet Error: ' + error.toString() 
-      }))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeader('Access-Control-Allow-Origin', 'https://bb948baf-d71d-4183-882c-dfc8b9ee2094-00-vj1xcz5mfci9.pike.replit.dev')
-      .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-      .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    const errorOutput = ContentService.createTextOutput(JSON.stringify({ 
+      success: false, 
+      error: 'doGet Error: ' + error.toString() 
+    }));
+    errorOutput.setMimeType(ContentService.MimeType.JSON);
+    return errorOutput;
   }
 }
 
@@ -761,4 +746,5 @@ function deleteEntry(data) {
     return { success: false, error: error.toString() };
   }
 }
+
 
