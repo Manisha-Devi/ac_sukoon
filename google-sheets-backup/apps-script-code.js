@@ -17,7 +17,6 @@ const SHEET_NAMES = {
   SERVICE_PAYMENTS: 'ServicePayments',
   OTHER_PAYMENTS: 'OtherPayments',
   CASH_BOOK_ENTRIES: 'CashBookEntries',
-  BANK_BOOK_ENTRIES: 'BankBookEntries',
   APPROVAL_DATA: 'ApprovalData'
 };
 
@@ -31,6 +30,18 @@ function doOptions() {
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '3600'
+    });
+}
+
+// Helper function to create response with CORS headers
+function createResponse(data) {
+  return ContentService
+    .createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeaders({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     });
 }
 
@@ -49,37 +60,34 @@ function doGet(e) {
         result = testConnection();
         break;
       case 'getFareReceipts':
-        result = handleGetFareReceipts();
+        result = getFareReceipts();
         break;
       case 'getBookingEntries':
-        result = handleGetBookingEntries();
+        result = getBookingEntries();
         break;
       case 'getOffDays':
-        result = handleGetOffDays();
+        result = getOffDays();
         break;
       case 'getFuelPayments':
-        result = handleGetFuelPayments();
+        result = getFuelPayments();
         break;
       case 'getAddaPayments':
-        result = handleGetAddaPayments();
+        result = getAddaPayments();
         break;
       case 'getUnionPayments':
-        result = handleGetUnionPayments();
+        result = getUnionPayments();
         break;
       case 'getServicePayments':
-        result = handleGetServicePayments();
+        result = getServicePayments();
         break;
       case 'getOtherPayments':
-        result = handleGetOtherPayments();
+        result = getOtherPayments();
         break;
       case 'getCashBookEntries':
-        result = handleGetCashBookEntries();
-        break;
-      case 'getBankBookEntries':
-        result = handleGetBankBookEntries();
+        result = getCashBookEntries();
         break;
       case 'getApprovalData':
-        result = handleGetApprovalData();
+        result = getApprovalData();
         break;
       default:
         result = { success: false, error: 'Invalid action: ' + action };
@@ -106,43 +114,34 @@ function doPost(e) {
         result = handleLogin(data);
         break;
       case 'addFareReceipt':
-        result = handleAddFareReceipt(data);
+        result = addFareReceipt(data);
         break;
       case 'addBookingEntry':
-        result = handleAddBookingEntry(data);
+        result = addBookingEntry(data);
         break;
       case 'addOffDay':
-        result = handleAddOffDay(data);
+        result = addOffDay(data);
         break;
       case 'addFuelPayment':
-        result = handleAddFuelPayment(data);
+        result = addFuelPayment(data);
         break;
       case 'addAddaPayment':
-        result = handleAddAddaPayment(data);
+        result = addAddaPayment(data);
         break;
       case 'addUnionPayment':
-        result = handleAddUnionPayment(data);
+        result = addUnionPayment(data);
         break;
       case 'addServicePayment':
-        result = handleAddServicePayment(data);
+        result = addServicePayment(data);
         break;
       case 'addOtherPayment':
-        result = handleAddOtherPayment(data);
+        result = addOtherPayment(data);
         break;
       case 'addCashBookEntry':
-        result = handleAddCashBookEntry(data);
-        break;
-      case 'addBankBookEntry':
-        result = handleAddBankBookEntry(data);
+        result = addCashBookEntry(data);
         break;
       case 'addApprovalData':
-        result = handleAddApprovalData(data);
-        break;
-      case 'updateEntry':
-        result = handleUpdateEntry(data);
-        break;
-      case 'deleteEntry':
-        result = handleDeleteEntry(data);
+        result = addApprovalData(data);
         break;
       default:
         result = { success: false, error: 'Invalid action: ' + data.action };
@@ -152,18 +151,6 @@ function doPost(e) {
   } catch (error) {
     return createResponse({ success: false, error: 'Server Error: ' + error.toString() });
   }
-}
-
-// Helper function to create response with CORS headers
-function createResponse(data) {
-  return ContentService
-    .createTextOutput(JSON.stringify(data))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-    });
 }
 
 // Test connection function
@@ -272,460 +259,483 @@ function handleLogin(data) {
 }
 
 // Fare Receipts
-function handleAddFareReceipt(data) {
+function addFareReceipt(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
-    const newRow = [
-      new Date(data.date),
-      data.route || '',
+    
+    sheet.appendRow([
+      new Date(),
+      data.date,
+      data.route,
       data.cashAmount || 0,
       data.bankAmount || 0,
       data.totalAmount || 0,
       data.remarks || '',
-      data.submittedBy || '',
-      new Date()
-    ];
-    sheet.appendRow(newRow);
+      data.submittedBy || ''
+    ]);
+
     return { success: true, message: 'Fare receipt added successfully' };
   } catch (error) {
-    return { success: false, error: 'Error adding fare receipt: ' + error.toString() };
+    return { success: false, error: 'Add fare receipt error: ' + error.toString() };
   }
 }
 
-function handleGetFareReceipts() {
+function getFareReceipts() {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
     const values = sheet.getDataRange().getValues();
-    const headers = values[0];
-    const data = values.slice(1).map(row => {
-      const obj = {};
-      headers.forEach((header, index) => {
-        obj[header] = row[index];
-      });
-      return obj;
-    });
-    return { success: true, data: data };
+
+    if (values.length <= 1) return { success: true, data: [] };
+
+    const data = values.slice(1).map((row, index) => ({
+      id: index + 2,
+      timestamp: row[0],
+      date: row[1],
+      route: row[2],
+      cashAmount: row[3],
+      bankAmount: row[4],
+      totalAmount: row[5],
+      remarks: row[6],
+      submittedBy: row[7]
+    }));
+
+    return { success: true, data: data.reverse() };
   } catch (error) {
-    return { success: false, error: 'Error getting fare receipts: ' + error.toString() };
+    return { success: false, error: 'Get fare receipts error: ' + error.toString() };
+  }
+}
+
+// Booking Entries
+function addBookingEntry(data) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
+    
+    sheet.appendRow([
+      new Date(),
+      data.bookingDetails || '',
+      data.dateFrom,
+      data.dateTo,
+      data.cashAmount || 0,
+      data.bankAmount || 0,
+      data.totalAmount || 0,
+      data.remarks || '',
+      data.submittedBy || ''
+    ]);
+
+    return { success: true, message: 'Booking entry added successfully' };
+  } catch (error) {
+    return { success: false, error: 'Add booking entry error: ' + error.toString() };
+  }
+}
+
+function getBookingEntries() {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
+    const values = sheet.getDataRange().getValues();
+
+    if (values.length <= 1) return { success: true, data: [] };
+
+    const data = values.slice(1).map((row, index) => ({
+      id: index + 2,
+      timestamp: row[0],
+      bookingDetails: row[1],
+      dateFrom: row[2],
+      dateTo: row[3],
+      cashAmount: row[4],
+      bankAmount: row[5],
+      totalAmount: row[6],
+      remarks: row[7],
+      submittedBy: row[8]
+    }));
+
+    return { success: true, data: data.reverse() };
+  } catch (error) {
+    return { success: false, error: 'Get booking entries error: ' + error.toString() };
+  }
+}
+
+// Off Days
+function addOffDay(data) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OFF_DAYS);
+    
+    sheet.appendRow([
+      new Date(),
+      data.date,
+      data.reason || '',
+      data.submittedBy || ''
+    ]);
+
+    return { success: true, message: 'Off day added successfully' };
+  } catch (error) {
+    return { success: false, error: 'Add off day error: ' + error.toString() };
+  }
+}
+
+function getOffDays() {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OFF_DAYS);
+    const values = sheet.getDataRange().getValues();
+
+    if (values.length <= 1) return { success: true, data: [] };
+
+    const data = values.slice(1).map((row, index) => ({
+      id: index + 2,
+      timestamp: row[0],
+      date: row[1],
+      reason: row[2],
+      submittedBy: row[3]
+    }));
+
+    return { success: true, data: data.reverse() };
+  } catch (error) {
+    return { success: false, error: 'Get off days error: ' + error.toString() };
   }
 }
 
 // Fuel Payments
-function handleAddFuelPayment(data) {
+function addFuelPayment(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.FUEL_PAYMENTS);
-    const newRow = [
-      new Date(data.date),
+    
+    sheet.appendRow([
+      new Date(),
+      data.date,
       data.pumpName || '',
       data.liters || 0,
-      data.rate || 0,
+      data.ratePerLiter || 0,
       data.cashAmount || 0,
       data.bankAmount || 0,
       data.totalAmount || 0,
-      data.submittedBy || '',
-      new Date()
-    ];
-    sheet.appendRow(newRow);
+      data.remarks || '',
+      data.submittedBy || ''
+    ]);
+
     return { success: true, message: 'Fuel payment added successfully' };
   } catch (error) {
-    return { success: false, error: 'Error adding fuel payment: ' + error.toString() };
+    return { success: false, error: 'Add fuel payment error: ' + error.toString() };
   }
 }
 
-function handleGetFuelPayments() {
+function getFuelPayments() {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.FUEL_PAYMENTS);
     const values = sheet.getDataRange().getValues();
-    const headers = values[0];
-    const data = values.slice(1).map(row => {
-      const obj = {};
-      headers.forEach((header, index) => {
-        obj[header] = row[index];
-      });
-      return obj;
-    });
-    return { success: true, data: data };
+
+    if (values.length <= 1) return { success: true, data: [] };
+
+    const data = values.slice(1).map((row, index) => ({
+      id: index + 2,
+      timestamp: row[0],
+      date: row[1],
+      pumpName: row[2],
+      liters: row[3],
+      ratePerLiter: row[4],
+      cashAmount: row[5],
+      bankAmount: row[6],
+      totalAmount: row[7],
+      remarks: row[8],
+      submittedBy: row[9]
+    }));
+
+    return { success: true, data: data.reverse() };
   } catch (error) {
-    return { success: false, error: 'Error getting fuel payments: ' + error.toString() };
+    return { success: false, error: 'Get fuel payments error: ' + error.toString() };
   }
 }
 
-// Bank Book Entries
-function handleAddBankBookEntry(data) {
+// Adda Payments
+function addAddaPayment(data) {
   try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BANK_BOOK_ENTRIES);
-    const newRow = [
-      new Date(data.date),
-      data.particulars || '',
-      data.description || '',
-      data.chequeNo || '',
-      data.debit || 0,
-      data.credit || 0,
-      data.submittedBy || '',
-      new Date()
-    ];
-    sheet.appendRow(newRow);
-    return { success: true, message: 'Bank book entry added successfully' };
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.ADDA_PAYMENTS);
+    
+    sheet.appendRow([
+      new Date(),
+      data.date,
+      data.addaName || '',
+      data.cashAmount || 0,
+      data.bankAmount || 0,
+      data.totalAmount || 0,
+      data.remarks || '',
+      data.submittedBy || ''
+    ]);
+
+    return { success: true, message: 'Adda payment added successfully' };
   } catch (error) {
-    return { success: false, error: 'Error adding bank book entry: ' + error.toString() };
+    return { success: false, error: 'Add adda payment error: ' + error.toString() };
   }
 }
 
-function handleGetBankBookEntries() {
+function getAddaPayments() {
   try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BANK_BOOK_ENTRIES);
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.ADDA_PAYMENTS);
     const values = sheet.getDataRange().getValues();
-    const headers = values[0];
-    const data = values.slice(1).map(row => {
-      const obj = {};
-      headers.forEach((header, index) => {
-        obj[header] = row[index];
-      });
-      return obj;
-    });
-    return { success: true, data: data };
+
+    if (values.length <= 1) return { success: true, data: [] };
+
+    const data = values.slice(1).map((row, index) => ({
+      id: index + 2,
+      timestamp: row[0],
+      date: row[1],
+      addaName: row[2],
+      cashAmount: row[3],
+      bankAmount: row[4],
+      totalAmount: row[5],
+      remarks: row[6],
+      submittedBy: row[7]
+    }));
+
+    return { success: true, data: data.reverse() };
   } catch (error) {
-    return { success: false, error: 'Error getting bank book entries: ' + error.toString() };
+    return { success: false, error: 'Get adda payments error: ' + error.toString() };
+  }
+}
+
+// Union Payments
+function addUnionPayment(data) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.UNION_PAYMENTS);
+    
+    sheet.appendRow([
+      new Date(),
+      data.date,
+      data.unionName || '',
+      data.cashAmount || 0,
+      data.bankAmount || 0,
+      data.totalAmount || 0,
+      data.remarks || '',
+      data.submittedBy || ''
+    ]);
+
+    return { success: true, message: 'Union payment added successfully' };
+  } catch (error) {
+    return { success: false, error: 'Add union payment error: ' + error.toString() };
+  }
+}
+
+function getUnionPayments() {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.UNION_PAYMENTS);
+    const values = sheet.getDataRange().getValues();
+
+    if (values.length <= 1) return { success: true, data: [] };
+
+    const data = values.slice(1).map((row, index) => ({
+      id: index + 2,
+      timestamp: row[0],
+      date: row[1],
+      unionName: row[2],
+      cashAmount: row[3],
+      bankAmount: row[4],
+      totalAmount: row[5],
+      remarks: row[6],
+      submittedBy: row[7]
+    }));
+
+    return { success: true, data: data.reverse() };
+  } catch (error) {
+    return { success: false, error: 'Get union payments error: ' + error.toString() };
+  }
+}
+
+// Service Payments
+function addServicePayment(data) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.SERVICE_PAYMENTS);
+    
+    sheet.appendRow([
+      new Date(),
+      data.date,
+      data.serviceType || '',
+      data.cashAmount || 0,
+      data.bankAmount || 0,
+      data.totalAmount || 0,
+      data.serviceDetails || '',
+      data.submittedBy || ''
+    ]);
+
+    return { success: true, message: 'Service payment added successfully' };
+  } catch (error) {
+    return { success: false, error: 'Add service payment error: ' + error.toString() };
+  }
+}
+
+function getServicePayments() {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.SERVICE_PAYMENTS);
+    const values = sheet.getDataRange().getValues();
+
+    if (values.length <= 1) return { success: true, data: [] };
+
+    const data = values.slice(1).map((row, index) => ({
+      id: index + 2,
+      timestamp: row[0],
+      date: row[1],
+      serviceType: row[2],
+      cashAmount: row[3],
+      bankAmount: row[4],
+      totalAmount: row[5],
+      serviceDetails: row[6],
+      submittedBy: row[7]
+    }));
+
+    return { success: true, data: data.reverse() };
+  } catch (error) {
+    return { success: false, error: 'Get service payments error: ' + error.toString() };
+  }
+}
+
+// Other Payments
+function addOtherPayment(data) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OTHER_PAYMENTS);
+    
+    sheet.appendRow([
+      new Date(),
+      data.date,
+      data.paymentType || '',
+      data.description || '',
+      data.cashAmount || 0,
+      data.bankAmount || 0,
+      data.totalAmount || 0,
+      data.category || '',
+      data.submittedBy || ''
+    ]);
+
+    return { success: true, message: 'Other payment added successfully' };
+  } catch (error) {
+    return { success: false, error: 'Add other payment error: ' + error.toString() };
+  }
+}
+
+function getOtherPayments() {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OTHER_PAYMENTS);
+    const values = sheet.getDataRange().getValues();
+
+    if (values.length <= 1) return { success: true, data: [] };
+
+    const data = values.slice(1).map((row, index) => ({
+      id: index + 2,
+      timestamp: row[0],
+      date: row[1],
+      paymentType: row[2],
+      description: row[3],
+      cashAmount: row[4],
+      bankAmount: row[5],
+      totalAmount: row[6],
+      category: row[7],
+      submittedBy: row[8]
+    }));
+
+    return { success: true, data: data.reverse() };
+  } catch (error) {
+    return { success: false, error: 'Get other payments error: ' + error.toString() };
   }
 }
 
 // Cash Book Entries
-function handleAddCashBookEntry(data) {
+function addCashBookEntry(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.CASH_BOOK_ENTRIES);
-    const newRow = [
-      new Date(data.date),
-      data.particulars || '',
+    
+    sheet.appendRow([
+      new Date(),
+      data.date,
+      data.type || '',
       data.description || '',
-      data.jfNo || '',
       data.cashAmount || 0,
       data.bankAmount || 0,
-      data.type || '',
-      data.submittedBy || '',
-      new Date()
-    ];
-    sheet.appendRow(newRow);
+      data.category || '',
+      data.submittedBy || ''
+    ]);
+
     return { success: true, message: 'Cash book entry added successfully' };
   } catch (error) {
-    return { success: false, error: 'Error adding cash book entry: ' + error.toString() };
+    return { success: false, error: 'Add cash book entry error: ' + error.toString() };
   }
 }
 
-function handleGetCashBookEntries() {
+function getCashBookEntries() {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.CASH_BOOK_ENTRIES);
     const values = sheet.getDataRange().getValues();
-    const headers = values[0];
-    const data = values.slice(1).map(row => {
-      const obj = {};
-      headers.forEach((header, index) => {
-        obj[header] = row[index];
-      });
-      return obj;
-    });
-    return { success: true, data: data };
+
+    if (values.length <= 1) return { success: true, data: [] };
+
+    const data = values.slice(1).map((row, index) => ({
+      id: index + 2,
+      timestamp: row[0],
+      date: row[1],
+      type: row[2],
+      description: row[3],
+      cashAmount: row[4],
+      bankAmount: row[5],
+      category: row[6],
+      submittedBy: row[7]
+    }));
+
+    return { success: true, data: data.reverse() };
   } catch (error) {
-    return { success: false, error: 'Error getting cash book entries: ' + error.toString() };
+    return { success: false, error: 'Get cash book entries error: ' + error.toString() };
   }
 }
 
-// Placeholder functions for other payment types
-function handleAddBookingEntry(data) {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
-    const newRow = [
-      new Date(data.dateFrom),
-      new Date(data.dateTo),
-      data.bookingDetails || '',
-      data.cashAmount || 0,
-      data.bankAmount || 0,
-      data.totalAmount || 0,
-      data.submittedBy || '',
-      new Date()
-    ];
-    sheet.appendRow(newRow);
-    return { success: true, message: 'Booking entry added successfully' };
-  } catch (error) {
-    return { success: false, error: 'Error adding booking entry: ' + error.toString() };
-  }
-}
-
-function handleGetBookingEntries() {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
-    const values = sheet.getDataRange().getValues();
-    const headers = values[0];
-    const data = values.slice(1).map(row => {
-      const obj = {};
-      headers.forEach((header, index) => {
-        obj[header] = row[index];
-      });
-      return obj;
-    });
-    return { success: true, data: data };
-  } catch (error) {
-    return { success: false, error: 'Error getting booking entries: ' + error.toString() };
-  }
-}
-
-function handleAddOffDay(data) {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OFF_DAYS);
-    const newRow = [
-      new Date(data.date),
-      data.reason || '',
-      data.submittedBy || '',
-      new Date()
-    ];
-    sheet.appendRow(newRow);
-    return { success: true, message: 'Off day added successfully' };
-  } catch (error) {
-    return { success: false, error: 'Error adding off day: ' + error.toString() };
-  }
-}
-
-function handleGetOffDays() {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OFF_DAYS);
-    const values = sheet.getDataRange().getValues();
-    const headers = values[0];
-    const data = values.slice(1).map(row => {
-      const obj = {};
-      headers.forEach((header, index) => {
-        obj[header] = row[index];
-      });
-      return obj;
-    });
-    return { success: true, data: data };
-  } catch (error) {
-    return { success: false, error: 'Error getting off days: ' + error.toString() };
-  }
-}
-
-// Add placeholder functions for other payment types
-function handleAddAddaPayment(data) {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.ADDA_PAYMENTS);
-    const newRow = [
-      new Date(data.date),
-      data.description || '',
-      data.cashAmount || 0,
-      data.bankAmount || 0,
-      data.totalAmount || 0,
-      data.submittedBy || '',
-      new Date()
-    ];
-    sheet.appendRow(newRow);
-    return { success: true, message: 'Adda payment added successfully' };
-  } catch (error) {
-    return { success: false, error: 'Error adding adda payment: ' + error.toString() };
-  }
-}
-
-function handleGetAddaPayments() {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.ADDA_PAYMENTS);
-    const values = sheet.getDataRange().getValues();
-    const headers = values[0];
-    const data = values.slice(1).map(row => {
-      const obj = {};
-      headers.forEach((header, index) => {
-        obj[header] = row[index];
-      });
-      return obj;
-    });
-    return { success: true, data: data };
-  } catch (error) {
-    return { success: false, error: 'Error getting adda payments: ' + error.toString() };
-  }
-}
-
-function handleAddUnionPayment(data) {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.UNION_PAYMENTS);
-    const newRow = [
-      new Date(data.date),
-      data.description || '',
-      data.cashAmount || 0,
-      data.bankAmount || 0,
-      data.totalAmount || 0,
-      data.submittedBy || '',
-      new Date()
-    ];
-    sheet.appendRow(newRow);
-    return { success: true, message: 'Union payment added successfully' };
-  } catch (error) {
-    return { success: false, error: 'Error adding union payment: ' + error.toString() };
-  }
-}
-
-function handleGetUnionPayments() {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.UNION_PAYMENTS);
-    const values = sheet.getDataRange().getValues();
-    const headers = values[0];
-    const data = values.slice(1).map(row => {
-      const obj = {};
-      headers.forEach((header, index) => {
-        obj[header] = row[index];
-      });
-      return obj;
-    });
-    return { success: true, data: data };
-  } catch (error) {
-    return { success: false, error: 'Error getting union payments: ' + error.toString() };
-  }
-}
-
-function handleAddServicePayment(data) {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.SERVICE_PAYMENTS);
-    const newRow = [
-      new Date(data.date),
-      data.description || '',
-      data.cashAmount || 0,
-      data.bankAmount || 0,
-      data.totalAmount || 0,
-      data.submittedBy || '',
-      new Date()
-    ];
-    sheet.appendRow(newRow);
-    return { success: true, message: 'Service payment added successfully' };
-  } catch (error) {
-    return { success: false, error: 'Error adding service payment: ' + error.toString() };
-  }
-}
-
-function handleGetServicePayments() {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.SERVICE_PAYMENTS);
-    const values = sheet.getDataRange().getValues();
-    const headers = values[0];
-    const data = values.slice(1).map(row => {
-      const obj = {};
-      headers.forEach((header, index) => {
-        obj[header] = row[index];
-      });
-      return obj;
-    });
-    return { success: true, data: data };
-  } catch (error) {
-    return { success: false, error: 'Error getting service payments: ' + error.toString() };
-  }
-}
-
-function handleAddOtherPayment(data) {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OTHER_PAYMENTS);
-    const newRow = [
-      new Date(data.date),
-      data.description || '',
-      data.cashAmount || 0,
-      data.bankAmount || 0,
-      data.totalAmount || 0,
-      data.submittedBy || '',
-      new Date()
-    ];
-    sheet.appendRow(newRow);
-    return { success: true, message: 'Other payment added successfully' };
-  } catch (error) {
-    return { success: false, error: 'Error adding other payment: ' + error.toString() };
-  }
-}
-
-function handleGetOtherPayments() {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OTHER_PAYMENTS);
-    const values = sheet.getDataRange().getValues();
-    const headers = values[0];
-    const data = values.slice(1).map(row => {
-      const obj = {};
-      headers.forEach((header, index) => {
-        obj[header] = row[index];
-      });
-      return obj;
-    });
-    return { success: true, data: data };
-  } catch (error) {
-    return { success: false, error: 'Error getting other payments: ' + error.toString() };
-  }
-}
-
-function handleAddApprovalData(data) {
+// Approval Data
+function addApprovalData(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.APPROVAL_DATA);
-    const newRow = [
-      new Date(data.date),
-      data.type || '',
-      data.description || '',
-      data.amount || 0,
-      data.status || 'pending',
-      data.submittedBy || '',
-      new Date()
-    ];
-    sheet.appendRow(newRow);
+    
+    sheet.appendRow([
+      new Date(),
+      data.submissionDate,
+      data.managerName || '',
+      data.cashHandover || 0,
+      data.bankAmount || 0,
+      data.totalCashReceipts || 0,
+      data.totalCashPayments || 0,
+      data.totalBankReceipts || 0,
+      data.totalBankPayments || 0,
+      data.cashBalance || 0,
+      data.bankBalance || 0,
+      data.remarks || '',
+      data.status || 'Pending',
+      data.submittedBy || ''
+    ]);
+
     return { success: true, message: 'Approval data added successfully' };
   } catch (error) {
-    return { success: false, error: 'Error adding approval data: ' + error.toString() };
+    return { success: false, error: 'Add approval data error: ' + error.toString() };
   }
 }
 
-function handleGetApprovalData() {
+function getApprovalData() {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.APPROVAL_DATA);
     const values = sheet.getDataRange().getValues();
-    const headers = values[0];
-    const data = values.slice(1).map(row => {
-      const obj = {};
-      headers.forEach((header, index) => {
-        obj[header] = row[index];
-      });
-      return obj;
-    });
-    return { success: true, data: data };
-  } catch (error) {
-    return { success: false, error: 'Error getting approval data: ' + error.toString() };
-  }
-}
 
-// Generic Update/Delete functions
-function handleUpdateEntry(data) {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(data.sheetName);
-    const values = sheet.getDataRange().getValues();
-    
-    for (let i = 1; i < values.length; i++) {
-      if (values[i][0] == data.rowId) {
-        Object.keys(data.updates).forEach(key => {
-          const columnIndex = values[0].indexOf(key);
-          if (columnIndex !== -1) {
-            sheet.getRange(i + 1, columnIndex + 1).setValue(data.updates[key]);
-          }
-        });
-        break;
-      }
-    }
-    
-    return { success: true, message: 'Entry updated successfully' };
-  } catch (error) {
-    return { success: false, error: 'Error updating entry: ' + error.toString() };
-  }
-}
+    if (values.length <= 1) return { success: true, data: [] };
 
-function handleDeleteEntry(data) {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(data.sheetName);
-    const values = sheet.getDataRange().getValues();
-    
-    for (let i = 1; i < values.length; i++) {
-      if (values[i][0] == data.rowId) {
-        sheet.deleteRow(i + 1);
-        break;
-      }
-    }
-    
-    return { success: true, message: 'Entry deleted successfully' };
+    const data = values.slice(1).map((row, index) => ({
+      id: index + 2,
+      timestamp: row[0],
+      submissionDate: row[1],
+      managerName: row[2],
+      cashHandover: row[3],
+      bankAmount: row[4],
+      totalCashReceipts: row[5],
+      totalCashPayments: row[6],
+      totalBankReceipts: row[7],
+      totalBankPayments: row[8],
+      cashBalance: row[9],
+      bankBalance: row[10],
+      remarks: row[11],
+      status: row[12],
+      submittedBy: row[13]
+    }));
+
+    return { success: true, data: data.reverse() };
   } catch (error) {
-    return { success: false, error: 'Error deleting entry: ' + error.toString() };
+    return { success: false, error: 'Get approval data error: ' + error.toString() };
   }
 }
