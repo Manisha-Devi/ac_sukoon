@@ -1,305 +1,349 @@
-import React, { useState, useEffect } from "react";
-import "../css/OtherPayment.css";
-import { addOtherPayment, getOtherPayments } from "../../services/googleSheetsAPI";
 
-const OtherPayment = () => {
+import React, { useState } from "react";
+import "../css/OtherPayment.css";
+
+function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
+  const [editingEntry, setEditingEntry] = useState(null);
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
-    paymentType: '',
-    description: '',
-    cashAmount: '',
-    bankAmount: '',
-    totalAmount: '',
-    category: '',
-    remarks: ''
+    paymentDetails: "",
+    cashAmount: "",
+    bankAmount: "",
+    description: "",
+    date: "",
+    vendor: "",
   });
 
-  const [payments, setPayments] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-
-  const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-
-  useEffect(() => {
-    loadPayments();
-  }, []);
-
-  const loadPayments = async () => {
-    try {
-      setLoading(true);
-      const response = await getOtherPayments();
-      if (response.success) {
-        setPayments(response.data || []);
-      } else {
-        setError(response.error || 'Failed to load other payments');
-      }
-    } catch (error) {
-      setError('Error loading payments: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
+  // Function to get min date for date inputs (today)
+  const getTodayDate = () => {
+    return new Date().toISOString().split('T')[0];
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => {
-      const updated = { ...prev, [name]: value };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    const cashAmount = parseInt(formData.cashAmount) || 0;
+    const bankAmount = parseInt(formData.bankAmount) || 0;
+    const totalAmount = cashAmount + bankAmount;
 
-      // Auto calculate total amount
-      if (name === 'cashAmount' || name === 'bankAmount') {
-        const cash = parseFloat(name === 'cashAmount' ? value : updated.cashAmount) || 0;
-        const bank = parseFloat(name === 'bankAmount' ? value : updated.bankAmount) || 0;
-        updated.totalAmount = (cash + bank).toString();
+    if (editingEntry) {
+      // Update existing entry
+      const oldTotal = editingEntry.totalAmount;
+      const updatedEntries = expenseData.map(entry => 
+        entry.id === editingEntry.id 
+          ? {
+              ...entry,
+              paymentDetails: formData.paymentDetails,
+              cashAmount: cashAmount,
+              bankAmount: bankAmount,
+              totalAmount: totalAmount,
+              description: formData.description,
+              date: formData.date,
+              vendor: formData.vendor,
+            }
+          : entry
+      );
+      setExpenseData(updatedEntries);
+      setTotalExpenses((prev) => prev - oldTotal + totalAmount);
+      setEditingEntry(null);
+    } else {
+      // Create new entry
+      const newEntry = {
+        id: Date.now(),
+        type: "other",
+        paymentDetails: formData.paymentDetails,
+        cashAmount: cashAmount,
+        bankAmount: bankAmount,
+        totalAmount: totalAmount,
+        description: formData.description,
+        date: formData.date,
+        vendor: formData.vendor,
+      };
+      setExpenseData([...expenseData, newEntry]);
+      setTotalExpenses((prev) => prev + totalAmount);
+      
+      // Add to cash book - payments go to Cr. side
+      if (cashAmount > 0 || bankAmount > 0) {
+        const cashBookEntry = {
+          id: Date.now() + 1,
+          date: formData.date,
+          particulars: "Other",
+          description: `${formData.paymentDetails}${formData.vendor ? ` - ${formData.vendor}` : ''}`,
+          jfNo: `OTHER-${Date.now()}`,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
+          type: 'cr', // Payments go to Cr. side
+          timestamp: new Date().toISOString(),
+          source: 'other-payment'
+        };
+        setCashBookEntries(prev => [cashBookEntry, ...prev]);
       }
-
-      return updated;
+    }
+    
+    setFormData({
+      paymentDetails: "",
+      cashAmount: "",
+      bankAmount: "",
+      description: "",
+      date: "",
+      vendor: "",
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setSuccess('');
-
-    try {
-      const submitData = {
-        ...formData,
-        cashAmount: parseFloat(formData.cashAmount) || 0,
-        bankAmount: parseFloat(formData.bankAmount) || 0,
-        totalAmount: parseFloat(formData.totalAmount) || 0,
-        submittedBy: currentUser.fullName || 'Unknown User'
-      };
-
-      const response = await addOtherPayment(submitData);
-
-      if (response.success) {
-        setSuccess('Other payment added successfully!');
-        setFormData({
-          date: new Date().toISOString().split('T')[0],
-          paymentType: '',
-          description: '',
-          cashAmount: '',
-          bankAmount: '',
-          totalAmount: '',
-          category: '',
-          remarks: ''
-        });
-        loadPayments();
-      } else {
-        setError(response.error || 'Failed to add other payment');
-      }
-    } catch (error) {
-      setError('Error: ' + error.message);
-    } finally {
-      setLoading(false);
+  const handleDeleteEntry = (entryId) => {
+    const entryToDelete = expenseData.find(entry => entry.id === entryId);
+    if (entryToDelete && entryToDelete.totalAmount) {
+      setTotalExpenses((prev) => prev - entryToDelete.totalAmount);
     }
+    setExpenseData(expenseData.filter(entry => entry.id !== entryId));
+    
+    // Remove corresponding cash book entry
+    setCashBookEntries(prev => prev.filter(entry => entry.source === 'other-payment' && !entry.jfNo?.includes(entryId.toString())));
   };
 
+  const handleEditEntry = (entry) => {
+    setEditingEntry(entry);
+    setFormData({
+      paymentDetails: entry.paymentDetails,
+      cashAmount: entry.cashAmount.toString(),
+      bankAmount: entry.bankAmount.toString(),
+      description: entry.description,
+      date: entry.date,
+      vendor: entry.vendor || "",
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingEntry(null);
+    setFormData({
+      paymentDetails: "",
+      cashAmount: "",
+      bankAmount: "",
+      description: "",
+      date: "",
+      vendor: "",
+    });
+  };
+
+  // Filter other payment entries
+  const otherEntries = expenseData.filter(entry => entry.type === "other");
+
+  // Calculate totals for summary
+  const totalCash = otherEntries.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
+  const totalBank = otherEntries.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+  const grandTotal = totalCash + totalBank;
+
   return (
-    <div className="other-payment-container">
-      <div className="header">
-        <h2><i className="bi bi-wallet2"></i> Other Payment Management</h2>
-      </div>
-
-      {/* Add Payment Form */}
-      <div className="card mb-4">
-        <div className="card-header">
-          <h5><i className="bi bi-plus-circle"></i> Add New Other Payment</h5>
+    <div className="other-entry-container">
+      <div className="container-fluid">
+        <div className="other-header">
+          <h2><i className="bi bi-credit-card"></i> Other Payment Entry</h2>
+          <p>Record your miscellaneous expenses (Payment)</p>
         </div>
-        <div className="card-body">
-          {error && <div className="alert alert-danger">{error}</div>}
-          {success && <div className="alert alert-success">{success}</div>}
 
+        {/* Summary Cards */}
+        {otherEntries.length > 0 && (
+          <div className="row mb-4">
+            <div className="col-md-3 col-sm-6 mb-3">
+              <div className="summary-card cash-card">
+                <div className="card-body">
+                  <h6>Cash Expenses</h6>
+                  <h4>₹{totalCash.toLocaleString('en-IN')}</h4>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-3 col-sm-6 mb-3">
+              <div className="summary-card bank-card">
+                <div className="card-body">
+                  <h6>Bank Expenses</h6>
+                  <h4>₹{totalBank.toLocaleString('en-IN')}</h4>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-3 col-sm-6 mb-3">
+              <div className="summary-card total-card">
+                <div className="card-body">
+                  <h6>Total Expenses</h6>
+                  <h4>₹{grandTotal.toLocaleString('en-IN')}</h4>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-3 col-sm-6 mb-3">
+              <div className="summary-card entries-card">
+                <div className="card-body">
+                  <h6>Total Entries</h6>
+                  <h4>{otherEntries.length}</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Other Payment Form */}
+        <div className="other-form-card">
+          <h4><i className="bi bi-receipt"></i> Other Payment Details</h4>
           <form onSubmit={handleSubmit}>
             <div className="row">
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label">Date</label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Payment Details</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.paymentDetails}
+                  onChange={(e) => setFormData({ ...formData, paymentDetails: e.target.value })}
+                  placeholder="Enter payment details"
+                  required
+                />
               </div>
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label">Payment Type</label>
-                  <select
-                    className="form-control"
-                    name="paymentType"
-                    value={formData.paymentType}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Select Payment Type</option>
-                    <option value="Insurance">Insurance</option>
-                    <option value="License Fee">License Fee</option>
-                    <option value="Permit Fee">Permit Fee</option>
-                    <option value="Fine/Penalty">Fine/Penalty</option>
-                    <option value="Parking Fee">Parking Fee</option>
-                    <option value="Toll Tax">Toll Tax</option>
-                    <option value="Office Expense">Office Expense</option>
-                    <option value="Emergency Expense">Emergency Expense</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Date</label>
+                <input
+                  type="date"
+                  className="form-control date-input"
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+                  placeholder="Select date"
+                  min={getTodayDate()}
+                  required
+                />
               </div>
             </div>
-
+            
             <div className="row">
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label">Description</label>
-                  <textarea
-                    className="form-control"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    rows="2"
-                    placeholder="Enter payment description"
-                    required
-                  ></textarea>
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label className="form-label">Category</label>
-                  <select
-                    className="form-control"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Select Category</option>
-                    <option value="Vehicle Related">Vehicle Related</option>
-                    <option value="Legal/Compliance">Legal/Compliance</option>
-                    <option value="Administrative">Administrative</option>
-                    <option value="Emergency">Emergency</option>
-                    <option value="Miscellaneous">Miscellaneous</option>
-                  </select>
-                </div>
+              <div className="col-12 mb-3">
+                <label className="form-label">Description</label>
+                <textarea
+                  className="form-control"
+                  rows={3}
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Enter detailed description of payment"
+                  required
+                />
               </div>
             </div>
-
+            
             <div className="row">
-              <div className="col-md-4">
-                <div className="mb-3">
-                  <label className="form-label">Cash Amount</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="cashAmount"
-                    value={formData.cashAmount}
-                    onChange={handleInputChange}
-                    placeholder="0.00"
-                    step="0.01"
-                  />
-                </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Vendor/Recipient (Optional)</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.vendor}
+                  onChange={(e) => setFormData({ ...formData, vendor: e.target.value })}
+                  placeholder="Enter vendor or recipient name"
+                />
               </div>
-              <div className="col-md-4">
-                <div className="mb-3">
-                  <label className="form-label">Bank Amount</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="bankAmount"
-                    value={formData.bankAmount}
-                    onChange={handleInputChange}
-                    placeholder="0.00"
-                    step="0.01"
-                  />
-                </div>
+            </div>
+            
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Cash Amount (₹)</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={formData.cashAmount}
+                  onChange={(e) => setFormData({ ...formData, cashAmount: e.target.value })}
+                  placeholder="Enter cash amount"
+                  min="0"
+                />
               </div>
-              <div className="col-md-4">
-                <div className="mb-3">
-                  <label className="form-label">Total Amount</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="totalAmount"
-                    value={formData.totalAmount}
-                    onChange={handleInputChange}
-                    placeholder="0.00"
-                    step="0.01"
-                    readOnly
-                  />
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Bank Amount (₹)</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={formData.bankAmount}
+                  onChange={(e) => setFormData({ ...formData, bankAmount: e.target.value })}
+                  placeholder="Enter bank amount"
+                  min="0"
+                />
+              </div>
+            </div>
+            
+            <div className="amount-summary mb-3">
+              <div className="row">
+                <div className="col-4">
+                  <span>Cash: ₹{parseInt(formData.cashAmount) || 0}</span>
+                </div>
+                <div className="col-4">
+                  <span>Bank: ₹{parseInt(formData.bankAmount) || 0}</span>
+                </div>
+                <div className="col-4">
+                  <strong>Total: ₹{(parseInt(formData.cashAmount) || 0) + (parseInt(formData.bankAmount) || 0)}</strong>
                 </div>
               </div>
             </div>
-
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2"></span>
-                  Adding...
-                </>
-              ) : (
-                <>
-                  <i className="bi bi-plus-circle me-2"></i>
-                  Add Payment
-                </>
+            
+            <div className="button-group">
+              <button type="submit" className="btn other-entry-btn">
+                <i className={editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
+                {editingEntry ? "Update Entry" : "Add Other Payment"}
+              </button>
+              {editingEntry && (
+                <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
+                  <i className="bi bi-x-circle"></i> Cancel
+                </button>
               )}
-            </button>
+            </div>
           </form>
         </div>
-      </div>
 
-      {/* Payments List */}
-      <div className="card">
-        <div className="card-header d-flex justify-content-between align-items-center">
-          <h5><i className="bi bi-list"></i> Recent Other Payments</h5>
-          <button className="btn btn-outline-primary btn-sm" onClick={loadPayments}>
-            <i className="bi bi-arrow-clockwise"></i> Refresh
-          </button>
-        </div>
-        <div className="card-body">
-          {loading && <div className="text-center">Loading...</div>}
-
-          {payments.length === 0 && !loading ? (
-            <div className="text-center text-muted">No other payments found</div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Type</th>
-                    <th>Description</th>
-                    <th>Category</th>
-                    <th>Cash</th>
-                    <th>Bank</th>
-                    <th>Total</th>
-                    <th>Submitted By</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {payments.map((payment, index) => (
-                    <tr key={payment.id || index}>
-                      <td>{new Date(payment.date).toLocaleDateString()}</td>
-                      <td>{payment.paymentType}</td>
-                      <td>{payment.description}</td>
-                      <td>{payment.category}</td>
-                      <td>₹{payment.cashAmount}</td>
-                      <td>₹{payment.bankAmount}</td>
-                      <td><strong>₹{payment.totalAmount}</strong></td>
-                      <td>{payment.submittedBy}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {/* Recent Entries */}
+        {otherEntries.length > 0 && (
+          <div className="recent-entries mt-4">
+            <h4>Recent Entries</h4>
+            <div className="row">
+              {otherEntries.slice(-6).reverse().map((entry) => (
+                <div key={entry.id} className="col-md-6 col-lg-4 mb-3">
+                  <div className="entry-card">
+                    <div className="card-body">
+                      <div className="entry-header">
+                        <span className="entry-type other">Other Payment</span>
+                        <div className="entry-actions">
+                          <button 
+                            className="btn btn-sm btn-edit" 
+                            onClick={() => handleEditEntry(entry)}
+                            title="Edit Entry"
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                          <button 
+                            className="btn btn-sm btn-delete" 
+                            onClick={() => handleDeleteEntry(entry.id)}
+                            title="Delete Entry"
+                          >
+                            <i className="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                      <div className="entry-date">
+                        <small className="text-muted">{entry.date}</small>
+                      </div>
+                      <div className="entry-content">
+                        <p><strong>{entry.paymentDetails}</strong></p>
+                        <p>{entry.description?.substring(0, 60)}...</p>
+                        {entry.vendor && <p><small>To: {entry.vendor}</small></p>}
+                      </div>
+                      <div className="entry-amounts">
+                        <div className="amount-row">
+                          <span>Cash: ₹{entry.cashAmount}</span>
+                          <span>Bank: ₹{entry.bankAmount}</span>
+                        </div>
+                        <div className="total-amount">
+                          <strong>Total: ₹{entry.totalAmount}</strong>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
-};
+}
 
 export default OtherPayment;

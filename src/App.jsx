@@ -28,17 +28,11 @@ function App() {
 
   const handleLogin = (userData) => {
     setUser(userData);
-    // Store user data for API calls
-    localStorage.setItem('username', userData.username);
-    localStorage.setItem('userType', userData.userType);
   };
 
   const handleLogout = () => {
     setUser(null);
     setActiveTab("dashboard");
-    // Clear stored user data
-    localStorage.removeItem('username');
-    localStorage.removeItem('userType');
   };
 
   // Handle window resize
