@@ -11,11 +11,17 @@ class AuthService {
     try {
       console.log('🔐 Authenticating user:', { username, userType });
       
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'text/plain;charset=utf-8',
         },
+        signal: controller.signal,
+        redirect: 'follow',
+        mode: 'cors',
         body: JSON.stringify({
           action: 'login',
           username: username,
@@ -24,21 +30,31 @@ class AuthService {
         })
       });
 
-      // In no-cors mode, we can't read the response directly
-      // We'll need to handle this differently or ensure CORS is properly set up on the server
-      let result;
-      try {
-        if (response.type === 'opaque') {
-          // For no-cors requests, we can't read the response
-          // You'll need to set up proper CORS on your Google Apps Script
-          throw new Error('CORS not properly configured on Google Apps Script');
-        }
-        result = await response.json();
-        console.log('🔍 Authentication response:', result);
-      } catch (error) {
-        console.error('Response parsing error:', error);
-        throw new Error('Unable to parse response. Please configure CORS on Google Apps Script.');
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('HTTP Error Response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
+
+      const contentType = response.headers.get('content-type');
+      let result;
+
+      if (contentType && contentType.includes('application/json')) {
+        result = await response.json();
+      } else {
+        const textResult = await response.text();
+        console.log('Non-JSON response:', textResult);
+        // Try to parse as JSON anyway in case the content-type is wrong
+        try {
+          result = JSON.parse(textResult);
+        } catch (parseError) {
+          throw new Error(`Invalid JSON response: ${textResult}`);
+        }
+      }
+
+      console.log('🔍 Authentication response:', result);
 
       if (result.success) {
         // Update last login timestamp
@@ -75,8 +91,10 @@ class AuthService {
       await fetch(this.API_URL, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'text/plain;charset=utf-8',
         },
+        mode: 'cors',
+        redirect: 'follow',
         body: JSON.stringify({
           action: 'updateLastLogin',
           username: username,
@@ -122,8 +140,10 @@ class AuthService {
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'text/plain;charset=utf-8',
         },
+        mode: 'cors',
+        redirect: 'follow',
         body: JSON.stringify({
           action: 'test'
         })
