@@ -1,11 +1,11 @@
+
 // AC Sukoon Transport Management - Google Apps Script API
-// Created for React App Integration
+// Complete Clean Code
 
-// Get your Google Sheets ID from the URL
 // IMPORTANT: Replace this with your actual Google Sheets ID
-const SPREADSHEET_ID = '1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidEmhzgM'; // Your actual Google Sheets ID
+const SPREADSHEET_ID = '1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidEmhzgM';
 
-// Sheet names - exact match required
+// Sheet names - must match exactly
 const SHEET_NAMES = {
   USERS: 'Users',
   FARE_RECEIPTS: 'FareReceipts', 
@@ -20,26 +20,22 @@ const SHEET_NAMES = {
   APPROVAL_DATA: 'ApprovalData'
 };
 
-// CORS handler for React app - handles preflight OPTIONS requests
-function doOptions(e) {
-  const output = ContentService.createTextOutput('');
-  output.setMimeType(ContentService.MimeType.TEXT);
-  return output;
+// Handle OPTIONS requests for CORS
+function doOptions() {
+  return ContentService
+    .createTextOutput('')
+    .setMimeType(ContentService.MimeType.TEXT);
 }
 
-// Main API handler
+// Main POST handler
 function doPost(e) {
   try {
-    // Add basic logging
-    console.log('Received POST request:', e);
-
     if (!e || !e.postData || !e.postData.contents) {
       throw new Error('No data received');
     }
 
     const data = JSON.parse(e.postData.contents);
     const action = data.action;
-
     let result;
 
     switch(action) {
@@ -106,100 +102,145 @@ function doPost(e) {
       case 'getApprovalData':
         result = getApprovalData();
         break;
-      case 'updateEntry':
-        result = updateEntry(data);
-        break;
-      case 'deleteEntry':
-        result = deleteEntry(data);
-        break;
       default:
-        result = { success: false, error: 'Invalid action' };
+        result = { success: false, error: 'Invalid action: ' + action };
     }
 
-    const output = ContentService.createTextOutput(JSON.stringify(result));
-    output.setMimeType(ContentService.MimeType.JSON);
-    return output;
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
-    const errorOutput = ContentService.createTextOutput(JSON.stringify({ success: false, error: error.toString() }));
-    errorOutput.setMimeType(ContentService.MimeType.JSON);
-    return errorOutput;
+    return ContentService
+      .createTextOutput(JSON.stringify({ 
+        success: false, 
+        error: 'Server Error: ' + error.toString() 
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
-// GET handler
+// Main GET handler
 function doGet(e) {
   try {
-    // If no parameters are provided, return the HTML test page.
-    if (!e || Object.keys(e).length === 0) {
-      return HtmlService.createHtmlOutput(getTestPageHtml());
-    }
-
-
-    // Handle case when no parameters are passed
-    if (!e || !e.parameter) {
-      const output = ContentService.createTextOutput(JSON.stringify({ success: false, error: 'No parameters provided' }));
-      output.setMimeType(ContentService.MimeType.JSON);
-      return output;
+    if (!e || !e.parameter || !e.parameter.action) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ 
+          success: false, 
+          error: 'No action parameter provided' 
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
     }
 
     const action = e.parameter.action;
-
     let result;
 
     switch(action) {
       case 'test':
-        result = testApiConnection();
+        result = testConnection();
         break;
-    case 'getFareReceipts':
-      result = getFareReceipts();
-      break;
-    case 'getBookingEntries':
-      result = getBookingEntries();
-      break;
-    case 'getOffDays':
-      result = getOffDays();
-      break;
-    case 'getFuelPayments':
-      result = getFuelPayments();
-      break;
-    case 'getAddaPayments':
-      result = getAddaPayments();
-      break;
-    case 'getUnionPayments':
-      result = getUnionPayments();
-      break;
-    case 'getServicePayments':
-      result = getServicePayments();
-      break;
-    case 'getOtherPayments':
-      result = getOtherPayments();
-      break;
-    case 'getCashBookEntries':
-      result = getCashBookEntries();
-      break;
-    case 'getApprovalData':
-      result = getApprovalData();
-      break;
-    default:
-      result = { success: false, error: 'Invalid action' };
-  }
+      case 'getFareReceipts':
+        result = getFareReceipts();
+        break;
+      case 'getBookingEntries':
+        result = getBookingEntries();
+        break;
+      case 'getOffDays':
+        result = getOffDays();
+        break;
+      case 'getFuelPayments':
+        result = getFuelPayments();
+        break;
+      case 'getAddaPayments':
+        result = getAddaPayments();
+        break;
+      case 'getUnionPayments':
+        result = getUnionPayments();
+        break;
+      case 'getServicePayments':
+        result = getServicePayments();
+        break;
+      case 'getOtherPayments':
+        result = getOtherPayments();
+        break;
+      case 'getCashBookEntries':
+        result = getCashBookEntries();
+        break;
+      case 'getApprovalData':
+        result = getApprovalData();
+        break;
+      default:
+        result = { success: false, error: 'Invalid GET action: ' + action };
+    }
 
-  const output = ContentService.createTextOutput(JSON.stringify(result));
-  output.setMimeType(ContentService.MimeType.JSON);
-  return output;
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
-    const errorOutput = ContentService.createTextOutput(JSON.stringify({ 
-      success: false, 
-      error: 'doGet Error: ' + error.toString() 
-    }));
-    errorOutput.setMimeType(ContentService.MimeType.JSON);
-    return errorOutput;
+    return ContentService
+      .createTextOutput(JSON.stringify({ 
+        success: false, 
+        error: 'GET Error: ' + error.toString() 
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
-// Authentication function
+// Test Connection Function
+function testConnection() {
+  try {
+    const result = {
+      success: true,
+      message: 'API is working perfectly!',
+      timestamp: new Date().toISOString(),
+      spreadsheetId: SPREADSHEET_ID,
+      tests: {}
+    };
+
+    // Test spreadsheet access
+    try {
+      const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+      result.tests.spreadsheet = {
+        success: true,
+        name: spreadsheet.getName()
+      };
+    } catch (error) {
+      result.tests.spreadsheet = {
+        success: false,
+        error: error.toString()
+      };
+    }
+
+    // Test sheets existence
+    try {
+      const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+      const sheets = spreadsheet.getSheets();
+      const sheetNames = sheets.map(sheet => sheet.getName());
+      
+      result.tests.sheets = {
+        success: true,
+        available: sheetNames,
+        required: Object.values(SHEET_NAMES)
+      };
+    } catch (error) {
+      result.tests.sheets = {
+        success: false,
+        error: error.toString()
+      };
+    }
+
+    return result;
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Test failed: ' + error.toString(),
+      timestamp: new Date().toISOString()
+    };
+  }
+}
+
+// Authentication
 function handleLogin(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.USERS);
@@ -212,6 +253,7 @@ function handleLogin(data) {
 
         return {
           success: true,
+          message: 'Login successful',
           user: {
             username: values[i][0],
             userType: values[i][2],
@@ -222,20 +264,19 @@ function handleLogin(data) {
       }
     }
 
-    return { success: false, error: 'Invalid credentials' };
+    return { success: false, error: 'Invalid username or password' };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Login error: ' + error.toString() };
   }
 }
 
-// Fare Receipts Functions
+// Fare Receipts
 function addFareReceipt(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
-    const timestamp = new Date();
-
+    
     sheet.appendRow([
-      timestamp,
+      new Date(),
       data.date,
       data.route,
       data.cashAmount || 0,
@@ -247,7 +288,7 @@ function addFareReceipt(data) {
 
     return { success: true, message: 'Fare receipt added successfully' };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Add fare receipt error: ' + error.toString() };
   }
 }
 
@@ -272,18 +313,17 @@ function getFareReceipts() {
 
     return { success: true, data: data.reverse() };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Get fare receipts error: ' + error.toString() };
   }
 }
 
-// Booking Entries Functions
+// Booking Entries
 function addBookingEntry(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
-    const timestamp = new Date();
-
+    
     sheet.appendRow([
-      timestamp,
+      new Date(),
       data.bookingDetails || '',
       data.dateFrom,
       data.dateTo,
@@ -296,7 +336,7 @@ function addBookingEntry(data) {
 
     return { success: true, message: 'Booking entry added successfully' };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Add booking entry error: ' + error.toString() };
   }
 }
 
@@ -322,18 +362,17 @@ function getBookingEntries() {
 
     return { success: true, data: data.reverse() };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Get booking entries error: ' + error.toString() };
   }
 }
 
-// Off Days Functions
+// Off Days
 function addOffDay(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OFF_DAYS);
-    const timestamp = new Date();
-
+    
     sheet.appendRow([
-      timestamp,
+      new Date(),
       data.date,
       data.reason || '',
       data.submittedBy || ''
@@ -341,7 +380,7 @@ function addOffDay(data) {
 
     return { success: true, message: 'Off day added successfully' };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Add off day error: ' + error.toString() };
   }
 }
 
@@ -362,18 +401,17 @@ function getOffDays() {
 
     return { success: true, data: data.reverse() };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Get off days error: ' + error.toString() };
   }
 }
 
-// Fuel Payments Functions
+// Fuel Payments
 function addFuelPayment(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.FUEL_PAYMENTS);
-    const timestamp = new Date();
-
+    
     sheet.appendRow([
-      timestamp,
+      new Date(),
       data.date,
       data.pumpName || '',
       data.liters || 0,
@@ -387,7 +425,7 @@ function addFuelPayment(data) {
 
     return { success: true, message: 'Fuel payment added successfully' };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Add fuel payment error: ' + error.toString() };
   }
 }
 
@@ -414,18 +452,17 @@ function getFuelPayments() {
 
     return { success: true, data: data.reverse() };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Get fuel payments error: ' + error.toString() };
   }
 }
 
-// Adda Payments Functions
+// Adda Payments
 function addAddaPayment(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.ADDA_PAYMENTS);
-    const timestamp = new Date();
-
+    
     sheet.appendRow([
-      timestamp,
+      new Date(),
       data.date,
       data.addaName || '',
       data.cashAmount || 0,
@@ -437,7 +474,7 @@ function addAddaPayment(data) {
 
     return { success: true, message: 'Adda payment added successfully' };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Add adda payment error: ' + error.toString() };
   }
 }
 
@@ -462,18 +499,17 @@ function getAddaPayments() {
 
     return { success: true, data: data.reverse() };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Get adda payments error: ' + error.toString() };
   }
 }
 
-// Union Payments Functions
+// Union Payments
 function addUnionPayment(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.UNION_PAYMENTS);
-    const timestamp = new Date();
-
+    
     sheet.appendRow([
-      timestamp,
+      new Date(),
       data.date,
       data.unionName || '',
       data.cashAmount || 0,
@@ -485,7 +521,7 @@ function addUnionPayment(data) {
 
     return { success: true, message: 'Union payment added successfully' };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Add union payment error: ' + error.toString() };
   }
 }
 
@@ -510,18 +546,17 @@ function getUnionPayments() {
 
     return { success: true, data: data.reverse() };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Get union payments error: ' + error.toString() };
   }
 }
 
-// Service Payments Functions
+// Service Payments
 function addServicePayment(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.SERVICE_PAYMENTS);
-    const timestamp = new Date();
-
+    
     sheet.appendRow([
-      timestamp,
+      new Date(),
       data.date,
       data.serviceType || '',
       data.cashAmount || 0,
@@ -533,7 +568,7 @@ function addServicePayment(data) {
 
     return { success: true, message: 'Service payment added successfully' };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Add service payment error: ' + error.toString() };
   }
 }
 
@@ -558,18 +593,17 @@ function getServicePayments() {
 
     return { success: true, data: data.reverse() };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Get service payments error: ' + error.toString() };
   }
 }
 
-// Other Payments Functions
+// Other Payments
 function addOtherPayment(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OTHER_PAYMENTS);
-    const timestamp = new Date();
-
+    
     sheet.appendRow([
-      timestamp,
+      new Date(),
       data.date,
       data.paymentType || '',
       data.description || '',
@@ -582,7 +616,7 @@ function addOtherPayment(data) {
 
     return { success: true, message: 'Other payment added successfully' };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Add other payment error: ' + error.toString() };
   }
 }
 
@@ -608,18 +642,17 @@ function getOtherPayments() {
 
     return { success: true, data: data.reverse() };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Get other payments error: ' + error.toString() };
   }
 }
 
-// Cash Book Entries Functions
+// Cash Book Entries
 function addCashBookEntry(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.CASH_BOOK_ENTRIES);
-    const timestamp = new Date();
-
+    
     sheet.appendRow([
-      timestamp,
+      new Date(),
       data.date,
       data.type || '',
       data.description || '',
@@ -631,7 +664,7 @@ function addCashBookEntry(data) {
 
     return { success: true, message: 'Cash book entry added successfully' };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Add cash book entry error: ' + error.toString() };
   }
 }
 
@@ -656,18 +689,17 @@ function getCashBookEntries() {
 
     return { success: true, data: data.reverse() };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Get cash book entries error: ' + error.toString() };
   }
 }
 
-// Approval Data Functions
+// Approval Data
 function addApprovalData(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.APPROVAL_DATA);
-    const timestamp = new Date();
-
+    
     sheet.appendRow([
-      timestamp,
+      new Date(),
       data.submissionDate,
       data.managerName || '',
       data.cashHandover || 0,
@@ -685,7 +717,7 @@ function addApprovalData(data) {
 
     return { success: true, message: 'Approval data added successfully' };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Add approval data error: ' + error.toString() };
   }
 }
 
@@ -716,121 +748,6 @@ function getApprovalData() {
 
     return { success: true, data: data.reverse() };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    return { success: false, error: 'Get approval data error: ' + error.toString() };
   }
 }
-
-// Generic Update Function
-function updateEntry(data) {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(data.sheetName);
-    const rowIndex = data.rowId;
-
-    // Update specific columns based on data provided
-    Object.keys(data.updates).forEach((column, index) => {
-      const columnIndex = parseInt(column);
-      sheet.getRange(rowIndex, columnIndex + 1).setValue(data.updates[column]);
-    });
-
-    return { success: true, message: 'Entry updated successfully' };
-  } catch (error) {
-    return { success: false, error: error.toString() };
-  }
-}
-
-// Generic Delete Function
-function deleteEntry(data) {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(data.sheetName);
-    sheet.deleteRow(data.rowId);
-
-    return { success: true, message: 'Entry deleted successfully' };
-  } catch (error) {
-    return { success: false, error: error.toString() };
-  }
-}
-
-// Comprehensive Test Function
-function testApiConnection() {
-  try {
-    console.log('Starting API test...');
-
-    // Test 1: Basic response
-    const testResult = {
-      success: true,
-      message: 'Google Apps Script API is working!',
-      timestamp: new Date().toISOString(),
-      tests: {}
-    };
-
-    // Test 2: Spreadsheet connection
-    try {
-      const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-      testResult.tests.spreadsheet = {
-        success: true,
-        name: spreadsheet.getName(),
-        id: SPREADSHEET_ID
-      };
-      console.log('Spreadsheet connection: SUCCESS');
-    } catch (error) {
-      testResult.tests.spreadsheet = {
-        success: false,
-        error: error.toString()
-      };
-      console.log('Spreadsheet connection: FAILED - ' + error.toString());
-    }
-
-    // Test 3: Check all required sheets
-    try {
-      const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-      const sheets = spreadsheet.getSheets();
-      const sheetNames = sheets.map(sheet => sheet.getName());
-
-      const requiredSheets = Object.values(SHEET_NAMES);
-      const missingSheets = requiredSheets.filter(name => !sheetNames.includes(name));
-
-      testResult.tests.sheets = {
-        success: missingSheets.length === 0,
-        available: sheetNames,
-        required: requiredSheets,
-        missing: missingSheets
-      };
-      console.log('Sheets check: ' + (missingSheets.length === 0 ? 'SUCCESS' : 'FAILED'));
-    } catch (error) {
-      testResult.tests.sheets = {
-        success: false,
-        error: error.toString()
-      };
-    }
-
-    // Test 4: Test Users sheet (for login)
-    try {
-      const usersSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.USERS);
-      const userData = usersSheet.getDataRange().getValues();
-
-      testResult.tests.users = {
-        success: true,
-        userCount: userData.length - 1, // Minus header row
-        hasHeaders: userData.length > 0
-      };
-      console.log('Users sheet test: SUCCESS');
-    } catch (error) {
-      testResult.tests.users = {
-        success: false,
-        error: error.toString()
-      };
-    }
-
-    console.log('API test completed');
-    return testResult;
-
-  } catch (error) {
-    console.log('API test failed: ' + error.toString());
-    return {
-      success: false,
-      error: 'Test function failed: ' + error.toString(),
-      timestamp: new Date().toISOString()
-    };
-  }
-}
-
