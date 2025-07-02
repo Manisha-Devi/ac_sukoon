@@ -303,6 +303,63 @@ class AuthService {
     }
   }
 
+  // Update existing entry in Google Sheets
+  async updateFareEntry(entryId, updatedData, entryType) {
+    try {
+      console.log('📝 Updating entry in Google Sheets:', { entryId, updatedData, entryType });
+      
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'updateFareEntry',
+          entryId: entryId,
+          updatedData: updatedData,
+          entryType: entryType
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Update entry response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating entry:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Delete entry from Google Sheets
+  async deleteFareEntry(entryId, entryType) {
+    try {
+      console.log('🗑️ Deleting entry from Google Sheets:', { entryId, entryType });
+      
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'deleteFareEntry',
+          entryId: entryId,
+          entryType: entryType
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Delete entry response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error deleting entry:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // Test connection to Google Sheets database
   async testConnection() {
     try {

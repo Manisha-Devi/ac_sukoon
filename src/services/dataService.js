@@ -136,15 +136,28 @@ class DataService {
     try {
       this.checkOnlineStatus();
 
-      // Note: For now, we'll update locally and inform user about Google Sheets limitation
-      const updatedFareData = currentFareData.map(entry => 
-        entry.id === entryId 
-          ? { ...entry, ...updatedData, lastModified: new Date().toISOString() }
-          : entry
-      );
+      // Find the entry to get its type
+      const existingEntry = currentFareData.find(entry => entry.id === entryId);
+      if (!existingEntry) {
+        throw new Error('Entry not found');
+      }
 
-      console.log('⚠️ Entry updated locally. Note: Google Sheets doesn\'t support direct updates.');
-      return { success: true, data: updatedFareData };
+      // Update in Google Sheets
+      const result = await authService.updateFareEntry(entryId, updatedData, existingEntry.type);
+
+      if (result && result.success) {
+        // Update local data for immediate UI refresh
+        const updatedFareData = currentFareData.map(entry => 
+          entry.id === entryId 
+            ? { ...entry, ...updatedData, lastModified: new Date().toISOString() }
+            : entry
+        );
+
+        console.log('✅ Entry updated in Google Sheets successfully');
+        return { success: true, data: updatedFareData };
+      } else {
+        throw new Error(result?.error || 'Failed to update entry in Google Sheets');
+      }
 
     } catch (error) {
       console.error('❌ Error updating fare entry:', error);
@@ -152,15 +165,29 @@ class DataService {
     }
   }
 
-  // Delete entry - Remove from local data only
+  // Delete entry - Remove from Google Sheets
   async deleteFareEntry(entryId, currentFareData) {
     try {
       this.checkOnlineStatus();
 
-      const updatedData = currentFareData.filter(entry => entry.id !== entryId);
+      // Find the entry to get its type
+      const existingEntry = currentFareData.find(entry => entry.id === entryId);
+      if (!existingEntry) {
+        throw new Error('Entry not found');
+      }
 
-      console.log('⚠️ Entry deleted locally. Note: Google Sheets entry will remain.');
-      return { success: true, data: updatedData };
+      // Delete from Google Sheets
+      const result = await authService.deleteFareEntry(entryId, existingEntry.type);
+
+      if (result && result.success) {
+        // Remove from local data for immediate UI update
+        const updatedData = currentFareData.filter(entry => entry.id !== entryId);
+
+        console.log('✅ Entry deleted from Google Sheets successfully');
+        return { success: true, data: updatedData };
+      } else {
+        throw new Error(result?.error || 'Failed to delete entry from Google Sheets');
+      }
 
     } catch (error) {
       console.error('❌ Error deleting fare entry:', error);
