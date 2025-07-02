@@ -1,4 +1,198 @@
-unt || 0, // E: CashAmount (Always 0 as per requirement)
+/**
+ * Add new Fare Receipt
+ * Columns: A=Timestamp, B=ReceiptDetails, C=Date, D=Amount, E: CashAmount, F: BankAmount, G: TotalAmount, H=EntryType, I=EntryId, J=SubmittedBy
+ */
+function addFareReceipt(data) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(
+      SHEET_NAMES.FARE_RECEIPTS,
+    );
+
+    const entryId = data.id || Date.now();
+
+    sheet.appendRow([
+      new Date(), // A: Timestamp
+      data.receiptDetails, // B: ReceiptDetails
+      data.date, // C: Date
+      data.amount || 0, // D: Amount
+      0, // E: CashAmount (Always 0 as per requirement)
+      0, // F: BankAmount (Always 0 as per requirement)
+      data.amount || 0, // G: TotalAmount
+      "daily", // H: EntryType
+      entryId, // I: EntryId
+      data.submittedBy || "", // J: SubmittedBy
+    ]);
+
+    return {
+      success: true,
+      message: "Fare receipt added successfully",
+      entryId: entryId
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: "Add fare receipt error: " + error.toString(),
+    };
+  }
+}
+
+/**
+ * Get all Fare Receipts
+ */
+function getFareReceipts() {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(
+      SHEET_NAMES.FARE_RECEIPTS,
+    );
+    const values = sheet.getDataRange().getValues();
+
+    if (values.length <= 1) return { success: true, data: [] };
+
+    const data = values.slice(1).map((row, index) => ({
+      id: row[8] || (index + 2), // I: EntryId
+      timestamp: row[0], // A: Timestamp
+      receiptDetails: row[1], // B: ReceiptDetails
+      date: row[2], // C: Date
+      amount: row[3], // D: Amount
+      cashAmount: row[4], // E: CashAmount
+      bankAmount: row[5], // F: BankAmount
+      totalAmount: row[6], // G: TotalAmount
+      entryType: row[7], // H: EntryType
+      submittedBy: row[9], // J: SubmittedBy
+      rowIndex: index + 2, // Store actual row index for updates
+    }));
+
+    return { success: true, data: data.reverse() };
+  } catch (error) {
+    return {
+      success: false,
+      error: "Get fare receipts error: " + error.toString(),
+    };
+  }
+}
+
+/**
+ * Update existing Fare Receipt
+ */
+function updateFareReceipt(data) {
+  try {
+    const entryId = data.entryId;
+    const updatedData = data.updatedData;
+
+    console.log('Updating fare receipt:', { entryId, updatedData });
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
+    const entryIdColumn = 9; // Column I
+
+    // Find the row with matching entryId
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1; // +1 because sheet rows are 1-indexed
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error('Fare receipt not found with ID: ' + entryId);
+    }
+
+    // Update specific columns for Fare Receipt
+    if (updatedData.receiptDetails) {
+      sheet.getRange(rowIndex, 2).setValue(updatedData.receiptDetails); // B: ReceiptDetails
+    }
+    if (updatedData.date) {
+      sheet.getRange(rowIndex, 3).setValue(updatedData.date); // C: Date
+    }
+    if (updatedData.amount !== undefined) {
+      sheet.getRange(rowIndex, 4).setValue(updatedData.amount); // D: Amount
+      sheet.getRange(rowIndex, 7).setValue(updatedData.amount); // G: TotalAmount
+    }
+    // Update timestamp
+    sheet.getRange(rowIndex, 1).setValue(new Date()); // A: Timestamp
+
+    return {
+      success: true,
+      message: 'Fare receipt updated successfully',
+      entryId: entryId,
+      rowIndex: rowIndex
+    };
+
+  } catch (error) {
+    console.error('Update fare receipt error:', error);
+    return {
+      success: false,
+      error: 'Update fare receipt error: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Delete Fare Receipt
+ */
+function deleteFareReceipt(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log('Deleting fare receipt:', { entryId });
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
+    const entryIdColumn = 9; // Column I
+
+    // Find the row with matching entryId
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1; // +1 because sheet rows are 1-indexed
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error('Fare receipt not found with ID: ' + entryId);
+    }
+
+    // Delete the row
+    sheet.deleteRow(rowIndex);
+
+    return {
+      success: true,
+      message: 'Fare receipt deleted successfully',
+      entryId: entryId,
+      deletedRow: rowIndex
+    };
+
+  } catch (error) {
+    console.error('Delete fare receipt error:', error);
+    return {
+      success: false,
+      error: 'Delete fare receipt error: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Add new Booking Entry
+ * Columns: A=Timestamp, B=BookingDetails, C=DateFrom, D=DateTo, E=CashAmount, F=BankAmount, G=TotalAmount, H=EntryType, I=EntryId, J=SubmittedBy
+ */
+function addBookingEntry(data) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(
+      SHEET_NAMES.BOOKING_ENTRIES,
+    );
+
+    const entryId = data.id || Date.now();
+
+    sheet.appendRow([
+      new Date(), // A: Timestamp
+      data.bookingDetails, // B: BookingDetails
+      data.dateFrom, // C: DateFrom
+      data.dateTo, // D: DateTo
+      data.cashAmount || 0, // E: CashAmount (Always 0 as per requirement)
       data.bankAmount || 0, // F: BankAmount (Always 0 as per requirement)
       data.totalAmount || 0, // G: TotalAmount
       "booking", // H: EntryType
@@ -61,7 +255,7 @@ function updateBookingEntry(data) {
   try {
     const entryId = data.entryId;
     const updatedData = data.updatedData;
-    
+
     console.log('Updating booking entry:', { entryId, updatedData });
 
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
@@ -70,7 +264,7 @@ function updateBookingEntry(data) {
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
     let rowIndex = -1;
-    
+
     for (let i = 1; i < values.length; i++) {
       if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
         rowIndex = i + 1; // +1 because sheet rows are 1-indexed
@@ -120,7 +314,7 @@ function updateBookingEntry(data) {
 function deleteBookingEntry(data) {
   try {
     const entryId = data.entryId;
-    
+
     console.log('Deleting booking entry:', { entryId });
 
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
@@ -129,7 +323,7 @@ function deleteBookingEntry(data) {
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
     let rowIndex = -1;
-    
+
     for (let i = 1; i < values.length; i++) {
       if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
         rowIndex = i + 1; // +1 because sheet rows are 1-indexed
@@ -228,7 +422,7 @@ function updateOffDay(data) {
   try {
     const entryId = data.entryId;
     const updatedData = data.updatedData;
-    
+
     console.log('Updating off day:', { entryId, updatedData });
 
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OFF_DAYS);
@@ -237,7 +431,7 @@ function updateOffDay(data) {
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
     let rowIndex = -1;
-    
+
     for (let i = 1; i < values.length; i++) {
       if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
         rowIndex = i + 1; // +1 because sheet rows are 1-indexed
@@ -281,7 +475,7 @@ function updateOffDay(data) {
 function deleteOffDay(data) {
   try {
     const entryId = data.entryId;
-    
+
     console.log('Deleting off day:', { entryId });
 
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.OFF_DAYS);
@@ -290,7 +484,7 @@ function deleteOffDay(data) {
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
     let rowIndex = -1;
-    
+
     for (let i = 1; i < values.length; i++) {
       if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
         rowIndex = i + 1; // +1 because sheet rows are 1-indexed
@@ -329,7 +523,7 @@ function deleteOffDay(data) {
 function updateFareEntryLegacy(data) {
   try {
     const entryType = data.entryType;
-    
+
     if (entryType === 'daily') {
       return updateFareReceipt(data);
     } else if (entryType === 'booking') {
@@ -353,7 +547,7 @@ function updateFareEntryLegacy(data) {
 function deleteFareEntryLegacy(data) {
   try {
     const entryType = data.entryType;
-    
+
     if (entryType === 'daily') {
       return deleteFareReceipt(data);
     } else if (entryType === 'booking') {

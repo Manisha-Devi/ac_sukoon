@@ -152,6 +152,7 @@ class HybridDataService {
       // Add to appropriate Google Sheet based on type
       if (entry.type === 'daily') {
         result = await authService.addFareReceipt({
+          id: entry.id, // Send local ID to Google Sheets
           date: entry.date,
           route: entry.route,
           cashAmount: entry.cashAmount || 0,
@@ -161,6 +162,7 @@ class HybridDataService {
         });
       } else if (entry.type === 'booking') {
         result = await authService.addBookingEntry({
+          id: entry.id, // Send local ID to Google Sheets
           bookingDetails: entry.bookingDetails,
           dateFrom: entry.dateFrom,
           dateTo: entry.dateTo,
@@ -171,6 +173,7 @@ class HybridDataService {
         });
       } else if (entry.type === 'off') {
         result = await authService.addOffDay({
+          id: entry.id, // Send local ID to Google Sheets
           date: entry.date,
           reason: entry.reason,
           submittedBy: 'driver'
@@ -182,13 +185,13 @@ class HybridDataService {
         const currentData = localStorageService.loadFareData();
         const updatedData = currentData.map(item => 
           item.id === entry.id 
-            ? { ...item, synced: true, pendingSync: false, cloudId: result.entryId }
+            ? { ...item, synced: true, pendingSync: false, cloudId: result.entryId || entry.id }
             : item
         );
         localStorageService.saveFareData(updatedData);
         localStorageService.removePendingSync(entry.id);
 
-        console.log('✅ Entry synced to Google Sheets:', entry.id);
+        console.log('✅ Entry synced to Google Sheets:', entry.id, 'CloudID:', result.entryId || entry.id);
         return true;
       } else {
         throw new Error(result?.error || 'Failed to sync to Google Sheets');
@@ -244,11 +247,19 @@ class HybridDataService {
   // Sync update to Google Sheets
   async syncUpdateToGoogleSheets(entryId, updatedData, entryType) {
     try {
-      const result = await authService.updateFareEntry(entryId, updatedData, entryType);
+      // Get the current entry to check if it has cloudId
+      const currentData = localStorageService.loadFareData();
+      const existingEntry = currentData.find(entry => entry.id === entryId);
+      
+      // Use cloudId if available, otherwise use local ID
+      const googleSheetsId = existingEntry?.cloudId || entryId;
+      
+      console.log('🔄 Updating in Google Sheets with ID:', googleSheetsId, 'for local ID:', entryId);
+
+      const result = await authService.updateFareEntry(googleSheetsId, updatedData, entryType);
 
       if (result && result.success) {
         // Mark as synced in localStorage
-        const currentData = localStorageService.loadFareData();
         const updatedLocalData = currentData.map(item => 
           item.id === entryId 
             ? { ...item, synced: true, pendingSync: false }
@@ -287,7 +298,7 @@ class HybridDataService {
 
       // Try to sync deletion to Google Sheets in background if online
       if (this.isOnline && existingEntry.synced) {
-        this.syncDeleteToGoogleSheets(entryId, existingEntry.type).catch(error => {
+        this.syncDeleteToGoogleSheets(entryId, existingEntry.type, existingEntry).catch(error => {
           console.error('⚠️ Background delete sync failed:', error);
         });
       }
@@ -304,9 +315,14 @@ class HybridDataService {
   }
 
   // Sync delete to Google Sheets
-  async syncDeleteToGoogleSheets(entryId, entryType) {
+  async syncDeleteToGoogleSheets(entryId, entryType, existingEntry) {
     try {
-      const result = await authService.deleteFareEntry(entryId, entryType);
+      // Use cloudId if available, otherwise use local ID
+      const googleSheetsId = existingEntry?.cloudId || entryId;
+      
+      console.log('🗑️ Deleting from Google Sheets with ID:', googleSheetsId, 'for local ID:', entryId);
+
+      const result = await authService.deleteFareEntry(googleSheetsId, entryType);
 
       if (result && result.success) {
         console.log('✅ Delete synced to Google Sheets:', entryId);
