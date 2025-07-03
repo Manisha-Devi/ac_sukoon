@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "../css/Dashboard.css";
+import authService from "../../services/authService.js";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -24,7 +25,220 @@ ChartJS.register(
   ArcElement,
 );
 
-function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage }) {
+function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, setFareData, setExpenseData, setCashBookEntries }) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [allData, setAllData] = useState({
+    fareReceipts: [],
+    bookingEntries: [],
+    offDays: [],
+    fuelPayments: [],
+    addaPayments: [],
+    totalRecords: 0
+  });
+
+  // Comprehensive data loading function
+  const loadAllDataFromSheets = async () => {
+    setIsLoading(true);
+    try {
+      console.log('🚀 Dashboard: Loading all data from Google Sheets...');
+
+      // Add timeout and retry logic for each API call
+      const loadWithRetry = async (fn, retries = 2) => {
+        for (let i = 0; i <= retries; i++) {
+          try {
+            return await fn();
+          } catch (error) {
+            if (i === retries) throw error;
+            console.log(`⚠️ Retry ${i + 1}/${retries} after error:`, error.message);
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+          }
+        }
+      };
+
+      // Fetch all types of data in parallel with retry mechanism
+      const [
+        fareReceipts, 
+        bookingEntries, 
+        offDays, 
+        fuelPayments, 
+        addaPayments
+      ] = await Promise.all([
+        loadWithRetry(() => authService.getFareReceipts()),
+        loadWithRetry(() => authService.getBookingEntries()),
+        loadWithRetry(() => authService.getOffDays()),
+        loadWithRetry(() => authService.getFuelPayments()),
+        loadWithRetry(() => authService.getAddaPayments())
+      ]);
+
+      // Process and combine all data
+      let combinedFareData = [];
+      let combinedExpenseData = [];
+      let combinedCashBookEntries = [];
+
+      // Process Fare Receipts
+      if (fareReceipts.success && fareReceipts.data) {
+        const processedFareReceipts = fareReceipts.data.map(entry => ({
+          ...entry,
+          type: 'daily',
+          timestamp: entry.timestamp || new Date().toISOString()
+        }));
+        combinedFareData = [...combinedFareData, ...processedFareReceipts];
+        
+        // Generate cash book entries from fare receipts
+        const fareCashEntries = processedFareReceipts.map(entry => ({
+          entryId: entry.entryId,
+          date: entry.date,
+          description: `Fare Collection - ${entry.route}`,
+          cashIn: entry.cashAmount || 0,
+          bankIn: entry.bankAmount || 0,
+          totalIn: entry.totalAmount || 0,
+          cashOut: 0,
+          bankOut: 0,
+          totalOut: 0,
+          type: 'income',
+          category: 'Fare Collection',
+          submittedBy: entry.submittedBy
+        }));
+        combinedCashBookEntries = [...combinedCashBookEntries, ...fareCashEntries];
+      }
+
+      // Process Booking Entries
+      if (bookingEntries.success && bookingEntries.data) {
+        const processedBookingEntries = bookingEntries.data.map(entry => ({
+          ...entry,
+          type: 'booking',
+          timestamp: entry.timestamp || new Date().toISOString()
+        }));
+        combinedFareData = [...combinedFareData, ...processedBookingEntries];
+        
+        // Generate cash book entries from booking entries
+        const bookingCashEntries = processedBookingEntries.map(entry => ({
+          entryId: entry.entryId,
+          date: entry.dateFrom,
+          description: `Booking - ${entry.bookingDetails}`,
+          cashIn: entry.cashAmount || 0,
+          bankIn: entry.bankAmount || 0,
+          totalIn: entry.totalAmount || 0,
+          cashOut: 0,
+          bankOut: 0,
+          totalOut: 0,
+          type: 'income',
+          category: 'Booking Revenue',
+          submittedBy: entry.submittedBy
+        }));
+        combinedCashBookEntries = [...combinedCashBookEntries, ...bookingCashEntries];
+      }
+
+      // Process Off Days
+      if (offDays.success && offDays.data) {
+        const processedOffDays = offDays.data.map(entry => ({
+          ...entry,
+          type: 'off',
+          timestamp: entry.timestamp || new Date().toISOString()
+        }));
+        combinedFareData = [...combinedFareData, ...processedOffDays];
+      }
+
+      // Process Fuel Payments (Expenses)
+      if (fuelPayments.success && fuelPayments.data) {
+        const processedFuelPayments = fuelPayments.data.map(entry => ({
+          ...entry,
+          type: 'fuel',
+          timestamp: entry.timestamp || new Date().toISOString()
+        }));
+        combinedExpenseData = [...combinedExpenseData, ...processedFuelPayments];
+        
+        // Generate cash book entries from fuel payments
+        const fuelCashEntries = processedFuelPayments.map(entry => ({
+          entryId: entry.entryId,
+          date: entry.date,
+          description: `Fuel Payment - ${entry.pumpName} (${entry.liters}L @ ₹${entry.rate})`,
+          cashIn: 0,
+          bankIn: 0,
+          totalIn: 0,
+          cashOut: entry.cashAmount || 0,
+          bankOut: entry.bankAmount || 0,
+          totalOut: entry.totalAmount || 0,
+          type: 'expense',
+          category: 'Fuel',
+          submittedBy: entry.submittedBy
+        }));
+        combinedCashBookEntries = [...combinedCashBookEntries, ...fuelCashEntries];
+      }
+
+      // Process Adda Payments (Expenses)
+      if (addaPayments.success && addaPayments.data) {
+        const processedAddaPayments = addaPayments.data.map(entry => ({
+          ...entry,
+          type: 'adda',
+          timestamp: entry.timestamp || new Date().toISOString()
+        }));
+        combinedExpenseData = [...combinedExpenseData, ...processedAddaPayments];
+        
+        // Generate cash book entries from adda payments
+        const addaCashEntries = processedAddaPayments.map(entry => ({
+          entryId: entry.entryId,
+          date: entry.date,
+          description: `Adda Payment - ${entry.addaName}`,
+          cashIn: 0,
+          bankIn: 0,
+          totalIn: 0,
+          cashOut: entry.cashAmount || 0,
+          bankOut: entry.bankAmount || 0,
+          totalOut: entry.totalAmount || 0,
+          type: 'expense',
+          category: 'Adda Fees',
+          submittedBy: entry.submittedBy
+        }));
+        combinedCashBookEntries = [...combinedCashBookEntries, ...addaCashEntries];
+      }
+
+      // Sort all data by timestamp (newest first)
+      combinedFareData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      combinedExpenseData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      combinedCashBookEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      // Update state in parent components
+      if (setFareData) setFareData(combinedFareData);
+      if (setExpenseData) setExpenseData(combinedExpenseData);
+      if (setCashBookEntries) setCashBookEntries(combinedCashBookEntries);
+
+      // Update local state for dashboard display
+      setAllData({
+        fareReceipts: fareReceipts.data || [],
+        bookingEntries: bookingEntries.data || [],
+        offDays: offDays.data || [],
+        fuelPayments: fuelPayments.data || [],
+        addaPayments: addaPayments.data || [],
+        totalRecords: combinedFareData.length + combinedExpenseData.length
+      });
+
+      console.log('✅ Dashboard: All data loaded successfully');
+      console.log('📊 Summary:', {
+        fareRecords: combinedFareData.length,
+        expenseRecords: combinedExpenseData.length,
+        cashBookEntries: combinedCashBookEntries.length,
+        totalRecords: combinedFareData.length + combinedExpenseData.length
+      });
+
+    } catch (error) {
+      console.error('❌ Dashboard: Error loading data:', error);
+      // Show user-friendly error message
+      alert('Unable to load data from Google Sheets. Please check your internet connection and try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Load data when dashboard mounts
+  useEffect(() => {
+    loadAllDataFromSheets();
+  }, []);
+
+  // Refresh data function (can be called manually)
+  const refreshAllData = () => {
+    loadAllDataFromSheets();
+  };
   const lineData = {
     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
     datasets: [
@@ -128,12 +342,19 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage }) {
             <h1 className="dashboard-title mb-2">
               <i className="bi bi-speedometer2 me-3"></i>
               Dashboard Overview
+              {isLoading && <span className="spinner-border spinner-border-sm ms-3" role="status"></span>}
             </h1>
             <p className="dashboard-subtitle mb-0">
               Welcome back! Here's what's happening with your business today.
+              {allData.totalRecords > 0 && (
+                <small className="text-success ms-2">
+                  <i className="bi bi-check-circle-fill me-1"></i>
+                  {allData.totalRecords} records loaded
+                </small>
+              )}
             </p>
           </div>
-          <div className="mt-3 mt-md-0">
+          <div className="mt-3 mt-md-0 d-flex flex-column align-items-end gap-2">
             <div className="dashboard-date">
               <i className="bi bi-calendar3 me-2"></i>
               {new Date().toLocaleDateString('en-IN', { 
@@ -143,6 +364,14 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage }) {
                 day: 'numeric' 
               })}
             </div>
+            <button 
+              className="btn btn-outline-primary btn-sm" 
+              onClick={refreshAllData}
+              disabled={isLoading}
+            >
+              <i className="bi bi-arrow-clockwise me-1"></i>
+              {isLoading ? 'Loading...' : 'Refresh Data'}
+            </button>
           </div>
         </div>
       </div>

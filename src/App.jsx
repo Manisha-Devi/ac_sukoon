@@ -319,6 +319,9 @@ function App() {
               totalExpenses={totalExpenses}
               profit={profit}
               profitPercentage={profitPercentage}
+              setFareData={setFareData}
+              setExpenseData={setExpenseData}
+              setCashBookEntries={setCashBookEntries}
             />
           )}
           {activeTab === "fare-entry" && (
