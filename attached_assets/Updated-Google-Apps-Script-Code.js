@@ -267,7 +267,7 @@ function getFareReceipts() {
     const data = values.slice(1).map((row, index) => {
         const rowData = {
           entryId: row[7], // Entry ID from column H
-          timestamp: row[0], // Timestamp from column A
+          timestamp: row[0] ? new Date(row[0]).toISOString() : new Date().toISOString(), // Convert to ISO string
           date: row[1], // Date from column B
           route: row[2], // Route from column C
           cashAmount: row[3], // Cash amount from column D
@@ -456,7 +456,7 @@ function getBookingEntries() {
     const data = values.slice(1).map((row, index) => {
         const rowData = {
           entryId: row[8], // Entry ID from column I
-          timestamp: row[0], // Timestamp from column A
+          timestamp: row[0] ? new Date(row[0]).toISOString() : new Date().toISOString(), // Convert to ISO string
           bookingDetails: row[1], // Booking details from column B
           dateFrom: row[2], // Date from from column C
           dateTo: row[3], // Date to from column D
@@ -642,7 +642,7 @@ function getOffDays() {
     const data = values.slice(1).map((row, index) => {
       const rowData = {
         entryId: row[4], // Entry ID from column E
-        timestamp: row[0], // Timestamp from column A
+        timestamp: row[0] ? new Date(row[0]).toISOString() : new Date().toISOString(), // Convert to ISO string
         date: row[1], // Date from column B
         reason: row[2], // Reason from column C
         entryType: row[3], // Static entry type
