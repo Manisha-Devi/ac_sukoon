@@ -83,6 +83,20 @@ function doPost(e) {
         result = deleteOffDay(data);
         break;
 
+      // Fuel Payments - Complete CRUD
+      case "addFuelPayment":
+        result = addFuelPayment(data);
+        break;
+      case "getFuelPayments":
+        result = getFuelPayments();
+        break;
+      case "updateFuelPayment":
+        result = updateFuelPayment(data);
+        break;
+      case "deleteFuelPayment":
+        result = deleteFuelPayment(data);
+        break;
+
       // Legacy Update/Delete (for backward compatibility)
       case "updateFareEntry":
         result = updateFareEntryLegacy(data);
@@ -135,6 +149,9 @@ function doGet(e) {
         break;
       case "getOffDays":
         result = getOffDays();
+        break;
+      case "getFuelPayments":
+        result = getFuelPayments();
         break;
       default:
         result = { success: false, error: "Invalid GET action: " + action };
@@ -775,6 +792,223 @@ function deleteOffDay(data) {
     return {
       success: false,
       error: 'Delete off day error: ' + error.toString()
+    };
+  }
+}
+
+// ======= FUEL PAYMENTS - COMPLETE CRUD =======
+
+/**
+ * Add new Fuel Payment
+ * Columns: A=Timestamp, B=Date, C=PumpName, D=Liters, E=Rate, F=CashAmount, G=BankAmount, H=TotalAmount, I=EntryType, J=EntryId, K=SubmittedBy
+ */
+function addFuelPayment(data) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("FuelPayments");
+
+    // Create sheet if it doesn't exist
+    if (!sheet) {
+      const newSheet = SpreadsheetApp.openById(SPREADSHEET_ID).insertSheet("FuelPayments");
+      // Add headers
+      newSheet.getRange(1, 1, 1, 11).setValues([[
+        "Timestamp", "Date", "PumpName", "Liters", "Rate", "CashAmount", "BankAmount", "TotalAmount", "EntryType", "EntryId", "SubmittedBy"
+      ]]);
+    }
+
+    const entryId = data.entryId;
+    const timeOnly = data.timestamp || formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
+
+    // Insert at row 2 to keep new entries at top
+    sheet.insertRowBefore(2);
+    sheet.getRange(2, 1, 1, 11).setValues([[
+      timeOnly, // A: Time only in IST (HH:MM:SS AM/PM)
+      data.date, // B: Date from frontend in IST
+      data.pumpName || "", // C: PumpName
+      data.liters || "", // D: Liters
+      data.rate || "", // E: Rate
+      data.cashAmount || 0, // F: CashAmount
+      data.bankAmount || 0, // G: BankAmount
+      data.totalAmount || 0, // H: TotalAmount
+      "fuel", // I: EntryType
+      entryId, // J: EntryId
+      data.submittedBy || "", // K: SubmittedBy
+    ]]);
+
+    return {
+      success: true,
+      entryId: entryId,
+      message: "Fuel payment added successfully",
+      timestamp: timeOnly,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: "Add fuel payment error: " + error.toString(),
+    };
+  }
+}
+
+/**
+ * Get all Fuel Payments
+ */
+function getFuelPayments() {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("FuelPayments");
+    
+    if (!sheet) {
+      return { success: true, data: [] };
+    }
+
+    const values = sheet.getDataRange().getValues();
+
+    if (values.length <= 1) return { success: true, data: [] };
+
+    const data = values.slice(1).map((row, index) => {
+      const rowData = {
+        entryId: row[9], // Entry ID from column J
+        timestamp: String(row[0] || ''), // Convert timestamp to string
+        date: String(row[1] || ''), // Convert date to string
+        pumpName: row[2], // Pump name from column C
+        liters: row[3], // Liters from column D
+        rate: row[4], // Rate from column E
+        cashAmount: row[5], // Cash amount from column F
+        bankAmount: row[6], // Bank amount from column G
+        totalAmount: row[7], // Total amount from column H
+        entryType: row[8], // Static entry type
+        submittedBy: row[10], // Submitted by from column K
+        rowIndex: index + 2, // Store row index for updates/deletes
+      };
+      return rowData;
+    });
+
+    return { success: true, data: data.reverse() };
+  } catch (error) {
+    return {
+      success: false,
+      error: "Get fuel payments error: " + error.toString(),
+    };
+  }
+}
+
+/**
+ * Update existing Fuel Payment
+ */
+function updateFuelPayment(data) {
+  try {
+    const entryId = data.entryId;
+    const updatedData = data.updatedData;
+
+    console.log('Updating fuel payment:', { entryId, updatedData });
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("FuelPayments");
+    
+    if (!sheet) {
+      throw new Error('FuelPayments sheet not found');
+    }
+
+    const entryIdColumn = 10; // Column J
+
+    // Find the row with matching entryId
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1; // +1 because sheet rows are 1-indexed
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error('Fuel payment not found with ID: ' + entryId);
+    }
+
+    // Update only provided fields - don't modify timestamp
+    if (updatedData.date) {
+      sheet.getRange(rowIndex, 2).setValue(updatedData.date); // B: Date
+    }
+    if (updatedData.pumpName !== undefined) {
+      sheet.getRange(rowIndex, 3).setValue(updatedData.pumpName); // C: PumpName
+    }
+    if (updatedData.liters !== undefined) {
+      sheet.getRange(rowIndex, 4).setValue(updatedData.liters); // D: Liters
+    }
+    if (updatedData.rate !== undefined) {
+      sheet.getRange(rowIndex, 5).setValue(updatedData.rate); // E: Rate
+    }
+    if (updatedData.cashAmount !== undefined) {
+      sheet.getRange(rowIndex, 6).setValue(updatedData.cashAmount); // F: CashAmount
+    }
+    if (updatedData.bankAmount !== undefined) {
+      sheet.getRange(rowIndex, 7).setValue(updatedData.bankAmount); // G: BankAmount
+    }
+    if (updatedData.totalAmount !== undefined) {
+      sheet.getRange(rowIndex, 8).setValue(updatedData.totalAmount); // H: TotalAmount
+    }
+
+    return {
+      success: true,
+      message: 'Fuel payment updated successfully',
+      entryId: entryId,
+      rowIndex: rowIndex
+    };
+
+  } catch (error) {
+    console.error('Update fuel payment error:', error);
+    return {
+      success: false,
+      error: 'Update fuel payment error: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Delete Fuel Payment
+ */
+function deleteFuelPayment(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log('Deleting fuel payment:', { entryId });
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("FuelPayments");
+    
+    if (!sheet) {
+      throw new Error('FuelPayments sheet not found');
+    }
+
+    const entryIdColumn = 10; // Column J
+
+    // Find the row with matching entryId
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1; // +1 because sheet rows are 1-indexed
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error('Fuel payment not found with ID: ' + entryId);
+    }
+
+    // Delete the row
+    sheet.deleteRow(rowIndex);
+
+    return {
+      success: true,
+      message: 'Fuel payment deleted successfully',
+      entryId: entryId,
+      deletedRow: rowIndex
+    };
+
+  } catch (error) {
+    console.error('Delete fuel payment error:', error);
+    return {
+      success: false,
+      error: 'Delete fuel payment error: ' + error.toString()
     };
   }
 }

@@ -416,6 +416,123 @@ class AuthService {
     }
   }
 
+  // ======= FUEL PAYMENTS API METHODS =======
+
+  // Add Fuel Payment to Google Sheets
+  async addFuelPayment(data) {
+    try {
+      console.log('📝 Adding fuel payment to Google Sheets:', data);
+
+      const requestBody = JSON.stringify({
+        action: 'addFuelPayment',
+        entryId: data.entryId,
+        timestamp: data.timestamp,
+        date: data.date,
+        pumpName: data.pumpName || '',
+        liters: data.liters || '',
+        rate: data.rate || '',
+        cashAmount: data.cashAmount || 0,
+        bankAmount: data.bankAmount || 0,
+        totalAmount: data.totalAmount || 0,
+        submittedBy: data.submittedBy || 'driver'
+      });
+
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
+
+      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
+        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
+        return { success: false, error: 'API temporarily unavailable - data saved locally' };
+      }
+
+      console.log('✅ Fuel payment response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error adding fuel payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Get all Fuel Payments from Google Sheets
+  async getFuelPayments() {
+    try {
+      console.log('📋 Fetching fuel payments from Google Sheets...');
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'getFuelPayments'
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Fuel payments fetched:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error fetching fuel payments:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Update Fuel Payment
+  async updateFuelPayment(data) {
+    try {
+      console.log('📝 Updating fuel payment in Google Sheets:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'updateFuelPayment',
+          entryId: data.entryId,
+          updatedData: data.updatedData
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Fuel payment update response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating fuel payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Delete Fuel Payment
+  async deleteFuelPayment(data) {
+    try {
+      console.log('🗑️ Deleting fuel payment in Google Sheets:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'deleteFuelPayment',
+          entryId: data.entryId
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Fuel payment delete response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error deleting fuel payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // Add Off Day to Google Sheets
   async addOffDay(data) {
     try {
