@@ -195,133 +195,96 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
   return (
     <div className="data-summary-container">
       <div className="container-fluid">
+        {/* Simple Header */}
         <div className="summary-header">
-          <div className="header-content">
-            <div>
-              <h2><i className="bi bi-clipboard-data"></i> Data Summary & Approval</h2>
-              <p>Review and approve financial entries</p>
-            </div>
-            <div className="header-actions">
-              <div className="sync-status">
-                <div className={`simple-sync-indicator ${syncStatus.pendingSync > 0 || syncStatus.syncInProgress ? 'syncing' : 'synced'}`}>
-                  {syncStatus.pendingSync > 0 || syncStatus.syncInProgress ? (
-                    <i className="bi bi-arrow-clockwise"></i>
-                  ) : (
-                    <i className="bi bi-check-circle"></i>
-                  )}
-                </div>
-                <span className="sync-text">
-                  {syncStatus.pendingSync > 0 ? `${syncStatus.pendingSync} pending` : 'All synced'}
-                </span>
+          <h2><i className="bi bi-clipboard-data"></i> Data Summary & Approval</h2>
+          <p>Review and approve financial entries</p>
+
+          <div className="header-actions">
+            <div className="sync-status">
+              <span className="sync-text">
+                {syncStatus.pendingSync > 0 ? `${syncStatus.pendingSync} pending sync` : 'All synced'}
+              </span>
+              <div className={`sync-indicator ${syncStatus.pendingSync > 0 ? 'pending' : 'synced'}`}>
+                {syncStatus.pendingSync > 0 ? (
+                  <i className="bi bi-arrow-clockwise"></i>
+                ) : (
+                  <i className="bi bi-check-circle"></i>
+                )}
               </div>
-              <button 
-                className="btn btn-primary"
-                onClick={() => setShowApprovalModal(true)}
-              >
-                <i className="bi bi-check-circle"></i> Add Settlement
-              </button>
             </div>
+            <button 
+              className="btn btn-primary"
+              onClick={() => setShowApprovalModal(true)}
+            >
+              <i className="bi bi-plus-circle"></i> Add Settlement
+            </button>
           </div>
         </div>
 
-        {/* Summary Cards - Real-time data */}
+        {/* Simple Summary Cards */}
         <div className="row mb-4">
-          <div className="col-xl-3 col-md-6 mb-3">
+          <div className="col-md-3 col-sm-6 mb-3">
             <div className="summary-card income-card">
               <div className="card-body">
-                <div className="card-header">
-                  <h6>Total Earnings (Income)</h6>
-                  <i className="bi bi-arrow-up-circle text-success"></i>
-                </div>
-                <h3>₹{totals.totalFareAmount.toLocaleString('en-IN')}</h3>
-                <div className="card-details">
-                  <small>Cash: ₹{totals.totalFareCash.toLocaleString('en-IN')} | Bank: ₹{totals.totalFareBank.toLocaleString('en-IN')}</small>
-                  <div className="entry-count">{totals.fareEntries} entries</div>
-                </div>
+                <h6>Total Income</h6>
+                <h4>₹{totals.totalFareAmount.toLocaleString('en-IN')}</h4>
+                <small>Cash: ₹{totals.totalFareCash.toLocaleString('en-IN')} | Bank: ₹{totals.totalFareBank.toLocaleString('en-IN')}</small>
               </div>
             </div>
           </div>
 
-          <div className="col-xl-3 col-md-6 mb-3">
+          <div className="col-md-3 col-sm-6 mb-3">
             <div className="summary-card expense-card">
               <div className="card-body">
-                <div className="card-header">
-                  <h6>Total Expenses</h6>
-                  <i className="bi bi-arrow-down-circle text-danger"></i>
-                </div>
-                <h3>₹{totals.totalExpenseAmount.toLocaleString('en-IN')}</h3>
-                <div className="card-details">
-                  <small>Cash: ₹{totals.totalExpenseCash.toLocaleString('en-IN')} | Bank: ₹{totals.totalExpenseBank.toLocaleString('en-IN')}</small>
-                  <div className="entry-count">{totals.expenseEntries} entries</div>
-                </div>
+                <h6>Total Expenses</h6>
+                <h4>₹{totals.totalExpenseAmount.toLocaleString('en-IN')}</h4>
+                <small>Cash: ₹{totals.totalExpenseCash.toLocaleString('en-IN')} | Bank: ₹{totals.totalExpenseBank.toLocaleString('en-IN')}</small>
               </div>
             </div>
           </div>
 
-          <div className="col-xl-3 col-md-6 mb-3">
+          <div className="col-md-3 col-sm-6 mb-3">
             <div className={`summary-card ${totals.profit >= 0 ? 'profit-card' : 'loss-card'}`}>
               <div className="card-body">
-                <div className="card-header">
-                  <h6>{totals.profit >= 0 ? 'Net Profit' : 'Net Loss'}</h6>
-                  <i className={`bi ${totals.profit >= 0 ? 'bi-arrow-up-circle text-success' : 'bi-arrow-down-circle text-danger'}`}></i>
-                </div>
-                <h3>₹{Math.abs(totals.profit).toLocaleString('en-IN')}</h3>
-                <div className="card-details">
-                  <small>{totals.profitPercentage}% margin</small>
-                  <div className="entry-count">
-                    {totals.profit >= 0 ? 'Profitable' : 'Loss'}
-                  </div>
-                </div>
+                <h6>{totals.profit >= 0 ? 'Net Profit' : 'Net Loss'}</h6>
+                <h4>₹{Math.abs(totals.profit).toLocaleString('en-IN')}</h4>
+                <small>{totals.profitPercentage}% margin</small>
               </div>
             </div>
           </div>
 
-          <div className="col-xl-3 col-md-6 mb-3">
+          <div className="col-md-3 col-sm-6 mb-3">
             <div className="summary-card entries-card">
               <div className="card-body">
-                <div className="card-header">
-                  <h6>Cash Book Entries</h6>
-                  <i className="bi bi-journal-text"></i>
-                </div>
-                <h3>{currentCashBookEntries.length}</h3>
-                <div className="card-details">
-                  <small>Auto-generated entries</small>
-                  <div className="entry-count">Real-time sync</div>
-                </div>
+                <h6>Total Entries</h6>
+                <h4>{totals.fareEntries + totals.expenseEntries}</h4>
+                <small>Fare: {totals.fareEntries} | Expense: {totals.expenseEntries}</small>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Recent Entries - Real-time data */}
+        {/* Simple Recent Entries */}
         <div className="row">
-          {/* Recent Fare Entries */}
           <div className="col-lg-6 mb-4">
-            <div className="recent-entries-card">
+            <div className="card">
               <div className="card-header">
                 <h5><i className="bi bi-receipt"></i> Recent Fare Entries</h5>
-                <span className="entry-count">{currentFareData.length} total</span>
               </div>
-              <div className="entries-list">
+              <div className="card-body">
                 {currentFareData.slice(0, 5).map((entry) => (
                   <div key={entry.entryId} className="entry-item">
                     <div className="entry-info">
-                      <div className="entry-type-badge">
-                        <span className={`badge ${entry.type}`}>
-                          {entry.type === 'daily' ? 'Daily' : entry.type === 'booking' ? 'Booking' : 'Off Day'}
-                        </span>
-                      </div>
-                      <div className="entry-details">
-                        <div className="entry-title">
-                          {entry.type === 'daily' && entry.route}
-                          {entry.type === 'booking' && entry.bookingDetails?.substring(0, 30)}
-                          {entry.type === 'off' && entry.reason}
-                        </div>
-                        <div className="entry-date">
-                          {entry.type === 'daily' && entry.date}
-                          {entry.type === 'booking' && `${entry.dateFrom} - ${entry.dateTo}`}
-                          {entry.type === 'off' && entry.date}
-                        </div>
+                      <strong>
+                        {entry.type === 'daily' && entry.route}
+                        {entry.type === 'booking' && entry.bookingDetails?.substring(0, 30)}
+                        {entry.type === 'off' && entry.reason}
+                      </strong>
+                      <div className="text-muted">
+                        {entry.type === 'daily' && entry.date}
+                        {entry.type === 'booking' && `${entry.dateFrom} - ${entry.dateTo}`}
+                        {entry.type === 'off' && entry.date}
                       </div>
                     </div>
                     {entry.type !== 'off' && (
@@ -329,18 +292,10 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                         <strong>₹{entry.totalAmount?.toLocaleString('en-IN')}</strong>
                       </div>
                     )}
-                    <div className="sync-indicator">
-                      {entry.synced ? (
-                        <i className="bi bi-check-circle text-success" title="Synced"></i>
-                      ) : (
-                        <i className="bi bi-clock text-warning" title="Pending sync"></i>
-                      )}
-                    </div>
                   </div>
                 ))}
                 {currentFareData.length === 0 && (
-                  <div className="no-entries">
-                    <i className="bi bi-inbox"></i>
+                  <div className="text-center text-muted">
                     <p>No fare entries found</p>
                   </div>
                 )}
@@ -348,26 +303,17 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
             </div>
           </div>
 
-          {/* Recent Expense Entries */}
           <div className="col-lg-6 mb-4">
-            <div className="recent-entries-card">
+            <div className="card">
               <div className="card-header">
                 <h5><i className="bi bi-credit-card"></i> Recent Expense Entries</h5>
-                <span className="entry-count">{currentExpenseData.length} total</span>
               </div>
-              <div className="entries-list">
+              <div className="card-body">
                 {currentExpenseData.slice(0, 5).map((entry) => (
                   <div key={entry.id} className="entry-item">
                     <div className="entry-info">
-                      <div className="entry-type-badge">
-                        <span className="badge expense">{entry.category || 'Expense'}</span>
-                      </div>
-                      <div className="entry-details">
-                        <div className="entry-title">
-                          {entry.description || entry.category || 'Expense'}
-                        </div>
-                        <div className="entry-date">{entry.date}</div>
-                      </div>
+                      <strong>{entry.description || entry.category || 'Expense'}</strong>
+                      <div className="text-muted">{entry.date}</div>
                     </div>
                     <div className="entry-amount">
                       <strong>₹{entry.totalAmount?.toLocaleString('en-IN')}</strong>
@@ -375,8 +321,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                   </div>
                 ))}
                 {currentExpenseData.length === 0 && (
-                  <div className="no-entries">
-                    <i className="bi bi-inbox"></i>
+                  <div className="text-center text-muted">
                     <p>No expense entries found</p>
                   </div>
                 )}
@@ -385,15 +330,13 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
           </div>
         </div>
 
-        {/* Settlement Modal */}
+        {/* Simple Modal */}
         {showApprovalModal && (
           <div className="modal fade show d-block" style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
-            <div className="modal-dialog modal-lg">
+            <div className="modal-dialog">
               <div className="modal-content">
                 <div className="modal-header">
-                  <h5 className="modal-title">
-                    <i className="bi bi-check-circle"></i> Add Settlement Entry
-                  </h5>
+                  <h5 className="modal-title">Add Settlement Entry</h5>
                   <button 
                     type="button" 
                     className="btn-close" 
@@ -410,7 +353,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                           className="form-control"
                           value={settlementData.cashSettlement}
                           onChange={(e) => setSettlementData({...settlementData, cashSettlement: e.target.value})}
-                          placeholder="Enter cash settlement amount"
+                          placeholder="Enter cash amount"
                           min="0"
                         />
                       </div>
@@ -421,7 +364,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                           className="form-control"
                           value={settlementData.bankSettlement}
                           onChange={(e) => setSettlementData({...settlementData, bankSettlement: e.target.value})}
-                          placeholder="Enter bank settlement amount"
+                          placeholder="Enter bank amount"
                           min="0"
                         />
                       </div>
@@ -444,21 +387,8 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                         rows={3}
                         value={settlementData.remarks}
                         onChange={(e) => setSettlementData({...settlementData, remarks: e.target.value})}
-                        placeholder="Enter additional remarks..."
+                        placeholder="Enter remarks..."
                       />
-                    </div>
-                    <div className="settlement-summary mb-3">
-                      <div className="row">
-                        <div className="col-4">
-                          <span>Cash: ₹{parseInt(settlementData.cashSettlement) || 0}</span>
-                        </div>
-                        <div className="col-4">
-                          <span>Bank: ₹{parseInt(settlementData.bankSettlement) || 0}</span>
-                        </div>
-                        <div className="col-4">
-                          <strong>Total: ₹{(parseInt(settlementData.cashSettlement) || 0) + (parseInt(settlementData.bankSettlement) || 0)}</strong>
-                        </div>
-                      </div>
                     </div>
                     <div className="modal-footer">
                       <button 
@@ -469,7 +399,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                         Cancel
                       </button>
                       <button type="submit" className="btn btn-primary">
-                        <i className="bi bi-check-circle"></i> Add Settlement
+                        Add Settlement
                       </button>
                     </div>
                   </form>
