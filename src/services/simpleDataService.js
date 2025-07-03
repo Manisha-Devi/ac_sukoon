@@ -1,10 +1,9 @@
-
 import authService from './authService.js';
 
 class SimpleDataService {
   constructor() {
     this.isOnline = navigator.onLine;
-    
+
     window.addEventListener('online', () => {
       this.isOnline = true;
       console.log('🌐 Back online');
