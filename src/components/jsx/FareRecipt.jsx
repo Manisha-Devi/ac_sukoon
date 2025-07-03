@@ -253,6 +253,16 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           // UI instantly updated with localStorage data
           setFareData(result.data);
           setTotalEarnings((prev) => prev + totalAmount);
+          
+          // Force immediate re-render by triggering parent state updates
+          const updatedData = result.data;
+          
+          // Trigger immediate UI refresh for all components
+          setTimeout(() => {
+            const event = new CustomEvent('fareDataUpdated', { detail: updatedData });
+            window.dispatchEvent(event);
+          }, 0);
+          
           console.log('✅ Daily entry added instantly - UI updated!');
         }
       }
@@ -321,6 +331,16 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           // UI instantly updated with localStorage data
           setFareData(result.data);
           setTotalEarnings((prev) => prev + totalAmount);
+          
+          // Force immediate re-render by triggering parent state updates
+          const updatedData = result.data;
+          
+          // Trigger immediate UI refresh for all components
+          setTimeout(() => {
+            const event = new CustomEvent('fareDataUpdated', { detail: updatedData });
+            window.dispatchEvent(event);
+          }, 0);
+          
           console.log('✅ Booking entry added instantly - UI updated!');
         }
       }
@@ -371,6 +391,16 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         if (result.success) {
           // UI instantly updated with localStorage data
           setFareData(result.data);
+          
+          // Force immediate re-render by triggering parent state updates
+          const updatedData = result.data;
+          
+          // Trigger immediate UI refresh for all components
+          setTimeout(() => {
+            const event = new CustomEvent('fareDataUpdated', { detail: updatedData });
+            window.dispatchEvent(event);
+          }, 0);
+          
           console.log('✅ Off day entry added instantly - UI updated!');
         }
       }
