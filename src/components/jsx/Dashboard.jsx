@@ -75,120 +75,202 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
       let combinedExpenseData = [];
       let combinedCashBookEntries = [];
 
-      // Process Fare Receipts
+      // Helper functions to convert ISO strings to proper format (same as components)
+      const convertToTimeString = (timestamp) => {
+        if (!timestamp) return '';
+        if (typeof timestamp === 'string' && timestamp.match(/^\d{1,2}:\d{2}:\d{2} (AM|PM)$/)) {
+          return timestamp;
+        }
+        if (typeof timestamp === 'string' && timestamp.includes('T')) {
+          try {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('en-US', {
+              hour12: true,
+              hour: 'numeric',
+              minute: '2-digit',
+              second: '2-digit',
+              timeZone: 'Asia/Kolkata'
+            });
+          } catch (error) {
+            return timestamp.split('T')[1]?.split('.')[0] || timestamp;
+          }
+        }
+        if (timestamp instanceof Date) {
+          return timestamp.toLocaleTimeString('en-US', {
+            hour12: true,
+            hour: 'numeric',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZone: 'Asia/Kolkata'
+          });
+        }
+        return String(timestamp);
+      };
+
+      const convertToDateString = (date) => {
+        if (!date) return '';
+        if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          return date;
+        }
+        if (typeof date === 'string' && date.includes('T')) {
+          try {
+            const dateObj = new Date(date);
+            const istDate = new Date(dateObj.getTime() + (5.5 * 60 * 60 * 1000));
+            return istDate.toISOString().split('T')[0];
+          } catch (error) {
+            return date.split('T')[0];
+          }
+        }
+        if (date instanceof Date) {
+          const istDate = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
+          return istDate.toISOString().split('T')[0];
+        }
+        return String(date);
+      };
+
+      // Process Fare Receipts (same format as FareRecipt component)
       if (fareReceipts.success && fareReceipts.data) {
         const processedFareReceipts = fareReceipts.data.map(entry => ({
-          ...entry,
-          type: 'daily',
-          timestamp: entry.timestamp || new Date().toISOString()
+          entryId: entry.entryId,
+          timestamp: convertToTimeString(entry.timestamp),
+          date: convertToDateString(entry.date),
+          route: entry.route,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          totalAmount: entry.totalAmount || 0,
+          submittedBy: entry.submittedBy,
+          type: 'daily'
         }));
         combinedFareData = [...combinedFareData, ...processedFareReceipts];
-        
+
         // Generate cash book entries from fare receipts
         const fareCashEntries = processedFareReceipts.map(entry => ({
-          entryId: entry.entryId,
+          id: `fare-${entry.entryId}`,
           date: entry.date,
-          description: `Fare Collection - ${entry.route}`,
-          cashIn: entry.cashAmount || 0,
-          bankIn: entry.bankAmount || 0,
-          totalIn: entry.totalAmount || 0,
-          cashOut: 0,
-          bankOut: 0,
-          totalOut: 0,
-          type: 'income',
-          category: 'Fare Collection',
+          description: `Daily Collection - ${entry.route}`,
+          cashReceived: entry.cashAmount || 0,
+          bankReceived: entry.bankAmount || 0,
+          cashPaid: 0,
+          bankPaid: 0,
+          source: 'fare-entry',
+          jfNo: `JF-${entry.entryId}`,
           submittedBy: entry.submittedBy
         }));
         combinedCashBookEntries = [...combinedCashBookEntries, ...fareCashEntries];
       }
 
-      // Process Booking Entries
+      // Process Booking Entries (same format as FareRecipt component)
       if (bookingEntries.success && bookingEntries.data) {
         const processedBookingEntries = bookingEntries.data.map(entry => ({
-          ...entry,
-          type: 'booking',
-          timestamp: entry.timestamp || new Date().toISOString()
+          entryId: entry.entryId,
+          timestamp: convertToTimeString(entry.timestamp),
+          bookingDetails: entry.bookingDetails,
+          dateFrom: convertToDateString(entry.dateFrom),
+          dateTo: convertToDateString(entry.dateTo),
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          totalAmount: entry.totalAmount || 0,
+          submittedBy: entry.submittedBy,
+          type: 'booking'
         }));
         combinedFareData = [...combinedFareData, ...processedBookingEntries];
-        
+
         // Generate cash book entries from booking entries
         const bookingCashEntries = processedBookingEntries.map(entry => ({
-          entryId: entry.entryId,
+          id: `booking-${entry.entryId}`,
           date: entry.dateFrom,
           description: `Booking - ${entry.bookingDetails}`,
-          cashIn: entry.cashAmount || 0,
-          bankIn: entry.bankAmount || 0,
-          totalIn: entry.totalAmount || 0,
-          cashOut: 0,
-          bankOut: 0,
-          totalOut: 0,
-          type: 'income',
-          category: 'Booking Revenue',
+          cashReceived: entry.cashAmount || 0,
+          bankReceived: entry.bankAmount || 0,
+          cashPaid: 0,
+          bankPaid: 0,
+          source: 'fare-entry',
+          jfNo: `JF-${entry.entryId}`,
           submittedBy: entry.submittedBy
         }));
         combinedCashBookEntries = [...combinedCashBookEntries, ...bookingCashEntries];
       }
 
-      // Process Off Days
+      // Process Off Days (same format as FareRecipt component)
       if (offDays.success && offDays.data) {
         const processedOffDays = offDays.data.map(entry => ({
-          ...entry,
-          type: 'off',
-          timestamp: entry.timestamp || new Date().toISOString()
+          entryId: entry.entryId,
+          timestamp: convertToTimeString(entry.timestamp),
+          date: convertToDateString(entry.date),
+          reason: entry.reason,
+          submittedBy: entry.submittedBy,
+          cashAmount: 0,
+          bankAmount: 0,
+          totalAmount: 0,
+          type: 'off'
         }));
         combinedFareData = [...combinedFareData, ...processedOffDays];
       }
 
-      // Process Fuel Payments (Expenses)
+      // Process Fuel Payments (same format as FuelPayment component)
       if (fuelPayments.success && fuelPayments.data) {
         const processedFuelPayments = fuelPayments.data.map(entry => ({
-          ...entry,
-          type: 'fuel',
-          timestamp: entry.timestamp || new Date().toISOString()
+          id: entry.entryId,
+          entryId: entry.entryId,
+          timestamp: convertToTimeString(entry.timestamp),
+          date: convertToDateString(entry.date),
+          pumpName: entry.pumpName,
+          liters: entry.liters,
+          rate: entry.rate,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          totalAmount: entry.totalAmount || 0,
+          submittedBy: entry.submittedBy,
+          remarks: entry.remarks || "",
+          type: 'fuel'
         }));
         combinedExpenseData = [...combinedExpenseData, ...processedFuelPayments];
-        
+
         // Generate cash book entries from fuel payments
         const fuelCashEntries = processedFuelPayments.map(entry => ({
-          entryId: entry.entryId,
+          id: `fuel-${entry.entryId}`,
           date: entry.date,
-          description: `Fuel Payment - ${entry.pumpName} (${entry.liters}L @ ₹${entry.rate})`,
-          cashIn: 0,
-          bankIn: 0,
-          totalIn: 0,
-          cashOut: entry.cashAmount || 0,
-          bankOut: entry.bankAmount || 0,
-          totalOut: entry.totalAmount || 0,
-          type: 'expense',
-          category: 'Fuel',
-          submittedBy: entry.submittedBy
+          particulars: "Fuel",
+          description: `Fuel expense - ${entry.pumpName || 'Fuel Station'}${entry.liters ? ` (${entry.liters}L)` : ''}`,
+          jfNo: `FUEL-${entry.entryId}`,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          type: 'cr',
+          timestamp: entry.timestamp,
+          source: 'fuel-payment'
         }));
         combinedCashBookEntries = [...combinedCashBookEntries, ...fuelCashEntries];
       }
 
-      // Process Adda Payments (Expenses)
+      // Process Adda Payments (same format as AddaPayment component)
       if (addaPayments.success && addaPayments.data) {
         const processedAddaPayments = addaPayments.data.map(entry => ({
-          ...entry,
-          type: 'adda',
-          timestamp: entry.timestamp || new Date().toISOString()
+          id: entry.entryId,
+          entryId: entry.entryId,
+          timestamp: convertToTimeString(entry.timestamp),
+          date: convertToDateString(entry.date),
+          addaName: entry.addaName,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          totalAmount: entry.totalAmount || 0,
+          submittedBy: entry.submittedBy,
+          remarks: entry.remarks || "",
+          type: 'adda'
         }));
         combinedExpenseData = [...combinedExpenseData, ...processedAddaPayments];
-        
+
         // Generate cash book entries from adda payments
         const addaCashEntries = processedAddaPayments.map(entry => ({
-          entryId: entry.entryId,
+          id: `adda-${entry.entryId}`,
           date: entry.date,
-          description: `Adda Payment - ${entry.addaName}`,
-          cashIn: 0,
-          bankIn: 0,
-          totalIn: 0,
-          cashOut: entry.cashAmount || 0,
-          bankOut: entry.bankAmount || 0,
-          totalOut: entry.totalAmount || 0,
-          type: 'expense',
-          category: 'Adda Fees',
-          submittedBy: entry.submittedBy
+          particulars: "Adda",
+          description: `Adda payment - ${entry.addaName || 'Adda Station'}`,
+          jfNo: `ADDA-${entry.entryId}`,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          type: 'cr',
+          timestamp: entry.timestamp,
+          source: 'adda-payment'
         }));
         combinedCashBookEntries = [...combinedCashBookEntries, ...addaCashEntries];
       }
