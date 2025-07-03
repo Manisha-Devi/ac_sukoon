@@ -448,9 +448,9 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
           </div>
         </div>
 
-        {/* Overall Summary Cards */}
-        <div className="row mb-4">
-          <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+        {/* Overall Summary Cards - First Row */}
+        <div className="row mb-3">
+          <div className="col-lg-4 col-md-6 col-sm-6 mb-3">
             <div className="summary-card cash-receipts">
               <div className="card-body">
                 <h6>Total Cash Receipts</h6>
@@ -458,7 +458,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
               </div>
             </div>
           </div>
-          <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+          <div className="col-lg-4 col-md-6 col-sm-6 mb-3">
             <div className="summary-card cash-payments">
               <div className="card-body">
                 <h6>Total Cash Payments</h6>
@@ -466,7 +466,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
               </div>
             </div>
           </div>
-          <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+          <div className="col-lg-4 col-md-6 col-sm-6 mb-3">
             <div className="summary-card bank-receipts">
               <div className="card-body">
                 <h6>Total Bank Receipts</h6>
@@ -474,7 +474,11 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
               </div>
             </div>
           </div>
-          <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+        </div>
+
+        {/* Overall Summary Cards - Second Row */}
+        <div className="row mb-4">
+          <div className="col-lg-4 col-md-6 col-sm-6 mb-3">
             <div className="summary-card bank-payments">
               <div className="card-body">
                 <h6>Total Bank Payments</h6>
@@ -482,7 +486,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
               </div>
             </div>
           </div>
-          <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+          <div className="col-lg-4 col-md-6 col-sm-6 mb-3">
             <div className="summary-card cash-balance">
               <div className="card-body">
                 <h6>Cash Balance</h6>
@@ -490,7 +494,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
               </div>
             </div>
           </div>
-          <div className="col-lg-2 col-md-4 col-sm-6 mb-3">
+          <div className="col-lg-4 col-md-6 col-sm-6 mb-3">
             <div className="summary-card bank-balance">
               <div className="card-body">
                 <h6>Bank Balance</h6>
