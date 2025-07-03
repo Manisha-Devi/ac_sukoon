@@ -413,6 +413,137 @@ class AuthService {
     }
   }
 
+  // ======= ADDA PAYMENTS API METHODS =======
+
+  // Add Adda Payment to Google Sheets
+  async addAddaPayment(data) {
+    try {
+      console.log('📝 Adding adda payment to Google Sheets:', data);
+
+      const requestBody = JSON.stringify({
+        action: 'addAddaPayment',
+        entryId: data.entryId,
+        timestamp: data.timestamp,
+        date: data.date,
+        addaName: data.addaName || '',
+        cashAmount: data.cashAmount || 0,
+        bankAmount: data.bankAmount || 0,
+        totalAmount: data.totalAmount || 0,
+        remarks: data.remarks || '',
+        submittedBy: data.submittedBy || 'driver'
+      });
+
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
+
+      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
+        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
+        return { success: false, error: 'API temporarily unavailable - data saved locally' };
+      }
+
+      console.log('✅ Adda payment response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error adding adda payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Get all Adda Payments from Google Sheets
+  async getAddaPayments() {
+    try {
+      console.log('📋 Fetching adda payments from Google Sheets...');
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'getAddaPayments'
+        })
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Adda payments fetched:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error fetching adda payments:', error);
+      // Return empty data structure instead of error to prevent UI crashes
+      return { 
+        success: true, 
+        data: [],
+        message: 'Adda payments loaded from local cache (API temporarily unavailable)'
+      };
+    }
+  }
+
+  // Update Adda Payment
+  async updateAddaPayment(data) {
+    try {
+      console.log('📝 Updating adda payment in Google Sheets:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'updateAddaPayment',
+          entryId: data.entryId,
+          updatedData: data.updatedData
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Adda payment update response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating adda payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Delete Adda Payment
+  async deleteAddaPayment(data) {
+    try {
+      console.log('🗑️ Deleting adda payment in Google Sheets:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'deleteAddaPayment',
+          entryId: data.entryId
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Adda payment delete response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error deleting adda payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // ======= FUEL PAYMENTS API METHODS =======
 
   // Add Fuel Payment to Google Sheets

@@ -83,6 +83,20 @@ function doPost(e) {
         result = deleteOffDay(data);
         break;
 
+      // Adda Payments - Complete CRUD
+      case "addAddaPayment":
+        result = addAddaPayment(data);
+        break;
+      case "getAddaPayments":
+        result = getAddaPayments();
+        break;
+      case "updateAddaPayment":
+        result = updateAddaPayment(data);
+        break;
+      case "deleteAddaPayment":
+        result = deleteAddaPayment(data);
+        break;
+
       // Fuel Payments - Complete CRUD
       case "addFuelPayment":
         result = addFuelPayment(data);
@@ -796,6 +810,219 @@ function deleteOffDay(data) {
   }
 }
 
+// ======= ADDA PAYMENTS - COMPLETE CRUD =======
+
+/**
+ * Add new Adda Payment
+ * Columns: A=Timestamp, B=Date, C=AddaName, D=CashAmount, E=BankAmount, F=TotalAmount, G=Remarks, H=SubmittedBy, I=EntryType, J=EntryId
+ */
+function addAddaPayment(data) {
+  try {
+    let sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("AddaPayments");
+
+    // Create sheet if it doesn't exist
+    if (!sheet) {
+      sheet = SpreadsheetApp.openById(SPREADSHEET_ID).insertSheet("AddaPayments");
+      // Add headers exactly as you specified
+      sheet.getRange(1, 1, 1, 10).setValues([[
+        "AddaPayments Timestamp", "Date", "AddaName", "CashAmount", "BankAmount", "TotalAmount", "Remarks", "SubmittedBy", "EntryType", "EntryId"
+      ]]);
+    }
+
+    const entryId = data.entryId;
+    const timeOnly = data.timestamp || formatISTTimestamp().split(' ')[1] + ' ' + formatISTimestamp().split(' ')[2];
+
+    // Insert at row 2 to keep new entries at top
+    sheet.insertRowBefore(2);
+    sheet.getRange(2, 1, 1, 10).setValues([[
+      timeOnly, // A: Time only in IST (HH:MM:SS AM/PM)
+      data.date, // B: Date from frontend in IST
+      data.addaName || "", // C: AddaName
+      data.cashAmount || 0, // D: CashAmount
+      data.bankAmount || 0, // E: BankAmount
+      data.totalAmount || 0, // F: TotalAmount
+      data.remarks || "", // G: Remarks
+      data.submittedBy || "", // H: SubmittedBy
+      "adda", // I: EntryType
+      entryId, // J: EntryId
+    ]]);
+
+    return {
+      success: true,
+      entryId: entryId,
+      message: "Adda payment added successfully",
+      timestamp: timeOnly,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: "Add adda payment error: " + error.toString(),
+    };
+  }
+}
+
+/**
+ * Get all Adda Payments
+ */
+function getAddaPayments() {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("AddaPayments");
+
+    if (!sheet) {
+      return { success: true, data: [] };
+    }
+
+    const values = sheet.getDataRange().getValues();
+
+    if (values.length <= 1) return { success: true, data: [] };
+
+    const data = values.slice(1).map((row, index) => {
+      const rowData = {
+        entryId: row[9], // Entry ID from column J
+        timestamp: String(row[0] || ''), // Convert timestamp to string
+        date: String(row[1] || ''), // Convert date to string
+        addaName: row[2], // Adda name from column C
+        cashAmount: row[3], // Cash amount from column D
+        bankAmount: row[4], // Bank amount from column E
+        totalAmount: row[5], // Total amount from column F
+        remarks: row[6], // Remarks from column G
+        submittedBy: row[7], // Submitted by from column H
+        entryType: row[8], // Entry type from column I
+        rowIndex: index + 2, // Store row index for updates/deletes
+      };
+      return rowData;
+    });
+
+    return { success: true, data: data.reverse() };
+  } catch (error) {
+    return {
+      success: false,
+      error: "Get adda payments error: " + error.toString(),
+    };
+  }
+}
+
+/**
+ * Update existing Adda Payment
+ */
+function updateAddaPayment(data) {
+  try {
+    const entryId = data.entryId;
+    const updatedData = data.updatedData;
+
+    console.log('Updating adda payment:', { entryId, updatedData });
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("AddaPayments");
+
+    if (!sheet) {
+      throw new Error('AddaPayments sheet not found');
+    }
+
+    const entryIdColumn = 10; // Column J
+
+    // Find the row with matching entryId
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1; // +1 because sheet rows are 1-indexed
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error('Adda payment not found with ID: ' + entryId);
+    }
+
+    // Update only provided fields - don't modify timestamp
+    if (updatedData.date) {
+      sheet.getRange(rowIndex, 2).setValue(updatedData.date); // B: Date
+    }
+    if (updatedData.addaName !== undefined) {
+      sheet.getRange(rowIndex, 3).setValue(updatedData.addaName); // C: AddaName
+    }
+    if (updatedData.cashAmount !== undefined) {
+      sheet.getRange(rowIndex, 4).setValue(updatedData.cashAmount); // D: CashAmount
+    }
+    if (updatedData.bankAmount !== undefined) {
+      sheet.getRange(rowIndex, 5).setValue(updatedData.bankAmount); // E: BankAmount
+    }
+    if (updatedData.totalAmount !== undefined) {
+      sheet.getRange(rowIndex, 6).setValue(updatedData.totalAmount); // F: TotalAmount
+    }
+    if (updatedData.remarks !== undefined) {
+      sheet.getRange(rowIndex, 7).setValue(updatedData.remarks); // I: Remarks
+    }
+
+    return {
+      success: true,
+      message: 'Adda payment updated successfully',
+      entryId: entryId,
+      rowIndex: rowIndex
+    };
+
+  } catch (error) {
+```text
+    console.error('Update adda payment error:', error);
+    return {
+      success: false,
+      error: 'Update adda payment error: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Delete Adda Payment
+ */
+function deleteAddaPayment(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log('Deleting adda payment:', { entryId });
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("AddaPayments");
+
+    if (!sheet) {
+      throw new Error('AddaPayments sheet not found');
+    }
+
+    const entryIdColumn = 10; // Column J
+
+    // Find the row with matching entryId
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1; // +1 because sheet rows are 1-indexed
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error('Adda payment not found with ID: ' + entryId);
+    }
+
+    // Delete the row
+    sheet.deleteRow(rowIndex);
+
+    return {
+      success: true,
+      message: 'Adda payment deleted successfully',
+      entryId: entryId,
+      deletedRow: rowIndex
+    };
+
+  } catch (error) {
+    console.error('Delete adda payment error:', error);
+    return {
+      success: false,
+      error: 'Delete adda payment error: ' + error.toString()
+    };
+  }
+}
+
 // ======= FUEL PAYMENTS - COMPLETE CRUD =======
 
 /**
@@ -855,7 +1082,7 @@ function addFuelPayment(data) {
 function getFuelPayments() {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("FuelPayments");
-    
+
     if (!sheet) {
       return { success: true, data: [] };
     }
@@ -903,7 +1130,7 @@ function updateFuelPayment(data) {
     console.log('Updating fuel payment:', { entryId, updatedData });
 
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("FuelPayments");
-    
+
     if (!sheet) {
       throw new Error('FuelPayments sheet not found');
     }
@@ -977,7 +1204,7 @@ function deleteFuelPayment(data) {
     console.log('Deleting fuel payment:', { entryId });
 
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("FuelPayments");
-    
+
     if (!sheet) {
       throw new Error('FuelPayments sheet not found');
     }
