@@ -557,7 +557,18 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                   <div className="summary-card entries-card">
                     <div className="card-body">
                       <h6>Total Entries</h6>
-                      <h4>{fareData.length}</h4>
+                      <h4>{(() => {
+                        // Get current user info for filtering
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        
+                        // Filter entries by current user only
+                        const userEntries = fareData.filter(entry => 
+                          entry.submittedBy === currentUserName
+                        );
+                        
+                        return userEntries.length;
+                      })()}</h4>
                     </div>
                   </div>
                 </div>
