@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../css/DataSummary.css";
 
 function DataSummary({ fareData, expenseData, cashBookEntries }) {

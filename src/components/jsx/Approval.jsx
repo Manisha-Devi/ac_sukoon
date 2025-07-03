@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../css/Approval.css";
 
 function Approval({ fareData, expenseData, cashBookEntries }) {
@@ -9,6 +9,15 @@ function Approval({ fareData, expenseData, cashBookEntries }) {
     settlementWith: "",
     remarks: ""
   });
+
+  // Force re-calculation when data updates
+  useEffect(() => {
+    console.log('📊 Approval - Data updated:', {
+      fareEntries: fareData.length,
+      expenseEntries: expenseData.length,
+      cashBookEntries: cashBookEntries.length
+    });
+  }, [fareData, expenseData, cashBookEntries]);
 
   // Calculate totals from cashBookEntries
   const calculateTotals = () => {
