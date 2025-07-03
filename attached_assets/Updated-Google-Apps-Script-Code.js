@@ -1,3 +1,4 @@
+
 // AC Sukoon Transport Management - Google Apps Script API
 // Organized by Entry Types with Complete CRUD Operations
 
@@ -225,11 +226,12 @@ function addFareReceipt(data) {
     );
 
     const entryId = data.entryId;
+    const timestamp = data.timestamp ? new Date(data.timestamp) : new Date(); // Use frontend timestamp
 
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
     sheet.getRange(2, 1, 1, 9).setValues([[
-      new Date(), // A: Timestamp
+      timestamp, // A: Timestamp from frontend
       data.date, // B: Date
       data.route, // C: Route
       data.cashAmount || 0, // D: CashAmount
@@ -244,7 +246,7 @@ function addFareReceipt(data) {
       success: true,
       entryId: entryId,
       message: "Fare receipt added successfully",
-      timestamp: new Date().toISOString(),
+      timestamp: timestamp.toISOString(),
     };
   } catch (error) {
     return {
@@ -413,11 +415,12 @@ function addBookingEntry(data) {
     );
 
     const entryId = data.entryId;
+    const timestamp = data.timestamp ? new Date(data.timestamp) : new Date(); // Use frontend timestamp
 
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
     sheet.getRange(2, 1, 1, 10).setValues([[
-      new Date(), // A: Timestamp
+      timestamp, // A: Timestamp from frontend
       data.bookingDetails || "", // B: BookingDetails
       data.dateFrom, // C: DateFrom
       data.dateTo, // D: DateTo
@@ -434,7 +437,7 @@ function addBookingEntry(data) {
         success: true,
         entryId: entryId,
         message: "Booking entry added successfully",
-        timestamp: new Date().toISOString(),
+        timestamp: timestamp.toISOString(),
       }),
     );
   } catch (error) {
@@ -608,11 +611,12 @@ function addOffDay(data) {
     );
 
     const entryId = data.entryId;
+    const timestamp = data.timestamp ? new Date(data.timestamp) : new Date(); // Use frontend timestamp
 
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
     sheet.getRange(2, 1, 1, 6).setValues([[
-      new Date(), // A: Timestamp
+      timestamp, // A: Timestamp from frontend
       data.date, // B: Date
       data.reason || "", // C: Reason
       "off", // D: EntryType
@@ -625,7 +629,7 @@ function addOffDay(data) {
         success: true,
         entryId: entryId,
         message: "Off day added successfully",
-        timestamp: new Date().toISOString(),
+        timestamp: timestamp.toISOString(),
       }),
     );
   } catch (error) {
