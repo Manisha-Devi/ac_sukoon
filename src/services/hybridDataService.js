@@ -163,21 +163,22 @@ class HybridDataService {
       
       console.log('Step 3: Entry saved to localStorage immediately - UI updated instantly!');
 
-      // Generate and save cash book entry immediately
-      this.generateCashBookEntry(newEntry);
-      console.log('Step 5: Cash book entry generated automatically');
-
-      // Mark for sync
-      localStorageService.markPendingSync(newEntry.entryId);
-      console.log('Step 6: Entry marked for sync');
-
       // Trigger immediate data update events for real-time UI refresh (Step 4)
       const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: updatedData });
       window.dispatchEvent(dataUpdateEvent);
+      console.log('Step 4: Instant data update detected - refreshing UI immediately');
       
       // Also trigger fare-specific update event
       const fareUpdateEvent = new CustomEvent('fareDataUpdated', { detail: updatedData });
       window.dispatchEvent(fareUpdateEvent);
+
+      // Generate and save cash book entry immediately
+      this.generateCashBookEntry(newEntry);
+      console.log('Step 5: Cash book entry generated automatically');
+
+      // Mark for sync (after UI updates)
+      localStorageService.markPendingSync(newEntry.entryId);
+      console.log('Step 6: Entry marked for sync');
 
       // Trigger cash book update event
       this.triggerCashBookUpdate();
@@ -405,6 +406,15 @@ class HybridDataService {
       
       console.log('Step 3: Entry updated in localStorage immediately - UI updated instantly!');
 
+      // Trigger immediate data update events for real-time UI refresh (Step 4)
+      const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: updatedFareData });
+      window.dispatchEvent(dataUpdateEvent);
+      console.log('Step 4: Instant data update detected - refreshing UI immediately');
+      
+      // Also trigger fare-specific update event
+      const fareUpdateEvent = new CustomEvent('fareDataUpdated', { detail: updatedFareData });
+      window.dispatchEvent(fareUpdateEvent);
+
       // Update cash book entry
       const updatedEntry = updatedFareData.find(entry => entry.entryId === entryId);
       if (updatedEntry) {
@@ -412,17 +422,9 @@ class HybridDataService {
       }
       console.log('Step 5: Cash book entry updated');
 
-      // Mark for sync
+      // Mark for sync (after UI updates)
       localStorageService.markPendingSync(entryId);
       console.log('Step 6: Entry marked for sync');
-
-      // Trigger immediate data update events for real-time UI refresh (Step 4)
-      const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: updatedFareData });
-      window.dispatchEvent(dataUpdateEvent);
-      
-      // Also trigger fare-specific update event
-      const fareUpdateEvent = new CustomEvent('fareDataUpdated', { detail: updatedFareData });
-      window.dispatchEvent(fareUpdateEvent);
 
       // Trigger cash book update
       this.triggerCashBookUpdate();
