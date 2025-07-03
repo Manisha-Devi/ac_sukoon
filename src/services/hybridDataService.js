@@ -112,8 +112,24 @@ class HybridDataService {
       // Sort by entry ID (newest first) since timestamp is now time only
       allData.sort((a, b) => (b.entryId || 0) - (a.entryId || 0));
 
-      // Save to localStorage
-      localStorageService.saveFareData(allData);
+      // Get current localStorage data to merge with server data
+      const localData = localStorageService.loadFareData();
+      
+      // Merge local pending entries with server data (avoid duplicates)
+      const mergedData = [...allData];
+      
+      // Add any local entries that aren't in server data (pending sync)
+      localData.forEach(localEntry => {
+        if (!allData.find(serverEntry => serverEntry.entryId === localEntry.entryId)) {
+          mergedData.unshift(localEntry); // Add to beginning to maintain order
+        }
+      });
+
+      // Sort merged data by entry ID (newest first)
+      mergedData.sort((a, b) => (b.entryId || 0) - (a.entryId || 0));
+
+      // Save merged data to localStorage
+      localStorageService.saveFareData(mergedData);
       localStorageService.updateLastSync();
 
       // Generate cash book entries for all fare data
@@ -126,14 +142,14 @@ class HybridDataService {
       this.triggerSyncStatusChange();
 
       // Trigger custom event for data update (UI will reload from localStorage)
-      const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: allData });
+      const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: mergedData });
       window.dispatchEvent(dataUpdateEvent);
 
       // Trigger cash book update
       this.triggerCashBookUpdate();
 
-      console.log('✅ Background sync completed:', allData.length, 'entries');
-      return allData;
+      console.log('✅ Background sync completed:', mergedData.length, 'entries (merged with local data)');
+      return mergedData;
 
     } catch (error) {
       console.error('❌ Background sync error:', error);
@@ -163,10 +179,14 @@ class HybridDataService {
       
       console.log('Step 3: Entry saved to localStorage immediately - UI updated instantly!');
 
-      // Trigger immediate data update events for real-time UI refresh (Step 4)
+      // Mark for sync (step 4 - before UI updates)
+      localStorageService.markPendingSync(newEntry.entryId);
+      console.log('Step 4: Entry marked for sync');
+
+      // Trigger immediate data update events for real-time UI refresh (Step 5)
       const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: updatedData });
       window.dispatchEvent(dataUpdateEvent);
-      console.log('Step 4: Instant data update detected - refreshing UI immediately');
+      console.log('Step 5: Instant data update detected - refreshing UI immediately');
       
       // Also trigger fare-specific update event
       const fareUpdateEvent = new CustomEvent('fareDataUpdated', { detail: updatedData });
@@ -174,11 +194,7 @@ class HybridDataService {
 
       // Generate and save cash book entry immediately
       this.generateCashBookEntry(newEntry);
-      console.log('Step 5: Cash book entry generated automatically');
-
-      // Mark for sync (after UI updates)
-      localStorageService.markPendingSync(newEntry.entryId);
-      console.log('Step 6: Entry marked for sync');
+      console.log('Step 6: Cash book entry generated automatically');
 
       // Trigger cash book update event
       this.triggerCashBookUpdate();
