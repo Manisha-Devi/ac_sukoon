@@ -6,19 +6,37 @@ import authService from '../../services/authService.js';
 const convertToTimeString = (timestamp) => {
   if (!timestamp) return '';
 
-  // If it's already in HH:MM:SS format, return as is
-  if (typeof timestamp === 'string' && timestamp.match(/^\d{2}:\d{2}:\d{2}$/)) {
+  // If it's already in H:MM:SS AM/PM format, return as is
+  if (typeof timestamp === 'string' && timestamp.match(/^\d{1,2}:\d{2}:\d{2} (AM|PM)$/)) {
     return timestamp;
   }
 
-  // If it's an ISO string, extract just the time part
+  // If it's an ISO string from Google Sheets, convert to IST format
   if (typeof timestamp === 'string' && timestamp.includes('T')) {
-    return timestamp.split('T')[1]?.split('.')[0] || timestamp;
+    try {
+      const date = new Date(timestamp);
+      return date.toLocaleTimeString('en-US', {
+        hour12: true,
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: 'Asia/Kolkata'
+      });
+    } catch (error) {
+      console.warn('Error converting timestamp:', timestamp, error);
+      return timestamp.split('T')[1]?.split('.')[0] || timestamp;
+    }
   }
 
-  // If it's a Date object, convert to time string
+  // If it's a Date object, convert to IST time string
   if (timestamp instanceof Date) {
-    return timestamp.toTimeString().split(' ')[0];
+    return timestamp.toLocaleTimeString('en-US', {
+      hour12: true,
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: 'Asia/Kolkata'
+    });
   }
 
   // Return as string fallback
@@ -33,14 +51,23 @@ const convertToDateString = (date) => {
     return date;
   }
 
-  // If it's an ISO string, extract just the date part
+  // If it's an ISO string from Google Sheets, convert to IST date
   if (typeof date === 'string' && date.includes('T')) {
-    return date.split('T')[0];
+    try {
+      const dateObj = new Date(date);
+      // Convert to IST and get date part
+      const istDate = new Date(dateObj.getTime() + (5.5 * 60 * 60 * 1000));
+      return istDate.toISOString().split('T')[0];
+    } catch (error) {
+      console.warn('Error converting date:', date, error);
+      return date.split('T')[0];
+    }
   }
 
-  // If it's a Date object, convert to date string
+  // If it's a Date object, convert to IST date string
   if (date instanceof Date) {
-    return date.toISOString().split('T')[0];
+    const istDate = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
+    return istDate.toISOString().split('T')[0];
   }
 
   // Return as string fallback
