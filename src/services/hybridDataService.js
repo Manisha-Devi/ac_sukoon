@@ -151,6 +151,9 @@ class HybridDataService {
 
       console.log('💾 Entry saved to localStorage immediately - UI updated instantly!');
 
+      // Trigger sync status change event for UI update
+      this.triggerSyncStatusChange();
+
       // Background sync to Google Sheets - don't wait for response
       if (this.isOnline) {
         console.log('🔄 Starting background sync after add...');
@@ -166,6 +169,9 @@ class HybridDataService {
             );
             localStorageService.saveFareData(finalData);
             localStorageService.removePendingSync(newEntry.entryId);
+            
+            // Trigger sync status change event for UI update
+            this.triggerSyncStatusChange();
           }
         }).catch(syncError => {
           console.error('⚠️ Background sync failed, will retry later:', syncError);
@@ -360,6 +366,9 @@ class HybridDataService {
 
       console.log('💾 Entry updated in localStorage immediately - UI updated instantly!');
 
+      // Trigger sync status change event for UI update
+      this.triggerSyncStatusChange();
+
       // Background sync to Google Sheets - don't wait for response
       if (this.isOnline) {
         console.log('🔄 Starting background sync after update...');
@@ -382,6 +391,9 @@ class HybridDataService {
             );
             localStorageService.saveFareData(finalData);
             localStorageService.removePendingSync(entryId);
+            
+            // Trigger sync status change event for UI update
+            this.triggerSyncStatusChange();
           }
         }).catch(syncError => {
           console.error('⚠️ Background sync failed, will retry later:', syncError);
@@ -609,6 +621,16 @@ class HybridDataService {
         this.autoSync();
       }
     }, 5 * 60 * 1000); // 5 minutes
+  }
+
+  // Trigger sync status change event for real-time UI updates
+  triggerSyncStatusChange() {
+    try {
+      const event = new CustomEvent('syncStatusChanged');
+      window.dispatchEvent(event);
+    } catch (error) {
+      console.error('❌ Error triggering sync status change:', error);
+    }
   }
 }
 

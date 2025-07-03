@@ -49,16 +49,27 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     initializeData();
   }, [setFareData, setTotalEarnings]);
 
-  // Update sync status periodically
+  // Update sync status periodically and on changes
   useEffect(() => {
     const updateSyncStatus = () => {
-      setSyncStatus(hybridDataService.getSyncStatus());
+      const newStatus = hybridDataService.getSyncStatus();
+      setSyncStatus(newStatus);
     };
 
     updateSyncStatus();
-    const interval = setInterval(updateSyncStatus, 5000); // Update every 5 seconds
+    const interval = setInterval(updateSyncStatus, 1000); // Update every 1 second for better responsiveness
 
-    return () => clearInterval(interval);
+    // Listen for custom sync status changes
+    const handleSyncStatusChange = () => {
+      updateSyncStatus();
+    };
+
+    window.addEventListener('syncStatusChanged', handleSyncStatusChange);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('syncStatusChanged', handleSyncStatusChange);
+    };
   }, []);
 
   // Function to check if a date is disabled for daily collection
