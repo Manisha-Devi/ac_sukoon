@@ -228,10 +228,13 @@ function addFareReceipt(data) {
 
     const entryId = data.entryId;
     
+    // Extract only time from timestamp for storage
+    const timeOnly = data.timestamp ? data.timestamp.split('T')[1]?.split('.')[0] : '';
+    
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
     sheet.getRange(2, 1, 1, 9).setValues([[
-      data.timestamp, // A: Timestamp from frontend
+      timeOnly, // A: Time only (HH:MM:SS)
       data.date, // B: Date from frontend
       data.route, // C: Route
       data.cashAmount || 0, // D: CashAmount
@@ -414,10 +417,13 @@ function addBookingEntry(data) {
 
     const entryId = data.entryId;
 
+    // Extract only time from timestamp for storage
+    const timeOnly = data.timestamp ? data.timestamp.split('T')[1]?.split('.')[0] : '';
+    
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
     sheet.getRange(2, 1, 1, 10).setValues([[
-      data.timestamp, // A: Timestamp from frontend
+      timeOnly, // A: Time only (HH:MM:SS)
       data.bookingDetails || "", // B: BookingDetails
       data.dateFrom, // C: DateFrom from frontend
       data.dateTo, // D: DateTo from frontend
@@ -605,10 +611,13 @@ function addOffDay(data) {
 
     const entryId = data.entryId;
 
+    // Extract only time from timestamp for storage
+    const timeOnly = data.timestamp ? data.timestamp.split('T')[1]?.split('.')[0] : '';
+    
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
     sheet.getRange(2, 1, 1, 6).setValues([[
-      data.timestamp, // A: Timestamp from frontend
+      timeOnly, // A: Time only (HH:MM:SS)
       data.date, // B: Date from frontend
       data.reason || "", // C: Reason
       "off", // D: EntryType

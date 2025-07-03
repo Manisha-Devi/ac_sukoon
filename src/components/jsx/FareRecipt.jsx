@@ -944,19 +944,19 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                             {entry.type === "daily" && (
                               <>
                                 <div>{entry.date}</div>
-                                <div className="timestamp">{entry.timestamp ? entry.timestamp.split('T')[1]?.split('.')[0] : ''}</div>
+                                <div className="timestamp">{entry.timestamp ? (entry.timestamp.includes('T') ? entry.timestamp.split('T')[1]?.split('.')[0] : entry.timestamp) : ''}</div>
                               </>
                             )}
                             {entry.type === "booking" && (
                               <>
                                 <div>{entry.dateFrom} - {entry.dateTo}</div>
-                                <div className="timestamp">{entry.timestamp ? entry.timestamp.split('T')[1]?.split('.')[0] : ''}</div>
+                                <div className="timestamp">{entry.timestamp ? (entry.timestamp.includes('T') ? entry.timestamp.split('T')[1]?.split('.')[0] : entry.timestamp) : ''}</div>
                               </>
                             )}
                             {entry.type === "off" && (
                               <>
                                 <div>{entry.date}</div>
-                                <div className="timestamp">{entry.timestamp ? entry.timestamp.split('T')[1]?.split('.')[0] : ''}</div>
+                                <div className="timestamp">{entry.timestamp ? (entry.timestamp.includes('T') ? entry.timestamp.split('T')[1]?.split('.')[0] : entry.timestamp) : ''}</div>
                               </>
                             )}
                           </small>
