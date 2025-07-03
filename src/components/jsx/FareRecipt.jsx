@@ -526,54 +526,54 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
               </div>
             </div>
 
-            {/* Summary Cards */}
-            {fareData.length > 0 && (
-              <div className="row mb-4">
-                <div className="col-md-3 col-sm-6 mb-3">
-                  <div className="summary-card cash-card">
-                    <div className="card-body">
-                      <h6>Cash Collection</h6>
-                      <h4>₹{totalCash.toLocaleString('en-IN')}</h4>
+            {/* Summary Cards - Only show when user has entries */}
+            {(() => {
+              // Get current user info for filtering
+              const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+              const currentUserName = currentUser.fullName || currentUser.username;
+              
+              // Filter entries by current user only
+              const userEntries = fareData.filter(entry => 
+                entry.submittedBy === currentUserName
+              );
+              
+              return userEntries.length > 0 ? (
+                <div className="row mb-4">
+                  <div className="col-md-3 col-sm-6 mb-3">
+                    <div className="summary-card cash-card">
+                      <div className="card-body">
+                        <h6>Cash Collection</h6>
+                        <h4>₹{totalCash.toLocaleString('en-IN')}</h4>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-3 col-sm-6 mb-3">
+                    <div className="summary-card bank-card">
+                      <div className="card-body">
+                        <h6>Bank Transfer</h6>
+                        <h4>₹{totalBank.toLocaleString('en-IN')}</h4>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-3 col-sm-6 mb-3">
+                    <div className="summary-card total-card">
+                      <div className="card-body">
+                        <h6>Total Earnings</h6>
+                        <h4>₹{grandTotal.toLocaleString('en-IN')}</h4>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-3 col-sm-6 mb-3">
+                    <div className="summary-card entries-card">
+                      <div className="card-body">
+                        <h6>Total Entries</h6>
+                        <h4>{userEntries.length}</h4>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="col-md-3 col-sm-6 mb-3">
-                  <div className="summary-card bank-card">
-                    <div className="card-body">
-                      <h6>Bank Transfer</h6>
-                      <h4>₹{totalBank.toLocaleString('en-IN')}</h4>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-3 col-sm-6 mb-3">
-                  <div className="summary-card total-card">
-                    <div className="card-body">
-                      <h6>Total Earnings</h6>
-                      <h4>₹{grandTotal.toLocaleString('en-IN')}</h4>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-3 col-sm-6 mb-3">
-                  <div className="summary-card entries-card">
-                    <div className="card-body">
-                      <h6>Total Entries</h6>
-                      <h4>{(() => {
-                        // Get current user info for filtering
-                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                        const currentUserName = currentUser.fullName || currentUser.username;
-                        
-                        // Filter entries by current user only
-                        const userEntries = fareData.filter(entry => 
-                          entry.submittedBy === currentUserName
-                        );
-                        
-                        return userEntries.length;
-                      })()}</h4>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+              ) : null;
+            })()}
 
             {/* Tab Navigation */}
             <div className="tab-navigation mb-4">
