@@ -227,7 +227,7 @@ function addFareReceipt(data) {
 
     const entryId = data.entryId;
 
-    // Store timestamp as-is (already in HH:MM:SS string format from frontend)
+    // Store timestamp as-is (already in H:MM:SS AM/PM string format from frontend)
     const timeOnly = data.timestamp || '';
 
     // Insert at row 2 to keep new entries at top
@@ -416,7 +416,7 @@ function addBookingEntry(data) {
 
     const entryId = data.entryId;
 
-    // Store timestamp as-is (already in HH:MM:SS string format from frontend)
+    // Store timestamp as-is (already in H:MM:SS AM/PM string format from frontend)
     const timeOnly = data.timestamp || '';
 
     // Insert at row 2 to keep new entries at top
@@ -610,7 +610,7 @@ function addOffDay(data) {
 
     const entryId = data.entryId;
 
-    // Store timestamp as-is (already in HH:MM:SS string format from frontend)
+    // Store timestamp as-is (already in H:MM:SS AM/PM string format from frontend)
     const timeOnly = data.timestamp || '';
 
     // Insert at row 2 to keep new entries at top

@@ -5,44 +5,44 @@ import authService from '../../services/authService.js';
 // Helper functions to convert ISO strings to proper format
 const convertToTimeString = (timestamp) => {
   if (!timestamp) return '';
-  
+
   // If it's already in HH:MM:SS format, return as is
   if (typeof timestamp === 'string' && timestamp.match(/^\d{2}:\d{2}:\d{2}$/)) {
     return timestamp;
   }
-  
+
   // If it's an ISO string, extract just the time part
   if (typeof timestamp === 'string' && timestamp.includes('T')) {
     return timestamp.split('T')[1]?.split('.')[0] || timestamp;
   }
-  
+
   // If it's a Date object, convert to time string
   if (timestamp instanceof Date) {
     return timestamp.toTimeString().split(' ')[0];
   }
-  
+
   // Return as string fallback
   return String(timestamp);
 };
 
 const convertToDateString = (date) => {
   if (!date) return '';
-  
+
   // If it's already in YYYY-MM-DD format, return as is
   if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
     return date;
   }
-  
+
   // If it's an ISO string, extract just the date part
   if (typeof date === 'string' && date.includes('T')) {
     return date.split('T')[0];
   }
-  
+
   // If it's a Date object, convert to date string
   if (date instanceof Date) {
     return date.toISOString().split('T')[0];
   }
-  
+
   // Return as string fallback
   return String(date);
 };
@@ -265,7 +265,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
       const now = new Date();
-      const timeOnly = now.toTimeString().split(' ')[0]; // Returns HH:MM:SS format as string
+      const timeOnly = now.toLocaleTimeString('en-US', { 
+        hour12: true, 
+        hour: 'numeric', 
+        minute: '2-digit', 
+        second: '2-digit' 
+      }); // Returns H:MM:SS AM/PM format
       const dateOnly = dailyFareData.date; // Keep date as string (YYYY-MM-DD)
 
       if (editingEntry) {
@@ -352,7 +357,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       // Handle date strings directly without converting to Date objects
       const startDateStr = bookingData.dateFrom; // Keep as string (YYYY-MM-DD)
       const endDateStr = bookingData.dateTo; // Keep as string (YYYY-MM-DD)
-      
+
       // Generate date range as strings
       const startDate = new Date(startDateStr);
       const endDate = new Date(endDateStr);
@@ -372,7 +377,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
       const now = new Date();
-      const timeOnly = now.toTimeString().split(' ')[0]; // Returns HH:MM:SS format as string
+      const timeOnly = now.toLocaleTimeString('en-US', { 
+        hour12: true, 
+        hour: 'numeric', 
+        minute: '2-digit', 
+        second: '2-digit' 
+      }); // Returns H:MM:SS AM/PM format
 
       if (editingEntry) {
         // UPDATE: First update React state immediately
@@ -468,7 +478,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
       const now = new Date();
-      const timeOnly = now.toTimeString().split(' ')[0]; // Returns HH:MM:SS format as string
+      const timeOnly = now.toLocaleTimeString('en-US', { 
+        hour12: true, 
+        hour: 'numeric', 
+        minute: '2-digit', 
+        second: '2-digit' 
+      }); // Returns H:MM:SS AM/PM format
       const dateOnly = offDayData.date; // Keep date as string (YYYY-MM-DD)
 
       if (editingEntry) {
