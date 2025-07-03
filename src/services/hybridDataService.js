@@ -117,6 +117,9 @@ class HybridDataService {
       localStorageService.saveFareData(allData);
       localStorageService.updateLastSync();
 
+      // Generate cash book entries for all fare data
+      this.generateAllCashBookEntries(allData);
+
       // Sync pending entries
       await this.syncPendingEntries();
 
@@ -126,6 +129,9 @@ class HybridDataService {
       // Trigger custom event for data update
       const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: allData });
       window.dispatchEvent(dataUpdateEvent);
+      
+      // Trigger cash book update
+      this.triggerCashBookUpdate();
 
       console.log('✅ Background sync completed:', allData.length, 'entries');
       return allData;
@@ -156,10 +162,17 @@ class HybridDataService {
       localStorageService.saveFareData(updatedData);
       localStorageService.markPendingSync(newEntry.entryId);
 
+      // Generate and save cash book entry immediately
+      this.generateCashBookEntry(newEntry);
+
       console.log('💾 Entry saved to localStorage immediately - UI updated instantly!');
+      console.log('📖 Cash book entry generated automatically');
 
       // Trigger sync status change event for UI update
       this.triggerSyncStatusChange();
+      
+      // Trigger cash book update event
+      this.triggerCashBookUpdate();
 
       // Background sync to Google Sheets - don't wait for response
       if (this.isOnline) {
@@ -371,10 +384,20 @@ class HybridDataService {
       localStorageService.saveFareData(updatedFareData);
       localStorageService.markPendingSync(entryId);
 
+      // Update cash book entry
+      const updatedEntry = updatedFareData.find(entry => entry.entryId === entryId);
+      if (updatedEntry) {
+        this.generateCashBookEntry(updatedEntry);
+      }
+
       console.log('💾 Entry updated in localStorage immediately - UI updated instantly!');
+      console.log('📖 Cash book entry updated');
 
       // Trigger sync status change event for UI update
       this.triggerSyncStatusChange();
+      
+      // Trigger cash book update
+      this.triggerCashBookUpdate();
 
       // Background sync to Google Sheets - don't wait for response
       if (this.isOnline) {
@@ -478,7 +501,11 @@ class HybridDataService {
       const updatedData = currentFareData.filter(entry => entry.entryId !== entryId);
       localStorageService.saveFareData(updatedData);
 
+      // Remove corresponding cash book entry
+      this.removeCashBookEntry(entryId);
+
       console.log('💾 Entry deleted from localStorage immediately');
+      console.log('📖 Cash book entry removed');
 
       // Try to sync deletion to Google Sheets in background if online
       if (this.isOnline && existingEntry.synced) {
@@ -628,6 +655,135 @@ class HybridDataService {
         this.autoSync();
       }
     }, 5 * 60 * 1000); // 5 minutes
+  }
+
+  // Generate cash book entry from fare data
+  generateCashBookEntry(fareEntry) {
+    try {
+      if (fareEntry.type === 'off') return; // Off days don't generate cash book entries
+
+      const cashBookEntry = {
+        id: `cb_${fareEntry.entryId}`,
+        date: fareEntry.date || fareEntry.dateFrom, // Use appropriate date
+        type: 'dr', // Fare entries are always debit (income)
+        particulars: this.formatCashBookParticulars(fareEntry),
+        cashAmount: fareEntry.cashAmount || 0,
+        bankAmount: fareEntry.bankAmount || 0,
+        source: this.getCashBookSource(fareEntry),
+        sourceId: fareEntry.entryId,
+        route: fareEntry.route,
+        bookingDetails: fareEntry.bookingDetails,
+        description: fareEntry.bookingDetails || fareEntry.route,
+        timestamp: fareEntry.timestamp
+      };
+
+      // Get existing cash book entries
+      let cashBookEntries = JSON.parse(localStorage.getItem('cashBookEntries') || '[]');
+      
+      // Remove existing entry if updating
+      cashBookEntries = cashBookEntries.filter(entry => entry.sourceId !== fareEntry.entryId);
+      
+      // Add new entry
+      cashBookEntries.unshift(cashBookEntry);
+      
+      // Save to localStorage
+      localStorage.setItem('cashBookEntries', JSON.stringify(cashBookEntries));
+      
+      console.log('📖 Cash book entry generated:', cashBookEntry);
+      
+    } catch (error) {
+      console.error('❌ Error generating cash book entry:', error);
+    }
+  }
+
+  // Format cash book particulars
+  formatCashBookParticulars(fareEntry) {
+    switch (fareEntry.type) {
+      case 'daily':
+        return `Daily Fare - ${fareEntry.route || 'Route'}`;
+      case 'booking':
+        return `Booking - ${fareEntry.bookingDetails || 'Booking Details'}`;
+      default:
+        return `Fare - ${fareEntry.route || fareEntry.bookingDetails || 'Income'}`;
+    }
+  }
+
+  // Get cash book source
+  getCashBookSource(fareEntry) {
+    switch (fareEntry.type) {
+      case 'daily':
+        return 'fare-daily';
+      case 'booking':
+        return 'fare-booking';
+      default:
+        return 'fare-other';
+    }
+  }
+
+  // Generate all cash book entries from fare data
+  generateAllCashBookEntries(fareData) {
+    try {
+      console.log('📖 Generating all cash book entries from fare data...');
+      
+      let cashBookEntries = [];
+      
+      fareData.forEach(fareEntry => {
+        if (fareEntry.type !== 'off') { // Skip off days
+          const cashBookEntry = {
+            id: `cb_${fareEntry.entryId}`,
+            date: fareEntry.date || fareEntry.dateFrom,
+            type: 'dr', // Fare entries are always debit (income)
+            particulars: this.formatCashBookParticulars(fareEntry),
+            cashAmount: fareEntry.cashAmount || 0,
+            bankAmount: fareEntry.bankAmount || 0,
+            source: this.getCashBookSource(fareEntry),
+            sourceId: fareEntry.entryId,
+            route: fareEntry.route,
+            bookingDetails: fareEntry.bookingDetails,
+            description: fareEntry.bookingDetails || fareEntry.route,
+            timestamp: fareEntry.timestamp
+          };
+          
+          cashBookEntries.push(cashBookEntry);
+        }
+      });
+      
+      // Sort by timestamp (newest first)
+      cashBookEntries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      
+      // Save to localStorage
+      localStorage.setItem('cashBookEntries', JSON.stringify(cashBookEntries));
+      
+      console.log('📖 Generated', cashBookEntries.length, 'cash book entries');
+      
+    } catch (error) {
+      console.error('❌ Error generating all cash book entries:', error);
+    }
+  }
+
+  // Remove cash book entry
+  removeCashBookEntry(sourceId) {
+    try {
+      let cashBookEntries = JSON.parse(localStorage.getItem('cashBookEntries') || '[]');
+      cashBookEntries = cashBookEntries.filter(entry => entry.sourceId !== sourceId);
+      localStorage.setItem('cashBookEntries', JSON.stringify(cashBookEntries));
+      
+      console.log('📖 Cash book entry removed for:', sourceId);
+      
+    } catch (error) {
+      console.error('❌ Error removing cash book entry:', error);
+    }
+  }
+
+  // Trigger cash book update event
+  triggerCashBookUpdate() {
+    try {
+      const cashBookEntries = JSON.parse(localStorage.getItem('cashBookEntries') || '[]');
+      const event = new CustomEvent('cashBookUpdated', { detail: cashBookEntries });
+      window.dispatchEvent(event);
+    } catch (error) {
+      console.error('❌ Error triggering cash book update:', error);
+    }
   }
 
   // Trigger sync status change event for real-time UI updates

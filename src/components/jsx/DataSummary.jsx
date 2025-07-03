@@ -11,6 +11,15 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
     remarks: ""
   });
 
+  // Force re-calculation when data updates
+  useEffect(() => {
+    console.log('📊 Data Summary - Data updated:', {
+      fareEntries: fareData.length,
+      expenseEntries: expenseData.length,
+      cashBookEntries: cashBookEntries.length
+    });
+  }, [fareData, expenseData, cashBookEntries]);
+
   // Calculate totals from cashBookEntries
   const calculateTotals = () => {
     let totalCashReceipts = 0;
