@@ -1,4 +1,3 @@
-
 import authService from './authService.js';
 import localStorageService from './localStorageService.js';
 
@@ -69,78 +68,56 @@ class HybridDataService {
 
       if (fareReceipts.success && fareReceipts.data) {
         allData = [...allData, ...fareReceipts.data.map(entry => ({
-          entryId: entry.entryId || Date.now(),
+          ...entry,
+          entryId: entry.entryId || entry.id,
           type: 'daily',
-          date: entry.date ? new Date(entry.date).toISOString().split('T')[0] : '',
-          route: entry.route || '',
-          cashAmount: entry.cashAmount || 0,
-          bankAmount: entry.bankAmount || 0,
-          totalAmount: entry.totalAmount || 0,
-          submittedBy: entry.submittedBy || 'Unknown',
-          timestamp: entry.timestamp || new Date().toISOString(),
           synced: true,
-          pendingSync: false
+          pendingSync: false,
+          // Ensure date is date only (YYYY-MM-DD format)
+          date: entry.date ? new Date(entry.date).toISOString().split('T')[0] : entry.date,
+          // Keep full timestamp from server or generate if missing
+          timestamp: entry.timestamp || new Date().toISOString()
         }))];
       }
 
       if (bookingEntries.success && bookingEntries.data) {
         allData = [...allData, ...bookingEntries.data.map(entry => ({
-          entryId: entry.entryId || Date.now(),
+          ...entry,
+          entryId: entry.entryId || entry.id,
           type: 'booking',
-          bookingDetails: entry.bookingDetails || '',
-          dateFrom: entry.dateFrom ? new Date(entry.dateFrom).toISOString().split('T')[0] : '',
-          dateTo: entry.dateTo ? new Date(entry.dateTo).toISOString().split('T')[0] : '',
-          cashAmount: entry.cashAmount || 0,
-          bankAmount: entry.bankAmount || 0,
-          totalAmount: entry.totalAmount || 0,
-          submittedBy: entry.submittedBy || 'Unknown',
-          timestamp: entry.timestamp || new Date().toISOString(),
           synced: true,
-          pendingSync: false
+          pendingSync: false,
+          // Ensure dates are date only (YYYY-MM-DD format)
+          dateFrom: entry.dateFrom ? new Date(entry.dateFrom).toISOString().split('T')[0] : entry.dateFrom,
+          dateTo: entry.dateTo ? new Date(entry.dateTo).toISOString().split('T')[0] : entry.dateTo,
+          // Keep full timestamp from server or generate if missing
+          timestamp: entry.timestamp || new Date().toISOString()
         }))];
       }
 
       if (offDays.success && offDays.data) {
         allData = [...allData, ...offDays.data.map(entry => ({
-          entryId: entry.entryId || Date.now(),
+          ...entry,
+          entryId: entry.entryId || entry.id,
           type: 'off',
-          date: entry.date ? new Date(entry.date).toISOString().split('T')[0] : '',
-          reason: entry.reason || '',
-          cashAmount: 0,
-          bankAmount: 0,
-          totalAmount: 0,
-          submittedBy: entry.submittedBy || 'Unknown',
-          timestamp: entry.timestamp || new Date().toISOString(),
           synced: true,
-          pendingSync: false
+          pendingSync: false,
+          // Ensure date is date only (YYYY-MM-DD format)
+          date: entry.date ? new Date(entry.date).toISOString().split('T')[0] : entry.date,
+          // Keep full timestamp from server or generate if missing
+          timestamp: entry.timestamp || new Date().toISOString()
         }))];
       }
 
-      // Sort by entry ID (newest first)
+      // Sort by entry ID (newest first) since timestamp is now time only
       allData.sort((a, b) => (b.entryId || 0) - (a.entryId || 0));
 
-      // Get current localStorage data to merge with server data
-      const localData = localStorageService.loadFareData();
-      
-      // Merge local pending entries with server data (avoid duplicates)
-      const mergedData = [...allData];
-      
-      // Add any local entries that aren't in server data (pending sync)
-      localData.forEach(localEntry => {
-        if (!allData.find(serverEntry => serverEntry.entryId === localEntry.entryId)) {
-          mergedData.unshift(localEntry); // Add to beginning to maintain order
-        }
-      });
-
-      // Sort merged data by entry ID (newest first)
-      mergedData.sort((a, b) => (b.entryId || 0) - (a.entryId || 0));
-
-      // Save merged data to localStorage
-      localStorageService.saveFareData(mergedData);
+      // Save to localStorage
+      localStorageService.saveFareData(allData);
       localStorageService.updateLastSync();
 
       // Generate cash book entries for all fare data
-      this.generateAllCashBookEntries(mergedData);
+      this.generateAllCashBookEntries(allData);
 
       // Sync pending entries
       await this.syncPendingEntries();
@@ -149,14 +126,14 @@ class HybridDataService {
       this.triggerSyncStatusChange();
 
       // Trigger custom event for data update (UI will reload from localStorage)
-      const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: mergedData });
+      const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: allData });
       window.dispatchEvent(dataUpdateEvent);
 
       // Trigger cash book update
       this.triggerCashBookUpdate();
 
-      console.log('✅ Background sync completed:', mergedData.length, 'entries (merged with local data)');
-      return mergedData;
+      console.log('✅ Background sync completed:', allData.length, 'entries');
+      return allData;
 
     } catch (error) {
       console.error('❌ Background sync error:', error);
@@ -171,38 +148,13 @@ class HybridDataService {
     try {
       console.log('Step 1: Adding entry with hybrid system...');
 
-      // Get current user info
-      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
-
-      // Create consistent entry structure
       const newEntry = {
+        ...entryData,
         entryId: Date.now(),
-        type: entryData.type,
-        timestamp: new Date().toISOString(),
-        submittedBy: submittedBy,
+        timestamp: new Date().toISOString(), // Full timestamp for local storage
         synced: false,
-        pendingSync: true,
-        cashAmount: entryData.cashAmount || 0,
-        bankAmount: entryData.bankAmount || 0,
-        totalAmount: entryData.totalAmount || 0
+        pendingSync: true
       };
-
-      // Add type-specific fields
-      if (entryData.type === 'daily') {
-        newEntry.date = entryData.date;
-        newEntry.route = entryData.route;
-      } else if (entryData.type === 'booking') {
-        newEntry.bookingDetails = entryData.bookingDetails;
-        newEntry.dateFrom = entryData.dateFrom;
-        newEntry.dateTo = entryData.dateTo;
-      } else if (entryData.type === 'off') {
-        newEntry.date = entryData.date;
-        newEntry.reason = entryData.reason;
-        newEntry.cashAmount = 0;
-        newEntry.bankAmount = 0;
-        newEntry.totalAmount = 0;
-      }
 
       // Save to localStorage immediately for instant response
       const updatedData = [newEntry, ...currentFareData];
@@ -211,36 +163,22 @@ class HybridDataService {
       
       console.log('Step 3: Entry saved to localStorage immediately - UI updated instantly!');
 
-      // Mark for sync
-      localStorageService.markPendingSync(newEntry.entryId);
-      console.log('Step 4: Entry marked for sync');
-
-      // Trigger immediate data update events for real-time UI refresh
-      console.log('Step 5: Instant data update detected - refreshing UI immediately');
+      // Trigger immediate data update events for real-time UI refresh (Step 4)
+      const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: updatedData });
+      window.dispatchEvent(dataUpdateEvent);
+      console.log('Step 4: Instant data update detected - refreshing UI immediately');
       
-      // Trigger with small delay to ensure localStorage is written
-      setTimeout(() => {
-        const dataUpdateEvent = new CustomEvent('dataUpdated', { 
-          detail: updatedData,
-          bubbles: true
-        });
-        window.dispatchEvent(dataUpdateEvent);
-        
-        // Also trigger fare-specific update event
-        const fareUpdateEvent = new CustomEvent('fareDataUpdated', { 
-          detail: updatedData,
-          bubbles: true
-        });
-        window.dispatchEvent(fareUpdateEvent);
-        
-        console.log('🚀 Data update events dispatched with', updatedData.length, 'entries');
-      }, 10);
+      // Also trigger fare-specific update event
+      const fareUpdateEvent = new CustomEvent('fareDataUpdated', { detail: updatedData });
+      window.dispatchEvent(fareUpdateEvent);
 
-      // Generate and save cash book entry immediately (except for off days)
-      if (newEntry.type !== 'off') {
-        this.generateCashBookEntry(newEntry);
-        console.log('Step 6: Cash book entry generated automatically');
-      }
+      // Generate and save cash book entry immediately
+      this.generateCashBookEntry(newEntry);
+      console.log('Step 5: Cash book entry generated automatically');
+
+      // Mark for sync (after UI updates)
+      localStorageService.markPendingSync(newEntry.entryId);
+      console.log('Step 6: Entry marked for sync');
 
       // Trigger cash book update event
       this.triggerCashBookUpdate();
@@ -271,6 +209,7 @@ class HybridDataService {
           }
         }).catch(syncError => {
           console.log('⚠️ Background sync failed but data is safely stored locally:', syncError.message);
+          // Don't show error to user since data is saved locally
         });
       }
 
@@ -288,6 +227,10 @@ class HybridDataService {
     try {
       let result;
 
+      // Get current user info
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+
       // Add to appropriate Google Sheet based on type
       if (entry.type === 'daily') {
         result = await authService.addFareReceipt({
@@ -297,7 +240,7 @@ class HybridDataService {
           cashAmount: entry.cashAmount || 0,
           bankAmount: entry.bankAmount || 0,
           totalAmount: entry.totalAmount,
-          submittedBy: entry.submittedBy
+          submittedBy: submittedBy
         });
       } else if (entry.type === 'booking') {
         result = await authService.addBookingEntry({
@@ -308,14 +251,14 @@ class HybridDataService {
           cashAmount: entry.cashAmount || 0,
           bankAmount: entry.bankAmount || 0,
           totalAmount: entry.totalAmount,
-          submittedBy: entry.submittedBy
+          submittedBy: submittedBy
         });
       } else if (entry.type === 'off') {
         result = await authService.addOffDay({
           entryId: entry.entryId,
           date: entry.date,
           reason: entry.reason,
-          submittedBy: entry.submittedBy
+          submittedBy: submittedBy
         });
       }
 
@@ -328,6 +271,111 @@ class HybridDataService {
 
     } catch (error) {
       console.error('❌ Error syncing entry in background:', error);
+      return false;
+    }
+  }
+
+  // Background sync update to Google Sheets (non-blocking)
+  async backgroundSyncUpdate(entryId, updatedData, entryType) {
+    try {
+      console.log('🔄 Updating in Google Sheets in background with ID:', entryId);
+
+      let result;
+
+      // Call appropriate update function based on entry type
+      if (entryType === 'daily') {
+        result = await authService.updateFareReceipt({
+          entryId: entryId,
+          updatedData: updatedData
+        });
+      } else if (entryType === 'booking') {
+        result = await authService.updateBookingEntry({
+          entryId: entryId,
+          updatedData: updatedData
+        });
+      } else if (entryType === 'off') {
+        result = await authService.updateOffDay({
+          entryId: entryId,
+          updatedData: updatedData
+        });
+      }
+
+      if (result && result.success) {
+        console.log('✅ Update synced to Google Sheets in background:', entryId);
+        return true;
+      } else {
+        throw new Error(result?.error || 'Failed to sync update to Google Sheets');
+      }
+
+    } catch (error) {
+      console.error('❌ Error syncing update in background:', error);
+      return false;
+    }
+  }
+
+  // Sync single entry to Google Sheets (legacy method for pending sync)
+  async syncSingleEntry(entry) {
+    try {
+      let result;
+
+      // Get current user info
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+
+      // Add to appropriate Google Sheet based on type
+      if (entry.type === 'daily') {
+        result = await authService.addFareReceipt({
+          entryId: entry.entryId,
+          date: entry.date,
+          route: entry.route,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          totalAmount: entry.totalAmount,
+          submittedBy: submittedBy
+        });
+      } else if (entry.type === 'booking') {
+        result = await authService.addBookingEntry({
+          entryId: entry.entryId,
+          bookingDetails: entry.bookingDetails,
+          dateFrom: entry.dateFrom,
+          dateTo: entry.dateTo,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          totalAmount: entry.totalAmount,
+          submittedBy: submittedBy
+        });
+      } else if (entry.type === 'off') {
+        result = await authService.addOffDay({
+          entryId: entry.entryId,
+          date: entry.date,
+          reason: entry.reason,
+          submittedBy: submittedBy
+        });
+      }
+
+      if (result && result.success) {
+        // Mark as synced in localStorage
+        const currentData = localStorageService.loadFareData();
+        const updatedData = currentData.map(item => 
+          item.entryId === entry.entryId 
+            ? { 
+                ...item, 
+                synced: true, 
+                pendingSync: false
+              }
+            : item
+        );
+        localStorageService.saveFareData(updatedData);
+        localStorageService.removePendingSync(entry.entryId);
+
+        console.log('✅ Entry synced to Google Sheets:', entry.entryId);
+        return true;
+      } else {
+        throw new Error(result?.error || 'Failed to sync to Google Sheets');
+      }
+
+    } catch (error) {
+      console.error('❌ Error syncing entry:', error);
       return false;
     }
   }
@@ -361,46 +409,46 @@ class HybridDataService {
       
       console.log('Step 3: Entry updated in localStorage immediately - UI updated instantly!');
 
-      // Trigger immediate data update events for real-time UI refresh
+      // Trigger immediate data update events for real-time UI refresh (Step 4)
+      const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: updatedFareData });
+      window.dispatchEvent(dataUpdateEvent);
       console.log('Step 4: Instant data update detected - refreshing UI immediately');
       
-      setTimeout(() => {
-        const dataUpdateEvent = new CustomEvent('dataUpdated', { 
-          detail: updatedFareData,
-          bubbles: true
-        });
-        window.dispatchEvent(dataUpdateEvent);
-        
-        const fareUpdateEvent = new CustomEvent('fareDataUpdated', { 
-          detail: updatedFareData,
-          bubbles: true
-        });
-        window.dispatchEvent(fareUpdateEvent);
-        
-        console.log('🚀 Update events dispatched with', updatedFareData.length, 'entries');
-      }, 10);
+      // Also trigger fare-specific update event
+      const fareUpdateEvent = new CustomEvent('fareDataUpdated', { detail: updatedFareData });
+      window.dispatchEvent(fareUpdateEvent);
 
-      // Update cash book entry (except for off days)
+      // Update cash book entry
       const updatedEntry = updatedFareData.find(entry => entry.entryId === entryId);
-      if (updatedEntry && updatedEntry.type !== 'off') {
+      if (updatedEntry) {
         this.generateCashBookEntry(updatedEntry);
-        console.log('Step 5: Cash book entry updated');
       }
+      console.log('Step 5: Cash book entry updated');
 
-      // Mark for sync
+      // Mark for sync (after UI updates)
       localStorageService.markPendingSync(entryId);
       console.log('Step 6: Entry marked for sync');
 
       // Trigger cash book update
       this.triggerCashBookUpdate();
+
+      // Trigger sync status change event for UI update
       this.triggerSyncStatusChange();
 
-      // Background sync to Google Sheets
+      // Background sync to Google Sheets - don't wait for response
       if (this.isOnline) {
         console.log('🔄 Starting background sync after update...');
-        this.backgroundSyncUpdate(entryId, updatedData, existingEntry.type).then(syncResult => {
+        // Send complete entry data for update
+        const completeUpdateData = {
+          ...updatedData,
+          cashAmount: updatedData.cashAmount,
+          bankAmount: updatedData.bankAmount,
+          totalAmount: updatedData.totalAmount
+        };
+        this.backgroundSyncUpdate(entryId, completeUpdateData, existingEntry.type).then(syncResult => {
           if (syncResult) {
             console.log('✅ Update synced to Google Sheets in background');
+            // Update the local data to mark as synced
             const currentData = localStorageService.loadFareData();
             const finalData = currentData.map(entry => 
               entry.entryId === entryId 
@@ -409,6 +457,8 @@ class HybridDataService {
             );
             localStorageService.saveFareData(finalData);
             localStorageService.removePendingSync(entryId);
+
+            // Trigger sync status change event for UI update
             this.triggerSyncStatusChange();
           }
         }).catch(syncError => {
@@ -416,6 +466,7 @@ class HybridDataService {
         });
       }
 
+      // Return immediately with localStorage data for instant UI update
       return { success: true, data: updatedFareData, instant: true };
 
     } catch (error) {
@@ -424,13 +475,14 @@ class HybridDataService {
     }
   }
 
-  // Background sync update to Google Sheets
-  async backgroundSyncUpdate(entryId, updatedData, entryType) {
+  // Sync update to Google Sheets
+  async syncUpdateToGoogleSheets(entryId, updatedData, entryType) {
     try {
-      console.log('🔄 Updating in Google Sheets in background with ID:', entryId);
+      console.log('🔄 Updating in Google Sheets with ID:', entryId);
 
       let result;
 
+      // Call appropriate update function based on entry type
       if (entryType === 'daily') {
         result = await authService.updateFareReceipt({
           entryId: entryId,
@@ -449,14 +501,24 @@ class HybridDataService {
       }
 
       if (result && result.success) {
-        console.log('✅ Update synced to Google Sheets in background:', entryId);
+        // Mark as synced in localStorage
+        const currentData = localStorageService.loadFareData();
+        const updatedLocalData = currentData.map(item => 
+          item.entryId === entryId 
+            ? { ...item, synced: true, pendingSync: false }
+            : item
+        );
+        localStorageService.saveFareData(updatedLocalData);
+        localStorageService.removePendingSync(entryId);
+
+        console.log('✅ Update synced to Google Sheets:', entryId);
         return true;
       } else {
         throw new Error(result?.error || 'Failed to sync update to Google Sheets');
       }
 
     } catch (error) {
-      console.error('❌ Error syncing update in background:', error);
+      console.error('❌ Error syncing update:', error);
       return false;
     }
   }
@@ -506,6 +568,7 @@ class HybridDataService {
 
       let result;
 
+      // Call appropriate delete function based on entry type
       if (entryType === 'daily') {
         result = await authService.deleteFareReceipt({
           entryId: entryId
@@ -546,9 +609,12 @@ class HybridDataService {
 
       for (const entry of pendingEntries) {
         if (!entry.synced && entry.pendingSync) {
+          // Check if this is a new entry (no previous sync) or an update
           if (!entry.lastModified) {
+            // New entry - add to Google Sheets
             await this.syncSingleEntry(entry);
           } else {
+            // Updated entry - sync the update with complete data
             const updatedData = {
               date: entry.date,
               route: entry.route,
@@ -562,6 +628,7 @@ class HybridDataService {
             };
             await this.syncUpdateToGoogleSheets(entry.entryId, updatedData, entry.type);
           }
+          // Small delay to avoid overwhelming the API
           await new Promise(resolve => setTimeout(resolve, 500));
         }
       }
@@ -570,109 +637,6 @@ class HybridDataService {
 
     } catch (error) {
       console.error('❌ Error syncing pending entries:', error);
-    }
-  }
-
-  // Sync single entry to Google Sheets
-  async syncSingleEntry(entry) {
-    try {
-      let result;
-
-      if (entry.type === 'daily') {
-        result = await authService.addFareReceipt({
-          entryId: entry.entryId,
-          date: entry.date,
-          route: entry.route,
-          cashAmount: entry.cashAmount || 0,
-          bankAmount: entry.bankAmount || 0,
-          totalAmount: entry.totalAmount,
-          submittedBy: entry.submittedBy
-        });
-      } else if (entry.type === 'booking') {
-        result = await authService.addBookingEntry({
-          entryId: entry.entryId,
-          bookingDetails: entry.bookingDetails,
-          dateFrom: entry.dateFrom,
-          dateTo: entry.dateTo,
-          cashAmount: entry.cashAmount || 0,
-          bankAmount: entry.bankAmount || 0,
-          totalAmount: entry.totalAmount,
-          submittedBy: entry.submittedBy
-        });
-      } else if (entry.type === 'off') {
-        result = await authService.addOffDay({
-          entryId: entry.entryId,
-          date: entry.date,
-          reason: entry.reason,
-          submittedBy: entry.submittedBy
-        });
-      }
-
-      if (result && result.success) {
-        const currentData = localStorageService.loadFareData();
-        const updatedData = currentData.map(item => 
-          item.entryId === entry.entryId 
-            ? { ...item, synced: true, pendingSync: false }
-            : item
-        );
-        localStorageService.saveFareData(updatedData);
-        localStorageService.removePendingSync(entry.entryId);
-
-        console.log('✅ Entry synced to Google Sheets:', entry.entryId);
-        return true;
-      } else {
-        throw new Error(result?.error || 'Failed to sync to Google Sheets');
-      }
-
-    } catch (error) {
-      console.error('❌ Error syncing entry:', error);
-      return false;
-    }
-  }
-
-  // Sync update to Google Sheets
-  async syncUpdateToGoogleSheets(entryId, updatedData, entryType) {
-    try {
-      console.log('🔄 Updating in Google Sheets with ID:', entryId);
-
-      let result;
-
-      if (entryType === 'daily') {
-        result = await authService.updateFareReceipt({
-          entryId: entryId,
-          updatedData: updatedData
-        });
-      } else if (entryType === 'booking') {
-        result = await authService.updateBookingEntry({
-          entryId: entryId,
-          updatedData: updatedData
-        });
-      } else if (entryType === 'off') {
-        result = await authService.updateOffDay({
-          entryId: entryId,
-          updatedData: updatedData
-        });
-      }
-
-      if (result && result.success) {
-        const currentData = localStorageService.loadFareData();
-        const updatedLocalData = currentData.map(item => 
-          item.entryId === entryId 
-            ? { ...item, synced: true, pendingSync: false }
-            : item
-        );
-        localStorageService.saveFareData(updatedLocalData);
-        localStorageService.removePendingSync(entryId);
-
-        console.log('✅ Update synced to Google Sheets:', entryId);
-        return true;
-      } else {
-        throw new Error(result?.error || 'Failed to sync update to Google Sheets');
-      }
-
-    } catch (error) {
-      console.error('❌ Error syncing update:', error);
-      return false;
     }
   }
 
@@ -698,6 +662,8 @@ class HybridDataService {
 
       console.log('🔄 Manual sync started...');
       const result = await this.backgroundSync();
+
+      // Also refresh the UI data
       return result;
 
     } catch (error) {
@@ -734,7 +700,7 @@ class HybridDataService {
 
       const cashBookEntry = {
         id: `cb_${fareEntry.entryId}`,
-        date: fareEntry.date || fareEntry.dateFrom,
+        date: fareEntry.date || fareEntry.dateFrom, // Use appropriate date
         type: 'dr', // Fare entries are always debit (income)
         particulars: this.formatCashBookParticulars(fareEntry),
         cashAmount: fareEntry.cashAmount || 0,
@@ -802,7 +768,7 @@ class HybridDataService {
           const cashBookEntry = {
             id: `cb_${fareEntry.entryId}`,
             date: fareEntry.date || fareEntry.dateFrom,
-            type: 'dr',
+            type: 'dr', // Fare entries are always debit (income)
             particulars: this.formatCashBookParticulars(fareEntry),
             cashAmount: fareEntry.cashAmount || 0,
             bankAmount: fareEntry.bankAmount || 0,

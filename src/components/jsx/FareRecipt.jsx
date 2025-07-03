@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import "../css/FareRecipt.css";
 import hybridDataService from '../../services/hybridDataService.js';
@@ -43,9 +42,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         setFareData(localData);
 
         // Calculate total earnings from localStorage data
-        const total = localData
-          .filter(entry => entry.type !== 'off') // Exclude off days from total
-          .reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+        const total = localData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
         setTotalEarnings(total);
 
         console.log('💰 Total earnings calculated from localStorage:', total);
@@ -69,88 +66,45 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
   // Real-time data update listener for immediate UI refresh
   useEffect(() => {
-    const handleInstantDataUpdate = (event) => {
+    const handleInstantDataUpdate = () => {
       console.log('Step 4: Instant data update detected - refreshing UI immediately (FareRecipt component)');
       
       // Load fresh data from localStorage immediately
       const freshData = localStorageService.loadFareData();
-      console.log('📂 Fresh data loaded for FareRecipt:', freshData.length, 'entries');
+      console.log('📂 Fresh data loaded:', freshData.length, 'entries');
       
-      // Force state update with functional setState to ensure React detects change
-      setFareData(prevData => {
-        console.log('🔄 Updating FareRecipt state from', prevData.length, 'to', freshData.length, 'entries');
-        return [...freshData];
-      });
+      setFareData(freshData);
       
-      // Recalculate total earnings with functional setState (exclude off days)
-      setTotalEarnings(prevTotal => {
-        const newTotal = freshData
-          .filter(entry => entry.type !== 'off')
-          .reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
-        console.log('💰 Updated total earnings in FareRecipt from', prevTotal, 'to', newTotal);
-        return newTotal;
-      });
+      // Recalculate total earnings
+      const total = freshData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+      setTotalEarnings(total);
       
-      console.log('🔄 FareRecipt UI state updated successfully');
+      console.log('💰 Updated total earnings:', total);
     };
 
-    // Listen for immediate data updates with immediate execution
-    const handleFareUpdate = (event) => {
-      console.log('🎯 FareRecipt received fareDataUpdated event');
-      if (event.detail && Array.isArray(event.detail)) {
-        console.log('📊 Using event data directly:', event.detail.length, 'entries');
-        setFareData(prevData => [...event.detail]);
-        const newTotal = event.detail
-          .filter(entry => entry.type !== 'off')
-          .reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
-        setTotalEarnings(prevTotal => newTotal);
-      } else {
-        handleInstantDataUpdate(event);
-      }
-    };
-
-    const handleDataUpdate = (event) => {
-      console.log('🎯 FareRecipt received dataUpdated event');
-      if (event.detail && Array.isArray(event.detail)) {
-        console.log('📊 Using event data directly:', event.detail.length, 'entries');
-        setFareData(prevData => [...event.detail]);
-        const newTotal = event.detail
-          .filter(entry => entry.type !== 'off')
-          .reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
-        setTotalEarnings(prevTotal => newTotal);
-      } else {
-        handleInstantDataUpdate(event);
-      }
-    };
-
-    const handleStorageUpdate = (event) => {
-      if (event.key === 'fare_receipts_data') {
-        console.log('🎯 FareRecipt received storage update event');
-        handleInstantDataUpdate(event);
-      }
-    };
-
-    // Add event listeners
-    window.addEventListener('fareDataUpdated', handleFareUpdate);
-    window.addEventListener('dataUpdated', handleDataUpdate);
-    window.addEventListener('storage', handleStorageUpdate);
+    // Listen for immediate data updates
+    window.addEventListener('fareDataUpdated', handleInstantDataUpdate);
+    window.addEventListener('dataUpdated', handleInstantDataUpdate);
+    
+    // Also listen for storage changes for cross-tab sync
+    window.addEventListener('storage', handleInstantDataUpdate);
 
     return () => {
-      window.removeEventListener('fareDataUpdated', handleFareUpdate);
-      window.removeEventListener('dataUpdated', handleDataUpdate);
-      window.removeEventListener('storage', handleStorageUpdate);
+      window.removeEventListener('fareDataUpdated', handleInstantDataUpdate);
+      window.removeEventListener('dataUpdated', handleInstantDataUpdate);
+      window.removeEventListener('storage', handleInstantDataUpdate);
     };
-  }, []);
+  }, [setFareData, setTotalEarnings]);
 
   // Update sync status periodically and on changes
   useEffect(() => {
     const updateSyncStatus = () => {
       const newStatus = hybridDataService.getSyncStatus();
-      setSyncStatus(prevStatus => ({...newStatus}));
+      setSyncStatus(newStatus);
     };
 
     updateSyncStatus();
-    const interval = setInterval(updateSyncStatus, 1000);
+    const interval = setInterval(updateSyncStatus, 1000); // Update every 1 second for better responsiveness
 
     // Listen for custom sync status changes
     const handleSyncStatusChange = () => {
@@ -158,43 +112,32 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     };
 
     // Listen for data updates from background sync
-    const handleBackgroundSyncUpdate = (event) => {
+    const handleDataUpdate = (event) => {
       console.log('📱 Background sync completed, loading fresh data from localStorage...');
 
       // Always load from localStorage for consistent UI
       const freshLocalData = localStorageService.loadFareData();
-      console.log('📂 Fresh data from localStorage for sync update:', freshLocalData.length, 'entries');
+      console.log('📂 Fresh data from localStorage:', freshLocalData.length, 'entries');
 
-      // Force state update with functional setState
-      setFareData(prevData => {
-        console.log('🔄 Background sync updating FareRecipt state from', prevData.length, 'to', freshLocalData.length, 'entries');
-        return [...freshLocalData];
-      });
+      setFareData(freshLocalData);
 
-      // Calculate total earnings from localStorage with functional setState (exclude off days)
-      setTotalEarnings(prevTotal => {
-        const newTotal = freshLocalData
-          .filter(entry => entry.type !== 'off')
-          .reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
-        console.log('💰 Background sync updated total earnings from', prevTotal, 'to', newTotal);
-        return newTotal;
-      });
+      // Calculate total earnings from localStorage
+      const total = freshLocalData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+      setTotalEarnings(total);
 
       // Update sync status immediately
       updateSyncStatus();
-      
-      console.log('🔄 FareRecipt data refreshed after background sync');
     };
 
     window.addEventListener('syncStatusChanged', handleSyncStatusChange);
-    window.addEventListener('dataUpdated', handleBackgroundSyncUpdate);
+    window.addEventListener('dataUpdated', handleDataUpdate);
 
     return () => {
       clearInterval(interval);
       window.removeEventListener('syncStatusChanged', handleSyncStatusChange);
-      window.removeEventListener('dataUpdated', handleBackgroundSyncUpdate);
+      window.removeEventListener('dataUpdated', handleDataUpdate);
     };
-  }, []);
+  }, [setFareData, setTotalEarnings]);
 
   // Function to check if a date is disabled for daily collection
   const isDailyDateDisabled = (selectedDate, selectedRoute) => {
@@ -274,6 +217,30 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     return new Date().toISOString().split('T')[0];
   };
 
+  // Function to get disabled dates for HTML date input
+  const getDisabledDatesForDaily = () => {
+    if (!dailyFareData.route) return [];
+
+    const disabledDates = [];
+    fareData.forEach(entry => {
+      if (editingEntry && entry.entryId === editingEntry.entryId) return;
+
+      if (entry.type === 'daily' && entry.route === dailyFareData.route) {
+        disabledDates.push(entry.date);
+      } else if (entry.type === 'booking') {
+        const startDate = new Date(entry.dateFrom);
+        const endDate = new Date(entry.dateTo);
+        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+          disabledDates.push(d.toISOString().split('T')[0]);
+        }
+      } else if (entry.type === 'off') {
+        disabledDates.push(entry.date);
+      }
+    });
+
+    return disabledDates;
+  };
+
   const routes = [
     "Ghuraka to Bhaderwah",
     "Bhaderwah to Pul Doda", 
@@ -310,10 +277,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         }, fareData);
 
         if (result.success) {
+          // UI instantly updated with localStorage data
           setFareData(result.data);
           setTotalEarnings((prev) => prev - oldTotal + totalAmount);
           setEditingEntry(null);
           
+          // Force update other components immediately
           const updateEvent = new CustomEvent('fareDataUpdated', { detail: result.data });
           window.dispatchEvent(updateEvent);
           
@@ -333,9 +302,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         const result = await hybridDataService.addFareEntry(newEntryData, fareData);
 
         if (result.success) {
+          // UI instantly updated with localStorage data
           setFareData(result.data);
           setTotalEarnings((prev) => prev + totalAmount);
           
+          // Force update other components immediately
           const updateEvent = new CustomEvent('fareDataUpdated', { detail: result.data });
           window.dispatchEvent(updateEvent);
           
@@ -385,10 +356,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         }, fareData);
 
         if (result.success) {
+          // UI instantly updated with localStorage data
           setFareData(result.data);
           setTotalEarnings((prev) => prev - oldTotal + totalAmount);
           setEditingEntry(null);
           
+          // Force update other components immediately
           const updateEvent = new CustomEvent('fareDataUpdated', { detail: result.data });
           window.dispatchEvent(updateEvent);
           
@@ -409,9 +382,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         const result = await hybridDataService.addFareEntry(newEntryData, fareData);
 
         if (result.success) {
+          // UI instantly updated with localStorage data
           setFareData(result.data);
           setTotalEarnings((prev) => prev + totalAmount);
           
+          // Force update other components immediately
           const updateEvent = new CustomEvent('fareDataUpdated', { detail: result.data });
           window.dispatchEvent(updateEvent);
           
@@ -448,9 +423,6 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         if (result.success) {
           setFareData(result.data);
           setEditingEntry(null);
-          
-          const updateEvent = new CustomEvent('fareDataUpdated', { detail: result.data });
-          window.dispatchEvent(updateEvent);
         }
       } else {
         // Create new entry using hybrid service
@@ -466,8 +438,10 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         const result = await hybridDataService.addFareEntry(newEntryData, fareData);
 
         if (result.success) {
+          // UI instantly updated with localStorage data
           setFareData(result.data);
           
+          // Force update other components immediately
           const updateEvent = new CustomEvent('fareDataUpdated', { detail: result.data });
           window.dispatchEvent(updateEvent);
           
@@ -492,12 +466,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       if (result.success) {
         setFareData(result.data);
 
-        if (entryToDelete && entryToDelete.totalAmount && entryToDelete.type !== 'off') {
+        if (entryToDelete && entryToDelete.totalAmount) {
           setTotalEarnings((prev) => prev - entryToDelete.totalAmount);
         }
 
         // Remove corresponding cash book entry
-        setCashBookEntries(prev => prev.filter(entry => entry.sourceId !== entryId));
+        setCashBookEntries(prev => prev.filter(entry => entry.source === 'fare-entry' && !entry.jfNo?.includes(entryId.toString())));
       }
     } catch (error) {
       console.error('Error deleting entry:', error);
@@ -548,18 +522,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
     // Filter data by current user only
     const userFareData = fareData.filter(entry => 
-      entry.submittedBy === currentUserName ||
-      (!entry.submittedBy && entry.type) // Handle entries without submittedBy
+      entry.submittedBy === currentUserName
     );
 
-    const totalCash = userFareData
-      .filter(entry => entry.type !== 'off')
-      .reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
-    
-    const totalBank = userFareData
-      .filter(entry => entry.type !== 'off')
-      .reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
-    
+    const totalCash = userFareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
+    const totalBank = userFareData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
     const grandTotal = totalCash + totalBank;
 
     return { totalCash, totalBank, grandTotal };
@@ -575,6 +542,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                 <div>
                   <h2><i className="bi bi-receipt"></i> Fare Receipt Entry</h2>
                   <p>Record your daily earnings and bookings (Income)</p>
+
                 </div>
                 <div className="sync-status">
                   <div className={`simple-sync-indicator ${syncStatus.pendingSync > 0 || syncStatus.syncInProgress || isLoading ? 'syncing' : 'synced'}`}>
@@ -616,8 +584,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
               // Filter entries by current user only
               const userEntries = fareData.filter(entry => 
-                entry.submittedBy === currentUserName ||
-                (!entry.submittedBy && entry.type)
+                entry.submittedBy === currentUserName
               );
 
               return userEntries.length > 0 ? (
@@ -946,8 +913,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
               // Filter entries by current user
               const userEntries = fareData.filter(entry => 
-                entry.submittedBy === currentUserName ||
-                (!entry.submittedBy && entry.type)
+                entry.submittedBy === currentUserName
               );
 
               return userEntries.length > 0 ? (
@@ -968,7 +934,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                                   className="btn btn-sm btn-edit" 
                                   onClick={() => handleEditEntry(entry)}
                                   title="Edit Entry"
-                                >
+                                                               >
                                   <i className="bi bi-pencil"></i>
                                 </button>
                                 <button 
