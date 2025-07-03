@@ -800,18 +800,18 @@ function deleteOffDay(data) {
 
 /**
  * Add new Fuel Payment
- * Columns: A=Timestamp, B=Date, C=PumpName, D=Liters, E=Rate, F=CashAmount, G=BankAmount, H=TotalAmount, I=EntryType, J=EntryId, K=SubmittedBy
+ * Columns: A=Timestamp, B=Date, C=PumpName, D=Liters, E=RatePerLiter, F=CashAmount, G=BankAmount, H=TotalAmount, I=Remarks, J=SubmittedBy, K=EntryType, L=EntryId
  */
 function addFuelPayment(data) {
   try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("FuelPayments");
+    let sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("FuelPayments");
 
     // Create sheet if it doesn't exist
     if (!sheet) {
-      const newSheet = SpreadsheetApp.openById(SPREADSHEET_ID).insertSheet("FuelPayments");
-      // Add headers
-      newSheet.getRange(1, 1, 1, 11).setValues([[
-        "Timestamp", "Date", "PumpName", "Liters", "Rate", "CashAmount", "BankAmount", "TotalAmount", "EntryType", "EntryId", "SubmittedBy"
+      sheet = SpreadsheetApp.openById(SPREADSHEET_ID).insertSheet("FuelPayments");
+      // Add headers exactly as you specified
+      sheet.getRange(1, 1, 1, 12).setValues([[
+        "Timestamp", "Date", "PumpName", "Liters", "RatePerLiter", "CashAmount", "BankAmount", "TotalAmount", "Remarks", "SubmittedBy", "EntryType", "EntryId"
       ]]);
     }
 
@@ -820,18 +820,19 @@ function addFuelPayment(data) {
 
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
-    sheet.getRange(2, 1, 1, 11).setValues([[
+    sheet.getRange(2, 1, 1, 12).setValues([[
       timeOnly, // A: Time only in IST (HH:MM:SS AM/PM)
       data.date, // B: Date from frontend in IST
       data.pumpName || "", // C: PumpName
       data.liters || "", // D: Liters
-      data.rate || "", // E: Rate
+      data.rate || "", // E: RatePerLiter
       data.cashAmount || 0, // F: CashAmount
       data.bankAmount || 0, // G: BankAmount
       data.totalAmount || 0, // H: TotalAmount
-      "fuel", // I: EntryType
-      entryId, // J: EntryId
-      data.submittedBy || "", // K: SubmittedBy
+      data.remarks || "", // I: Remarks
+      data.submittedBy || "", // J: SubmittedBy
+      "fuel", // K: EntryType
+      entryId, // L: EntryId
     ]]);
 
     return {
@@ -865,17 +866,18 @@ function getFuelPayments() {
 
     const data = values.slice(1).map((row, index) => {
       const rowData = {
-        entryId: row[9], // Entry ID from column J
+        entryId: row[11], // Entry ID from column L
         timestamp: String(row[0] || ''), // Convert timestamp to string
         date: String(row[1] || ''), // Convert date to string
         pumpName: row[2], // Pump name from column C
         liters: row[3], // Liters from column D
-        rate: row[4], // Rate from column E
+        rate: row[4], // Rate from column E (RatePerLiter)
         cashAmount: row[5], // Cash amount from column F
         bankAmount: row[6], // Bank amount from column G
         totalAmount: row[7], // Total amount from column H
-        entryType: row[8], // Static entry type
-        submittedBy: row[10], // Submitted by from column K
+        remarks: row[8], // Remarks from column I
+        submittedBy: row[9], // Submitted by from column J
+        entryType: row[10], // Entry type from column K
         rowIndex: index + 2, // Store row index for updates/deletes
       };
       return rowData;
@@ -906,7 +908,7 @@ function updateFuelPayment(data) {
       throw new Error('FuelPayments sheet not found');
     }
 
-    const entryIdColumn = 10; // Column J
+    const entryIdColumn = 12; // Column L
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
@@ -934,7 +936,7 @@ function updateFuelPayment(data) {
       sheet.getRange(rowIndex, 4).setValue(updatedData.liters); // D: Liters
     }
     if (updatedData.rate !== undefined) {
-      sheet.getRange(rowIndex, 5).setValue(updatedData.rate); // E: Rate
+      sheet.getRange(rowIndex, 5).setValue(updatedData.rate); // E: RatePerLiter
     }
     if (updatedData.cashAmount !== undefined) {
       sheet.getRange(rowIndex, 6).setValue(updatedData.cashAmount); // F: CashAmount
@@ -944,6 +946,9 @@ function updateFuelPayment(data) {
     }
     if (updatedData.totalAmount !== undefined) {
       sheet.getRange(rowIndex, 8).setValue(updatedData.totalAmount); // H: TotalAmount
+    }
+    if (updatedData.remarks !== undefined) {
+      sheet.getRange(rowIndex, 9).setValue(updatedData.remarks); // I: Remarks
     }
 
     return {
@@ -977,7 +982,7 @@ function deleteFuelPayment(data) {
       throw new Error('FuelPayments sheet not found');
     }
 
-    const entryIdColumn = 10; // Column J
+    const entryIdColumn = 12; // Column L
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
