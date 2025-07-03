@@ -1,3 +1,4 @@
+
 import authService from './authService.js';
 
 // Online-Only Data Service - Direct Google Sheets Integration
@@ -5,7 +6,6 @@ class DataService {
   constructor() {
     this.isOnline = navigator.onLine;
 
-    // Listen for online/offline events
     window.addEventListener('online', () => {
       this.isOnline = true;
       console.log('🌐 Back online');
@@ -17,27 +17,23 @@ class DataService {
     });
   }
 
-  // Check if online before any operation
   checkOnlineStatus() {
     if (!this.isOnline) {
       throw new Error('No internet connection. Please check your network and try again.');
     }
   }
 
-  // Initialize data - Load directly from Google Sheets
   async initializeData() {
     try {
       this.checkOnlineStatus();
       console.log('🚀 Loading data from Google Sheets...');
 
-      // Get all data from Google Sheets
       const [fareReceipts, bookingEntries, offDays] = await Promise.all([
         authService.getFareReceipts(),
         authService.getBookingEntries(),
         authService.getOffDays()
       ]);
 
-      // Combine all data with proper type
       let allData = [];
 
       if (fareReceipts.success && fareReceipts.data) {
@@ -69,58 +65,61 @@ class DataService {
 
     } catch (error) {
       console.error('❌ Error loading data from Google Sheets:', error);
-      if (!this.isOnline) {
-        throw new Error('No internet connection. Cannot load data.');
-      }
       throw error;
     }
   }
 
-  // Add new fare entry - Direct to Google Sheets
-  async addFareEntry(entryData, currentFareData) {
+  async addFareEntry(entryData) {
     try {
       this.checkOnlineStatus();
+
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
 
       let result;
       const newEntry = {
         ...entryData,
         entryId: Date.now(),
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        submittedBy: submittedBy
       };
 
-      // Add to appropriate Google Sheet based on type
       if (entryData.type === 'daily') {
         result = await authService.addFareReceipt({
+          entryId: newEntry.entryId,
+          timestamp: newEntry.timestamp,
           date: entryData.date,
           route: entryData.route,
           cashAmount: entryData.cashAmount || 0,
           bankAmount: entryData.bankAmount || 0,
           totalAmount: entryData.totalAmount,
-          submittedBy: 'driver'
+          submittedBy: submittedBy
         });
       } else if (entryData.type === 'booking') {
         result = await authService.addBookingEntry({
+          entryId: newEntry.entryId,
+          timestamp: newEntry.timestamp,
           bookingDetails: entryData.bookingDetails,
           dateFrom: entryData.dateFrom,
           dateTo: entryData.dateTo,
           cashAmount: entryData.cashAmount || 0,
           bankAmount: entryData.bankAmount || 0,
           totalAmount: entryData.totalAmount,
-          submittedBy: 'driver'
+          submittedBy: submittedBy
         });
       } else if (entryData.type === 'off') {
         result = await authService.addOffDay({
+          entryId: newEntry.entryId,
+          timestamp: newEntry.timestamp,
           date: entryData.date,
           reason: entryData.reason,
-          submittedBy: 'driver'
+          submittedBy: submittedBy
         });
       }
 
       if (result && result.success) {
-        // Add to current data array for immediate UI update
-        const updatedData = [newEntry, ...currentFareData];
         console.log('✅ Entry added to Google Sheets successfully');
-        return { success: true, data: updatedData, entry: newEntry };
+        return { success: true, entry: newEntry };
       } else {
         throw new Error(result?.error || 'Failed to add entry to Google Sheets');
       }
@@ -131,30 +130,32 @@ class DataService {
     }
   }
 
-  // Update existing entry - Direct to Google Sheets
-  async updateFareEntry(entryId, updatedData, currentFareData) {
+  async updateFareEntry(entryId, updatedData, entryType) {
     try {
       this.checkOnlineStatus();
 
-      // Find the entry to get its type
-      const existingEntry = currentFareData.find(entry => entry.entryId === entryId);
-      if (!existingEntry) {
-        throw new Error('Entry not found');
+      let result;
+
+      if (entryType === 'daily') {
+        result = await authService.updateFareReceipt({
+          entryId: entryId,
+          updatedData: updatedData
+        });
+      } else if (entryType === 'booking') {
+        result = await authService.updateBookingEntry({
+          entryId: entryId,
+          updatedData: updatedData
+        });
+      } else if (entryType === 'off') {
+        result = await authService.updateOffDay({
+          entryId: entryId,
+          updatedData: updatedData
+        });
       }
 
-      // Update in Google Sheets
-      const result = await authService.updateFareEntry(entryId, updatedData, existingEntry.type);
-
       if (result && result.success) {
-        // Update local data for immediate UI refresh
-        const updatedFareData = currentFareData.map(entry => 
-          entry.entryId === entryId 
-            ? { ...entry, ...updatedData, lastModified: new Date().toISOString() }
-            : entry
-        );
-
         console.log('✅ Entry updated in Google Sheets successfully');
-        return { success: true, data: updatedFareData };
+        return { success: true };
       } else {
         throw new Error(result?.error || 'Failed to update entry in Google Sheets');
       }
@@ -165,26 +166,29 @@ class DataService {
     }
   }
 
-  // Delete entry - Remove from Google Sheets
-  async deleteFareEntry(entryId, currentFareData) {
+  async deleteFareEntry(entryId, entryType) {
     try {
       this.checkOnlineStatus();
 
-      // Find the entry to get its type
-      const existingEntry = currentFareData.find(entry => entry.entryId === entryId);
-      if (!existingEntry) {
-        throw new Error('Entry not found');
+      let result;
+
+      if (entryType === 'daily') {
+        result = await authService.deleteFareReceipt({
+          entryId: entryId
+        });
+      } else if (entryType === 'booking') {
+        result = await authService.deleteBookingEntry({
+          entryId: entryId
+        });
+      } else if (entryType === 'off') {
+        result = await authService.deleteOffDay({
+          entryId: entryId
+        });
       }
 
-      // Delete from Google Sheets
-      const result = await authService.deleteFareEntry(entryId, existingEntry.type);
-
       if (result && result.success) {
-        // Remove from local data for immediate UI update
-        const updatedData = currentFareData.filter(entry => entry.entryId !== entryId);
-
         console.log('✅ Entry deleted from Google Sheets successfully');
-        return { success: true, data: updatedData };
+        return { success: true };
       } else {
         throw new Error(result?.error || 'Failed to delete entry from Google Sheets');
       }
@@ -195,18 +199,16 @@ class DataService {
     }
   }
 
-  // Get connection status
   getSyncStatus() {
     return {
       isOnline: this.isOnline,
-      pendingSync: 0, // No pending sync in online-only mode
+      pendingSync: 0,
       lastSync: new Date().toISOString(),
       syncInProgress: false
     };
   }
 
-  // Manual refresh from Google Sheets
-  async forcSync() {
+  async forceSync() {
     try {
       this.checkOnlineStatus();
       console.log('🔄 Refreshing data from Google Sheets...');

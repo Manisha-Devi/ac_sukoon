@@ -7,10 +7,12 @@ class SimpleDataService {
     
     window.addEventListener('online', () => {
       this.isOnline = true;
+      console.log('🌐 Back online');
     });
 
     window.addEventListener('offline', () => {
       this.isOnline = false;
+      console.log('📴 Gone offline');
     });
   }
 
@@ -54,6 +56,7 @@ class SimpleDataService {
         }))];
       }
 
+      // Sort by timestamp (newest first)
       allData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
       console.log('✅ Data loaded from Google Sheets:', allData.length, 'entries');
@@ -69,6 +72,7 @@ class SimpleDataService {
     try {
       this.checkOnlineStatus();
 
+      // Get user data from localStorage (only for user info)
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
 
@@ -84,7 +88,7 @@ class SimpleDataService {
         result = await authService.addFareReceipt({
           entryId: newEntry.entryId,
           timestamp: newEntry.timestamp,
-          date: entryData.date, // Already in YYYY-MM-DD format from form
+          date: entryData.date,
           route: entryData.route,
           cashAmount: entryData.cashAmount || 0,
           bankAmount: entryData.bankAmount || 0,
@@ -96,8 +100,8 @@ class SimpleDataService {
           entryId: newEntry.entryId,
           timestamp: newEntry.timestamp,
           bookingDetails: entryData.bookingDetails,
-          dateFrom: entryData.dateFrom, // Already in YYYY-MM-DD format from form
-          dateTo: entryData.dateTo, // Already in YYYY-MM-DD format from form
+          dateFrom: entryData.dateFrom,
+          dateTo: entryData.dateTo,
           cashAmount: entryData.cashAmount || 0,
           bankAmount: entryData.bankAmount || 0,
           totalAmount: entryData.totalAmount,
@@ -107,7 +111,7 @@ class SimpleDataService {
         result = await authService.addOffDay({
           entryId: newEntry.entryId,
           timestamp: newEntry.timestamp,
-          date: entryData.date, // Already in YYYY-MM-DD format from form
+          date: entryData.date,
           reason: entryData.reason,
           submittedBy: submittedBy
         });
@@ -130,7 +134,24 @@ class SimpleDataService {
     try {
       this.checkOnlineStatus();
 
-      const result = await authService.updateFareEntry(entryId, updatedData, entryType);
+      let result;
+
+      if (entryType === 'daily') {
+        result = await authService.updateFareReceipt({
+          entryId: entryId,
+          updatedData: updatedData
+        });
+      } else if (entryType === 'booking') {
+        result = await authService.updateBookingEntry({
+          entryId: entryId,
+          updatedData: updatedData
+        });
+      } else if (entryType === 'off') {
+        result = await authService.updateOffDay({
+          entryId: entryId,
+          updatedData: updatedData
+        });
+      }
 
       if (result && result.success) {
         console.log('✅ Entry updated in Google Sheets successfully');
@@ -149,31 +170,49 @@ class SimpleDataService {
     try {
       this.checkOnlineStatus();
 
-      console.log('🗑️ Attempting to delete entry from Google Sheets:', { entryId, entryType });
+      let result;
 
-      const result = await authService.deleteFareEntry(entryId, entryType);
+      if (entryType === 'daily') {
+        result = await authService.deleteFareReceipt({
+          entryId: entryId
+        });
+      } else if (entryType === 'booking') {
+        result = await authService.deleteBookingEntry({
+          entryId: entryId
+        });
+      } else if (entryType === 'off') {
+        result = await authService.deleteOffDay({
+          entryId: entryId
+        });
+      }
 
       if (result && result.success) {
         console.log('✅ Entry deleted from Google Sheets successfully:', entryId);
         return { success: true, message: 'Entry deleted successfully' };
       } else {
-        // Log the error but don't throw - let the optimistic update stand
         console.warn('⚠️ Failed to delete from Google Sheets:', result?.error || 'Unknown error');
         return { 
           success: false, 
-          error: result?.error || 'Failed to delete entry from Google Sheets',
-          note: 'Entry was removed locally but Google Sheets sync failed'
+          error: result?.error || 'Failed to delete entry from Google Sheets'
         };
       }
 
     } catch (error) {
-      console.warn('⚠️ Delete sync error (entry removed locally):', error.message);
+      console.warn('⚠️ Delete sync error:', error.message);
       return { 
         success: false, 
-        error: error.message,
-        note: 'Entry was removed locally but Google Sheets sync failed'
+        error: error.message
       };
     }
+  }
+
+  getSyncStatus() {
+    return {
+      isOnline: this.isOnline,
+      pendingSync: 0,
+      lastSync: new Date().toISOString(),
+      syncInProgress: false
+    };
   }
 }
 
