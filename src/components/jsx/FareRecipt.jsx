@@ -913,7 +913,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
             <div className="recent-entries mt-4">
               <h4>Recent Entries</h4>
               <div className="row">
-                {userEntries.slice(-6).reverse().map((entry) => (
+                {userEntries.slice(0, 6).map((entry) => (
                   <div key={entry.entryId} className="col-md-6 col-lg-4 mb-3">
                     <div className="entry-card">
                       <div className="card-body">
