@@ -209,13 +209,6 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     e.preventDefault();
     setIsLoading(true);
 
-    // Check internet connection first
-    if (!navigator.onLine) {
-      alert("No internet connection. Please check your network and try again.");
-      setIsLoading(false);
-      return;
-    }
-
     try {
       // Validate if date is disabled
       if (isDailyDateDisabled(dailyFareData.date, dailyFareData.route)) {
@@ -257,25 +250,10 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         const result = await hybridDataService.addFareEntry(newEntryData, fareData);
 
         if (result.success) {
+          // UI instantly updated with localStorage data
           setFareData(result.data);
           setTotalEarnings((prev) => prev + totalAmount);
-
-          // Add to cash book - receipts go to Dr. side
-          if (cashAmount > 0 || bankAmount > 0) {
-            const cashBookEntry = {
-              id: Date.now() + 1,
-              date: dailyFareData.date,
-              particulars: "Fare",
-              description: `Daily fare collection - ${dailyFareData.route}`,
-              jfNo: `FARE-${Date.now()}`,
-              cashAmount: cashAmount,
-              bankAmount: bankAmount,
-              type: 'dr', // Receipts go to Dr. side
-              timestamp: new Date().toISOString(),
-              source: 'fare-entry'
-            };
-            setCashBookEntries(prev => [cashBookEntry, ...prev]);
-          }
+          console.log('✅ Daily entry added instantly - UI updated!');
         }
       }
       setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
@@ -290,13 +268,6 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // Check internet connection first
-    if (!navigator.onLine) {
-      alert("No internet connection. Please check your network and try again.");
-      setIsLoading(false);
-      return;
-    }
 
     try {
       // Validate date range for conflicts
@@ -347,25 +318,10 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         const result = await hybridDataService.addFareEntry(newEntryData, fareData);
 
         if (result.success) {
+          // UI instantly updated with localStorage data
           setFareData(result.data);
           setTotalEarnings((prev) => prev + totalAmount);
-
-          // Add to cash book - receipts go to Dr. side  
-          if (cashAmount > 0 || bankAmount > 0) {
-            const cashBookEntry = {
-              id: Date.now() + 1,
-              date: bookingData.dateFrom,
-              particulars: "Fare",
-              description: `Booking fare - ${bookingData.bookingDetails}`,
-              jfNo: `BOOKING-${Date.now()}`,
-              cashAmount: cashAmount,
-              bankAmount: bankAmount,
-              type: 'dr', // Receipts go to Dr. side
-              timestamp: new Date().toISOString(),
-              source: 'fare-entry'
-            };
-            setCashBookEntries(prev => [cashBookEntry, ...prev]);
-          }
+          console.log('✅ Booking entry added instantly - UI updated!');
         }
       }
       setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
@@ -380,13 +336,6 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
   const handleOffDaySubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // Check internet connection first
-    if (!navigator.onLine) {
-      alert("No internet connection. Please check your network and try again.");
-      setIsLoading(false);
-      return;
-    }
 
     try {
       // Validate if date is disabled
@@ -420,7 +369,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         const result = await hybridDataService.addFareEntry(newEntryData, fareData);
 
         if (result.success) {
+          // UI instantly updated with localStorage data
           setFareData(result.data);
+          console.log('✅ Off day entry added instantly - UI updated!');
         }
       }
       setOffDayData({ date: "", reason: "" });
