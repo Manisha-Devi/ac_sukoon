@@ -64,6 +64,38 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     initializeData();
   }, [setFareData, setTotalEarnings]);
 
+  // Real-time data update listener for immediate UI refresh
+  useEffect(() => {
+    const handleInstantDataUpdate = () => {
+      console.log('📱 Instant data update detected - refreshing UI immediately');
+      
+      // Load fresh data from localStorage immediately
+      const freshData = localStorageService.loadFareData();
+      console.log('📂 Fresh data loaded:', freshData.length, 'entries');
+      
+      setFareData(freshData);
+      
+      // Recalculate total earnings
+      const total = freshData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+      setTotalEarnings(total);
+      
+      console.log('💰 Updated total earnings:', total);
+    };
+
+    // Listen for immediate data updates
+    window.addEventListener('fareDataUpdated', handleInstantDataUpdate);
+    window.addEventListener('dataUpdated', handleInstantDataUpdate);
+    
+    // Also listen for storage changes for cross-tab sync
+    window.addEventListener('storage', handleInstantDataUpdate);
+
+    return () => {
+      window.removeEventListener('fareDataUpdated', handleInstantDataUpdate);
+      window.removeEventListener('dataUpdated', handleInstantDataUpdate);
+      window.removeEventListener('storage', handleInstantDataUpdate);
+    };
+  }, [setFareData, setTotalEarnings]);
+
   // Update sync status periodically and on changes
   useEffect(() => {
     const updateSyncStatus = () => {
