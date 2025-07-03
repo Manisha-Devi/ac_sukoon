@@ -150,76 +150,86 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     try {
       if (isDailyDateDisabled(dailyFareData.date, dailyFareData.route)) {
         alert('This date is already taken for this route or conflicts with existing bookings/off days!');
+        setIsLoading(false);
         return;
       }
 
       const cashAmount = parseInt(dailyFareData.cashAmount) || 0;
       const bankAmount = parseInt(dailyFareData.bankAmount) || 0;
       const totalAmount = cashAmount + bankAmount;
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
 
       if (editingEntry) {
+        // UPDATE: First update React state immediately
         const oldTotal = editingEntry.totalAmount;
-        const result = await simpleDataService.updateFareEntry(editingEntry.entryId, {
+        const updatedData = fareData.map(entry => 
+          entry.entryId === editingEntry.entryId 
+            ? { ...entry, 
+                route: dailyFareData.route,
+                cashAmount: cashAmount,
+                bankAmount: bankAmount,
+                totalAmount: totalAmount,
+                date: dailyFareData.date,
+              }
+            : entry
+        );
+
+        setFareData(updatedData);
+        setTotalEarnings((prev) => prev - oldTotal + totalAmount);
+        setEditingEntry(null);
+        setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
+        setIsLoading(false);
+
+        // Then sync to Google Sheets in background
+        simpleDataService.updateFareEntry(editingEntry.entryId, {
           route: dailyFareData.route,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
           totalAmount: totalAmount,
           date: dailyFareData.date,
-        }, editingEntry.type);
+        }, editingEntry.type).catch(error => {
+          console.error('Background update sync failed:', error);
+          // Could add a retry mechanism or show a subtle notification
+        });
 
-        if (result.success) {
-          const updatedData = fareData.map(entry => 
-            entry.entryId === editingEntry.entryId 
-              ? { ...entry, ...{
-                  route: dailyFareData.route,
-                  cashAmount: cashAmount,
-                  bankAmount: bankAmount,
-                  totalAmount: totalAmount,
-                  date: dailyFareData.date,
-                }}
-              : entry
-          );
-
-          setFareData(updatedData);
-          setTotalEarnings((prev) => prev - oldTotal + totalAmount);
-          setEditingEntry(null);
-        }
       } else {
-        const newEntryData = {
+        // ADD: First create entry and update React state immediately
+        const newEntry = {
+          entryId: Date.now(),
+          timestamp: new Date().toISOString(),
           type: "daily",
           route: dailyFareData.route,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
           totalAmount: totalAmount,
           date: dailyFareData.date,
+          submittedBy: submittedBy
         };
 
-        const result = await simpleDataService.addFareEntry(newEntryData);
+        const updatedData = [newEntry, ...fareData];
+        setFareData(updatedData);
+        setTotalEarnings((prev) => prev + totalAmount);
+        setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
+        setIsLoading(false);
 
-        if (result.success) {
-          const updatedData = [result.entry, ...fareData];
-          setFareData(updatedData);
-          setTotalEarnings((prev) => prev + totalAmount);
-        } else {
-          if (result.error && result.error.includes('timeout')) {
-            alert('⏰ The request is taking longer than usual. Please check your internet connection and try again. Your data might still be saved.');
-          } else if (result.error && result.error.includes('temporarily unavailable')) {
-            alert('⚠️ Server is temporarily unavailable. Your data has been saved locally and will sync when the server is available.');
-          } else {
-            alert(`❌ Error saving data: ${result.error || 'Unknown error'}. Please try again.`);
-          }
-        }
+        // Then sync to Google Sheets in background
+        simpleDataService.addFareEntry({
+          type: "daily",
+          route: dailyFareData.route,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
+          totalAmount: totalAmount,
+          date: dailyFareData.date,
+        }).catch(error => {
+          console.error('Background add sync failed:', error);
+          // Could add a retry mechanism or show a subtle notification
+        });
       }
-      setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
     } catch (error) {
       console.error('Error submitting daily fare:', error);
-      if (error.message && error.message.includes('timeout')) {
-        alert('⏰ Request timeout. Please check your internet connection and try again.');
-      } else {
-        alert(`❌ Error saving data: ${error.message || 'Unknown error'}. Please try again.`);
-      }
-    } finally {
       setIsLoading(false);
+      alert(`❌ Error saving data: ${error.message || 'Unknown error'}. Please try again.`);
     }
   };
 
@@ -235,6 +245,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         const dateStr = d.toISOString().split('T')[0];
         if (isBookingDateDisabled(dateStr)) {
           alert(`Date ${dateStr} conflicts with existing daily collection or off day entries!`);
+          setIsLoading(false);
           return;
         }
       }
@@ -242,38 +253,48 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const cashAmount = parseInt(bookingData.cashAmount) || 0;
       const bankAmount = parseInt(bookingData.bankAmount) || 0;
       const totalAmount = cashAmount + bankAmount;
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
 
       if (editingEntry) {
+        // UPDATE: First update React state immediately
         const oldTotal = editingEntry.totalAmount;
-        const result = await simpleDataService.updateFareEntry(editingEntry.entryId, {
+        const updatedData = fareData.map(entry => 
+          entry.entryId === editingEntry.entryId 
+            ? { ...entry,
+                bookingDetails: bookingData.bookingDetails,
+                cashAmount: cashAmount,
+                bankAmount: bankAmount,
+                totalAmount: totalAmount,
+                dateFrom: bookingData.dateFrom,
+                dateTo: bookingData.dateTo,
+              }
+            : entry
+        );
+
+        setFareData(updatedData);
+        setTotalEarnings((prev) => prev - oldTotal + totalAmount);
+        setEditingEntry(null);
+        setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
+        setIsLoading(false);
+
+        // Then sync to Google Sheets in background
+        simpleDataService.updateFareEntry(editingEntry.entryId, {
           bookingDetails: bookingData.bookingDetails,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
           totalAmount: totalAmount,
           dateFrom: bookingData.dateFrom,
           dateTo: bookingData.dateTo,
-        }, editingEntry.type);
+        }, editingEntry.type).catch(error => {
+          console.error('Background booking update sync failed:', error);
+        });
 
-        if (result.success) {
-          const updatedData = fareData.map(entry => 
-            entry.entryId === editingEntry.entryId 
-              ? { ...entry, ...{
-                  bookingDetails: bookingData.bookingDetails,
-                  cashAmount: cashAmount,
-                  bankAmount: bankAmount,
-                  totalAmount: totalAmount,
-                  dateFrom: bookingData.dateFrom,
-                  dateTo: bookingData.dateTo,
-                }}
-              : entry
-          );
-
-          setFareData(updatedData);
-          setTotalEarnings((prev) => prev - oldTotal + totalAmount);
-          setEditingEntry(null);
-        }
       } else {
-        const newEntryData = {
+        // ADD: First create entry and update React state immediately
+        const newEntry = {
+          entryId: Date.now(),
+          timestamp: new Date().toISOString(),
           type: "booking",
           bookingDetails: bookingData.bookingDetails,
           cashAmount: cashAmount,
@@ -281,34 +302,32 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           totalAmount: totalAmount,
           dateFrom: bookingData.dateFrom,
           dateTo: bookingData.dateTo,
+          submittedBy: submittedBy
         };
 
-        const result = await simpleDataService.addFareEntry(newEntryData);
+        const updatedData = [newEntry, ...fareData];
+        setFareData(updatedData);
+        setTotalEarnings((prev) => prev + totalAmount);
+        setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
+        setIsLoading(false);
 
-        if (result.success) {
-          const updatedData = [result.entry, ...fareData];
-          setFareData(updatedData);
-          setTotalEarnings((prev) => prev + totalAmount);
-        } else {
-          if (result.error && result.error.includes('timeout')) {
-            alert('⏰ The request is taking longer than usual. Please check your internet connection and try again. Your data might still be saved.');
-          } else if (result.error && result.error.includes('temporarily unavailable')) {
-            alert('⚠️ Server is temporarily unavailable. Your data has been saved locally and will sync when the server is available.');
-          } else {
-            alert(`❌ Error saving data: ${result.error || 'Unknown error'}. Please try again.`);
-          }
-        }
+        // Then sync to Google Sheets in background
+        simpleDataService.addFareEntry({
+          type: "booking",
+          bookingDetails: bookingData.bookingDetails,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
+          totalAmount: totalAmount,
+          dateFrom: bookingData.dateFrom,
+          dateTo: bookingData.dateTo,
+        }).catch(error => {
+          console.error('Background booking add sync failed:', error);
+        });
       }
-      setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
     } catch (error) {
       console.error('Error submitting booking entry:', error);
-      if (error.message && error.message.includes('timeout')) {
-        alert('⏰ Request timeout. Please check your internet connection and try again.');
-      } else {
-        alert(`❌ Error saving data: ${error.message || 'Unknown error'}. Please try again.`);
-      }
-    } finally {
       setIsLoading(false);
+      alert(`❌ Error saving data: ${error.message || 'Unknown error'}. Please try again.`);
     }
   };
 
@@ -319,78 +338,97 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     try {
       if (isOffDayDateDisabled(offDayData.date)) {
         alert('This date conflicts with existing daily collection or booking entries!');
+        setIsLoading(false);
         return;
       }
 
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+
       if (editingEntry) {
-        const result = await simpleDataService.updateFareEntry(editingEntry.entryId, {
+        // UPDATE: First update React state immediately
+        const updatedData = fareData.map(entry => 
+          entry.entryId === editingEntry.entryId 
+            ? { ...entry, date: offDayData.date, reason: offDayData.reason }
+            : entry
+        );
+        setFareData(updatedData);
+        setEditingEntry(null);
+        setOffDayData({ date: "", reason: "" });
+        setIsLoading(false);
+
+        // Then sync to Google Sheets in background
+        simpleDataService.updateFareEntry(editingEntry.entryId, {
           date: offDayData.date,
           reason: offDayData.reason
-        }, editingEntry.type);
+        }, editingEntry.type).catch(error => {
+          console.error('Background off day update sync failed:', error);
+        });
 
-        if (result.success) {
-          const updatedData = fareData.map(entry => 
-            entry.entryId === editingEntry.entryId 
-              ? { ...entry, date: offDayData.date, reason: offDayData.reason }
-              : entry
-          );
-          setFareData(updatedData);
-          setEditingEntry(null);
-        }
       } else {
-        const newEntryData = {
+        // ADD: First create entry and update React state immediately
+        const newEntry = {
+          entryId: Date.now(),
+          timestamp: new Date().toISOString(),
           type: "off",
           date: offDayData.date,
           reason: offDayData.reason,
           cashAmount: 0,
           bankAmount: 0,
           totalAmount: 0,
+          submittedBy: submittedBy
         };
 
-        const result = await simpleDataService.addFareEntry(newEntryData);
+        const updatedData = [newEntry, ...fareData];
+        setFareData(updatedData);
+        setOffDayData({ date: "", reason: "" });
+        setIsLoading(false);
 
-        if (result.success) {
-          const updatedData = [result.entry, ...fareData];
-          setFareData(updatedData);
-        } else {
-          if (result.error && result.error.includes('timeout')) {
-            alert('⏰ The request is taking longer than usual. Please check your internet connection and try again. Your data might still be saved.');
-          } else if (result.error && result.error.includes('temporarily unavailable')) {
-            alert('⚠️ Server is temporarily unavailable. Your data has been saved locally and will sync when the server is available.');
-          } else {
-            alert(`❌ Error saving data: ${result.error || 'Unknown error'}. Please try again.`);
-          }
-        }
+        // Then sync to Google Sheets in background
+        simpleDataService.addFareEntry({
+          type: "off",
+          date: offDayData.date,
+          reason: offDayData.reason,
+          cashAmount: 0,
+          bankAmount: 0,
+          totalAmount: 0,
+        }).catch(error => {
+          console.error('Background off day add sync failed:', error);
+        });
       }
-      setOffDayData({ date: "", reason: "" });
     } catch (error) {
       console.error('Error submitting off day:', error);
-      if (error.message && error.message.includes('timeout')) {
-        alert('⏰ Request timeout. Please check your internet connection and try again.');
-      } else {
-        alert(`❌ Error saving data: ${error.message || 'Unknown error'}. Please try again.`);
-      }
-    } finally {
       setIsLoading(false);
+      alert(`❌ Error saving data: ${error.message || 'Unknown error'}. Please try again.`);
     }
   };
 
   const handleDeleteEntry = async (entryId) => {
     try {
       const entryToDelete = fareData.find(entry => entry.entryId === entryId);
-
-      const result = await simpleDataService.deleteFareEntry(entryId, entryToDelete.type);
-
-      if (result.success) {
-        const updatedData = fareData.filter(entry => entry.entryId !== entryId);
-        setFareData(updatedData);
-
-        if (entryToDelete && entryToDelete.totalAmount) {
-          setTotalEarnings((prev) => prev - entryToDelete.totalAmount);
-        }
-
-        setCashBookEntries(prev => prev.filter(entry => entry.source === 'fare-entry' && !entry.jfNo?.includes(entryId.toString())));
+      
+      if (!entryToDelete) {
+        alert('Entry not found!');
+        return;
       }
+
+      // DELETE: First update React state immediately
+      const updatedData = fareData.filter(entry => entry.entryId !== entryId);
+      setFareData(updatedData);
+
+      if (entryToDelete && entryToDelete.totalAmount) {
+        setTotalEarnings((prev) => prev - entryToDelete.totalAmount);
+      }
+
+      setCashBookEntries(prev => prev.filter(entry => entry.source === 'fare-entry' && !entry.jfNo?.includes(entryId.toString())));
+
+      // Then sync deletion to Google Sheets in background
+      simpleDataService.deleteFareEntry(entryId, entryToDelete.type).catch(error => {
+        console.error('Background delete sync failed:', error);
+        // Optionally, you could revert the state here if delete fails
+        // But for better UX, we'll keep the optimistic update
+      });
+
     } catch (error) {
       console.error('Error deleting entry:', error);
       alert('Error deleting entry. Please try again.');
