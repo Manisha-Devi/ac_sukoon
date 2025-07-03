@@ -111,6 +111,48 @@ function doPost(e) {
         result = deleteFuelPayment(data);
         break;
 
+      // Union Payments - Complete CRUD
+      case "addUnionPayment":
+        result = addUnionPayment(data);
+        break;
+      case "getUnionPayments":
+        result = getUnionPayments();
+        break;
+      case "updateUnionPayment":
+        result = updateUnionPayment(data);
+        break;
+      case "deleteUnionPayment":
+        result = deleteUnionPayment(data);
+        break;
+
+      // Service Payments - Complete CRUD
+      case "addServicePayment":
+        result = addServicePayment(data);
+        break;
+      case "getServicePayments":
+        result = getServicePayments();
+        break;
+      case "updateServicePayment":
+        result = updateServicePayment(data);
+        break;
+      case "deleteServicePayment":
+        result = deleteServicePayment(data);
+        break;
+
+      // Other Payments - Complete CRUD
+      case "addOtherPayment":
+        result = addOtherPayment(data);
+        break;
+      case "getOtherPayments":
+        result = getOtherPayments();
+        break;
+      case "updateOtherPayment":
+        result = updateOtherPayment(data);
+        break;
+      case "deleteOtherPayment":
+        result = deleteOtherPayment(data);
+        break;
+
       // Legacy Update/Delete (for backward compatibility)
       case "updateFareEntry":
         result = updateFareEntryLegacy(data);
@@ -166,6 +208,15 @@ function doGet(e) {
         break;
       case "getFuelPayments":
         result = getFuelPayments();
+        break;
+      case "getUnionPayments":
+        result = getUnionPayments();
+        break;
+      case "getServicePayments":
+        result = getServicePayments();
+        break;
+      case "getOtherPayments":
+        result = getOtherPayments();
         break;
       default:
         result = { success: false, error: "Invalid GET action: " + action };
@@ -830,7 +881,7 @@ function addAddaPayment(data) {
     }
 
     const entryId = data.entryId;
-    const timeOnly = data.timestamp || formatISTTimestamp().split(' ')[1] + ' ' + formatISTimestamp().split(' ')[2];
+    const timeOnly = data.timestamp || formatISTTimestamp().split(' ')[1] + ' ' + formatISTtimestamp().split(' ')[2];
 
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
@@ -1253,7 +1304,7 @@ function deleteFuelPayment(data) {
 function addUnionPayment(data) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("UnionPayments");
-    
+
     if (!sheet) {
       throw new Error('UnionPayments sheet not found');
     }
@@ -1462,32 +1513,34 @@ function deleteUnionPayment(data) {
  */
 function addServicePayment(data) {
   try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("ServicePayments");
-    
+    let sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("ServicePayments");
+
+    // Create sheet if it doesn't exist
     if (!sheet) {
-      throw new Error('ServicePayments sheet not found');
+      sheet = SpreadsheetApp.openById(SPREADSHEET_ID).insertSheet("ServicePayments");
+      // Add headers exactly as you specified
+      sheet.getRange(1, 1, 1, 10).setValues([[
+        "Timestamp", "Date", "ServiceType", "CashAmount", "BankAmount", "TotalAmount", "ServiceDetails", "SubmittedBy", "EntryType", "EntryId"
+      ]]);
     }
 
-    const entryId = data.entryId || Date.now();
-    const timeOnly = data.timestamp;
-    const dateOnly = data.date;
-    const serviceType = data.serviceType || '';
-    const cashAmount = data.cashAmount || 0;
-    const bankAmount = data.bankAmount || 0;
-    const totalAmount = data.totalAmount || 0;
-    const serviceDetails = data.serviceDetails || '';
-    const submittedBy = data.submittedBy || 'driver';
-    const entryType = 'service';
+    const entryId = data.entryId;
+    const timeOnly = data.timestamp || formatISTTimestamp().split(' ')[1] + ' ' + formatISTtimestamp().split(' ')[2];
 
-    console.log('Adding service payment:', {
-      entryId, timeOnly, dateOnly, serviceType, cashAmount, bankAmount, totalAmount, serviceDetails, submittedBy
-    });
-
-    const rowData = [
-      timeOnly, dateOnly, serviceType, cashAmount, bankAmount, totalAmount, serviceDetails, submittedBy, entryType, entryId
-    ];
-
-    sheet.appendRow(rowData);
+    // Insert at row 2 to keep new entries at top
+    sheet.insertRowBefore(2);
+    sheet.getRange(2, 1, 1, 10).setValues([[
+      timeOnly, // A: Time only in IST (HH:MM:SS AM/PM)
+      data.date, // B: Date from frontend in IST
+      data.serviceType || "", // C: ServiceType
+      data.cashAmount || 0, // D: CashAmount
+      data.bankAmount || 0, // E: BankAmount
+      data.totalAmount || 0, // F: TotalAmount
+      data.serviceDetails || "", // G: ServiceDetails
+      data.submittedBy || "", // H: SubmittedBy
+      "service", // I: EntryType
+      entryId, // J: EntryId
+    ]]);
 
     return {
       success: true,
@@ -1672,33 +1725,35 @@ function deleteServicePayment(data) {
  */
 function addOtherPayment(data) {
   try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("OtherPayments");
-    
+    let sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("OtherPayments");
+
+    // Create sheet if it doesn't exist
     if (!sheet) {
-      throw new Error('OtherPayments sheet not found');
+      sheet = SpreadsheetApp.openById(SPREADSHEET_ID).insertSheet("OtherPayments");
+      // Add headers exactly as you specified
+      sheet.getRange(1, 1, 1, 11).setValues([[
+        "Timestamp", "Date", "PaymentType", "Description", "CashAmount", "BankAmount", "TotalAmount", "Category", "SubmittedBy", "EntryType", "EntryId"
+      ]]);
     }
 
-    const entryId = data.entryId || Date.now();
-    const timeOnly = data.timestamp;
-    const dateOnly = data.date;
-    const paymentType = data.paymentType || '';
-    const description = data.description || '';
-    const cashAmount = data.cashAmount || 0;
-    const bankAmount = data.bankAmount || 0;
-    const totalAmount = data.totalAmount || 0;
-    const category = data.category || '';
-    const submittedBy = data.submittedBy || 'driver';
-    const entryType = 'other';
+    const entryId = data.entryId;
+    const timeOnly = data.timestamp || formatISTTimestamp().split(' ')[1] + ' ' + formatISTtimestamp().split(' ')[2];
 
-    console.log('Adding other payment:', {
-      entryId, timeOnly, dateOnly, paymentType, description, cashAmount, bankAmount, totalAmount, category, submittedBy
-    });
-
-    const rowData = [
-      timeOnly, dateOnly, paymentType, description, cashAmount, bankAmount, totalAmount, category, submittedBy, entryType, entryId
-    ];
-
-    sheet.appendRow(rowData);
+    // Insert at row 2 to keep new entries at top
+    sheet.insertRowBefore(2);
+    sheet.getRange(2, 1, 1, 11).setValues([[
+      timeOnly, // A: Time only in IST (HH:MM:SS AM/PM)
+      data.date, // B: Date from frontend in IST
+      data.paymentType || "", // C: PaymentType
+      data.description || "", // D: Description
+      data.cashAmount || 0, // E: CashAmount
+      data.bankAmount || 0, // F: BankAmount
+      data.totalAmount || 0, // G: TotalAmount
+      data.category || "", // H: Category
+      data.submittedBy || "", // I: SubmittedBy
+      "other", // J: EntryType
+      entryId, // K: EntryId
+    ]]);
 
     return {
       success: true,
@@ -1879,7 +1934,7 @@ function deleteOtherPayment(data) {
   }
 }
 
-// ======= LEGACY FUNCTIONS (For Backward Compatibility) =======
+//// ======= LEGACY FUNCTIONS (For Backward Compatibility) =======
 
 /**
  * Legacy Universal Update Function (for backward compatibility)
