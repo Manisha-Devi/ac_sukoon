@@ -74,7 +74,7 @@ function Login({ onLogin }) {
       setIsLoading(false);
 
       if (authResult.success) {
-        // Pass user details to parent component (no localStorage)
+        // Store user details locally (without password)
         const userDetails = {
           username: authResult.user.username,
           userType: authResult.user.userType,
@@ -82,7 +82,8 @@ function Login({ onLogin }) {
           status: authResult.user.status,
           isAuthenticated: true
         };
-        console.log('👤 User authenticated:', userDetails);
+        localStorage.setItem('user', JSON.stringify(userDetails));
+        console.log('👤 User details stored locally:', userDetails);
         onLogin(userDetails);
       } else {
         setErrors({

@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from "react";
 import "../css/CashBook.css";
 
-const CashBook = ({ cashBookEntries, setCashBookEntries, user }) => {
-
+const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
+  
   const [customDateFrom, setCustomDateFrom] = useState('');
   const [customDateTo, setCustomDateTo] = useState('');
   const [filteredEntries, setFilteredEntries] = useState([]);
@@ -10,8 +11,15 @@ const CashBook = ({ cashBookEntries, setCashBookEntries, user }) => {
   const [showSummary, setShowSummary] = useState(true);
 
   useEffect(() => {
-    // Initialize cash book entries from props
-    console.log('📖 Initializing cash book entries from props:', cashBookEntries.length);
+    // Load initial cash book entries from localStorage
+    const loadCashBookEntries = () => {
+      const storedEntries = JSON.parse(localStorage.getItem('cashBookEntries') || '[]');
+      console.log('📖 Loading cash book entries from localStorage:', storedEntries.length);
+      setCashBookEntries(storedEntries);
+    };
+
+    // Load entries on component mount
+    loadCashBookEntries();
 
     // Listen for cash book updates
     const handleCashBookUpdate = (event) => {
@@ -20,7 +28,14 @@ const CashBook = ({ cashBookEntries, setCashBookEntries, user }) => {
       setCashBookEntries(updatedEntries);
     };
 
+    // Listen for data updates that might affect cash book
+    const handleDataUpdate = () => {
+      console.log('📖 Data updated - refreshing cash book entries');
+      loadCashBookEntries();
+    };
+
     window.addEventListener('cashBookUpdated', handleCashBookUpdate);
+    window.addEventListener('dataUpdated', handleDataUpdate);
 
     return () => {
       window.removeEventListener('cashBookUpdated', handleCashBookUpdate);
@@ -34,7 +49,7 @@ const CashBook = ({ cashBookEntries, setCashBookEntries, user }) => {
 
   const filterEntries = () => {
     let filtered = [...cashBookEntries];
-
+    
     if (customDateFrom && customDateTo) {
       const fromDate = new Date(customDateFrom);
       const toDate = new Date(customDateTo);
@@ -44,7 +59,7 @@ const CashBook = ({ cashBookEntries, setCashBookEntries, user }) => {
         return entryDate >= fromDate && entryDate <= toDate;
       });
     }
-
+    
     setFilteredEntries(filtered);
   };
 
@@ -90,7 +105,7 @@ const CashBook = ({ cashBookEntries, setCashBookEntries, user }) => {
         <div className="cash-book-header">
           <h2><i className="bi bi-book"></i> Cash Book (Double Column)</h2>
           <p>Traditional Dr./Cr. format with Cash and Bank columns</p>
-
+          
           {/* Toggle Buttons */}
           <div className="filter-toggle-section">
             <button 

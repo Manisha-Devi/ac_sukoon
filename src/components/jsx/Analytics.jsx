@@ -1,3 +1,4 @@
+
 import React from "react";
 import "../css/Analytics.css";
 import {
@@ -20,7 +21,7 @@ ChartJS.register(
   Legend,
 );
 
-function Analytics({ user }) {
+function Analytics() {
   const profitData = {
     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
     datasets: [
@@ -43,20 +44,10 @@ function Analytics({ user }) {
 
   return (
     <div className="fade-in">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-4">
-          <i className="bi bi-graph-up me-2"></i>
-          Profit & Loss Analysis
-        </h2>
-        {user && (
-          <div className="user-info">
-            <small className="text-muted">
-              <i className="bi bi-person-circle me-1"></i>
-              {user.fullName || user.username} ({user.userType})
-            </small>
-          </div>
-        )}
-      </div>
+      <h2 className="mb-4">
+        <i className="bi bi-graph-up me-2"></i>
+        Profit & Loss Analysis
+      </h2>
 
       <div className="row g-4 mb-4">
         <div className="col-12 col-lg-8">

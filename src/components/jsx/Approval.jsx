@@ -226,9 +226,9 @@ function Approval({ fareData, expenseData, cashBookEntries }) {
               <div className="recent-entries-preview">
                 <h6>Recent Entries:</h6>
                 {(() => {
-                  // Get current user info for filtering (passed as prop)
-                  const currentUser = {}; // User data should be passed as prop
-                  const currentUserName = 'Current User';
+                  // Get current user info for filtering
+                  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                  const currentUserName = currentUser.fullName || currentUser.username;
 
                   // Filter entries by current user and show last 3
                   const userEntries = fareData.filter(entry => 

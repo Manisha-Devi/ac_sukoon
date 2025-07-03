@@ -3,7 +3,7 @@ import "../css/DataSummary.css";
 import hybridDataService from '../../services/hybridDataService.js';
 import localStorageService from '../../services/localStorageService.js';
 
-function DataSummary({ fareData, expenseData, cashBookEntries, user }) {
+function DataSummary({ fareData, expenseData, cashBookEntries }) {
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [settlementData, setSettlementData] = useState({
     cashSettlement: "",
