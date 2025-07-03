@@ -1,10 +1,27 @@
 
-/* AddaPayment.css */
+:root {
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --adda-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --border-radius: 15px;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --card-shadow-hover: 0 8px 15px rgba(0, 0, 0, 0.15);
+  --transition: all 0.3s ease;
+}
+
 .adda-entry-container {
-  padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px 0;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.adda-entry-container .container-fluid {
+  padding-left: 15px;
+  padding-right: 15px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .adda-header {
@@ -15,24 +32,29 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 20px 30px;
-  border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
 }
 
 .adda-header h2 {
-  color: white;
-  margin: 0;
+  color: #333;
+  margin-bottom: 10px;
   font-weight: 600;
+  margin: 0;
   font-size: 2rem;
 }
 
 .adda-header p {
-  color: rgba(255, 255, 255, 0.8);
-  margin: 5px 0 0 0;
+  color: #666;
+  margin: 0;
   font-size: 1.1rem;
+}
+
+.adda-header i {
+  color: #667eea;
+  margin-right: 10px;
 }
 
 .sync-status {
@@ -79,16 +101,15 @@
 /* Summary Cards */
 .summary-card {
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 15px;
-  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  transition: all 0.3s ease;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  transition: var(--transition);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .summary-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.5);
+  transform: translateY(-3px);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .summary-card .card-body {
@@ -97,123 +118,132 @@
 }
 
 .summary-card h6 {
-  color: #6c757d;
-  font-weight: 600;
-  margin-bottom: 10px;
+  color: #666;
   font-size: 0.9rem;
+  margin-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  font-weight: 600;
 }
 
 .summary-card h4 {
-  color: #2c3e50;
+  color: #333;
   font-weight: 700;
   margin: 0;
-  font-size: 1.5rem;
 }
 
-.cash-card .card-body {
+.cash-card {
   border-left: 4px solid #28a745;
 }
 
-.bank-card .card-body {
+.bank-card {
   border-left: 4px solid #007bff;
 }
 
-.total-card .card-body {
-  border-left: 4px solid #dc3545;
+.total-card {
+  border-left: 4px solid #667eea;
 }
 
-.entries-card .card-body {
+.entries-card {
   border-left: 4px solid #6f42c1;
 }
 
 /* Form Card */
 .adda-form-card {
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
+  border-radius: var(--border-radius);
   padding: 30px;
+  box-shadow: var(--card-shadow);
   margin-bottom: 30px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .adda-form-card h4 {
-  color: #2c3e50;
+  color: #333;
   margin-bottom: 25px;
   font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 10px;
 }
 
+.adda-form-card h4 i {
+  color: #667eea;
+  margin-right: 10px;
+}
+
+/* Form Controls */
 .form-label {
+  color: #555;
   font-weight: 600;
-  color: #495057;
   margin-bottom: 8px;
-  font-size: 0.9rem;
 }
 
-.form-control {
-  border: 2px solid #e9ecef;
+.form-control, .form-select {
+  border: 2px solid #e2e8f0;
   border-radius: 10px;
   padding: 12px 15px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  transition: var(--transition);
 }
 
-.form-control:focus {
+.form-control:focus, .form-select:focus {
   border-color: #667eea;
-  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-  background: white;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
+.form-control::placeholder {
+  color: #a0aec0;
+}
+
+/* Date Input */
 .date-input {
+  position: relative;
   cursor: pointer;
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(0.5);
+  opacity: 0.8;
+}
+
+.date-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
 }
 
 /* Amount Summary */
 .amount-summary {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: rgba(102, 126, 234, 0.1);
   border-radius: 10px;
   padding: 15px;
-  border: 1px solid #dee2e6;
+  border: 1px solid rgba(102, 126, 234, 0.2);
 }
 
 .amount-summary span {
-  font-weight: 600;
-  color: #495057;
+  font-weight: 500;
+  color: #333;
 }
 
 .amount-summary strong {
-  color: #dc3545;
-  font-size: 1.1rem;
+  color: #667eea;
 }
 
-/* Buttons */
-.button-group {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
+/* Submit Button */
 .adda-entry-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--adda-gradient);
   border: none;
-  color: white;
   padding: 12px 30px;
-  border-radius: 25px;
+  border-radius: 10px;
+  color: white;
   font-weight: 600;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  transition: var(--transition);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .adda-entry-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
   color: white;
 }
 
@@ -221,6 +251,16 @@
   opacity: 0.7;
   cursor: not-allowed;
   transform: none;
+}
+
+.adda-entry-btn i {
+  margin-right: 8px;
+}
+
+.button-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .btn-secondary {
@@ -239,22 +279,23 @@
 
 /* Recent Entries */
 .recent-entries h4 {
-  color: white;
+  color: #333;
   margin-bottom: 20px;
   font-weight: 600;
 }
 
 .entry-card {
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 15px;
-  transition: all 0.3s ease;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  transition: var(--transition);
   border: 1px solid rgba(255, 255, 255, 0.2);
   height: 100%;
 }
 
 .entry-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.3);
+  transform: translateY(-3px);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .entry-card .card-body {
@@ -265,12 +306,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .entry-type {
   padding: 4px 12px;
-  border-radius: 15px;
+  border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -278,8 +319,9 @@
 }
 
 .entry-type.adda {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  border: 1px solid rgba(102, 126, 234, 0.3);
 }
 
 .entry-actions {
@@ -287,36 +329,38 @@
   gap: 5px;
 }
 
-.btn-edit, .btn-delete {
-  padding: 6px 10px;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  transition: all 0.3s ease;
-}
-
 .btn-edit {
-  background: #ffc107;
-  color: #212529;
+  background: rgba(40, 167, 69, 0.1);
+  border: 1px solid rgba(40, 167, 69, 0.3);
+  color: #28a745;
+  padding: 5px 8px;
+  border-radius: 6px;
+  transition: var(--transition);
 }
 
 .btn-edit:hover {
-  background: #e0a800;
-  transform: scale(1.1);
+  background: #28a745;
+  color: white;
+  transform: scale(1.05);
 }
 
 .btn-delete {
-  background: #dc3545;
-  color: white;
+  background: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  color: #dc3545;
+  padding: 5px 8px;
+  border-radius: 6px;
+  transition: var(--transition);
 }
 
 .btn-delete:hover {
-  background: #c82333;
-  transform: scale(1.1);
+  background: #dc3545;
+  color: white;
+  transform: scale(1.05);
 }
 
 .entry-date {
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .entry-date .text-muted {
@@ -334,29 +378,29 @@
 }
 
 .entry-content p {
-  margin: 5px 0;
-  color: #495057;
+  margin: 0;
+  color: #666;
   font-size: 0.9rem;
   line-height: 1.4;
 }
 
 .entry-amounts {
-  border-top: 1px solid #e9ecef;
-  padding-top: 15px;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
 }
 
 .amount-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
   font-size: 0.9rem;
-  color: #6c757d;
+  color: #666;
 }
 
 .total-amount {
   text-align: center;
-  font-size: 1.1rem;
-  color: #dc3545;
+  color: #667eea;
+  font-size: 1rem;
 }
 
 .entry-remarks {
@@ -369,8 +413,20 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .adda-entry-container {
+  .adda-form-card {
+    padding: 20px;
+  }
+  
+  .summary-card .card-body {
     padding: 15px;
+  }
+  
+  .button-group {
+    flex-direction: column;
+  }
+  
+  .button-group .btn {
+    width: 100%;
   }
 
   .header-content {
@@ -382,30 +438,34 @@
   .adda-header h2 {
     font-size: 1.5rem;
   }
-
-  .adda-form-card {
-    padding: 20px;
-  }
-
-  .button-group {
-    flex-direction: column;
-  }
-
-  .adda-entry-btn, .btn-secondary {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .amount-summary .row {
-    text-align: center;
-  }
-
-  .amount-summary .col-4 {
-    margin-bottom: 8px;
-  }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 575.98px) {
+  .adda-entry-container {
+    padding: 15px;
+  }
+
+  .adda-form-card {
+    padding: 1.5rem;
+  }
+
+  .summary-card h4 {
+    font-size: 1.2rem;
+  }
+
+  .entry-card {
+    margin-bottom: 1rem;
+  }
+
+  .date-input {
+    padding: 0.65rem;
+  }
+  
+  .amount-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+
   .entry-actions {
     flex-direction: column;
   }
@@ -422,4 +482,12 @@
   .summary-card h4 {
     font-size: 1.2rem;
   }
+}
+
+.invalid-feedback {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875em;
+  color: #dc3545;
 }
