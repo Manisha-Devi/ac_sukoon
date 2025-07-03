@@ -478,6 +478,26 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       <i className="bi bi-check-circle"></i>
                     )}
                   </div>
+                  {syncStatus.pendingSync > 0 && (
+                    <button 
+                      className="btn btn-sm btn-outline-primary ms-2"
+                      onClick={async () => {
+                        try {
+                          setIsLoading(true);
+                          await hybridDataService.forceSync();
+                          console.log('✅ Manual sync completed');
+                        } catch (error) {
+                          console.error('❌ Manual sync failed:', error);
+                        } finally {
+                          setIsLoading(false);
+                        }
+                      }}
+                      disabled={isLoading || syncStatus.syncInProgress}
+                      title="Force sync pending entries"
+                    >
+                      <i className="bi bi-cloud-upload"></i> Sync
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
