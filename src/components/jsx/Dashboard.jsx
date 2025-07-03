@@ -55,19 +55,25 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         }
       };
 
-      // Fetch all types of data in parallel with retry mechanism
+      // Fetch all data types in parallel
       const [
-        fareReceipts, 
-        bookingEntries, 
-        offDays, 
-        fuelPayments, 
-        addaPayments
+        fareReceipts,
+        bookingEntries,
+        offDays,
+        fuelPayments,
+        addaPayments,
+        servicePayments,
+        otherPayments,
+        unionPayments
       ] = await Promise.all([
         loadWithRetry(() => authService.getFareReceipts()),
         loadWithRetry(() => authService.getBookingEntries()),
         loadWithRetry(() => authService.getOffDays()),
         loadWithRetry(() => authService.getFuelPayments()),
-        loadWithRetry(() => authService.getAddaPayments())
+        loadWithRetry(() => authService.getAddaPayments()),
+        loadWithRetry(() => authService.getServicePayments()),
+        loadWithRetry(() => authService.getOtherPayments()),
+        loadWithRetry(() => authService.getUnionPayments())
       ]);
 
       // Process and combine all data
@@ -273,6 +279,73 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
           source: 'adda-payment'
         }));
         combinedCashBookEntries = [...combinedCashBookEntries, ...addaCashEntries];
+      }
+
+      // Process Other Payments (same format as OtherPayment component)
+      if (otherPayments.success && otherPayments.data) {
+        const processedOtherPayments = otherPayments.data.map(entry => ({
+          id: entry.entryId,
+          entryId: entry.entryId,
+          timestamp: convertToTimeString(entry.timestamp),
+          date: convertToDateString(entry.date),
+          paymentType: entry.paymentType,
+          description: entry.description,
+          category: entry.category,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          totalAmount: entry.totalAmount || 0,
+          submittedBy: entry.submittedBy,
+          type: 'other'
+        }));
+        combinedExpenseData = [...combinedExpenseData, ...processedOtherPayments];
+
+        // Generate cash book entries from other payments
+        const otherCashEntries = processedOtherPayments.map(entry => ({
+          id: `other-${entry.entryId}`,
+          date: entry.date,
+          particulars: "Other",
+          description: `${entry.paymentType || 'Other'} - ${entry.description || 'Payment'}`,
+          jfNo: `OTHER-${entry.entryId}`,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          type: 'cr',
+          timestamp: entry.timestamp,
+          source: 'other-payment'
+        }));
+        combinedCashBookEntries = [...combinedCashBookEntries, ...otherCashEntries];
+      }
+
+      // Process Union Payments (same format as UnionPayment component)
+      if (unionPayments.success && unionPayments.data) {
+        const processedUnionPayments = unionPayments.data.map(entry => ({
+          id: entry.entryId,
+          entryId: entry.entryId,
+          timestamp: convertToTimeString(entry.timestamp),
+          date: convertToDateString(entry.date),
+          unionName: entry.unionName,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          totalAmount: entry.totalAmount || 0,
+          remarks: entry.remarks || '',
+          submittedBy: entry.submittedBy,
+          type: 'union'
+        }));
+        combinedExpenseData = [...combinedExpenseData, ...processedUnionPayments];
+
+        // Generate cash book entries from union payments
+        const unionCashEntries = processedUnionPayments.map(entry => ({
+          id: `union-${entry.entryId}`,
+          date: entry.date,
+          particulars: "Union",
+          description: `Union payment - ${entry.unionName || 'Union'}`,
+          jfNo: `UNION-${entry.entryId}`,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          type: 'cr',
+          timestamp: entry.timestamp,
+          source: 'union-payment'
+        }));
+        combinedCashBookEntries = [...combinedCashBookEntries, ...unionCashEntries];
       }
 
       // Sort all data by timestamp (newest first)
