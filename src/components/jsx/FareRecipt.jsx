@@ -944,34 +944,19 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                             {entry.type === "daily" && (
                               <>
                                 <div>{entry.date}</div>
-                                <div className="timestamp">{entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString('en-IN', { 
-                                  hour: '2-digit', 
-                                  minute: '2-digit',
-                                  second: '2-digit',
-                                  hour12: false 
-                                }) : ''}</div>
+                                <div className="timestamp">{entry.timestamp ? entry.timestamp.split('T')[1]?.split('.')[0] : ''}</div>
                               </>
                             )}
                             {entry.type === "booking" && (
                               <>
                                 <div>{entry.dateFrom} - {entry.dateTo}</div>
-                                <div className="timestamp">{entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString('en-IN', { 
-                                  hour: '2-digit', 
-                                  minute: '2-digit',
-                                  second: '2-digit',
-                                  hour12: false 
-                                }) : ''}</div>
+                                <div className="timestamp">{entry.timestamp ? entry.timestamp.split('T')[1]?.split('.')[0] : ''}</div>
                               </>
                             )}
                             {entry.type === "off" && (
                               <>
                                 <div>{entry.date}</div>
-                                <div className="timestamp">{entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString('en-IN', { 
-                                  hour: '2-digit', 
-                                  minute: '2-digit',
-                                  second: '2-digit',
-                                  hour12: false 
-                                }) : ''}</div>
+                                <div className="timestamp">{entry.timestamp ? entry.timestamp.split('T')[1]?.split('.')[0] : ''}</div>
                               </>
                             )}
                           </small>

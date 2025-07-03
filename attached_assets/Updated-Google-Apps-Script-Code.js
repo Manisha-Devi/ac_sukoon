@@ -161,8 +161,7 @@ function testConnection() {
   try {
     return {
       success: true,
-      message: "Google Apps Script is working!",
-      timestamp: new Date().toISOString() // Only for test connection
+      message: "Google Apps Script is working!"
     };
   } catch (error) {
     return {
