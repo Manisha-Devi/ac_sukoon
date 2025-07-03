@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "../css/DataSummary.css";
-import hybridDataService from '../../services/hybridDataService.js';
-import localStorageService from '../../services/localStorageService.js';
 
 function DataSummary({ fareData, expenseData, cashBookEntries }) {
   const [showApprovalModal, setShowApprovalModal] = useState(false);
@@ -11,11 +9,6 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
     settlementWith: "",
     remarks: ""
   });
-  const [syncStatus, setSyncStatus] = useState(hybridDataService.getSyncStatus());
-
-  // Real-time data refresh state
-  const [localFareData, setLocalFareData] = useState([]);
-
   // Log data for debugging
   useEffect(() => {
     console.log('📊 Data Summary - Using React state data:', {
@@ -24,29 +17,6 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
       cashBookEntries: cashBookEntries.length
     });
   }, [fareData, expenseData, cashBookEntries]);
-
-  // Monitor sync status
-  useEffect(() => {
-    const updateSyncStatus = () => {
-      const newStatus = hybridDataService.getSyncStatus();
-      setSyncStatus(newStatus);
-    };
-
-    updateSyncStatus();
-    const interval = setInterval(updateSyncStatus, 1000);
-
-    // Listen for sync status changes
-    const handleSyncStatusChange = () => {
-      updateSyncStatus();
-    };
-
-    window.addEventListener('syncStatusChanged', handleSyncStatusChange);
-
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('syncStatusChanged', handleSyncStatusChange);
-    };
-  }, []);
 
   // Calculate totals from localFareData and expenseData directly - only for current user
   const calculateTotals = () => {
@@ -218,46 +188,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
     });
   };
 
-  // Real-time data update listener
-  useEffect(() => {
-    const handleInstantDataUpdate = (event) => {
-      console.log('Step 5: Instant data update detected - refreshing UI immediately (DataSummary component)');
-
-      // Load fresh data from localStorage immediately
-      const freshData = localStorageService.loadFareData();
-
-      // Force state update with new array reference
-      setFareData([...freshData]);
-
-      console.log('📊 DataSummary refreshed with', freshData.length, 'entries');
-      console.log('🔄 DataSummary UI state updated successfully');
-    };
-
-    const handleFareUpdate = (event) => {
-      handleInstantDataUpdate(event);
-    };
-
-    const handleDataUpdate = (event) => {
-      handleInstantDataUpdate(event);
-    };
-
-    const handleStorageUpdate = (event) => {
-      if (event.key === 'fare_receipts_data') {
-        handleInstantDataUpdate(event);
-      }
-    };
-
-    // Listen for immediate data updates
-    window.addEventListener('fareDataUpdated', handleFareUpdate);
-    window.addEventListener('dataUpdated', handleDataUpdate);
-    window.addEventListener('storage', handleStorageUpdate);
-
-    return () => {
-      window.removeEventListener('fareDataUpdated', handleFareUpdate);
-      window.removeEventListener('dataUpdated', handleDataUpdate);
-      window.removeEventListener('storage', handleStorageUpdate);
-    };
-  }, []);
+  
 
   return (
     <div className="approval-container">
@@ -268,15 +199,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
               <h2><i className="bi bi-check-circle"></i> Data Summary & Approval</h2>
               <p>Review your financial data and send for approval</p>
             </div>
-            <div className="sync-status">
-              <div className={`simple-sync-indicator ${syncStatus.syncing ? 'syncing' : 'synced'}`}>
-                {syncStatus.syncing ? (
-                  <i className="bi bi-arrow-clockwise"></i>
-                ) : (
-                  <i className="bi bi-check-circle"></i>
-                )}
-              </div>
-            </div>
+            
           </div>
         </div>
 

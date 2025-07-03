@@ -14,6 +14,7 @@ import BonusCalculator from "./components/jsx/BonusCalculator";
 import Analytics from "./components/jsx/Analytics";
 import CashBook from "./components/jsx/CashBook";
 import DataSummary from "./components/jsx/DataSummary";
+import localStorageService from "./services/localStorageService.js";
 
 
 function App() {

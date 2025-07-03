@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../css/FareRecipt.css";
-import * as authService from '../../services/authService.js';
+import authService from '../../services/authService.js';
 
 function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries }) {
   const [activeTab, setActiveTab] = useState("daily");

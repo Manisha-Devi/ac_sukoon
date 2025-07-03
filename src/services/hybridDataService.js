@@ -8,6 +8,85 @@ class HybridDataService {
 
     window.addEventListener('online', () => {
       this.isOnline = true;
+      console.log('🌐 Back online');
+    });
+
+    window.addEventListener('offline', () => {
+      this.isOnline = false;
+      console.log('📴 Gone offline');
+    });
+  }
+
+  async initializeData() {
+    try {
+      if (!this.isOnline) {
+        console.log('📴 Offline - using React state only');
+        return [];
+      }
+
+      console.log('🔄 Starting background sync...');
+      this.syncInProgress = true;
+
+      const [fareReceipts, bookingEntries, offDays] = await Promise.all([
+        authService.getFareReceipts(),
+        authService.getBookingEntries(),
+        authService.getOffDays()
+      ]);
+
+      let allData = [];
+
+      if (fareReceipts.success && fareReceipts.data) {
+        allData = [...allData, ...fareReceipts.data.map(entry => ({
+          ...entry,
+          type: 'daily'
+        }))];
+      }
+
+      if (bookingEntries.success && bookingEntries.data) {
+        allData = [...allData, ...bookingEntries.data.map(entry => ({
+          ...entry,
+          type: 'booking'
+        }))];
+      }
+
+      if (offDays.success && offDays.data) {
+        allData = [...allData, ...offDays.data.map(entry => ({
+          ...entry,
+          type: 'off'
+        }))];
+      }
+
+      allData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+      this.syncInProgress = false;
+      return allData;
+
+    } catch (error) {
+      console.error('❌ Error in hybrid sync:', error);
+      this.syncInProgress = false;
+      return [];
+    }
+  }
+
+  getSyncStatus() {
+    return {
+      isOnline: this.isOnline,
+      pendingSync: 0,
+      lastSync: new Date().toISOString(),
+      syncInProgress: this.syncInProgress,
+      syncing: this.syncInProgress
+    };
+  }
+}
+
+export default new HybridDataService();
+class HybridDataService {
+  constructor() {
+    this.isOnline = navigator.onLine;
+    this.syncInProgress = false;
+
+    window.addEventListener('online', () => {
+      this.isOnline = true;
       console.log('🌐 Back online - starting auto sync');
     });
 
