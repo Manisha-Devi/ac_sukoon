@@ -200,12 +200,25 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           const updatedData = [result.entry, ...fareData];
           setFareData(updatedData);
           setTotalEarnings((prev) => prev + totalAmount);
+          alert('✅ Daily fare entry saved successfully!');
+        } else {
+          if (result.error && result.error.includes('timeout')) {
+            alert('⏰ The request is taking longer than usual. Please check your internet connection and try again. Your data might still be saved.');
+          } else if (result.error && result.error.includes('temporarily unavailable')) {
+            alert('⚠️ Server is temporarily unavailable. Your data has been saved locally and will sync when the server is available.');
+          } else {
+            alert(`❌ Error saving data: ${result.error || 'Unknown error'}. Please try again.`);
+          }
         }
       }
       setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
     } catch (error) {
       console.error('Error submitting daily fare:', error);
-      alert('Error saving data. Please try again.');
+      if (error.message && error.message.includes('timeout')) {
+        alert('⏰ Request timeout. Please check your internet connection and try again.');
+      } else {
+        alert(`❌ Error saving data: ${error.message || 'Unknown error'}. Please try again.`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -277,12 +290,25 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           const updatedData = [result.entry, ...fareData];
           setFareData(updatedData);
           setTotalEarnings((prev) => prev + totalAmount);
+          alert('✅ Booking entry saved successfully!');
+        } else {
+          if (result.error && result.error.includes('timeout')) {
+            alert('⏰ The request is taking longer than usual. Please check your internet connection and try again. Your data might still be saved.');
+          } else if (result.error && result.error.includes('temporarily unavailable')) {
+            alert('⚠️ Server is temporarily unavailable. Your data has been saved locally and will sync when the server is available.');
+          } else {
+            alert(`❌ Error saving data: ${result.error || 'Unknown error'}. Please try again.`);
+          }
         }
       }
       setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
     } catch (error) {
       console.error('Error submitting booking entry:', error);
-      alert('Error saving data. Please try again.');
+      if (error.message && error.message.includes('timeout')) {
+        alert('⏰ Request timeout. Please check your internet connection and try again.');
+      } else {
+        alert(`❌ Error saving data: ${error.message || 'Unknown error'}. Please try again.`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -328,12 +354,25 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         if (result.success) {
           const updatedData = [result.entry, ...fareData];
           setFareData(updatedData);
+          alert('✅ Off day entry saved successfully!');
+        } else {
+          if (result.error && result.error.includes('timeout')) {
+            alert('⏰ The request is taking longer than usual. Please check your internet connection and try again. Your data might still be saved.');
+          } else if (result.error && result.error.includes('temporarily unavailable')) {
+            alert('⚠️ Server is temporarily unavailable. Your data has been saved locally and will sync when the server is available.');
+          } else {
+            alert(`❌ Error saving data: ${result.error || 'Unknown error'}. Please try again.`);
+          }
         }
       }
       setOffDayData({ date: "", reason: "" });
     } catch (error) {
       console.error('Error submitting off day:', error);
-      alert('Error saving data. Please try again.');
+      if (error.message && error.message.includes('timeout')) {
+        alert('⏰ Request timeout. Please check your internet connection and try again.');
+      } else {
+        alert(`❌ Error saving data: ${error.message || 'Unknown error'}. Please try again.`);
+      }
     } finally {
       setIsLoading(false);
     }

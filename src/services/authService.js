@@ -1,10 +1,9 @@
-
 // Authentication service for Google Sheets database
 class AuthService {
   constructor() {
     // Google Apps Script Web App URL - Updated to use the correct deployment URL
     this.API_URL = 'https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec';
-    
+
     // Backup URL in case primary fails
     this.BACKUP_API_URL = 'https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLgy6_26jFcHfa8roEX8JaA8MEGC&lib=MieMuve86j_26jFcHfa8roEX8JaA8MEGC';
   }
@@ -13,7 +12,7 @@ class AuthService {
   async authenticateUser(username, password, userType) {
     try {
       console.log('🔐 Authenticating user:', { username, userType });
-      
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
@@ -62,7 +61,7 @@ class AuthService {
       if (result.success) {
         // Update last login timestamp
         await this.updateLastLogin(username);
-        
+
         return {
           success: true,
           user: {
@@ -138,7 +137,7 @@ class AuthService {
   async addFareReceipt(data) {
     try {
       console.log('📝 Adding fare receipt to Google Sheets:', data);
-      
+
       const requestBody = JSON.stringify({
         action: 'addFareReceipt',
         entryId: data.entryId,
@@ -152,7 +151,7 @@ class AuthService {
 
       // Try primary URL first
       let result = await this.makeAPIRequest(this.API_URL, requestBody);
-      
+
       // If primary fails, don't retry - just return error for hybrid system to handle
       if (!result.success && result.error.includes('Failed to fetch')) {
         console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
@@ -168,35 +167,53 @@ class AuthService {
   }
 
   // Generic API request method with timeout and better error handling
-  async makeAPIRequest(url, body, timeout = 10000) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeout);
+  async makeAPIRequest(url, body, timeout = 10000, retries = 1) {
+    let attempt = 0;
+    while (attempt < retries + 1) {
+      try {
+        attempt++;
+        console.log(`Attempt ${attempt} of ${retries + 1} to make API request`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: body
-      });
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8',
+          },
+          mode: 'cors',
+          redirect: 'follow',
+          signal: controller.signal,
+          body: body
+        });
 
-      clearTimeout(timeoutId);
+        clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`HTTP Error Response (Attempt ${attempt}):`, errorText);
+          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        const result = await response.json();
+        return result;
+      } catch (error) {
+        console.error(`API Request failed (Attempt ${attempt}):`, error);
+        if (error.name === 'AbortError') {
+          if (attempt <= retries) {
+            console.log(`Request timed out. Retrying... (${attempt}/${retries})`);
+            continue; // Retry if timeout and retries are remaining
+          } else {
+            throw new Error('Request timeout - API took too long to respond after multiple retries');
+          }
+        }
+        if (attempt <= retries) {
+          console.log(`Request failed. Retrying... (${attempt}/${retries})`);
+          continue; // Retry if other errors and retries are remaining
+        } else {
+          throw new Error(`Failed to fetch after multiple retries: ${error.message}`);
+        }
       }
-
-      const result = await response.json();
-      return result;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timeout - API took too long to respond');
-      }
-      throw new Error(`Failed to fetch: ${error.message}`);
     }
   }
 
@@ -204,7 +221,7 @@ class AuthService {
   async addBookingEntry(data) {
     try {
       console.log('📝 Adding booking entry to Google Sheets:', data);
-      
+
       const requestBody = JSON.stringify({
         action: 'addBookingEntry',
         entryId: data.entryId,
@@ -217,9 +234,9 @@ class AuthService {
         submittedBy: data.submittedBy || 'driver'
       });
 
-      const result = await this.makeAPIRequest(this.API_URL, requestBody);
-      
-      if (!result.success && result.error.includes('Failed to fetch')) {
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
+
+      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
         console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
         return { success: false, error: 'API temporarily unavailable - data saved locally' };
       }
@@ -236,7 +253,7 @@ class AuthService {
   async updateFareReceipt(data) {
     try {
       console.log('📝 Updating fare receipt in Google Sheets:', data);
-      
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -264,7 +281,7 @@ class AuthService {
   async updateBookingEntry(data) {
     try {
       console.log('📝 Updating booking entry in Google Sheets:', data);
-      
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -292,7 +309,7 @@ class AuthService {
   async updateOffDay(data) {
     try {
       console.log('📝 Updating off day in Google Sheets:', data);
-      
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -320,7 +337,7 @@ class AuthService {
   async deleteFareReceipt(data) {
     try {
       console.log('🗑️ Deleting fare receipt in Google Sheets:', data);
-      
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -347,7 +364,7 @@ class AuthService {
   async deleteBookingEntry(data) {
     try {
       console.log('🗑️ Deleting booking entry in Google Sheets:', data);
-      
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -374,7 +391,7 @@ class AuthService {
   async deleteOffDay(data) {
     try {
       console.log('🗑️ Deleting off day in Google Sheets:', data);
-      
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -401,7 +418,7 @@ class AuthService {
   async addOffDay(data) {
     try {
       console.log('📝 Adding off day to Google Sheets:', data);
-      
+
       const requestBody = JSON.stringify({
         action: 'addOffDay',
         entryId: data.entryId,
@@ -410,9 +427,9 @@ class AuthService {
         submittedBy: data.submittedBy || 'driver'
       });
 
-      const result = await this.makeAPIRequest(this.API_URL, requestBody);
-      
-      if (!result.success && result.error.includes('Failed to fetch')) {
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
+
+      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
         console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
         return { success: false, error: 'API temporarily unavailable - data saved locally' };
       }
@@ -429,7 +446,7 @@ class AuthService {
   async getFareReceipts() {
     try {
       console.log('📋 Fetching fare receipts from Google Sheets...');
-      
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -455,7 +472,7 @@ class AuthService {
   async getBookingEntries() {
     try {
       console.log('📋 Fetching booking entries from Google Sheets...');
-      
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -481,7 +498,7 @@ class AuthService {
   async getOffDays() {
     try {
       console.log('📋 Fetching off days from Google Sheets...');
-      
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -507,7 +524,7 @@ class AuthService {
   async updateFareEntry(entryId, updatedData, entryType) {
     try {
       console.log('📝 Updating entry in Google Sheets:', { entryId, updatedData, entryType });
-      
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -536,7 +553,7 @@ class AuthService {
   async deleteFareEntry(entryId, entryType) {
     try {
       console.log('🗑️ Deleting entry from Google Sheets:', { entryId, entryType });
-      
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -565,7 +582,7 @@ class AuthService {
     try {
       console.log('🔍 Testing Google Sheets database connection...');
       console.log('📍 API URL:', this.API_URL);
-      
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -579,7 +596,7 @@ class AuthService {
       });
 
       console.log('Response status:', response.status);
-      
+
       if (response.ok) {
         const result = await response.json();
         console.log('✅ Database connection successful:', result);
