@@ -412,11 +412,6 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         return;
       }
 
-      // Confirm delete
-      if (!confirm(`Are you sure you want to delete this ${entryToDelete.type} entry?`)) {
-        return;
-      }
-
       console.log('🗑️ Deleting entry:', { entryId, type: entryToDelete.type });
 
       // DELETE: First update React state immediately for better UX
