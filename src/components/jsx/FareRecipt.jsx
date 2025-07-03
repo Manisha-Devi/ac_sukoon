@@ -200,7 +200,6 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           const updatedData = [result.entry, ...fareData];
           setFareData(updatedData);
           setTotalEarnings((prev) => prev + totalAmount);
-          alert('✅ Daily fare entry saved successfully!');
         } else {
           if (result.error && result.error.includes('timeout')) {
             alert('⏰ The request is taking longer than usual. Please check your internet connection and try again. Your data might still be saved.');
@@ -290,7 +289,6 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           const updatedData = [result.entry, ...fareData];
           setFareData(updatedData);
           setTotalEarnings((prev) => prev + totalAmount);
-          alert('✅ Booking entry saved successfully!');
         } else {
           if (result.error && result.error.includes('timeout')) {
             alert('⏰ The request is taking longer than usual. Please check your internet connection and try again. Your data might still be saved.');
@@ -354,7 +352,6 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         if (result.success) {
           const updatedData = [result.entry, ...fareData];
           setFareData(updatedData);
-          alert('✅ Off day entry saved successfully!');
         } else {
           if (result.error && result.error.includes('timeout')) {
             alert('⏰ The request is taking longer than usual. Please check your internet connection and try again. Your data might still be saved.');
