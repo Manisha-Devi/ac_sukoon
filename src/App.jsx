@@ -55,6 +55,57 @@ function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Generate cash book entries whenever fareData or expenseData changes
+  useEffect(() => {
+    const generateCashBookEntries = () => {
+      let entries = [];
+
+      // Add fare receipt entries (Dr - income)
+      fareData.forEach(fareEntry => {
+        if (fareEntry.type !== 'off') { // Exclude off days
+          entries.push({
+            id: `fare-${fareEntry.entryId}`,
+            date: fareEntry.date || fareEntry.dateFrom,
+            description: fareEntry.type === 'daily' ? 
+              `Daily Collection - ${fareEntry.route}` : 
+              `Booking - ${fareEntry.bookingDetails || 'Booking Entry'}`,
+            cashAmount: fareEntry.cashAmount || 0,
+            bankAmount: fareEntry.bankAmount || 0,
+            type: 'dr', // Debit (income)
+            source: fareEntry.type === 'daily' ? 'fare-daily' : 'fare-booking',
+            particulars: fareEntry.type === 'daily' ? fareEntry.route : fareEntry.bookingDetails,
+            jfNo: `JF-${fareEntry.entryId}`,
+            submittedBy: fareEntry.submittedBy
+          });
+        }
+      });
+
+      // Add expense entries (Cr - payments)
+      expenseData.forEach(expenseEntry => {
+        entries.push({
+          id: `expense-${expenseEntry.entryId}`,
+          date: expenseEntry.date,
+          description: `${expenseEntry.type} - ${expenseEntry.description}`,
+          cashAmount: expenseEntry.cashAmount || 0,
+          bankAmount: expenseEntry.bankAmount || 0,
+          type: 'cr', // Credit (payment)
+          source: `${expenseEntry.type}-payment`,
+          particulars: expenseEntry.description,
+          jfNo: `PV-${expenseEntry.entryId}`,
+          submittedBy: expenseEntry.submittedBy
+        });
+      });
+
+      // Sort by date (newest first)
+      entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      console.log('📖 Generated cash book entries:', entries.length);
+      setCashBookEntries(entries);
+    };
+
+    generateCashBookEntries();
+  }, [fareData, expenseData, setCashBookEntries]);
+
   // If user is not logged in, show login component
   if (!user) {
     return <Login onLogin={handleLogin} />;
