@@ -32,13 +32,14 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
       window.dispatchEvent(new CustomEvent('fareDataUpdated', { detail: freshData }));
     };
 
-    // Listen for immediate fare data updates
+    // Listen for immediate fare data updates (both events should trigger immediate refresh)
     const handleFareDataUpdate = (event) => {
       console.log('📊 DataSummary received immediate fare data update');
-      // Force component re-render immediately
-      window.location.reload = () => {}; // Prevent actual reload
+      // Trigger immediate component refresh by forcing re-render
       const refreshEvent = new CustomEvent('componentRefresh');
       window.dispatchEvent(refreshEvent);
+      // Also call handleDataUpdate to refresh from localStorage
+      handleDataUpdate();
     };
 
     // Listen for localStorage changes and immediate updates
