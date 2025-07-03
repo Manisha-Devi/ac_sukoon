@@ -128,10 +128,6 @@ class HybridDataService {
       // Trigger custom event for data update
       const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: allData });
       window.dispatchEvent(dataUpdateEvent);
-      
-      // Also trigger fare-specific update for instant UI refresh
-      const fareUpdateEvent = new CustomEvent('fareDataUpdated', { detail: allData });
-      window.dispatchEvent(fareUpdateEvent);
 
       // Trigger cash book update
       this.triggerCashBookUpdate();
@@ -176,9 +172,6 @@ class HybridDataService {
 
       // Trigger cash book update event
       this.triggerCashBookUpdate();
-
-      // Trigger immediate fare data update for instant UI refresh
-      this.triggerFareDataUpdate(updatedData);
 
       // Background sync to Google Sheets - don't wait for response
       if (this.isOnline) {
@@ -810,16 +803,7 @@ class HybridDataService {
     }
   }
 
-  // Trigger fare data update for instant UI refresh
-  triggerFareDataUpdate(fareData) {
-    try {
-      const event = new CustomEvent('fareDataUpdated', { detail: fareData });
-      window.dispatchEvent(event);
-      console.log('📡 Fare data update event triggered for instant UI refresh');
-    } catch (error) {
-      console.error('❌ Error triggering fare data update:', error);
-    }
-  }
+  
 }
 
 export default new HybridDataService();
