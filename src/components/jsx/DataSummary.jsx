@@ -16,50 +16,14 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
   // Real-time data refresh state
   const [localFareData, setLocalFareData] = useState([]);
 
-  // Load data from localStorage for summary calculations and real-time updates
+  // Log data for debugging
   useEffect(() => {
-    // Initial load from localStorage
-    const loadLocalData = () => {
-      const localData = localStorageService.loadFareData();
-      setLocalFareData(localData);
-
-      console.log('📊 Data Summary - Using localStorage data:', {
-        fareEntries: localData.length,
-        expenseEntries: expenseData.length,
-        cashBookEntries: cashBookEntries.length
-      });
-    };
-
-    // Load initial data
-    loadLocalData();
-
-    // Listen for real-time data updates from localStorage
-    const handleDataUpdate = () => {
-      console.log('Step 4: Instant data update detected - refreshing UI immediately (DataSummary component)');
-      loadLocalData(); // Reload data immediately
-    };
-
-    // Listen for immediate fare data updates
-    const handleFareDataUpdate = (event) => {
-      console.log('Step 4: DataSummary received immediate fare data update');
-      if (event.detail) {
-        setLocalFareData(event.detail); // Use the updated data directly
-      } else {
-        loadLocalData(); // Fallback to localStorage
-      }
-    };
-
-    // Listen for localStorage changes and immediate updates
-    window.addEventListener('storage', handleDataUpdate);
-    window.addEventListener('dataUpdated', handleDataUpdate);
-    window.addEventListener('fareDataUpdated', handleFareDataUpdate);
-
-    return () => {
-      window.removeEventListener('storage', handleDataUpdate);
-      window.removeEventListener('dataUpdated', handleDataUpdate);
-      window.removeEventListener('fareDataUpdated', handleFareDataUpdate);
-    };
-  }, [expenseData, cashBookEntries]);
+    console.log('📊 Data Summary - Using React state data:', {
+      fareEntries: fareData.length,
+      expenseEntries: expenseData.length,
+      cashBookEntries: cashBookEntries.length
+    });
+  }, [fareData, expenseData, cashBookEntries]);
 
   // Monitor sync status
   useEffect(() => {
@@ -91,7 +55,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
     const currentUserName = currentUser.fullName || currentUser.username;
 
     // Filter data by current user only - use localFareData for real-time updates
-    const userFareData = localFareData.filter(entry => 
+    const userFareData = fareData.filter(entry => 
       entry.submittedBy === currentUserName || 
       (!entry.submittedBy && entry.type) // Handle old entries without submittedBy
     );
@@ -323,7 +287,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
           const currentUserName = currentUser.fullName || currentUser.username;
 
           // Check if current user has any entries
-          const userFareEntries = localFareData.filter(entry => entry.submittedBy === currentUserName);
+          const userFareEntries = fareData.filter(entry => entry.submittedBy === currentUserName);
           const userExpenseEntries = expenseData.filter(entry => entry.submittedBy === currentUserName);
           const hasUserEntries = userFareEntries.length > 0 || userExpenseEntries.length > 0;
 
@@ -339,7 +303,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                       <h5>{(() => {
                         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
                         const currentUserName = currentUser.fullName || currentUser.username;
-                        return localFareData.filter(entry => 
+                        return fareData.filter(entry => 
                           entry.submittedBy === currentUserName || 
                           (!entry.submittedBy && entry.type)
                         ).length;
@@ -352,7 +316,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                       <h5>₹{(() => {
                         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
                         const currentUserName = currentUser.fullName || currentUser.username;
-                        return localFareData.filter(entry => 
+                        return fareData.filter(entry => 
                           entry.submittedBy === currentUserName || 
                           (!entry.submittedBy && entry.type)
                         ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString();
@@ -365,7 +329,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                       <h5>₹{(() => {
                         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
                         const currentUserName = currentUser.fullName || currentUser.username;
-                        return localFareData.filter(entry => 
+                        return fareData.filter(entry => 
                           entry.submittedBy === currentUserName || 
                           (!entry.submittedBy && entry.type)
                         ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString();
@@ -378,7 +342,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                       <h5>₹{(() => {
                         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
                         const currentUserName = currentUser.fullName || currentUser.username;
-                        return localFareData.filter(entry => 
+                        return fareData.filter(entry => 
                           entry.submittedBy === currentUserName || 
                           (!entry.submittedBy && entry.type)
                         ).reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString();
@@ -386,7 +350,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                     </div>
                   </div>
                 </div>
-                {localFareData.length > 0 && (
+                {fareData.length > 0 && (
                   <div className="recent-entries-preview">
                     <h6>Recent Entries:</h6>
                     {(() => {
@@ -395,7 +359,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                       const currentUserName = currentUser.fullName || currentUser.username;
 
                       // Filter entries by current user and show last 3
-                      const userEntries = localFareData.filter(entry => 
+                      const userEntries = fareData.filter(entry => 
                         entry.submittedBy === currentUserName || 
                         entry.submittedBy === 'driver' || // Fallback for old entries
                         !entry.submittedBy // Handle entries without submittedBy field
