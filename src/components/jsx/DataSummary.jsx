@@ -207,573 +207,592 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
         </div>
 
         {/* Detailed Section Summaries */}
-        <div className="section-summaries mb-4">
-          {/* Fare Receipt Summary */}
-          <div className="section-summary-card">
-            <h5><i className="bi bi-receipt"></i> Fare Receipt Summary</h5>
-            <div className="row">
-              <div className="col-md-3">
-                <div className="mini-card">
-                  <h6>Total Entries</h6>
-                  <h5>{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return fareData.filter(entry => 
-                      entry.submittedBy === currentUserName || 
-                      (!entry.submittedBy && entry.type)
-                    ).length;
-                  })()}</h5>
+        {(() => {
+          // Get current user info for filtering
+          const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+          const currentUserName = currentUser.fullName || currentUser.username;
+
+          // Check if current user has any entries
+          const userFareEntries = fareData.filter(entry => entry.submittedBy === currentUserName);
+          const userExpenseEntries = expenseData.filter(entry => entry.submittedBy === currentUserName);
+          const hasUserEntries = userFareEntries.length > 0 || userExpenseEntries.length > 0;
+
+          return hasUserEntries ? (
+            <div className="section-summaries mb-4">
+              {/* Fare Receipt Summary */}
+              <div className="section-summary-card">
+                <h5><i className="bi bi-receipt"></i> Fare Receipt Summary</h5>
+                <div className="row">
+                  <div className="col-md-3">
+                    <div className="mini-card">
+                      <h6>Total Entries</h6>
+                      <h5>{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return fareData.filter(entry => 
+                          entry.submittedBy === currentUserName || 
+                          (!entry.submittedBy && entry.type)
+                        ).length;
+                      })()}</h5>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mini-card">
+                      <h6>Cash Collection</h6>
+                      <h5>₹{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return fareData.filter(entry => 
+                          entry.submittedBy === currentUserName || 
+                          (!entry.submittedBy && entry.type)
+                        ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString();
+                      })()}</h5>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mini-card">
+                      <h6>Bank Collection</h6>
+                      <h5>₹{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return fareData.filter(entry => 
+                          entry.submittedBy === currentUserName || 
+                          (!entry.submittedBy && entry.type)
+                        ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString();
+                      })()}</h5>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mini-card total">
+                      <h6>Total Fare Income</h6>
+                      <h5>₹{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return fareData.filter(entry => 
+                          entry.submittedBy === currentUserName || 
+                          (!entry.submittedBy && entry.type)
+                        ).reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString();
+                      })()}</h5>
+                    </div>
+                  </div>
                 </div>
+                {fareData.length > 0 && (
+                  <div className="recent-entries-preview">
+                    <h6>Recent Entries:</h6>
+                    {(() => {
+                      // Get current user info for filtering
+                      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                      const currentUserName = currentUser.fullName || currentUser.username;
+
+                      // Filter entries by current user and show last 3
+                      const userEntries = fareData.filter(entry => 
+                        entry.submittedBy === currentUserName || 
+                        entry.submittedBy === 'driver' || // Fallback for old entries
+                        !entry.submittedBy // Handle entries without submittedBy field
+                      );
+
+                      return userEntries.slice(-3).map((entry) => (
+                        <div key={entry.entryId || entry.id} className="entry-preview">
+                          <span className="entry-type">{entry.type === 'daily' ? 'Daily' : entry.type === 'booking' ? 'Booking' : 'Off Day'}</span>
+                          <span className="entry-detail">
+                            {entry.type === 'daily' && `${entry.route} - ${entry.date}`}
+                            {entry.type === 'booking' && `${entry.bookingDetails?.substring(0, 30)}... - ${entry.dateFrom} to ${entry.dateTo}`}
+                            {entry.type === 'off' && `${entry.reason} - ${entry.date}`}
+                          </span>
+                          {entry.type !== 'off' && <span className="entry-amount">₹{entry.totalAmount}</span>}
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                )}
               </div>
-              <div className="col-md-3">
-                <div className="mini-card">
-                  <h6>Cash Collection</h6>
-                  <h5>₹{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return fareData.filter(entry => 
-                      entry.submittedBy === currentUserName || 
-                      (!entry.submittedBy && entry.type)
-                    ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString();
-                  })()}</h5>
+
+              {/* Fuel Payment Summary */}
+              <div className="section-summary-card">
+                <h5><i className="bi bi-fuel-pump"></i> Fuel Payment Summary</h5>
+                <div className="row">
+                  <div className="col-md-3">
+                    <div className="mini-card">
+                      <h6>Total Entries</h6>
+                      <h5>{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'fuel' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).length;
+                      })()}</h5>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mini-card">
+                      <h6>Cash Expense</h6>
+                      <h5>₹{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'fuel' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString();
+                      })()}</h5>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mini-card">
+                      <h6>Bank Expense</h6>
+                      <h5>₹{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'fuel' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString();
+                      })()}</h5>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mini-card total">
+                      <h6>Total Fuel Expense</h6>
+                      <h5>₹{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'fuel' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString();
+                      })()}</h5>
+                    </div>
+                  </div>
                 </div>
+                {expenseData.filter(entry => entry.type === 'fuel').length > 0 && (
+                  <div className="recent-entries-preview">
+                    <h6>Recent Entries:</h6>
+                    {(() => {
+                      // Get current user info for filtering
+                      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                      const currentUserName = currentUser.fullName || currentUser.username;
+
+                      // Filter fuel entries by current user and show last 3
+                      const userFuelEntries = expenseData.filter(entry => 
+                        entry.type === 'fuel' && (
+                          entry.submittedBy === currentUserName || 
+                          !entry.submittedBy // Handle entries without submittedBy field
+                        )
+                      );
+
+                      return userFuelEntries.slice(-3).map((entry) => (
+                        <div key={entry.entryId || entry.id} className="entry-preview">
+                          <span className="entry-type">Fuel</span>
+                          <span className="entry-detail">
+                            {entry.pumpName || 'Fuel Station'} - {entry.date}
+                            {entry.liters && ` (${entry.liters}L)`}
+                          </span>
+                          <span className="entry-amount">₹{entry.totalAmount}</span>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                )}
               </div>
-              <div className="col-md-3">
-                <div className="mini-card">
-                  <h6>Bank Collection</h6>
-                  <h5>₹{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return fareData.filter(entry => 
-                      entry.submittedBy === currentUserName || 
-                      (!entry.submittedBy && entry.type)
-                    ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString();
-                  })()}</h5>
+
+              {/* Adda Payment Summary */}
+              <div className="section-summary-card">
+                <h5><i className="bi bi-building"></i> Adda Payment Summary</h5>
+                <div className="row">
+                  <div className="col-md-3">
+                    <div className="mini-card">
+                      <h6>Total Entries</h6>
+                      <h5>{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'fees' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).length;
+                      })()}</h5>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mini-card">
+                      <h6>Cash Expense</h6>
+                      <h5>₹{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'fees' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString();
+                      })()}</h5>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mini-card">
+                      <h6>Bank Expense</h6>
+                      <h5>₹{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'fees' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString();
+                      })()}</h5>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mini-card total">
+                      <h6>Total Adda Expense</h6>
+                      <h5>₹{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'fees' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString();
+                      })()}</h5>
+                    </div>
+                  </div>
                 </div>
+                {expenseData.filter(entry => entry.type === 'fees').length > 0 && (
+                  <div className="recent-entries-preview">
+                    <h6>Recent Entries:</h6>
+                    {(() => {
+                      // Get current user info for filtering
+                      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                      const currentUserName = currentUser.fullName || currentUser.username;
+
+                      // Filter fees entries by current user and show last 3
+                      const userFeesEntries = expenseData.filter(entry => 
+                        entry.type === 'fees' && (
+                          entry.submittedBy === currentUserName || 
+                          !entry.submittedBy // Handle entries without submittedBy field
+                        )
+                      );
+
+                      return userFeesEntries.slice(-3).map((entry) => (
+                        <div key={entry.entryId || entry.id} className="entry-preview">
+                          <span className="entry-type">Adda</span>
+                          <span className="entry-detail">
+                            {entry.description} - {entry.date}
+                          </span>
+                          <span className="entry-amount">₹{entry.totalAmount}</span>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                )}
               </div>
-              <div className="col-md-3">
-                <div className="mini-card total">
-                  <h6>Total Fare Income</h6>
-                  <h5>₹{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return fareData.filter(entry => 
-                      entry.submittedBy === currentUserName || 
-                      (!entry.submittedBy && entry.type)
-                    ).reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString();
-                  })()}</h5>
+
+              {/* Service Payment Summary */}
+              <div className="section-summary-card">
+                <h5><i className="bi bi-tools"></i> Service Payment Summary</h5>
+                <div className="row">
+                  <div className="col-md-3">
+                    <div className="mini-card">
+                      <h6>Total Entries</h6>
+                      <h5>{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'service' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).length;
+                      })()}</h5>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mini-card">
+                      <h6>Cash Expense</h6>
+                      <h5>₹{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'service' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString();
+                      })()}</h5>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mini-card">
+                      <h6>Bank Expense</h6>
+                      <h5>₹{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'service' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString();
+                      })()}</h5>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mini-card total">
+                      <h6>Total Service Expense</h6>
+                      <h5>₹{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'service' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString();
+                      })()}</h5>
+                    </div>
+                  </div>
                 </div>
+                {expenseData.filter(entry => entry.type === 'service').length > 0 && (
+                  <div className="recent-entries-preview">
+                    <h6>Recent Entries:</h6>
+                    {(() => {
+                      // Get current user info for filtering
+                      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                      const currentUserName = currentUser.fullName || currentUser.username;
+
+                      // Filter service entries by current user and show last 3
+                      const userServiceEntries = expenseData.filter(entry => 
+                        entry.type === 'service' && (
+                          entry.submittedBy === currentUserName || 
+                          !entry.submittedBy // Handle entries without submittedBy field
+                        )
+                      );
+
+                      return userServiceEntries.slice(-3).map((entry) => (
+                        <div key={entry.entryId || entry.id} className="entry-preview">
+                          <span className="entry-type">Service</span>
+                          <span className="entry-detail">
+                            {entry.serviceType || entry.description} - {entry.date}
+                            {entry.vendor && ` (${entry.vendor})`}
+                          </span>
+                          <span className="entry-amount">₹{entry.totalAmount}</span>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                )}
+              </div>
+
+              {/* Union Payment Summary */}
+              <div className="section-summary-card">
+                <h5><i className="bi bi-people"></i> Union Payment Summary</h5>
+                <div className="row">
+                  <div className="col-md-3">
+                    <div className="mini-card">
+                      <h6>Total Entries</h6>
+                      <h5>{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'union' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).length;
+                      })()}</h5>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mini-card">
+                      <h6>Cash Expense</h6>
+                      <h5>₹{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'union' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString();
+                      })()}</h5>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mini-card">
+                      <h6>Bank Expense</h6>
+                      <h5>₹{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'union' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString();
+                      })()}</h5>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mini-card total">
+                      <h6>Total Union Expense</h6>
+                      <h5>₹{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'union' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString();
+                      })()}</h5>
+                    </div>
+                  </div>
+                </div>
+                {expenseData.filter(entry => entry.type === 'union').length > 0 && (
+                  <div className="recent-entries-preview">
+                    <h6>Recent Entries:</h6>
+                    {(() => {
+                      // Get current user info for filtering
+                      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                      const currentUserName = currentUser.fullName || currentUser.username;
+
+                      // Filter union entries by current user and show last 3
+                      const userUnionEntries = expenseData.filter(entry => 
+                        entry.type === 'union' && (
+                          entry.submittedBy === currentUserName || 
+                          !entry.submittedBy // Handle entries without submittedBy field
+                        )
+                      );
+
+                      return userUnionEntries.slice(-3).map((entry) => (
+                        <div key={entry.entryId || entry.id} className="entry-preview">
+                          <span className="entry-type">Union</span>
+                          <span className="entry-detail">
+                            {entry.description} - {entry.date}
+                          </span>
+                          <span className="entry-amount">₹{entry.totalAmount}</span>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                )}
+              </div>
+
+              {/* Other Payment Summary */}
+              <div className="section-summary-card">
+                <h5><i className="bi bi-credit-card"></i> Other Payment Summary</h5>
+                <div className="row">
+                  <div className="col-md-3">
+                    <div className="mini-card">
+                      <h6>Total Entries</h6>
+                      <h5>{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'other' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).length;
+                      })()}</h5>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mini-card">
+                      <h6>Cash Expense</h6>
+                      <h5>₹{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'other' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString();
+                      })()}</h5>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mini-card">
+                      <h6>Bank Expense</h6>
+                      <h5>₹{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'other' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString();
+                      })()}</h5>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mini-card total">
+                      <h6>Total Other Expense</h6>
+                      <h5>₹{(() => {
+                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUserName = currentUser.fullName || currentUser.username;
+                        return expenseData.filter(entry => 
+                          entry.type === 'other' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString();
+                      })()}</h5>
+                    </div>
+                  </div>
+                </div>
+                {expenseData.filter(entry => entry.type === 'other').length > 0 && (
+                  <div className="recent-entries-preview">
+                    <h6>Recent Entries:</h6>
+                    {(() => {
+                      // Get current user info for filtering
+                      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                      const currentUserName = currentUser.fullName || currentUser.username;
+
+                      // Filter other entries by current user and show last 3
+                      const userOtherEntries = expenseData.filter(entry => 
+                        entry.type === 'other' && (
+                          entry.submittedBy === currentUserName || 
+                          !entry.submittedBy // Handle entries without submittedBy field
+                        )
+                      );
+
+                      return userOtherEntries.slice(-3).map((entry) => (
+                        <div key={entry.entryId || entry.id} className="entry-preview">
+                          <span className="entry-type">Other</span>
+                          <span className="entry-detail">
+                            {entry.paymentDetails} - {entry.date}
+                            {entry.vendor && ` (${entry.vendor})`}
+                          </span>
+                          <span className="entry-amount">₹{entry.totalAmount}</span>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                )}
               </div>
             </div>
-            {fareData.length > 0 && (
-              <div className="recent-entries-preview">
-                <h6>Recent Entries:</h6>
-                {(() => {
-                  // Get current user info for filtering
-                  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                  const currentUserName = currentUser.fullName || currentUser.username;
-
-                  // Filter entries by current user and show last 3
-                  const userEntries = fareData.filter(entry => 
-                    entry.submittedBy === currentUserName || 
-                    entry.submittedBy === 'driver' || // Fallback for old entries
-                    !entry.submittedBy // Handle entries without submittedBy field
-                  );
-
-                  return userEntries.slice(-3).map((entry) => (
-                    <div key={entry.entryId || entry.id} className="entry-preview">
-                      <span className="entry-type">{entry.type === 'daily' ? 'Daily' : entry.type === 'booking' ? 'Booking' : 'Off Day'}</span>
-                      <span className="entry-detail">
-                        {entry.type === 'daily' && `${entry.route} - ${entry.date}`}
-                        {entry.type === 'booking' && `${entry.bookingDetails?.substring(0, 30)}... - ${entry.dateFrom} to ${entry.dateTo}`}
-                        {entry.type === 'off' && `${entry.reason} - ${entry.date}`}
-                      </span>
-                      {entry.type !== 'off' && <span className="entry-amount">₹{entry.totalAmount}</span>}
-                    </div>
-                  ));
-                })()}
-              </div>
-            )}
-          </div>
-
-          {/* Fuel Payment Summary */}
-          <div className="section-summary-card">
-            <h5><i className="bi bi-fuel-pump"></i> Fuel Payment Summary</h5>
-            <div className="row">
-              <div className="col-md-3">
-                <div className="mini-card">
-                  <h6>Total Entries</h6>
-                  <h5>{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'fuel' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).length;
-                  })()}</h5>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="mini-card">
-                  <h6>Cash Expense</h6>
-                  <h5>₹{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'fuel' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString();
-                  })()}</h5>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="mini-card">
-                  <h6>Bank Expense</h6>
-                  <h5>₹{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'fuel' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString();
-                  })()}</h5>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="mini-card total">
-                  <h6>Total Fuel Expense</h6>
-                  <h5>₹{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'fuel' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString();
-                  })()}</h5>
-                </div>
-              </div>
+          ) : (
+            <div className="no-entries-message text-center py-5">
+              <i className="bi bi-clipboard-data display-1 text-muted"></i>
+              <h4 className="mt-3 text-muted">No Data Found</h4>
+              <p className="text-muted">Add some fare receipts or expense entries to see the summary</p>
             </div>
-            {expenseData.filter(entry => entry.type === 'fuel').length > 0 && (
-              <div className="recent-entries-preview">
-                <h6>Recent Entries:</h6>
-                {(() => {
-                  // Get current user info for filtering
-                  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                  const currentUserName = currentUser.fullName || currentUser.username;
-
-                  // Filter fuel entries by current user and show last 3
-                  const userFuelEntries = expenseData.filter(entry => 
-                    entry.type === 'fuel' && (
-                      entry.submittedBy === currentUserName || 
-                      !entry.submittedBy // Handle entries without submittedBy field
-                    )
-                  );
-
-                  return userFuelEntries.slice(-3).map((entry) => (
-                    <div key={entry.entryId || entry.id} className="entry-preview">
-                      <span className="entry-type">Fuel</span>
-                      <span className="entry-detail">
-                        {entry.pumpName || 'Fuel Station'} - {entry.date}
-                        {entry.liters && ` (${entry.liters}L)`}
-                      </span>
-                      <span className="entry-amount">₹{entry.totalAmount}</span>
-                    </div>
-                  ));
-                })()}
-              </div>
-            )}
-          </div>
-
-          {/* Adda Payment Summary */}
-          <div className="section-summary-card">
-            <h5><i className="bi bi-building"></i> Adda Payment Summary</h5>
-            <div className="row">
-              <div className="col-md-3">
-                <div className="mini-card">
-                  <h6>Total Entries</h6>
-                  <h5>{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'fees' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).length;
-                  })()}</h5>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="mini-card">
-                  <h6>Cash Expense</h6>
-                  <h5>₹{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'fees' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString();
-                  })()}</h5>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="mini-card">
-                  <h6>Bank Expense</h6>
-                  <h5>₹{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'fees' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString();
-                  })()}</h5>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="mini-card total">
-                  <h6>Total Adda Expense</h6>
-                  <h5>₹{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'fees' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString();
-                  })()}</h5>
-                </div>
-              </div>
-            </div>
-            {expenseData.filter(entry => entry.type === 'fees').length > 0 && (
-              <div className="recent-entries-preview">
-                <h6>Recent Entries:</h6>
-                {(() => {
-                  // Get current user info for filtering
-                  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                  const currentUserName = currentUser.fullName || currentUser.username;
-
-                  // Filter fees entries by current user and show last 3
-                  const userFeesEntries = expenseData.filter(entry => 
-                    entry.type === 'fees' && (
-                      entry.submittedBy === currentUserName || 
-                      !entry.submittedBy // Handle entries without submittedBy field
-                    )
-                  );
-
-                  return userFeesEntries.slice(-3).map((entry) => (
-                    <div key={entry.entryId || entry.id} className="entry-preview">
-                      <span className="entry-type">Adda</span>
-                      <span className="entry-detail">
-                        {entry.description} - {entry.date}
-                      </span>
-                      <span className="entry-amount">₹{entry.totalAmount}</span>
-                    </div>
-                  ));
-                })()}
-              </div>
-            )}
-          </div>
-
-          {/* Service Payment Summary */}
-          <div className="section-summary-card">
-            <h5><i className="bi bi-tools"></i> Service Payment Summary</h5>
-            <div className="row">
-              <div className="col-md-3">
-                <div className="mini-card">
-                  <h6>Total Entries</h6>
-                  <h5>{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'service' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).length;
-                  })()}</h5>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="mini-card">
-                  <h6>Cash Expense</h6>
-                  <h5>₹{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'service' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString();
-                  })()}</h5>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="mini-card">
-                  <h6>Bank Expense</h6>
-                  <h5>₹{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'service' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString();
-                  })()}</h5>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="mini-card total">
-                  <h6>Total Service Expense</h6>
-                  <h5>₹{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'service' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString();
-                  })()}</h5>
-                </div>
-              </div>
-            </div>
-            {expenseData.filter(entry => entry.type === 'service').length > 0 && (
-              <div className="recent-entries-preview">
-                <h6>Recent Entries:</h6>
-                {(() => {
-                  // Get current user info for filtering
-                  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                  const currentUserName = currentUser.fullName || currentUser.username;
-
-                  // Filter service entries by current user and show last 3
-                  const userServiceEntries = expenseData.filter(entry => 
-                    entry.type === 'service' && (
-                      entry.submittedBy === currentUserName || 
-                      !entry.submittedBy // Handle entries without submittedBy field
-                    )
-                  );
-
-                  return userServiceEntries.slice(-3).map((entry) => (
-                    <div key={entry.entryId || entry.id} className="entry-preview">
-                      <span className="entry-type">Service</span>
-                      <span className="entry-detail">
-                        {entry.serviceType || entry.description} - {entry.date}
-                        {entry.vendor && ` (${entry.vendor})`}
-                      </span>
-                      <span className="entry-amount">₹{entry.totalAmount}</span>
-                    </div>
-                  ));
-                })()}
-              </div>
-            )}
-          </div>
-
-          {/* Union Payment Summary */}
-          <div className="section-summary-card">
-            <h5><i className="bi bi-people"></i> Union Payment Summary</h5>
-            <div className="row">
-              <div className="col-md-3">
-                <div className="mini-card">
-                  <h6>Total Entries</h6>
-                  <h5>{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'union' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).length;
-                  })()}</h5>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="mini-card">
-                  <h6>Cash Expense</h6>
-                  <h5>₹{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'union' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString();
-                  })()}</h5>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="mini-card">
-                  <h6>Bank Expense</h6>
-                  <h5>₹{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'union' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString();
-                  })()}</h5>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="mini-card total">
-                  <h6>Total Union Expense</h6>
-                  <h5>₹{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'union' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString();
-                  })()}</h5>
-                </div>
-              </div>
-            </div>
-            {expenseData.filter(entry => entry.type === 'union').length > 0 && (
-              <div className="recent-entries-preview">
-                <h6>Recent Entries:</h6>
-                {(() => {
-                  // Get current user info for filtering
-                  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                  const currentUserName = currentUser.fullName || currentUser.username;
-
-                  // Filter union entries by current user and show last 3
-                  const userUnionEntries = expenseData.filter(entry => 
-                    entry.type === 'union' && (
-                      entry.submittedBy === currentUserName || 
-                      !entry.submittedBy // Handle entries without submittedBy field
-                    )
-                  );
-
-                  return userUnionEntries.slice(-3).map((entry) => (
-                    <div key={entry.entryId || entry.id} className="entry-preview">
-                      <span className="entry-type">Union</span>
-                      <span className="entry-detail">
-                        {entry.description} - {entry.date}
-                      </span>
-                      <span className="entry-amount">₹{entry.totalAmount}</span>
-                    </div>
-                  ));
-                })()}
-              </div>
-            )}
-          </div>
-
-          {/* Other Payment Summary */}
-          <div className="section-summary-card">
-            <h5><i className="bi bi-credit-card"></i> Other Payment Summary</h5>
-            <div className="row">
-              <div className="col-md-3">
-                <div className="mini-card">
-                  <h6>Total Entries</h6>
-                  <h5>{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'other' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).length;
-                  })()}</h5>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="mini-card">
-                  <h6>Cash Expense</h6>
-                  <h5>₹{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'other' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString();
-                  })()}</h5>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="mini-card">
-                  <h6>Bank Expense</h6>
-                  <h5>₹{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'other' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString();
-                  })()}</h5>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="mini-card total">
-                  <h6>Total Other Expense</h6>
-                  <h5>₹{(() => {
-                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    const currentUserName = currentUser.fullName || currentUser.username;
-                    return expenseData.filter(entry => 
-                      entry.type === 'other' && (
-                        entry.submittedBy === currentUserName || 
-                        (!entry.submittedBy && entry.type)
-                      )
-                    ).reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString();
-                  })()}</h5>
-                </div>
-              </div>
-            </div>
-            {expenseData.filter(entry => entry.type === 'other').length > 0 && (
-              <div className="recent-entries-preview">
-                <h6>Recent Entries:</h6>
-                {(() => {
-                  // Get current user info for filtering
-                  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                  const currentUserName = currentUser.fullName || currentUser.username;
-
-                  // Filter other entries by current user and show last 3
-                  const userOtherEntries = expenseData.filter(entry => 
-                    entry.type === 'other' && (
-                      entry.submittedBy === currentUserName || 
-                      !entry.submittedBy // Handle entries without submittedBy field
-                    )
-                  );
-
-                  return userOtherEntries.slice(-3).map((entry) => (
-                    <div key={entry.entryId || entry.id} className="entry-preview">
-                      <span className="entry-type">Other</span>
-                      <span className="entry-detail">
-                        {entry.paymentDetails} - {entry.date}
-                        {entry.vendor && ` (${entry.vendor})`}
-                      </span>
-                      <span className="entry-amount">₹{entry.totalAmount}</span>
-                    </div>
-                  ));
-                })()}
-              </div>
-            )}
-          </div>
-        </div>
+          );
+        })()}
 
         {/* Overall Summary Cards - First Row */}
         <div className="row mb-3">
@@ -831,18 +850,31 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
           </div>
         </div>
 
-        
 
-        {/* Send for Approval Button */}
-        <div className="text-center">
-          <button 
-            className="btn btn-lg approval-btn"
-            onClick={handleSendForApproval}
-          >
-            <i className="bi bi-send"></i>
-            Send for Approval
-          </button>
-        </div>
+
+        {/* Send for Approval Button - Only show if user has entries */}
+        {(() => {
+          // Get current user info for filtering
+          const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+          const currentUserName = currentUser.fullName || currentUser.username;
+
+          // Check if current user has any entries
+          const userFareEntries = fareData.filter(entry => entry.submittedBy === currentUserName);
+          const userExpenseEntries = expenseData.filter(entry => entry.submittedBy === currentUserName);
+          const hasUserEntries = userFareEntries.length > 0 || userExpenseEntries.length > 0;
+
+          return hasUserEntries ? (
+            <div className="text-center">
+              <button 
+                className="btn btn-lg approval-btn"
+                onClick={handleSendForApproval}
+              >
+                <i className="bi bi-send"></i>
+                Send for Approval
+              </button>
+            </div>
+          ) : null;
+        })()}
 
         {/* Approval Modal */}
         {showApprovalModal && (
