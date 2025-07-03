@@ -197,6 +197,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const totalAmount = cashAmount + bankAmount;
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+      const now = new Date();
+      const timeOnly = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
       if (editingEntry) {
         // UPDATE: First update React state immediately
@@ -237,7 +239,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         // ADD: First create entry and update React state immediately
         const newEntry = {
           entryId: Date.now(),
-          timestamp: new Date().toISOString(),
+          timestamp: timeOnly,
           type: "daily",
           route: dailyFareData.route,
           cashAmount: cashAmount,
@@ -256,7 +258,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         // Then sync to Google Sheets in background
         authService.addFareReceipt({
           entryId: newEntry.entryId,
-          timestamp: newEntry.timestamp,
+          timestamp: timeOnly,
           date: dailyFareData.date,
           route: dailyFareData.route,
           cashAmount: cashAmount,
@@ -296,6 +298,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const totalAmount = cashAmount + bankAmount;
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+      const now = new Date();
+      const timeOnly = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
       if (editingEntry) {
         // UPDATE: First update React state immediately
@@ -338,7 +342,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         // ADD: First create entry and update React state immediately
         const newEntry = {
           entryId: Date.now(),
-          timestamp: new Date().toISOString(),
+          timestamp: timeOnly,
           type: "booking",
           bookingDetails: bookingData.bookingDetails,
           cashAmount: cashAmount,
@@ -356,9 +360,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         setIsLoading(false);
 
         // Then sync to Google Sheets in background
-        authService.addFareReceipt({
+        authService.addBookingEntry({
           entryId: newEntry.entryId,
-          timestamp: newEntry.timestamp,
+          timestamp: timeOnly,
           bookingDetails: bookingData.bookingDetails,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
@@ -390,6 +394,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+      const now = new Date();
+      const timeOnly = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
       if (editingEntry) {
         // UPDATE: First update React state immediately
@@ -418,7 +424,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         // ADD: First create entry and update React state immediately
         const newEntry = {
           entryId: Date.now(),
-          timestamp: new Date().toISOString(),
+          timestamp: timeOnly,
           type: "off",
           date: offDayData.date,
           reason: offDayData.reason,
@@ -434,9 +440,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         setIsLoading(false);
 
         // Then sync to Google Sheets in background
-        authService.addOffDay({
+        authService.addFareReceipt({
           entryId: newEntry.entryId,
-          timestamp: newEntry.timestamp,
+          timestamp: timeOnly,
           date: offDayData.date,
           reason: offDayData.reason,
           submittedBy: submittedBy
@@ -944,19 +950,19 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                             {entry.type === "daily" && (
                               <>
                                 <div>{entry.date}</div>
-                                <div className="timestamp">{entry.timestamp ? (entry.timestamp.includes('T') ? entry.timestamp.split('T')[1]?.split('.')[0] : entry.timestamp) : ''}</div>
+                                <div className="timestamp">{entry.timestamp || ''}</div>
                               </>
                             )}
                             {entry.type === "booking" && (
                               <>
                                 <div>{entry.dateFrom} - {entry.dateTo}</div>
-                                <div className="timestamp">{entry.timestamp ? (entry.timestamp.includes('T') ? entry.timestamp.split('T')[1]?.split('.')[0] : entry.timestamp) : ''}</div>
+                                <div className="timestamp">{entry.timestamp || ''}</div>
                               </>
                             )}
                             {entry.type === "off" && (
                               <>
                                 <div>{entry.date}</div>
-                                <div className="timestamp">{entry.timestamp ? (entry.timestamp.includes('T') ? entry.timestamp.split('T')[1]?.split('.')[0] : entry.timestamp) : ''}</div>
+                                <div className="timestamp">{entry.timestamp || ''}</div>
                               </>
                             )}
                           </small>

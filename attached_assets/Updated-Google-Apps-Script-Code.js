@@ -229,7 +229,14 @@ function addFareReceipt(data) {
     const entryId = data.entryId;
     
     // Extract only time from timestamp for storage
-    const timeOnly = data.timestamp ? data.timestamp.split('T')[1]?.split('.')[0] : '';
+    let timeOnly = '';
+    if (data.timestamp) {
+      if (data.timestamp.includes('T')) {
+        timeOnly = data.timestamp.split('T')[1]?.split('.')[0] || '';
+      } else {
+        timeOnly = data.timestamp;
+      }
+    }
     
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
@@ -418,7 +425,14 @@ function addBookingEntry(data) {
     const entryId = data.entryId;
 
     // Extract only time from timestamp for storage
-    const timeOnly = data.timestamp ? data.timestamp.split('T')[1]?.split('.')[0] : '';
+    let timeOnly = '';
+    if (data.timestamp) {
+      if (data.timestamp.includes('T')) {
+        timeOnly = data.timestamp.split('T')[1]?.split('.')[0] || '';
+      } else {
+        timeOnly = data.timestamp;
+      }
+    }
     
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
@@ -612,7 +626,14 @@ function addOffDay(data) {
     const entryId = data.entryId;
 
     // Extract only time from timestamp for storage
-    const timeOnly = data.timestamp ? data.timestamp.split('T')[1]?.split('.')[0] : '';
+    let timeOnly = '';
+    if (data.timestamp) {
+      if (data.timestamp.includes('T')) {
+        timeOnly = data.timestamp.split('T')[1]?.split('.')[0] || '';
+      } else {
+        timeOnly = data.timestamp;
+      }
+    }
     
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
