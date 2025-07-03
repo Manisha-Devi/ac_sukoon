@@ -142,8 +142,17 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
     <div className="approval-container">
       <div className="container-fluid">
         <div className="approval-header">
-          <h2><i className="bi bi-check-circle"></i> Data Summary & Approval</h2>
-          <p>Review your financial data and send for approval</p>
+          <div className="header-content">
+            <div>
+              <h2><i className="bi bi-check-circle"></i> Data Summary & Approval</h2>
+              <p>Review your financial data and send for approval</p>
+            </div>
+            <div className="sync-status">
+              <div className="simple-sync-indicator synced">
+                <i className="bi bi-check-circle"></i>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Detailed Section Summaries */}
@@ -181,7 +190,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
               <div className="recent-entries-preview">
                 <h6>Recent Entries:</h6>
                 {fareData.slice(-3).map((entry) => (
-                  <div key={entry.id} className="entry-preview">
+                  <div key={entry.entryId || entry.id} className="entry-preview">
                     <span className="entry-type">{entry.type === 'daily' ? 'Daily' : entry.type === 'booking' ? 'Booking' : 'Off Day'}</span>
                     <span className="entry-detail">
                       {entry.type === 'daily' && `${entry.route} - ${entry.date}`}
@@ -228,7 +237,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
               <div className="recent-entries-preview">
                 <h6>Recent Entries:</h6>
                 {expenseData.filter(entry => entry.type === 'fuel').slice(-3).map((entry) => (
-                  <div key={entry.id} className="entry-preview">
+                  <div key={entry.entryId || entry.id} className="entry-preview">
                     <span className="entry-type">Fuel</span>
                     <span className="entry-detail">
                       {entry.pumpName || 'Fuel Station'} - {entry.date}
@@ -274,7 +283,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
               <div className="recent-entries-preview">
                 <h6>Recent Entries:</h6>
                 {expenseData.filter(entry => entry.type === 'fees').slice(-3).map((entry) => (
-                  <div key={entry.id} className="entry-preview">
+                  <div key={entry.entryId || entry.id} className="entry-preview">
                     <span className="entry-type">Adda</span>
                     <span className="entry-detail">
                       {entry.description} - {entry.date}
@@ -319,7 +328,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
               <div className="recent-entries-preview">
                 <h6>Recent Entries:</h6>
                 {expenseData.filter(entry => entry.type === 'service').slice(-3).map((entry) => (
-                  <div key={entry.id} className="entry-preview">
+                  <div key={entry.entryId || entry.id} className="entry-preview">
                     <span className="entry-type">Service</span>
                     <span className="entry-detail">
                       {entry.serviceType || entry.description} - {entry.date}
@@ -365,7 +374,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
               <div className="recent-entries-preview">
                 <h6>Recent Entries:</h6>
                 {expenseData.filter(entry => entry.type === 'union').slice(-3).map((entry) => (
-                  <div key={entry.id} className="entry-preview">
+                  <div key={entry.entryId || entry.id} className="entry-preview">
                     <span className="entry-type">Union</span>
                     <span className="entry-detail">
                       {entry.description} - {entry.date}
@@ -410,7 +419,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
               <div className="recent-entries-preview">
                 <h6>Recent Entries:</h6>
                 {expenseData.filter(entry => entry.type === 'other').slice(-3).map((entry) => (
-                  <div key={entry.id} className="entry-preview">
+                  <div key={entry.entryId || entry.id} className="entry-preview">
                     <span className="entry-type">Other</span>
                     <span className="entry-detail">
                       {entry.paymentDetails} - {entry.date}
