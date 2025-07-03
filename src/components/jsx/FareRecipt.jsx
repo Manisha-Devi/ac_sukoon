@@ -35,13 +35,13 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         console.log('🚀 Initializing data for FareReceipt component...');
         const initialData = await hybridDataService.initializeData();
         console.log('📊 Initial data loaded:', initialData.length, 'entries');
-        
+
         setFareData(initialData);
-        
+
         // Calculate total earnings
         const total = initialData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
         setTotalEarnings(total);
-        
+
         console.log('💰 Total earnings calculated:', total);
       } catch (error) {
         console.error('Error initializing data:', error);
@@ -72,13 +72,13 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     const handleDataUpdate = (event) => {
       const updatedData = event.detail;
       console.log('📱 UI received data update from background sync:', updatedData.length, 'entries');
-      
+
       setFareData(updatedData);
-      
+
       // Calculate total earnings
       const total = updatedData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
       setTotalEarnings(total);
-      
+
       // Update sync status immediately
       updateSyncStatus();
     };
@@ -501,7 +501,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                 <div>
                   <h2><i className="bi bi-receipt"></i> Fare Receipt Entry</h2>
                   <p>Record your daily earnings and bookings (Income)</p>
-                  
+
                 </div>
                 <div className="sync-status">
                   <div className={`simple-sync-indicator ${syncStatus.pendingSync > 0 || syncStatus.syncInProgress || isLoading ? 'pending' : 'synced'}`}>
@@ -830,66 +830,87 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
             </div>
 
             {/* Recent Entries */}
-            {fareData.length > 0 && (
-              <div className="recent-entries mt-4">
-                <h4>Recent Entries</h4>
-                <div className="row">
-                  {fareData.slice(-6).reverse().map((entry) => (
-                    <div key={entry.entryId} className="col-md-6 col-lg-4 mb-3">
-                      <div className="entry-card">
-                        <div className="card-body">
-                          <div className="entry-header">
-                            <span className={`entry-type ${entry.type}`}>
-                              {entry.type === "daily" ? "Daily" : 
-                               entry.type === "booking" ? "Booking" : "Off Day"}
-                            </span>
-                            <div className="entry-actions">
-                              <button 
-                                className="btn btn-sm btn-edit" 
-                                onClick={() => handleEditEntry(entry)}
-                                title="Edit Entry"
-                              >
-                                <i className="bi bi-pencil"></i>
-                              </button>
-                              <button 
-                                className="btn btn-sm btn-delete" 
-                                onClick={() => handleDeleteEntry(entry.entryId)}
-                                title="Delete Entry"
-                              >
-                                <i className="bi bi-trash"></i>
-                              </button>
-                            </div>
-                          </div>
-                          <div className="entry-date">
-                            <small className="text-muted">
-                              {entry.type === "daily" && entry.date}
-                              {entry.type === "booking" && `${entry.dateFrom} - ${entry.dateTo}`}
-                              {entry.type === "off" && entry.date}
-                            </small>
-                          </div>
-                          <div className="entry-content">
-                            {entry.type === "daily" && <p>{entry.route}</p>}
-                            {entry.type === "booking" && <p>{entry.bookingDetails?.substring(0, 60)}...</p>}
-                            {entry.type === "off" && <p>{entry.reason}</p>}
-                          </div>
-                          {entry.type !== "off" && (
-                            <div className="entry-amounts">
-                              <div className="amount-row">
-                                <span>Cash: ₹{entry.cashAmount}</span>
-                                <span>Bank: ₹{entry.bankAmount}</span>
-                              </div>
-                              <div className="total-amount">
-                                <strong>Total: ₹{entry.totalAmount}</strong>
+            {(() => {
+              // Get current user info for filtering
+              const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+              const currentUserName = currentUser.fullName || currentUser.username;
+
+              // Filter entries by current user
+              const userEntries = fareData.filter(entry => 
+                entry.submittedBy === currentUserName || 
+                entry.submittedBy === 'driver' || // Fallback for old entries
+                !entry.submittedBy // Handle entries without submittedBy field
+              );
+
+              return userEntries.length > 0 ? (
+                <div className="recent-entries mt-4">
+                  <h4>Recent Entries</h4>
+                  <div className="row">
+                    {userEntries.slice(-6).reverse().map((entry) => (
+                      <div key={entry.entryId} className="col-md-6 col-lg-4 mb-3">
+                        <div className="entry-card">
+                          <div className="card-body">
+                            <div className="entry-header">
+                              <span className={`entry-type ${entry.type}`}>
+                                {entry.type === "daily" ? "Daily" : 
+                                 entry.type === "booking" ? "Booking" : "Off Day"}
+                              </span>
+                              <div className="entry-actions">
+                                <button 
+                                  className="btn btn-sm btn-edit" 
+                                  onClick={() => handleEditEntry(entry)}
+                                  title="Edit Entry"
+                                >
+                                  <i className="bi bi-pencil"></i>
+                                </button>
+                                <button 
+                                  className="btn btn-sm btn-delete" 
+                                  onClick={() => handleDeleteEntry(entry.entryId)}
+                                  title="Delete Entry"
+                                >
+                                  <i className="bi bi-trash"></i>
+                                </button>
                               </div>
                             </div>
-                          )}
+                            <div className="entry-date">
+                              <small className="text-muted">
+                                {entry.type === "daily" && entry.date}
+                                {entry.type === "booking" && `${entry.dateFrom} - ${entry.dateTo}`}
+                                {entry.type === "off" && entry.date}
+                              </small>
+                            </div>
+                            <div className="entry-content">
+                              {entry.type === "daily" && <p>{entry.route}</p>}
+                              {entry.type === "booking" && <p>{entry.bookingDetails?.substring(0, 60)}...</p>}
+                              {entry.type === "off" && <p>{entry.reason}</p>}
+                            </div>
+                            {entry.type !== "off" && (
+                              <div className="entry-amounts">
+                                <div className="amount-row">
+                                  <span>Cash: ₹{entry.cashAmount}</span>
+                                  <span>Bank: ₹{entry.bankAmount}</span>
+                                </div>
+                                <div className="total-amount">
+                                  <strong>Total: ₹{entry.totalAmount}</strong>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="recent-entries mt-4">
+                  <h4>Recent Entries</h4>
+                  <div className="text-center py-4">
+                    <i className="bi bi-receipt display-4 text-muted"></i>
+                    <p className="text-muted mt-2">No entries found for current user</p>
+                  </div>
+                </div>
+              );
+            })()}
       </div>
     </div>
   );

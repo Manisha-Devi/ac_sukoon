@@ -214,7 +214,7 @@ class HybridDataService {
 
       // Get current user info
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+      const submittedBy = currentUser.fullName || currentUser.username || 'driver';
 
       // Add to appropriate Google Sheet based on type
       if (entry.type === 'daily') {
@@ -305,7 +305,7 @@ class HybridDataService {
 
       // Get current user info
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+      const submittedBy = currentUser.fullName || currentUser.username || 'driver';
 
       // Add to appropriate Google Sheet based on type
       if (entry.type === 'daily') {
