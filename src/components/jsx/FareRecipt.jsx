@@ -159,7 +159,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
       if (editingEntry) {
         const oldTotal = editingEntry.totalAmount;
-        const result = await simpleDataService.updateFareEntry(editingEntry.entryId, {
+        const result = await directDataService.updateFareEntry(editingEntry.entryId, {
           route: dailyFareData.route,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
@@ -194,7 +194,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           date: dailyFareData.date,
         };
 
-        const result = await simpleDataService.addFareEntry(newEntryData);
+        const result = await directDataService.addFareEntry(newEntryData);
 
         if (result.success) {
           const updatedData = [result.entry, ...fareData];
@@ -233,7 +233,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
       if (editingEntry) {
         const oldTotal = editingEntry.totalAmount;
-        const result = await simpleDataService.updateFareEntry(editingEntry.entryId, {
+        const result = await directDataService.updateFareEntry(editingEntry.entryId, {
           bookingDetails: bookingData.bookingDetails,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
@@ -271,7 +271,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           dateTo: bookingData.dateTo,
         };
 
-        const result = await simpleDataService.addFareEntry(newEntryData);
+        const result = await directDataService.addFareEntry(newEntryData);
 
         if (result.success) {
           const updatedData = [result.entry, ...fareData];
@@ -299,7 +299,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       }
 
       if (editingEntry) {
-        const result = await simpleDataService.updateFareEntry(editingEntry.entryId, {
+        const result = await directDataService.updateFareEntry(editingEntry.entryId, {
           date: offDayData.date,
           reason: offDayData.reason
         }, editingEntry.type);
@@ -323,7 +323,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           totalAmount: 0,
         };
 
-        const result = await simpleDataService.addFareEntry(newEntryData);
+        const result = await directDataService.addFareEntry(newEntryData);
 
         if (result.success) {
           const updatedData = [result.entry, ...fareData];
