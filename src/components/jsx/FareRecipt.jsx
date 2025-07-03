@@ -3,7 +3,7 @@ import "../css/FareRecipt.css";
 import simpleDataService from '../../services/simpleDataService.js';
 import reactStateService from '../../services/reactStateService.js';
 
-function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries }) {
+function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries, user }) {
   const [activeTab, setActiveTab] = useState("daily");
   const [editingEntry, setEditingEntry] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -132,8 +132,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const cashAmount = parseInt(dailyFareData.cashAmount) || 0;
       const bankAmount = parseInt(dailyFareData.bankAmount) || 0;
       const totalAmount = cashAmount + bankAmount;
-      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+      // const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      // const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+      const submittedBy = user ? (user.fullName || user.username) : 'Unknown User';
 
       if (editingEntry) {
         // UPDATE: First update React state immediately
@@ -228,8 +229,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const cashAmount = parseInt(bookingData.cashAmount) || 0;
       const bankAmount = parseInt(bookingData.bankAmount) || 0;
       const totalAmount = cashAmount + bankAmount;
-      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+      // const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      // const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+      const submittedBy = user ? (user.fullName || user.username) : 'Unknown User';
 
       if (editingEntry) {
         // UPDATE: First update React state immediately
@@ -317,8 +319,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         return;
       }
 
-      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+      // const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      // const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+      const submittedBy = user ? (user.fullName || user.username) : 'Unknown User';
 
       if (editingEntry) {
         // UPDATE: First update React state immediately
@@ -458,8 +461,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
   // Calculate totals for summary - only for current user
   const calculateSummaryTotals = () => {
-    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const currentUserName = currentUser.fullName || currentUser.username;
+    // const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    // const currentUserName = currentUser.fullName || currentUser.username;
+    const currentUserName = user ? (user.fullName || user.username) : 'Unknown User';
 
     const userFareData = fareData.filter(entry => 
       entry.submittedBy === currentUserName
@@ -497,8 +501,10 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
         {/* Summary Cards - Only show when user has entries */}
         {(() => {
-          const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-          const currentUserName = currentUser.fullName || currentUser.username;
+          // const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+          // const currentUserName = currentUser.fullName || currentUser.username;
+          const currentUserName = user ? (user.fullName || user.username) : 'Unknown User';
+
           const userEntries = fareData.filter(entry => 
             entry.submittedBy === currentUserName
           );
@@ -823,8 +829,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
         {/* Recent Entries */}
         {(() => {
-          const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-          const currentUserName = currentUser.fullName || currentUser.username;
+          // const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+          // const currentUserName = currentUser.fullName || currentUser.username;
+          const currentUserName = user ? (user.fullName || user.username) : 'Unknown User';
           const userEntries = fareData.filter(entry => 
             entry.submittedBy === currentUserName
           );

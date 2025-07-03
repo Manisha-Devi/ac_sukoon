@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from "react";
 import "../css/CashBook.css";
 
-const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
-  
+const CashBook = ({ cashBookEntries, setCashBookEntries, user }) => {
+
   const [customDateFrom, setCustomDateFrom] = useState('');
   const [customDateTo, setCustomDateTo] = useState('');
   const [filteredEntries, setFilteredEntries] = useState([]);
@@ -35,7 +34,7 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
 
   const filterEntries = () => {
     let filtered = [...cashBookEntries];
-    
+
     if (customDateFrom && customDateTo) {
       const fromDate = new Date(customDateFrom);
       const toDate = new Date(customDateTo);
@@ -45,7 +44,7 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
         return entryDate >= fromDate && entryDate <= toDate;
       });
     }
-    
+
     setFilteredEntries(filtered);
   };
 
@@ -91,7 +90,7 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
         <div className="cash-book-header">
           <h2><i className="bi bi-book"></i> Cash Book (Double Column)</h2>
           <p>Traditional Dr./Cr. format with Cash and Bank columns</p>
-          
+
           {/* Toggle Buttons */}
           <div className="filter-toggle-section">
             <button 

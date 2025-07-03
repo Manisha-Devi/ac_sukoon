@@ -1,125 +1,45 @@
-
 // React State Service - No localStorage, pure React state management
 class ReactStateService {
   constructor() {
-    this.isOnline = navigator.onLine;
-    
-    // Listen for online/offline events
-    window.addEventListener('online', () => {
-      this.isOnline = true;
-      console.log('📶 Application is online');
-    });
-    
-    window.addEventListener('offline', () => {
-      this.isOnline = false;
-      console.log('📶 Application is offline');
-    });
+    this.currentUser = null;
+    this.userListeners = [];
   }
 
-  // Check if online
-  checkOnlineStatus() {
-    if (!this.isOnline) {
-      throw new Error('No internet connection available');
-    }
+  // User state management
+  setUser(userData) {
+    this.currentUser = userData;
+    this.userListeners.forEach(listener => listener(userData));
   }
 
-  // Generate unique ID for entries
-  generateEntryId() {
-    return Date.now();
+  getUser() {
+    return this.currentUser;
   }
 
-  // Create new entry with proper structure
-  createEntry(data, entryType) {
-    const entryId = this.generateEntryId();
-    const timestamp = new Date().toISOString();
-    
-    const baseEntry = {
-      entryId,
-      timestamp,
-      type: entryType,
-      submittedBy: data.submittedBy || 'Unknown User'
+  onUserChange(callback) {
+    this.userListeners.push(callback);
+    return () => {
+      this.userListeners = this.userListeners.filter(listener => listener !== callback);
     };
-
-    if (entryType === 'daily') {
-      return {
-        ...baseEntry,
-        date: data.date,
-        route: data.route,
-        cashAmount: parseFloat(data.cashAmount) || 0,
-        bankAmount: parseFloat(data.bankAmount) || 0,
-        totalAmount: parseFloat(data.totalAmount) || 0
-      };
-    } else if (entryType === 'booking') {
-      return {
-        ...baseEntry,
-        bookingDetails: data.bookingDetails,
-        dateFrom: data.dateFrom,
-        dateTo: data.dateTo,
-        cashAmount: parseFloat(data.cashAmount) || 0,
-        bankAmount: parseFloat(data.bankAmount) || 0,
-        totalAmount: parseFloat(data.totalAmount) || 0
-      };
-    } else if (entryType === 'off') {
-      return {
-        ...baseEntry,
-        date: data.date,
-        reason: data.reason
-      };
-    }
-
-    return baseEntry;
   }
 
-  // Generate cash book entries from fare data
-  generateCashBookEntries(fareData) {
-    const cashBookEntries = [];
-    
-    fareData.forEach(entry => {
-      if (entry.type === 'daily') {
-        // Receipt entry
-        cashBookEntries.push({
-          id: `receipt-${entry.entryId}`,
-          date: entry.date,
-          description: `Daily Receipt - ${entry.route}`,
-          jfNo: `JF-${entry.entryId}`,
-          receiptAmount: entry.totalAmount,
-          paymentAmount: 0,
-          source: 'fare-entry',
-          type: 'receipt'
-        });
-      } else if (entry.type === 'booking') {
-        // Booking entry
-        cashBookEntries.push({
-          id: `booking-${entry.entryId}`,
-          date: entry.dateFrom,
-          description: `Booking - ${entry.bookingDetails}`,
-          jfNo: `BK-${entry.entryId}`,
-          receiptAmount: entry.totalAmount,
-          paymentAmount: 0,
-          source: 'fare-entry',
-          type: 'booking'
-        });
-      }
-    });
-
-    return cashBookEntries;
+  clearUser() {
+    this.currentUser = null;
+    this.userListeners.forEach(listener => listener(null));
   }
 
-  // Calculate totals from fare data
-  calculateTotals(fareData) {
-    let totalEarnings = 0;
-    
-    fareData.forEach(entry => {
-      if (entry.totalAmount) {
-        totalEarnings += entry.totalAmount;
-      }
-    });
+  // Helper method to get user name for submissions
+  getUserName() {
+    return this.currentUser ? this.currentUser.fullName || this.currentUser.username : 'Unknown User';
+  }
 
-    return {
-      totalEarnings,
-      totalExpenses: 0, // Will be calculated from expense data
-      profit: totalEarnings // Will be recalculated when expense data is available
-    };
+  // Helper method to get user type
+  getUserType() {
+    return this.currentUser ? this.currentUser.userType : 'Unknown';
+  }
+
+  // Helper method to check if user is authenticated
+  isAuthenticated() {
+    return this.currentUser && this.currentUser.isAuthenticated;
   }
 }
 

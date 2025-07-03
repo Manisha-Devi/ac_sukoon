@@ -275,6 +275,7 @@ function App() {
               setFareData={setFareData}
               setTotalEarnings={setTotalEarnings}
               setCashBookEntries={setCashBookEntries}
+              user={user}
             />
           )}
           {activeTab === "fuel-entry" && (
@@ -283,6 +284,7 @@ function App() {
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
               setCashBookEntries={setCashBookEntries}
+              user={user}
             />
           )}
           {activeTab === "adda-fees" && (
@@ -291,6 +293,7 @@ function App() {
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
               setCashBookEntries={setCashBookEntries}
+              user={user}
             />
           )}
            {activeTab === "union-payment" && (
@@ -299,6 +302,7 @@ function App() {
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
               setCashBookEntries={setCashBookEntries}
+              user={user}
             />
           )}
           {activeTab === "service-entry" && (
@@ -307,6 +311,7 @@ function App() {
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
               setCashBookEntries={setCashBookEntries}
+              user={user}
             />
           )}
           {activeTab === "other-payment" && (
@@ -315,14 +320,16 @@ function App() {
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
               setCashBookEntries={setCashBookEntries}
+              user={user}
             />
           )}
           {activeTab === "bonus-calc" && <BonusCalculator />}
-          {activeTab === "analytics" && <Analytics />}
+          {activeTab === "analytics" && <Analytics user={user} />}
           {activeTab === "cash-book" && (
             <CashBook
               cashBookEntries={cashBookEntries}
               setCashBookEntries={setCashBookEntries}
+              user={user}
             />
           )}
           {activeTab === "approval" && (
@@ -330,6 +337,7 @@ function App() {
               fareData={fareData}
               expenseData={expenseData}
               cashBookEntries={cashBookEntries}
+              user={user}
             />
           )}
         </div>
