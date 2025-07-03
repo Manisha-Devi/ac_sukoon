@@ -50,11 +50,6 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
       window.removeEventListener('dataUpdated', handleDataUpdate);
       window.removeEventListener('fareDataUpdated', handleFareDataUpdate);
       window.removeEventListener('storage', handleDataUpdate);
-    };aUpdate);
-
-    return () => {
-      window.removeEventListener('cashBookUpdated', handleCashBookUpdate);
-      window.removeEventListener('dataUpdated', handleDataUpdate);
     };
   }, [setCashBookEntries]);
 
