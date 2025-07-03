@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../css/FareRecipt.css";
-import directDataService from '../../services/directDataService.js';
+import simpleDataService from '../../services/simpleDataService.js';
 
 function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries }) {
   const [activeTab, setActiveTab] = useState("daily");
@@ -31,7 +31,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const data = await directDataService.initializeData();
+        const data = await simpleDataService.initializeData();
         setFareData(data);
 
         const total = data.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
@@ -159,7 +159,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
       if (editingEntry) {
         const oldTotal = editingEntry.totalAmount;
-        const result = await directDataService.updateFareEntry(editingEntry.entryId, {
+        const result = await simpleDataService.updateFareEntry(editingEntry.entryId, {
           route: dailyFareData.route,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
@@ -194,7 +194,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           date: dailyFareData.date,
         };
 
-        const result = await directDataService.addFareEntry(newEntryData);
+        const result = await simpleDataService.addFareEntry(newEntryData);
 
         if (result.success) {
           const updatedData = [result.entry, ...fareData];
@@ -233,7 +233,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
       if (editingEntry) {
         const oldTotal = editingEntry.totalAmount;
-        const result = await directDataService.updateFareEntry(editingEntry.entryId, {
+        const result = await simpleDataService.updateFareEntry(editingEntry.entryId, {
           bookingDetails: bookingData.bookingDetails,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
@@ -271,7 +271,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           dateTo: bookingData.dateTo,
         };
 
-        const result = await directDataService.addFareEntry(newEntryData);
+        const result = await simpleDataService.addFareEntry(newEntryData);
 
         if (result.success) {
           const updatedData = [result.entry, ...fareData];
@@ -299,7 +299,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       }
 
       if (editingEntry) {
-        const result = await directDataService.updateFareEntry(editingEntry.entryId, {
+        const result = await simpleDataService.updateFareEntry(editingEntry.entryId, {
           date: offDayData.date,
           reason: offDayData.reason
         }, editingEntry.type);
@@ -323,7 +323,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           totalAmount: 0,
         };
 
-        const result = await directDataService.addFareEntry(newEntryData);
+        const result = await simpleDataService.addFareEntry(newEntryData);
 
         if (result.success) {
           const updatedData = [result.entry, ...fareData];
@@ -343,7 +343,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     try {
       const entryToDelete = fareData.find(entry => entry.entryId === entryId);
 
-      const result = await directDataService.deleteFareEntry(entryId, entryToDelete.type);
+      const result = await simpleDataService.deleteFareEntry(entryId, entryToDelete.type);
 
       if (result.success) {
         const updatedData = fareData.filter(entry => entry.entryId !== entryId);
