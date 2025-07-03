@@ -75,7 +75,7 @@ const convertToDateString = (date) => {
   return String(date);
 };
 
-function UnionPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
+function UnionPaymentEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
   const [editingEntry, setEditingEntry] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -105,7 +105,7 @@ function UnionPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
             cashAmount: entry.cashAmount || 0,
             bankAmount: entry.bankAmount || 0,
             totalAmount: entry.totalAmount || 0,
-            remarks: entry.remarks || '',
+            remarks: entry.remarks || "",
             submittedBy: entry.submittedBy,
             type: 'union'
           }));
@@ -130,7 +130,7 @@ function UnionPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           const cashBookEntries = unionData.map(entry => ({
             id: `union-${entry.entryId}`,
             date: entry.date,
-            particulars: "Union",
+            particulars: "Union Payment",
             description: `Union payment - ${entry.unionName || 'Union'}`,
             jfNo: `UNION-${entry.entryId}`,
             cashAmount: entry.cashAmount || 0,
@@ -216,10 +216,10 @@ function UnionPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           updatedData: {
             date: dateOnly,
             unionName: formData.unionName,
-            remarks: formData.remarks,
             cashAmount: cashAmount,
             bankAmount: bankAmount,
             totalAmount: totalAmount,
+            remarks: formData.remarks,
           }
         }).catch(error => {
           console.error('Background union update sync failed:', error);
@@ -251,7 +251,7 @@ function UnionPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           const cashBookEntry = {
             id: Date.now() + 1,
             date: dateOnly,
-            particulars: "Union",
+            particulars: "Union Payment",
             description: `Union payment - ${formData.unionName || 'Union'}`,
             jfNo: `UNION-${newEntry.entryId}`,
             cashAmount: cashAmount,
@@ -269,10 +269,10 @@ function UnionPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           timestamp: timeOnly,
           date: dateOnly,
           unionName: formData.unionName,
-          remarks: formData.remarks,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
           totalAmount: totalAmount,
+          remarks: formData.remarks,
           submittedBy: submittedBy,
         }).catch(error => {
           console.error('Background union add sync failed:', error);
@@ -367,7 +367,7 @@ function UnionPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           <div className="header-content">
             <div>
               <h2><i className="bi bi-people"></i> Union Payment Entry</h2>
-              <p>Record your union fees and related expenses (Payment)</p>
+              <p>Record your union payment expenses (Payment)</p>
             </div>
             <div className="sync-status">
               <div className={`simple-sync-indicator ${isLoading ? 'syncing' : 'synced'}`}>
@@ -477,12 +477,12 @@ function UnionPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
             <div className="row">
               <div className="col-md-12 mb-3">
                 <label className="form-label">Remarks (Optional)</label>
-                <textarea
+                <input
+                  type="text"
                   className="form-control"
-                  rows={3}
                   value={formData.remarks}
                   onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
-                  placeholder="Enter any additional remarks"
+                  placeholder="Enter remarks"
                 />
               </div>
             </div>
@@ -504,7 +504,7 @@ function UnionPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
             <div className="button-group">
               <button type="submit" className="btn union-entry-btn" disabled={isLoading}>
                 <i className={isLoading ? "bi bi-hourglass-split" : editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
-                {isLoading ? "Saving..." : editingEntry ? "Update Entry" : "Add Union Payment"}
+                {isLoading ? "Saving..." : editingEntry ? "Update Entry" : "Add Union Entry"}
               </button>
               {editingEntry && (
                 <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
@@ -553,8 +553,7 @@ function UnionPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                       </div>
                       <div className="entry-content">
                         <p>
-                          <strong>Union:</strong> {entry.unionName || 'N/A'}<br/>
-                          {entry.remarks && <><strong>Remarks:</strong> {entry.remarks.substring(0, 50)}...</>}
+                          {entry.unionName && <><strong>Union:</strong> {entry.unionName}<br/></>}
                         </p>
                       </div>
                       <div className="entry-amounts">
@@ -566,6 +565,11 @@ function UnionPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                           <strong>Total: ₹{entry.totalAmount}</strong>
                         </div>
                       </div>
+                      {entry.remarks && (
+                        <div className="entry-remarks">
+                          <strong>Remarks:</strong> {entry.remarks}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -578,4 +582,4 @@ function UnionPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
   );
 }
 
-export default UnionPayment;
+export default UnionPaymentEntry;
