@@ -170,6 +170,22 @@ function testConnection() {
   }
 }
 
+// Helper function to format IST timestamp
+function formatISTTimestamp() {
+  const now = new Date();
+  const istDate = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+  return istDate.toLocaleString('en-IN', { 
+    timeZone: 'Asia/Kolkata',
+    hour12: true,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+}
+
 // User Authentication
 function handleLogin(data) {
   try {
@@ -186,10 +202,9 @@ function handleLogin(data) {
       const inputPassword = String(data.password).trim();
 
       if (sheetUsername === inputUsername && sheetPassword === inputPassword) {
-        // Update last login with timestamp from frontend
-        if (data.timestamp) {
-          sheet.getRange(i + 1, 7).setValue(data.timestamp);
-        }
+        // Update last login with IST timestamp
+        const istTimestamp = data.timestamp || formatISTTimestamp();
+        sheet.getRange(i + 1, 7).setValue(istTimestamp);
 
         return {
           success: true,
@@ -227,14 +242,14 @@ function addFareReceipt(data) {
 
     const entryId = data.entryId;
 
-    // Store timestamp as-is (already in H:MM:SS AM/PM string format from frontend)
-    const timeOnly = data.timestamp || '';
+    // Store timestamp as-is from frontend (already in IST H:MM:SS AM/PM format)
+    const timeOnly = data.timestamp || formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
 
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
     sheet.getRange(2, 1, 1, 9).setValues([[
-      timeOnly, // A: Time only (HH:MM:SS)
-      data.date, // B: Date from frontend
+      timeOnly, // A: Time only in IST (HH:MM:SS AM/PM)
+      data.date, // B: Date from frontend in IST
       data.route, // C: Route
       data.cashAmount || 0, // D: CashAmount
       data.bankAmount || 0, // E: BankAmount
@@ -248,7 +263,7 @@ function addFareReceipt(data) {
         success: true,
         entryId: entryId,
         message: "Fare receipt added successfully",
-        timestamp: data.timestamp,
+        timestamp: timeOnly,
       };
   } catch (error) {
     return {
@@ -416,16 +431,16 @@ function addBookingEntry(data) {
 
     const entryId = data.entryId;
 
-    // Store timestamp as-is (already in H:MM:SS AM/PM string format from frontend)
-    const timeOnly = data.timestamp || '';
+    // Store timestamp as-is from frontend (already in IST H:MM:SS AM/PM format)
+    const timeOnly = data.timestamp || formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
 
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
     sheet.getRange(2, 1, 1, 10).setValues([[
-      timeOnly, // A: Time only (HH:MM:SS)
+      timeOnly, // A: Time only in IST (HH:MM:SS AM/PM)
       data.bookingDetails || "", // B: BookingDetails
-      data.dateFrom, // C: DateFrom from frontend
-      data.dateTo, // D: DateTo from frontend
+      data.dateFrom, // C: DateFrom from frontend in IST
+      data.dateTo, // D: DateTo from frontend in IST
       data.cashAmount || 0, // E: CashAmount
       data.bankAmount || 0, // F: BankAmount
       data.totalAmount || 0, // G: TotalAmount
@@ -438,7 +453,7 @@ function addBookingEntry(data) {
         success: true,
         entryId: entryId,
         message: "Booking entry added successfully",
-        timestamp: data.timestamp,
+        timestamp: timeOnly,
       };
   } catch (error) {
     return {
@@ -610,14 +625,14 @@ function addOffDay(data) {
 
     const entryId = data.entryId;
 
-    // Store timestamp as-is (already in H:MM:SS AM/PM string format from frontend)
-    const timeOnly = data.timestamp || '';
+    // Store timestamp as-is from frontend (already in IST H:MM:SS AM/PM format)
+    const timeOnly = data.timestamp || formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
 
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
     sheet.getRange(2, 1, 1, 6).setValues([[
-      timeOnly, // A: Time only (HH:MM:SS)
-      data.date, // B: Date from frontend
+      timeOnly, // A: Time only in IST (HH:MM:SS AM/PM)
+      data.date, // B: Date from frontend in IST
       data.reason || "", // C: Reason
       "off", // D: EntryType
       entryId, // E: EntryId (use provided ID)
@@ -628,7 +643,7 @@ function addOffDay(data) {
         success: true,
         entryId: entryId,
         message: "Off day added successfully",
-        timestamp: data.timestamp,
+        timestamp: timeOnly,
       };
   } catch (error) {
     return { success: false, error: "Add off day error: " + error.toString() };

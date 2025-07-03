@@ -47,6 +47,20 @@ const convertToDateString = (date) => {
   return String(date);
 };
 
+// Function to format time in IST
+const formatISTTime = () => {
+    const now = new Date();
+    const istOffset = 330 * 60000; // IST is UTC+5:30
+    const istDate = new Date(now.getTime() + istOffset);
+    return istDate.toLocaleTimeString('en-US', {
+        hour12: true,
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: 'Asia/Kolkata' // Explicitly set timezone to IST
+    });
+};
+
 function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries }) {
   const [activeTab, setActiveTab] = useState("daily");
   const [editingEntry, setEditingEntry] = useState(null);
@@ -376,13 +390,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const totalAmount = cashAmount + bankAmount;
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
-      const now = new Date();
-      const timeOnly = now.toLocaleTimeString('en-US', { 
-        hour12: true, 
-        hour: 'numeric', 
-        minute: '2-digit', 
-        second: '2-digit' 
-      }); // Returns H:MM:SS AM/PM format
+      const timeOnly = formatISTTime(); // IST time in H:MM:SS AM/PM format
 
       if (editingEntry) {
         // UPDATE: First update React state immediately
@@ -863,8 +871,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       className={`form-control date-input ${isBookingDateDisabled(bookingData.dateFrom) ? 'is-invalid' : ''}`}
                       value={bookingData.dateFrom}
                       onChange={(e) => setBookingData({ ...bookingData, dateFrom: e.target.value })}
-                      onFocus={(e) => e.target.showPicker && e.target.showPicker()}
-                      placeholder="Select from date"
+                      onFocus={(e) => e.target.showPicker && e.target.showPicker()}                      placeholder="Select from date"
                       min={getTodayDate()}
                       required
                     />
