@@ -179,17 +179,30 @@ function Approval({ fareData, expenseData, cashBookEntries }) {
             {fareData.length > 0 && (
               <div className="recent-entries-preview">
                 <h6>Recent Entries:</h6>
-                {fareData.slice(-3).map((entry) => (
-                  <div key={entry.id} className="entry-preview">
-                    <span className="entry-type">{entry.type === 'daily' ? 'Daily' : entry.type === 'booking' ? 'Booking' : 'Off Day'}</span>
-                    <span className="entry-detail">
-                      {entry.type === 'daily' && `${entry.route} - ${entry.date}`}
-                      {entry.type === 'booking' && `${entry.bookingDetails?.substring(0, 30)}... - ${entry.dateFrom} to ${entry.dateTo}`}
-                      {entry.type === 'off' && `${entry.reason} - ${entry.date}`}
-                    </span>
-                    {entry.type !== 'off' && <span className="entry-amount">₹{entry.totalAmount}</span>}
-                  </div>
-                ))}
+                {(() => {
+                  // Get current user info for filtering
+                  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                  const currentUserName = currentUser.fullName || currentUser.username;
+                  
+                  // Filter entries by current user and show last 3
+                  const userEntries = fareData.filter(entry => 
+                    entry.submittedBy === currentUserName || 
+                    entry.submittedBy === 'driver' || // Fallback for old entries
+                    !entry.submittedBy // Handle entries without submittedBy field
+                  );
+                  
+                  return userEntries.slice(-3).map((entry) => (
+                    <div key={entry.entryId || entry.id} className="entry-preview">
+                      <span className="entry-type">{entry.type === 'daily' ? 'Daily' : entry.type === 'booking' ? 'Booking' : 'Off Day'}</span>
+                      <span className="entry-detail">
+                        {entry.type === 'daily' && `${entry.route} - ${entry.date}`}
+                        {entry.type === 'booking' && `${entry.bookingDetails?.substring(0, 30)}... - ${entry.dateFrom} to ${entry.dateTo}`}
+                        {entry.type === 'off' && `${entry.reason} - ${entry.date}`}
+                      </span>
+                      {entry.type !== 'off' && <span className="entry-amount">₹{entry.totalAmount}</span>}
+                    </div>
+                  ));
+                })()}
               </div>
             )}
           </div>

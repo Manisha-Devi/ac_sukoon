@@ -204,17 +204,30 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
             {fareData.length > 0 && (
               <div className="recent-entries-preview">
                 <h6>Recent Entries:</h6>
-                {fareData.slice(-3).map((entry) => (
-                  <div key={entry.entryId || entry.id} className="entry-preview">
-                    <span className="entry-type">{entry.type === 'daily' ? 'Daily' : entry.type === 'booking' ? 'Booking' : 'Off Day'}</span>
-                    <span className="entry-detail">
-                      {entry.type === 'daily' && `${entry.route} - ${entry.date}`}
-                      {entry.type === 'booking' && `${entry.bookingDetails?.substring(0, 30)}... - ${entry.dateFrom} to ${entry.dateTo}`}
-                      {entry.type === 'off' && `${entry.reason} - ${entry.date}`}
-                    </span>
-                    {entry.type !== 'off' && <span className="entry-amount">₹{entry.totalAmount}</span>}
-                  </div>
-                ))}
+                {(() => {
+                  // Get current user info for filtering
+                  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                  const currentUserName = currentUser.fullName || currentUser.username;
+                  
+                  // Filter entries by current user and show last 3
+                  const userEntries = fareData.filter(entry => 
+                    entry.submittedBy === currentUserName || 
+                    entry.submittedBy === 'driver' || // Fallback for old entries
+                    !entry.submittedBy // Handle entries without submittedBy field
+                  );
+                  
+                  return userEntries.slice(-3).map((entry) => (
+                    <div key={entry.entryId || entry.id} className="entry-preview">
+                      <span className="entry-type">{entry.type === 'daily' ? 'Daily' : entry.type === 'booking' ? 'Booking' : 'Off Day'}</span>
+                      <span className="entry-detail">
+                        {entry.type === 'daily' && `${entry.route} - ${entry.date}`}
+                        {entry.type === 'booking' && `${entry.bookingDetails?.substring(0, 30)}... - ${entry.dateFrom} to ${entry.dateTo}`}
+                        {entry.type === 'off' && `${entry.reason} - ${entry.date}`}
+                      </span>
+                      {entry.type !== 'off' && <span className="entry-amount">₹{entry.totalAmount}</span>}
+                    </div>
+                  ));
+                })()}
               </div>
             )}
           </div>
@@ -251,16 +264,30 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
             {expenseData.filter(entry => entry.type === 'fuel').length > 0 && (
               <div className="recent-entries-preview">
                 <h6>Recent Entries:</h6>
-                {expenseData.filter(entry => entry.type === 'fuel').slice(-3).map((entry) => (
-                  <div key={entry.entryId || entry.id} className="entry-preview">
-                    <span className="entry-type">Fuel</span>
-                    <span className="entry-detail">
-                      {entry.pumpName || 'Fuel Station'} - {entry.date}
-                      {entry.liters && ` (${entry.liters}L)`}
-                    </span>
-                    <span className="entry-amount">₹{entry.totalAmount}</span>
-                  </div>
-                ))}
+                {(() => {
+                  // Get current user info for filtering
+                  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                  const currentUserName = currentUser.fullName || currentUser.username;
+                  
+                  // Filter fuel entries by current user and show last 3
+                  const userFuelEntries = expenseData.filter(entry => 
+                    entry.type === 'fuel' && (
+                      entry.submittedBy === currentUserName || 
+                      !entry.submittedBy // Handle entries without submittedBy field
+                    )
+                  );
+                  
+                  return userFuelEntries.slice(-3).map((entry) => (
+                    <div key={entry.entryId || entry.id} className="entry-preview">
+                      <span className="entry-type">Fuel</span>
+                      <span className="entry-detail">
+                        {entry.pumpName || 'Fuel Station'} - {entry.date}
+                        {entry.liters && ` (${entry.liters}L)`}
+                      </span>
+                      <span className="entry-amount">₹{entry.totalAmount}</span>
+                    </div>
+                  ));
+                })()}
               </div>
             )}
           </div>
@@ -297,15 +324,29 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
             {expenseData.filter(entry => entry.type === 'fees').length > 0 && (
               <div className="recent-entries-preview">
                 <h6>Recent Entries:</h6>
-                {expenseData.filter(entry => entry.type === 'fees').slice(-3).map((entry) => (
-                  <div key={entry.entryId || entry.id} className="entry-preview">
-                    <span className="entry-type">Adda</span>
-                    <span className="entry-detail">
-                      {entry.description} - {entry.date}
-                    </span>
-                    <span className="entry-amount">₹{entry.totalAmount}</span>
-                  </div>
-                ))}
+                {(() => {
+                  // Get current user info for filtering
+                  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                  const currentUserName = currentUser.fullName || currentUser.username;
+                  
+                  // Filter fees entries by current user and show last 3
+                  const userFeesEntries = expenseData.filter(entry => 
+                    entry.type === 'fees' && (
+                      entry.submittedBy === currentUserName || 
+                      !entry.submittedBy // Handle entries without submittedBy field
+                    )
+                  );
+                  
+                  return userFeesEntries.slice(-3).map((entry) => (
+                    <div key={entry.entryId || entry.id} className="entry-preview">
+                      <span className="entry-type">Adda</span>
+                      <span className="entry-detail">
+                        {entry.description} - {entry.date}
+                      </span>
+                      <span className="entry-amount">₹{entry.totalAmount}</span>
+                    </div>
+                  ));
+                })()}
               </div>
             )}
           </div>
@@ -342,16 +383,30 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
             {expenseData.filter(entry => entry.type === 'service').length > 0 && (
               <div className="recent-entries-preview">
                 <h6>Recent Entries:</h6>
-                {expenseData.filter(entry => entry.type === 'service').slice(-3).map((entry) => (
-                  <div key={entry.entryId || entry.id} className="entry-preview">
-                    <span className="entry-type">Service</span>
-                    <span className="entry-detail">
-                      {entry.serviceType || entry.description} - {entry.date}
-                      {entry.vendor && ` (${entry.vendor})`}
-                    </span>
-                    <span className="entry-amount">₹{entry.totalAmount}</span>
-                  </div>
-                ))}
+                {(() => {
+                  // Get current user info for filtering
+                  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                  const currentUserName = currentUser.fullName || currentUser.username;
+                  
+                  // Filter service entries by current user and show last 3
+                  const userServiceEntries = expenseData.filter(entry => 
+                    entry.type === 'service' && (
+                      entry.submittedBy === currentUserName || 
+                      !entry.submittedBy // Handle entries without submittedBy field
+                    )
+                  );
+                  
+                  return userServiceEntries.slice(-3).map((entry) => (
+                    <div key={entry.entryId || entry.id} className="entry-preview">
+                      <span className="entry-type">Service</span>
+                      <span className="entry-detail">
+                        {entry.serviceType || entry.description} - {entry.date}
+                        {entry.vendor && ` (${entry.vendor})`}
+                      </span>
+                      <span className="entry-amount">₹{entry.totalAmount}</span>
+                    </div>
+                  ));
+                })()}
               </div>
             )}
           </div>
@@ -388,15 +443,29 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
             {expenseData.filter(entry => entry.type === 'union').length > 0 && (
               <div className="recent-entries-preview">
                 <h6>Recent Entries:</h6>
-                {expenseData.filter(entry => entry.type === 'union').slice(-3).map((entry) => (
-                  <div key={entry.entryId || entry.id} className="entry-preview">
-                    <span className="entry-type">Union</span>
-                    <span className="entry-detail">
-                      {entry.description} - {entry.date}
-                    </span>
-                    <span className="entry-amount">₹{entry.totalAmount}</span>
-                  </div>
-                ))}
+                {(() => {
+                  // Get current user info for filtering
+                  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                  const currentUserName = currentUser.fullName || currentUser.username;
+                  
+                  // Filter union entries by current user and show last 3
+                  const userUnionEntries = expenseData.filter(entry => 
+                    entry.type === 'union' && (
+                      entry.submittedBy === currentUserName || 
+                      !entry.submittedBy // Handle entries without submittedBy field
+                    )
+                  );
+                  
+                  return userUnionEntries.slice(-3).map((entry) => (
+                    <div key={entry.entryId || entry.id} className="entry-preview">
+                      <span className="entry-type">Union</span>
+                      <span className="entry-detail">
+                        {entry.description} - {entry.date}
+                      </span>
+                      <span className="entry-amount">₹{entry.totalAmount}</span>
+                    </div>
+                  ));
+                })()}
               </div>
             )}
           </div>
@@ -433,16 +502,30 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
             {expenseData.filter(entry => entry.type === 'other').length > 0 && (
               <div className="recent-entries-preview">
                 <h6>Recent Entries:</h6>
-                {expenseData.filter(entry => entry.type === 'other').slice(-3).map((entry) => (
-                  <div key={entry.entryId || entry.id} className="entry-preview">
-                    <span className="entry-type">Other</span>
-                    <span className="entry-detail">
-                      {entry.paymentDetails} - {entry.date}
-                      {entry.vendor && ` (${entry.vendor})`}
-                    </span>
-                    <span className="entry-amount">₹{entry.totalAmount}</span>
-                  </div>
-                ))}
+                {(() => {
+                  // Get current user info for filtering
+                  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                  const currentUserName = currentUser.fullName || currentUser.username;
+                  
+                  // Filter other entries by current user and show last 3
+                  const userOtherEntries = expenseData.filter(entry => 
+                    entry.type === 'other' && (
+                      entry.submittedBy === currentUserName || 
+                      !entry.submittedBy // Handle entries without submittedBy field
+                    )
+                  );
+                  
+                  return userOtherEntries.slice(-3).map((entry) => (
+                    <div key={entry.entryId || entry.id} className="entry-preview">
+                      <span className="entry-type">Other</span>
+                      <span className="entry-detail">
+                        {entry.paymentDetails} - {entry.date}
+                        {entry.vendor && ` (${entry.vendor})`}
+                      </span>
+                      <span className="entry-amount">₹{entry.totalAmount}</span>
+                    </div>
+                  ));
+                })()}
               </div>
             )}
           </div>

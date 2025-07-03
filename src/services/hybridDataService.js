@@ -212,6 +212,10 @@ class HybridDataService {
     try {
       let result;
 
+      // Get current user info
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+
       // Add to appropriate Google Sheet based on type
       if (entry.type === 'daily') {
         result = await authService.addFareReceipt({
@@ -221,7 +225,7 @@ class HybridDataService {
           cashAmount: entry.cashAmount || 0,
           bankAmount: entry.bankAmount || 0,
           totalAmount: entry.totalAmount,
-          submittedBy: 'driver'
+          submittedBy: submittedBy
         });
       } else if (entry.type === 'booking') {
         result = await authService.addBookingEntry({
@@ -232,14 +236,14 @@ class HybridDataService {
           cashAmount: entry.cashAmount || 0,
           bankAmount: entry.bankAmount || 0,
           totalAmount: entry.totalAmount,
-          submittedBy: 'driver'
+          submittedBy: submittedBy
         });
       } else if (entry.type === 'off') {
         result = await authService.addOffDay({
           entryId: entry.entryId,
           date: entry.date,
           reason: entry.reason,
-          submittedBy: 'driver'
+          submittedBy: submittedBy
         });
       }
 
@@ -299,6 +303,10 @@ class HybridDataService {
     try {
       let result;
 
+      // Get current user info
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+
       // Add to appropriate Google Sheet based on type
       if (entry.type === 'daily') {
         result = await authService.addFareReceipt({
@@ -308,7 +316,7 @@ class HybridDataService {
           cashAmount: entry.cashAmount || 0,
           bankAmount: entry.bankAmount || 0,
           totalAmount: entry.totalAmount,
-          submittedBy: 'driver'
+          submittedBy: submittedBy
         });
       } else if (entry.type === 'booking') {
         result = await authService.addBookingEntry({
@@ -319,14 +327,14 @@ class HybridDataService {
           cashAmount: entry.cashAmount || 0,
           bankAmount: entry.bankAmount || 0,
           totalAmount: entry.totalAmount,
-          submittedBy: 'driver'
+          submittedBy: submittedBy
         });
       } else if (entry.type === 'off') {
         result = await authService.addOffDay({
           entryId: entry.entryId,
           date: entry.date,
           reason: entry.reason,
-          submittedBy: 'driver'
+          submittedBy: submittedBy
         });
       }
 
