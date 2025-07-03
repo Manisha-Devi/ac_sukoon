@@ -374,7 +374,13 @@
 }
 
 .entry-date {
-  margin-bottom: 15px;
+  margin-bottom: 8px;
+}
+
+.timestamp {
+  font-size: 0.75rem;
+  color: #6c757d;
+  margin-top: 2px;
 }
 
 .btn-edit, .btn-delete {

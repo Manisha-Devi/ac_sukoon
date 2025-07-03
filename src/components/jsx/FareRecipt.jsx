@@ -837,9 +837,36 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                         </div>
                         <div className="entry-date">
                           <small className="text-muted">
-                            {entry.type === "daily" && entry.date}
-                            {entry.type === "booking" && `${entry.dateFrom} - ${entry.dateTo}`}
-                            {entry.type === "off" && entry.date}
+                            {entry.type === "daily" && (
+                              <>
+                                <div>{entry.date}</div>
+                                <div className="timestamp">{entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString('en-IN', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit',
+                                  hour12: true 
+                                }) : ''}</div>
+                              </>
+                            )}
+                            {entry.type === "booking" && (
+                              <>
+                                <div>{entry.dateFrom} - {entry.dateTo}</div>
+                                <div className="timestamp">{entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString('en-IN', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit',
+                                  hour12: true 
+                                }) : ''}</div>
+                              </>
+                            )}
+                            {entry.type === "off" && (
+                              <>
+                                <div>{entry.date}</div>
+                                <div className="timestamp">{entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString('en-IN', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit',
+                                  hour12: true 
+                                }) : ''}</div>
+                              </>
+                            )}
                           </small>
                         </div>
                         <div className="entry-content">
