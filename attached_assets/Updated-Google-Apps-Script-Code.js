@@ -1,3 +1,4 @@
+
 // AC Sukoon Transport Management - Google Apps Script API
 // Organized by Entry Types with Complete CRUD Operations
 
@@ -158,15 +159,10 @@ function doGet(e) {
 // Test Connection
 function testConnection() {
   try {
-    // Create current IST timestamp
-    const now = new Date();
-    const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
-    const istTime = new Date(now.getTime() + istOffset);
-    
     return {
       success: true,
       message: "Google Apps Script is working!",
-      timestamp: istTime.toISOString()
+      timestamp: new Date().toISOString() // Only for test connection
     };
   } catch (error) {
     return {
@@ -192,8 +188,10 @@ function handleLogin(data) {
       const inputPassword = String(data.password).trim();
 
       if (sheetUsername === inputUsername && sheetPassword === inputPassword) {
-        // Update last login
-        sheet.getRange(i + 1, 7).setValue(data.timestamp || new Date());
+        // Update last login with timestamp from frontend
+        if (data.timestamp) {
+          sheet.getRange(i + 1, 7).setValue(data.timestamp);
+        }
 
         return {
           success: true,
@@ -235,7 +233,7 @@ function addFareReceipt(data) {
     sheet.insertRowBefore(2);
     sheet.getRange(2, 1, 1, 9).setValues([[
       data.timestamp, // A: Timestamp from frontend
-      data.date, // B: Date
+      data.date, // B: Date from frontend
       data.route, // C: Route
       data.cashAmount || 0, // D: CashAmount
       data.bankAmount || 0, // E: BankAmount
@@ -274,8 +272,8 @@ function getFareReceipts() {
     const data = values.slice(1).map((row, index) => {
         const rowData = {
           entryId: row[7], // Entry ID from column H
-          timestamp: row[0] ? new Date(row[0]).toISOString() : new Date().toISOString(), // Convert to ISO string
-          date: row[1] ? (row[1] instanceof Date ? row[1].toISOString().split('T')[0] : row[1]) : row[1], // Format date as YYYY-MM-DD
+          timestamp: row[0], // Use timestamp as-is from sheet
+          date: row[1], // Use date as-is from sheet
           route: row[2], // Route from column C
           cashAmount: row[3], // Cash amount from column D
           bankAmount: row[4], // Bank amount from column E
@@ -324,7 +322,7 @@ function updateFareReceipt(data) {
       throw new Error('Fare receipt not found with ID: ' + entryId);
     }
 
-    // Update all columns for Fare Receipt
+    // Update only provided fields - don't modify timestamp
     if (updatedData.date) {
       sheet.getRange(rowIndex, 2).setValue(updatedData.date); // B: Date
     }
@@ -340,7 +338,6 @@ function updateFareReceipt(data) {
     if (updatedData.totalAmount !== undefined) {
       sheet.getRange(rowIndex, 6).setValue(updatedData.totalAmount); // F: TotalAmount
     }
-    // Keep original timestamp - don't modify it
 
     return {
       success: true,
@@ -423,8 +420,8 @@ function addBookingEntry(data) {
     sheet.getRange(2, 1, 1, 10).setValues([[
       data.timestamp, // A: Timestamp from frontend
       data.bookingDetails || "", // B: BookingDetails
-      data.dateFrom, // C: DateFrom
-      data.dateTo, // D: DateTo
+      data.dateFrom, // C: DateFrom from frontend
+      data.dateTo, // D: DateTo from frontend
       data.cashAmount || 0, // E: CashAmount
       data.bankAmount || 0, // F: BankAmount
       data.totalAmount || 0, // G: TotalAmount
@@ -433,14 +430,12 @@ function addBookingEntry(data) {
       data.submittedBy || "", // J: SubmittedBy
     ]]);
 
-    return ContentService.createTextOutput(
-      JSON.stringify({
+    return {
         success: true,
         entryId: entryId,
         message: "Booking entry added successfully",
         timestamp: data.timestamp,
-      }),
-    );
+      };
   } catch (error) {
     return {
       success: false,
@@ -464,10 +459,10 @@ function getBookingEntries() {
     const data = values.slice(1).map((row, index) => {
         const rowData = {
           entryId: row[8], // Entry ID from column I
-          timestamp: row[0] ? new Date(row[0]).toISOString() : new Date().toISOString(), // Convert to ISO string
+          timestamp: row[0], // Use timestamp as-is from sheet
           bookingDetails: row[1], // Booking details from column B
-          dateFrom: row[2] ? (row[2] instanceof Date ? row[2].toISOString().split('T')[0] : row[2]) : row[2], // Format date as YYYY-MM-DD
-          dateTo: row[3] ? (row[3] instanceof Date ? row[3].toISOString().split('T')[0] : row[3]) : row[3], // Format date as YYYY-MM-DD
+          dateFrom: row[2], // Use date as-is from sheet
+          dateTo: row[3], // Use date as-is from sheet
           cashAmount: row[4], // Cash amount from column E
           bankAmount: row[5], // Bank amount from column F
           totalAmount: row[6], // Total amount from column G
@@ -515,7 +510,7 @@ function updateBookingEntry(data) {
       throw new Error('Booking entry not found with ID: ' + entryId);
     }
 
-    // Update all columns for Booking Entry
+    // Update only provided fields - don't modify timestamp
     if (updatedData.bookingDetails) {
       sheet.getRange(rowIndex, 2).setValue(updatedData.bookingDetails); // B: BookingDetails
     }
@@ -534,7 +529,6 @@ function updateBookingEntry(data) {
     if (updatedData.totalAmount !== undefined) {
       sheet.getRange(rowIndex, 7).setValue(updatedData.totalAmount); // G: TotalAmount
     }
-    // Keep original timestamp - don't modify it
 
     return {
       success: true,
@@ -616,21 +610,19 @@ function addOffDay(data) {
     sheet.insertRowBefore(2);
     sheet.getRange(2, 1, 1, 6).setValues([[
       data.timestamp, // A: Timestamp from frontend
-      data.date, // B: Date
+      data.date, // B: Date from frontend
       data.reason || "", // C: Reason
       "off", // D: EntryType
       entryId, // E: EntryId (use provided ID)
       data.submittedBy || "", // F: SubmittedBy
     ]]);
 
-    return ContentService.createTextOutput(
-      JSON.stringify({
+    return {
         success: true,
         entryId: entryId,
         message: "Off day added successfully",
         timestamp: data.timestamp,
-      }),
-    );
+      };
   } catch (error) {
     return { success: false, error: "Add off day error: " + error.toString() };
   }
@@ -651,8 +643,8 @@ function getOffDays() {
     const data = values.slice(1).map((row, index) => {
       const rowData = {
         entryId: row[4], // Entry ID from column E
-        timestamp: row[0] ? new Date(row[0]).toISOString() : new Date().toISOString(), // Convert to ISO string
-        date: row[1] ? (row[1] instanceof Date ? row[1].toISOString().split('T')[0] : row[1]) : row[1], // Format date as YYYY-MM-DD
+        timestamp: row[0], // Use timestamp as-is from sheet
+        date: row[1], // Use date as-is from sheet
         reason: row[2], // Reason from column C
         entryType: row[3], // Static entry type
         submittedBy: row[5], // Submitted by from column F
@@ -695,14 +687,13 @@ function updateOffDay(data) {
       throw new Error('Off day not found with ID: ' + entryId);
     }
 
-    // Update specific columns for Off Day
+    // Update only provided fields - don't modify timestamp
     if (updatedData.date) {
       sheet.getRange(rowIndex, 2).setValue(updatedData.date); // B: Date
     }
     if (updatedData.reason) {
       sheet.getRange(rowIndex, 3).setValue(updatedData.reason); // C: Reason
     }
-    // Keep original timestamp - don't modify it
 
     return {
       success: true,
