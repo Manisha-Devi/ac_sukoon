@@ -96,7 +96,7 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookE
 
         const result = await authService.getFuelPayments();
 
-        if (result.success && result.data) {
+        if (result.success && Array.isArray(result.data)) {
           const fuelData = result.data.map(entry => ({
             id: entry.entryId,
             entryId: entry.entryId,
@@ -149,7 +149,12 @@ function FuelEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookE
           });
 
         } else {
-          console.warn('No fuel payment data found or error loading data');
+          console.warn('No fuel payment data found or error loading data:', result.message || 'Unknown error');
+          // Set empty array to prevent errors
+          setExpenseData(prev => {
+            const nonFuelData = prev.filter(entry => entry.type !== 'fuel');
+            return nonFuelData;
+          });
         }
 
       } catch (error) {

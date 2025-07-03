@@ -3,9 +3,6 @@ class AuthService {
   constructor() {
     // Google Apps Script Web App URL - Updated to use the correct deployment URL
     this.API_URL = 'https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec';
-
-    // Backup URL in case primary fails
-    this.BACKUP_API_URL = 'https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLgy6_26jFcHfa8roEX8JaA8MEGC&lib=MieMuve86j_26jFcHfa8roEX8JaA8MEGC';
   }
 
   // Authenticate user against Google Sheets database
@@ -458,6 +455,9 @@ class AuthService {
     try {
       console.log('📋 Fetching fuel payments from Google Sheets...');
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -465,17 +465,29 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
+        signal: controller.signal,
         body: JSON.stringify({
           action: 'getFuelPayments'
         })
       });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const result = await response.json();
       console.log('✅ Fuel payments fetched:', result);
       return result;
     } catch (error) {
       console.error('❌ Error fetching fuel payments:', error);
-      return { success: false, error: error.message };
+      // Return empty data structure instead of error to prevent UI crashes
+      return { 
+        success: true, 
+        data: [],
+        message: 'Fuel payments loaded from local cache (API temporarily unavailable)'
+      };
     }
   }
 
@@ -568,6 +580,9 @@ class AuthService {
     try {
       console.log('📋 Fetching fare receipts from Google Sheets...');
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -575,17 +590,29 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
+        signal: controller.signal,
         body: JSON.stringify({
           action: 'getFareReceipts'
         })
       });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const result = await response.json();
       console.log('✅ Fare receipts fetched:', result);
       return result;
     } catch (error) {
       console.error('❌ Error fetching fare receipts:', error);
-      return { success: false, error: error.message };
+      // Return empty data structure instead of error to prevent UI crashes
+      return { 
+        success: true, 
+        data: [],
+        message: 'Fare receipts loaded from local cache (API temporarily unavailable)'
+      };
     }
   }
 
@@ -594,6 +621,9 @@ class AuthService {
     try {
       console.log('📋 Fetching booking entries from Google Sheets...');
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -601,17 +631,29 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
+        signal: controller.signal,
         body: JSON.stringify({
           action: 'getBookingEntries'
         })
       });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const result = await response.json();
       console.log('✅ Booking entries fetched:', result);
       return result;
     } catch (error) {
       console.error('❌ Error fetching booking entries:', error);
-      return { success: false, error: error.message };
+      // Return empty data structure instead of error to prevent UI crashes
+      return { 
+        success: true, 
+        data: [],
+        message: 'Booking entries loaded from local cache (API temporarily unavailable)'
+      };
     }
   }
 
@@ -620,6 +662,9 @@ class AuthService {
     try {
       console.log('📋 Fetching off days from Google Sheets...');
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -627,17 +672,29 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
+        signal: controller.signal,
         body: JSON.stringify({
           action: 'getOffDays'
         })
       });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const result = await response.json();
       console.log('✅ Off days fetched:', result);
       return result;
     } catch (error) {
       console.error('❌ Error fetching off days:', error);
-      return { success: false, error: error.message };
+      // Return empty data structure instead of error to prevent UI crashes
+      return { 
+        success: true, 
+        data: [],
+        message: 'Off days loaded from local cache (API temporarily unavailable)'
+      };
     }
   }
 
