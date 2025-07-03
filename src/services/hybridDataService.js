@@ -167,11 +167,19 @@ class HybridDataService {
       console.log('💾 Entry saved to localStorage immediately - UI updated instantly!');
       console.log('📖 Cash book entry generated automatically');
 
-      // Trigger sync status change event for UI update
-      this.triggerSyncStatusChange();
+      // Trigger immediate data update events for real-time UI refresh (Step 1)
+      const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: updatedData });
+      window.dispatchEvent(dataUpdateEvent);
+      
+      // Also trigger fare-specific update event
+      const fareUpdateEvent = new CustomEvent('fareDataUpdated', { detail: updatedData });
+      window.dispatchEvent(fareUpdateEvent);
 
       // Trigger cash book update event
       this.triggerCashBookUpdate();
+
+      // Trigger sync status change event for UI update (Step 2)
+      this.triggerSyncStatusChange();
 
       // Background sync to Google Sheets - don't wait for response
       if (this.isOnline) {
@@ -400,19 +408,19 @@ class HybridDataService {
       console.log('💾 Entry updated in localStorage immediately - UI updated instantly!');
       console.log('📖 Cash book entry updated');
 
-      // Trigger sync status change event for UI update
-      this.triggerSyncStatusChange();
-
-      // Trigger cash book update
-      this.triggerCashBookUpdate();
-
-      // Trigger immediate data update events for real-time UI refresh
+      // Trigger immediate data update events for real-time UI refresh (Step 1)
       const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: updatedFareData });
       window.dispatchEvent(dataUpdateEvent);
       
       // Also trigger fare-specific update event
       const fareUpdateEvent = new CustomEvent('fareDataUpdated', { detail: updatedFareData });
       window.dispatchEvent(fareUpdateEvent);
+
+      // Trigger cash book update
+      this.triggerCashBookUpdate();
+
+      // Trigger sync status change event for UI update (Step 2)
+      this.triggerSyncStatusChange();
 
       // Background sync to Google Sheets - don't wait for response
       if (this.isOnline) {
