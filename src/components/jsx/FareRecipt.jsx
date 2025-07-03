@@ -45,7 +45,14 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         // Process fare receipts (daily entries)
         if (fareReceipts.success && fareReceipts.data) {
           allData = [...allData, ...fareReceipts.data.map(entry => ({
-            ...entry,
+            entryId: entry.entryId,
+            timestamp: entry.timestamp,
+            date: entry.date,
+            route: entry.route,
+            cashAmount: entry.cashAmount || 0,
+            bankAmount: entry.bankAmount || 0,
+            totalAmount: entry.totalAmount || 0,
+            submittedBy: entry.submittedBy,
             type: 'daily'
           }))];
         }
@@ -53,7 +60,15 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         // Process booking entries
         if (bookingEntries.success && bookingEntries.data) {
           allData = [...allData, ...bookingEntries.data.map(entry => ({
-            ...entry,
+            entryId: entry.entryId,
+            timestamp: entry.timestamp,
+            bookingDetails: entry.bookingDetails,
+            dateFrom: entry.dateFrom,
+            dateTo: entry.dateTo,
+            cashAmount: entry.cashAmount || 0,
+            bankAmount: entry.bankAmount || 0,
+            totalAmount: entry.totalAmount || 0,
+            submittedBy: entry.submittedBy,
             type: 'booking'
           }))];
         }
@@ -61,7 +76,14 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         // Process off days
         if (offDays.success && offDays.data) {
           allData = [...allData, ...offDays.data.map(entry => ({
-            ...entry,
+            entryId: entry.entryId,
+            timestamp: entry.timestamp,
+            date: entry.date,
+            reason: entry.reason,
+            submittedBy: entry.submittedBy,
+            cashAmount: 0,
+            bankAmount: 0,
+            totalAmount: 0,
             type: 'off'
           }))];
         }
@@ -324,7 +346,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         setIsLoading(false);
 
         // Then sync to Google Sheets in background
-        authService.updateFareReceipt({
+        authService.updateBookingEntry({
           entryId: editingEntry.entryId,
           updatedData: {
             bookingDetails: bookingData.bookingDetails,
@@ -440,7 +462,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         setIsLoading(false);
 
         // Then sync to Google Sheets in background
-        authService.addFareReceipt({
+        authService.addOffDay({
           entryId: newEntry.entryId,
           timestamp: timeOnly,
           date: offDayData.date,
@@ -950,19 +972,37 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                             {entry.type === "daily" && (
                               <>
                                 <div>{entry.date}</div>
-                                <div className="timestamp">{entry.timestamp || ''}</div>
+                                <div className="timestamp">
+                                  {entry.timestamp ? (
+                                    entry.timestamp.includes('T') ? 
+                                    entry.timestamp.split('T')[1]?.split('.')[0] : 
+                                    entry.timestamp
+                                  ) : ''}
+                                </div>
                               </>
                             )}
                             {entry.type === "booking" && (
                               <>
                                 <div>{entry.dateFrom} - {entry.dateTo}</div>
-                                <div className="timestamp">{entry.timestamp || ''}</div>
+                                <div className="timestamp">
+                                  {entry.timestamp ? (
+                                    entry.timestamp.includes('T') ? 
+                                    entry.timestamp.split('T')[1]?.split('.')[0] : 
+                                    entry.timestamp
+                                  ) : ''}
+                                </div>
                               </>
                             )}
                             {entry.type === "off" && (
                               <>
                                 <div>{entry.date}</div>
-                                <div className="timestamp">{entry.timestamp || ''}</div>
+                                <div className="timestamp">
+                                  {entry.timestamp ? (
+                                    entry.timestamp.includes('T') ? 
+                                    entry.timestamp.split('T')[1]?.split('.')[0] : 
+                                    entry.timestamp
+                                  ) : ''}
+                                </div>
                               </>
                             )}
                           </small>
