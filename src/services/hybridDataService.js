@@ -406,9 +406,13 @@ class HybridDataService {
       // Trigger cash book update
       this.triggerCashBookUpdate();
 
-      // Trigger data update event for real-time UI refresh
+      // Trigger immediate data update events for real-time UI refresh
       const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: updatedFareData });
       window.dispatchEvent(dataUpdateEvent);
+      
+      // Also trigger fare-specific update event
+      const fareUpdateEvent = new CustomEvent('fareDataUpdated', { detail: updatedFareData });
+      window.dispatchEvent(fareUpdateEvent);
 
       // Background sync to Google Sheets - don't wait for response
       if (this.isOnline) {

@@ -32,13 +32,24 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
       window.dispatchEvent(new CustomEvent('fareDataUpdated', { detail: freshData }));
     };
 
-    // Listen for localStorage changes
+    // Listen for immediate fare data updates
+    const handleFareDataUpdate = (event) => {
+      console.log('📊 DataSummary received immediate fare data update');
+      // Force component re-render immediately
+      window.location.reload = () => {}; // Prevent actual reload
+      const refreshEvent = new CustomEvent('componentRefresh');
+      window.dispatchEvent(refreshEvent);
+    };
+
+    // Listen for localStorage changes and immediate updates
     window.addEventListener('storage', handleDataUpdate);
     window.addEventListener('dataUpdated', handleDataUpdate);
+    window.addEventListener('fareDataUpdated', handleFareDataUpdate);
 
     return () => {
       window.removeEventListener('storage', handleDataUpdate);
       window.removeEventListener('dataUpdated', handleDataUpdate);
+      window.removeEventListener('fareDataUpdated', handleFareDataUpdate);
     };
   }, [fareData, expenseData, cashBookEntries]);
 

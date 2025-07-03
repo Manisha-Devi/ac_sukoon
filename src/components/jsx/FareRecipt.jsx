@@ -249,6 +249,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           setFareData(result.data);
           setTotalEarnings((prev) => prev - oldTotal + totalAmount);
           setEditingEntry(null);
+          
+          // Force update other components immediately
+          const updateEvent = new CustomEvent('fareDataUpdated', { detail: result.data });
+          window.dispatchEvent(updateEvent);
+          
           console.log('✅ Daily entry updated instantly - UI updated!');
         }
       } else {
@@ -268,6 +273,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           // UI instantly updated with localStorage data
           setFareData(result.data);
           setTotalEarnings((prev) => prev + totalAmount);
+          
+          // Force update other components immediately
+          const updateEvent = new CustomEvent('fareDataUpdated', { detail: result.data });
+          window.dispatchEvent(updateEvent);
+          
           console.log('✅ Daily entry added instantly - UI updated!');
         }
       }
@@ -318,6 +328,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           setFareData(result.data);
           setTotalEarnings((prev) => prev - oldTotal + totalAmount);
           setEditingEntry(null);
+          
+          // Force update other components immediately
+          const updateEvent = new CustomEvent('fareDataUpdated', { detail: result.data });
+          window.dispatchEvent(updateEvent);
+          
           console.log('✅ Booking entry updated instantly - UI updated!');
         }
       } else {
@@ -338,6 +353,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           // UI instantly updated with localStorage data
           setFareData(result.data);
           setTotalEarnings((prev) => prev + totalAmount);
+          
+          // Force update other components immediately
+          const updateEvent = new CustomEvent('fareDataUpdated', { detail: result.data });
+          window.dispatchEvent(updateEvent);
+          
           console.log('✅ Booking entry added instantly - UI updated!');
         }
       }
@@ -388,6 +408,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         if (result.success) {
           // UI instantly updated with localStorage data
           setFareData(result.data);
+          
+          // Force update other components immediately
+          const updateEvent = new CustomEvent('fareDataUpdated', { detail: result.data });
+          window.dispatchEvent(updateEvent);
+          
           console.log('✅ Off day entry added instantly - UI updated!');
         }
       }
