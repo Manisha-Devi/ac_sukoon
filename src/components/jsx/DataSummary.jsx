@@ -35,13 +35,13 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
 
     // Listen for real-time data updates from localStorage
     const handleDataUpdate = () => {
-      console.log('📊 DataSummary detected data change - refreshing from localStorage');
+      console.log('Step 4: Instant data update detected - refreshing UI immediately (DataSummary component)');
       loadLocalData(); // Reload data immediately
     };
 
     // Listen for immediate fare data updates
     const handleFareDataUpdate = (event) => {
-      console.log('📊 DataSummary received immediate fare data update');
+      console.log('Step 4: DataSummary received immediate fare data update');
       if (event.detail) {
         setLocalFareData(event.detail); // Use the updated data directly
       } else {

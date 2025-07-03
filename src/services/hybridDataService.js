@@ -146,7 +146,7 @@ class HybridDataService {
   // Add new fare entry - Save to localStorage immediately, sync to Google Sheets in background
   async addFareEntry(entryData, currentFareData) {
     try {
-      console.log('📝 Adding entry with hybrid system...');
+      console.log('Step 1: Adding entry with hybrid system...');
 
       const newEntry = {
         ...entryData,
@@ -159,15 +159,19 @@ class HybridDataService {
       // Save to localStorage immediately for instant response
       const updatedData = [newEntry, ...currentFareData];
       localStorageService.saveFareData(updatedData);
-      localStorageService.markPendingSync(newEntry.entryId);
+      console.log(`Step 2: Data saved to localStorage: ${updatedData.length} entries`);
+      
+      console.log('Step 3: Entry saved to localStorage immediately - UI updated instantly!');
 
       // Generate and save cash book entry immediately
       this.generateCashBookEntry(newEntry);
+      console.log('Step 5: Cash book entry generated automatically');
 
-      console.log('💾 Entry saved to localStorage immediately - UI updated instantly!');
-      console.log('📖 Cash book entry generated automatically');
+      // Mark for sync
+      localStorageService.markPendingSync(newEntry.entryId);
+      console.log('Step 6: Entry marked for sync');
 
-      // Trigger immediate data update events for real-time UI refresh (Step 1)
+      // Trigger immediate data update events for real-time UI refresh (Step 4)
       const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: updatedData });
       window.dispatchEvent(dataUpdateEvent);
       
@@ -178,7 +182,7 @@ class HybridDataService {
       // Trigger cash book update event
       this.triggerCashBookUpdate();
 
-      // Trigger sync status change event for UI update (Step 2)
+      // Trigger sync status change event for UI update
       this.triggerSyncStatusChange();
 
       // Background sync to Google Sheets - don't wait for response
@@ -397,18 +401,22 @@ class HybridDataService {
       );
 
       localStorageService.saveFareData(updatedFareData);
-      localStorageService.markPendingSync(entryId);
+      console.log(`Step 2: Data updated in localStorage: ${updatedFareData.length} entries`);
+      
+      console.log('Step 3: Entry updated in localStorage immediately - UI updated instantly!');
 
       // Update cash book entry
       const updatedEntry = updatedFareData.find(entry => entry.entryId === entryId);
       if (updatedEntry) {
         this.generateCashBookEntry(updatedEntry);
       }
+      console.log('Step 5: Cash book entry updated');
 
-      console.log('💾 Entry updated in localStorage immediately - UI updated instantly!');
-      console.log('📖 Cash book entry updated');
+      // Mark for sync
+      localStorageService.markPendingSync(entryId);
+      console.log('Step 6: Entry marked for sync');
 
-      // Trigger immediate data update events for real-time UI refresh (Step 1)
+      // Trigger immediate data update events for real-time UI refresh (Step 4)
       const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: updatedFareData });
       window.dispatchEvent(dataUpdateEvent);
       
@@ -419,7 +427,7 @@ class HybridDataService {
       // Trigger cash book update
       this.triggerCashBookUpdate();
 
-      // Trigger sync status change event for UI update (Step 2)
+      // Trigger sync status change event for UI update
       this.triggerSyncStatusChange();
 
       // Background sync to Google Sheets - don't wait for response

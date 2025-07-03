@@ -67,7 +67,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
   // Real-time data update listener for immediate UI refresh
   useEffect(() => {
     const handleInstantDataUpdate = () => {
-      console.log('📱 Instant data update detected - refreshing UI immediately');
+      console.log('Step 4: Instant data update detected - refreshing UI immediately (FareRecipt component)');
       
       // Load fresh data from localStorage immediately
       const freshData = localStorageService.loadFareData();
