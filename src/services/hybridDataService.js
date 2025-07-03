@@ -149,31 +149,31 @@ class HybridDataService {
       localStorageService.saveFareData(updatedData);
       localStorageService.markPendingSync(newEntry.entryId);
 
-      console.log('💾 Entry saved to localStorage immediately');
+      console.log('💾 Entry saved to localStorage immediately - UI updated instantly!');
 
-      // Try to sync to Google Sheets immediately if online
+      // Background sync to Google Sheets - don't wait for response
       if (this.isOnline) {
-        console.log('🔄 Attempting immediate sync after add...');
-        try {
-          const syncResult = await this.syncSingleEntry(newEntry);
+        console.log('🔄 Starting background sync after add...');
+        this.backgroundSyncSingleEntry(newEntry).then(syncResult => {
           if (syncResult) {
-            console.log('✅ Entry synced immediately to Google Sheets');
+            console.log('✅ Entry synced to Google Sheets in background');
             // Update the local data to mark as synced
-            const finalData = updatedData.map(entry => 
+            const currentData = localStorageService.loadFareData();
+            const finalData = currentData.map(entry => 
               entry.entryId === newEntry.entryId 
                 ? { ...entry, synced: true, pendingSync: false }
                 : entry
             );
             localStorageService.saveFareData(finalData);
             localStorageService.removePendingSync(newEntry.entryId);
-            return { success: true, data: finalData, entry: { ...newEntry, synced: true, pendingSync: false } };
           }
-        } catch (syncError) {
-          console.error('⚠️ Immediate sync failed, will retry later:', syncError);
-        }
+        }).catch(syncError => {
+          console.error('⚠️ Background sync failed, will retry later:', syncError);
+        });
       }
 
-      return { success: true, data: updatedData, entry: newEntry };
+      // Return immediately with localStorage data for instant UI update
+      return { success: true, data: updatedData, entry: newEntry, instant: true };
 
     } catch (error) {
       console.error('❌ Error adding fare entry:', error);
@@ -181,7 +181,94 @@ class HybridDataService {
     }
   }
 
-  // Sync single entry to Google Sheets
+  // Background sync single entry to Google Sheets (non-blocking)
+  async backgroundSyncSingleEntry(entry) {
+    try {
+      let result;
+
+      // Add to appropriate Google Sheet based on type
+      if (entry.type === 'daily') {
+        result = await authService.addFareReceipt({
+          entryId: entry.entryId,
+          date: entry.date,
+          route: entry.route,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          totalAmount: entry.totalAmount,
+          submittedBy: 'driver'
+        });
+      } else if (entry.type === 'booking') {
+        result = await authService.addBookingEntry({
+          entryId: entry.entryId,
+          bookingDetails: entry.bookingDetails,
+          dateFrom: entry.dateFrom,
+          dateTo: entry.dateTo,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          totalAmount: entry.totalAmount,
+          submittedBy: 'driver'
+        });
+      } else if (entry.type === 'off') {
+        result = await authService.addOffDay({
+          entryId: entry.entryId,
+          date: entry.date,
+          reason: entry.reason,
+          submittedBy: 'driver'
+        });
+      }
+
+      if (result && result.success) {
+        console.log('✅ Entry synced to Google Sheets in background:', entry.entryId);
+        return true;
+      } else {
+        throw new Error(result?.error || 'Failed to sync to Google Sheets');
+      }
+
+    } catch (error) {
+      console.error('❌ Error syncing entry in background:', error);
+      return false;
+    }
+  }
+
+  // Background sync update to Google Sheets (non-blocking)
+  async backgroundSyncUpdate(entryId, updatedData, entryType) {
+    try {
+      console.log('🔄 Updating in Google Sheets in background with ID:', entryId);
+
+      let result;
+
+      // Call appropriate update function based on entry type
+      if (entryType === 'daily') {
+        result = await authService.updateFareReceipt({
+          entryId: entryId,
+          updatedData: updatedData
+        });
+      } else if (entryType === 'booking') {
+        result = await authService.updateBookingEntry({
+          entryId: entryId,
+          updatedData: updatedData
+        });
+      } else if (entryType === 'off') {
+        result = await authService.updateOffDay({
+          entryId: entryId,
+          updatedData: updatedData
+        });
+      }
+
+      if (result && result.success) {
+        console.log('✅ Update synced to Google Sheets in background:', entryId);
+        return true;
+      } else {
+        throw new Error(result?.error || 'Failed to sync update to Google Sheets');
+      }
+
+    } catch (error) {
+      console.error('❌ Error syncing update in background:', error);
+      return false;
+    }
+  }
+
+  // Sync single entry to Google Sheets (legacy method for pending sync)
   async syncSingleEntry(entry) {
     try {
       let result;
@@ -271,38 +358,38 @@ class HybridDataService {
       localStorageService.saveFareData(updatedFareData);
       localStorageService.markPendingSync(entryId);
 
-      console.log('💾 Entry updated in localStorage immediately');
+      console.log('💾 Entry updated in localStorage immediately - UI updated instantly!');
 
-      // Try to sync to Google Sheets immediately if online
+      // Background sync to Google Sheets - don't wait for response
       if (this.isOnline) {
-        console.log('🔄 Attempting immediate sync after update...');
-        try {
-          // Send complete entry data for update
-          const completeUpdateData = {
-            ...updatedData,
-            cashAmount: updatedData.cashAmount,
-            bankAmount: updatedData.bankAmount,
-            totalAmount: updatedData.totalAmount
-          };
-          const syncResult = await this.syncUpdateToGoogleSheets(entryId, completeUpdateData, existingEntry.type);
+        console.log('🔄 Starting background sync after update...');
+        // Send complete entry data for update
+        const completeUpdateData = {
+          ...updatedData,
+          cashAmount: updatedData.cashAmount,
+          bankAmount: updatedData.bankAmount,
+          totalAmount: updatedData.totalAmount
+        };
+        this.backgroundSyncUpdate(entryId, completeUpdateData, existingEntry.type).then(syncResult => {
           if (syncResult) {
-            console.log('✅ Update synced immediately to Google Sheets');
+            console.log('✅ Update synced to Google Sheets in background');
             // Update the local data to mark as synced
-            const finalData = updatedFareData.map(entry => 
+            const currentData = localStorageService.loadFareData();
+            const finalData = currentData.map(entry => 
               entry.entryId === entryId 
                 ? { ...entry, synced: true, pendingSync: false }
                 : entry
             );
             localStorageService.saveFareData(finalData);
             localStorageService.removePendingSync(entryId);
-            return { success: true, data: finalData };
           }
-        } catch (syncError) {
-          console.error('⚠️ Immediate sync failed, will retry later:', syncError);
-        }
+        }).catch(syncError => {
+          console.error('⚠️ Background sync failed, will retry later:', syncError);
+        });
       }
 
-      return { success: true, data: updatedFareData };
+      // Return immediately with localStorage data for instant UI update
+      return { success: true, data: updatedFareData, instant: true };
 
     } catch (error) {
       console.error('❌ Error updating fare entry:', error);
