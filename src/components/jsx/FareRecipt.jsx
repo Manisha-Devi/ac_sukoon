@@ -507,12 +507,6 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                   <div className={`simple-sync-indicator ${syncStatus.pendingSync > 0 || syncStatus.syncInProgress || isLoading ? 'pending' : 'synced'}`}>
                     <i className={`bi ${syncStatus.pendingSync > 0 || syncStatus.syncInProgress || isLoading ? 'bi-arrow-repeat' : 'bi-check-circle'}`}></i>
                   </div>
-                  <small className="sync-info">
-                    {isLoading ? 'Loading...' : 
-                     syncStatus.pendingSync > 0 ? `${syncStatus.pendingSync} pending` : 
-                     syncStatus.syncInProgress ? 'Syncing...' : 
-                     'Synced'}
-                  </small>
                 </div>
               </div>
             </div>
