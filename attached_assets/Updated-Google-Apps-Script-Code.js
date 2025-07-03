@@ -338,11 +338,7 @@ function updateFareReceipt(data) {
       throw new Error('Fare receipt not found with ID: ' + entryId);
     }
 
-    // Update timestamp when any field is updated
-    const currentTime = formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
-    sheet.getRange(rowIndex, 1).setValue(currentTime); // A: Update timestamp
-    
-    // Update only provided fields
+    // Update only provided fields - don't modify timestamp
     if (updatedData.date) {
       sheet.getRange(rowIndex, 2).setValue(updatedData.date); // B: Date
     }
@@ -533,11 +529,7 @@ function updateBookingEntry(data) {
       throw new Error('Booking entry not found with ID: ' + entryId);
     }
 
-    // Update timestamp when any field is updated
-    const currentTime = formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
-    sheet.getRange(rowIndex, 1).setValue(currentTime); // A: Update timestamp
-    
-    // Update only provided fields
+    // Update only provided fields - don't modify timestamp
     if (updatedData.bookingDetails) {
       sheet.getRange(rowIndex, 2).setValue(updatedData.bookingDetails); // B: BookingDetails
     }
@@ -717,11 +709,7 @@ function updateOffDay(data) {
       throw new Error('Off day not found with ID: ' + entryId);
     }
 
-    // Update timestamp when any field is updated
-    const currentTime = formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
-    sheet.getRange(rowIndex, 1).setValue(currentTime); // A: Update timestamp
-    
-    // Update only provided fields
+    // Update only provided fields - don't modify timestamp
     if (updatedData.date) {
       sheet.getRange(rowIndex, 2).setValue(updatedData.date); // B: Date
     }
