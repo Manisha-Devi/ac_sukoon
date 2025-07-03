@@ -220,7 +220,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
       const now = new Date();
-      const timeOnly = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const timeOnly = now.toTimeString().split(' ')[0]; // Returns HH:MM:SS format
 
       if (editingEntry) {
         // UPDATE: First update React state immediately
@@ -321,7 +321,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
       const now = new Date();
-      const timeOnly = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const timeOnly = now.toTimeString().split(' ')[0]; // Returns HH:MM:SS format
 
       if (editingEntry) {
         // UPDATE: First update React state immediately
@@ -417,7 +417,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
       const now = new Date();
-      const timeOnly = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const timeOnly = now.toTimeString().split(' ')[0]; // Returns HH:MM:SS format
 
       if (editingEntry) {
         // UPDATE: First update React state immediately
@@ -972,37 +972,19 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                             {entry.type === "daily" && (
                               <>
                                 <div>{entry.date}</div>
-                                <div className="timestamp">
-                                  {entry.timestamp ? (
-                                    entry.timestamp.includes('T') ? 
-                                    entry.timestamp.split('T')[1]?.split('.')[0] : 
-                                    entry.timestamp
-                                  ) : ''}
-                                </div>
+                                <div className="timestamp">{entry.timestamp || ''}</div>
                               </>
                             )}
                             {entry.type === "booking" && (
                               <>
                                 <div>{entry.dateFrom} - {entry.dateTo}</div>
-                                <div className="timestamp">
-                                  {entry.timestamp ? (
-                                    entry.timestamp.includes('T') ? 
-                                    entry.timestamp.split('T')[1]?.split('.')[0] : 
-                                    entry.timestamp
-                                  ) : ''}
-                                </div>
+                                <div className="timestamp">{entry.timestamp || ''}</div>
                               </>
                             )}
                             {entry.type === "off" && (
                               <>
                                 <div>{entry.date}</div>
-                                <div className="timestamp">
-                                  {entry.timestamp ? (
-                                    entry.timestamp.includes('T') ? 
-                                    entry.timestamp.split('T')[1]?.split('.')[0] : 
-                                    entry.timestamp
-                                  ) : ''}
-                                </div>
+                                <div className="timestamp">{entry.timestamp || ''}</div>
                               </>
                             )}
                           </small>

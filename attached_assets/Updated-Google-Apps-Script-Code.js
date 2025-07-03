@@ -1,4 +1,3 @@
-
 // AC Sukoon Transport Management - Google Apps Script API
 // Organized by Entry Types with Complete CRUD Operations
 
@@ -227,17 +226,10 @@ function addFareReceipt(data) {
     );
 
     const entryId = data.entryId;
-    
-    // Extract only time from timestamp for storage
-    let timeOnly = '';
-    if (data.timestamp) {
-      if (data.timestamp.includes('T')) {
-        timeOnly = data.timestamp.split('T')[1]?.split('.')[0] || '';
-      } else {
-        timeOnly = data.timestamp;
-      }
-    }
-    
+
+    // Store timestamp as-is (already in HH:MM:SS string format from frontend)
+    const timeOnly = data.timestamp || '';
+
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
     sheet.getRange(2, 1, 1, 9).setValues([[
@@ -424,16 +416,9 @@ function addBookingEntry(data) {
 
     const entryId = data.entryId;
 
-    // Extract only time from timestamp for storage
-    let timeOnly = '';
-    if (data.timestamp) {
-      if (data.timestamp.includes('T')) {
-        timeOnly = data.timestamp.split('T')[1]?.split('.')[0] || '';
-      } else {
-        timeOnly = data.timestamp;
-      }
-    }
-    
+    // Store timestamp as-is (already in HH:MM:SS string format from frontend)
+    const timeOnly = data.timestamp || '';
+
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
     sheet.getRange(2, 1, 1, 10).setValues([[
@@ -625,16 +610,9 @@ function addOffDay(data) {
 
     const entryId = data.entryId;
 
-    // Extract only time from timestamp for storage
-    let timeOnly = '';
-    if (data.timestamp) {
-      if (data.timestamp.includes('T')) {
-        timeOnly = data.timestamp.split('T')[1]?.split('.')[0] || '';
-      } else {
-        timeOnly = data.timestamp;
-      }
-    }
-    
+    // Store timestamp as-is (already in HH:MM:SS string format from frontend)
+    const timeOnly = data.timestamp || '';
+
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
     sheet.getRange(2, 1, 1, 6).setValues([[
