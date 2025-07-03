@@ -158,10 +158,15 @@ function doGet(e) {
 // Test Connection
 function testConnection() {
   try {
+    // Create current IST timestamp
+    const now = new Date();
+    const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
+    const istTime = new Date(now.getTime() + istOffset);
+    
     return {
       success: true,
       message: "Google Apps Script is working!",
-      timestamp: new Date().toISOString()
+      timestamp: istTime.toISOString()
     };
   } catch (error) {
     return {
@@ -188,7 +193,7 @@ function handleLogin(data) {
 
       if (sheetUsername === inputUsername && sheetPassword === inputPassword) {
         // Update last login
-        sheet.getRange(i + 1, 7).setValue(new Date());
+        sheet.getRange(i + 1, 7).setValue(data.timestamp || new Date());
 
         return {
           success: true,
@@ -225,15 +230,11 @@ function addFareReceipt(data) {
     );
 
     const entryId = data.entryId;
-    // Create IST timestamp
-    const now = new Date();
-    const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
-    const timestamp = new Date(now.getTime() + istOffset);
-
+    
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
     sheet.getRange(2, 1, 1, 9).setValues([[
-      timestamp, // A: Timestamp from frontend
+      data.timestamp, // A: Timestamp from frontend
       data.date, // B: Date
       data.route, // C: Route
       data.cashAmount || 0, // D: CashAmount
@@ -248,7 +249,7 @@ function addFareReceipt(data) {
         success: true,
         entryId: entryId,
         message: "Fare receipt added successfully",
-        timestamp: timestamp.toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'}),
+        timestamp: data.timestamp,
       };
   } catch (error) {
     return {
@@ -339,8 +340,7 @@ function updateFareReceipt(data) {
     if (updatedData.totalAmount !== undefined) {
       sheet.getRange(rowIndex, 6).setValue(updatedData.totalAmount); // F: TotalAmount
     }
-    // Update timestamp to show when it was modified
-    sheet.getRange(rowIndex, 1).setValue(new Date()); // A: Timestamp
+    // Keep original timestamp - don't modify it
 
     return {
       success: true,
@@ -417,15 +417,11 @@ function addBookingEntry(data) {
     );
 
     const entryId = data.entryId;
-        // Create IST timestamp
-    const now = new Date();
-    const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
-    const timestamp = new Date(now.getTime() + istOffset);
 
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
     sheet.getRange(2, 1, 1, 10).setValues([[
-      timestamp, // A: Timestamp from frontend
+      data.timestamp, // A: Timestamp from frontend
       data.bookingDetails || "", // B: BookingDetails
       data.dateFrom, // C: DateFrom
       data.dateTo, // D: DateTo
@@ -442,7 +438,7 @@ function addBookingEntry(data) {
         success: true,
         entryId: entryId,
         message: "Booking entry added successfully",
-        timestamp: timestamp.toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'}),
+        timestamp: data.timestamp,
       }),
     );
   } catch (error) {
@@ -615,15 +611,11 @@ function addOffDay(data) {
     );
 
     const entryId = data.entryId;
-        // Create IST timestamp
-    const now = new Date();
-    const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
-    const timestamp = new Date(now.getTime() + istOffset);
 
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
     sheet.getRange(2, 1, 1, 6).setValues([[
-      timestamp, // A: Timestamp from frontend
+      data.timestamp, // A: Timestamp from frontend
       data.date, // B: Date
       data.reason || "", // C: Reason
       "off", // D: EntryType
@@ -636,7 +628,7 @@ function addOffDay(data) {
         success: true,
         entryId: entryId,
         message: "Off day added successfully",
-        timestamp: timestamp.toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'}),
+        timestamp: data.timestamp,
       }),
     );
   } catch (error) {
