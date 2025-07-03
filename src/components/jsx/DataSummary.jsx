@@ -22,7 +22,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
     const loadLocalData = () => {
       const localData = localStorageService.loadFareData();
       setLocalFareData(localData);
-      
+
       console.log('📊 Data Summary - Using localStorage data:', {
         fareEntries: localData.length,
         expenseEntries: expenseData.length,
@@ -253,6 +253,47 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
       remarks: ""
     });
   };
+
+  // Real-time data update listener
+  useEffect(() => {
+    const handleInstantDataUpdate = (event) => {
+      console.log('Step 5: Instant data update detected - refreshing UI immediately (DataSummary component)');
+
+      // Load fresh data from localStorage immediately
+      const freshData = localStorageService.loadFareData();
+
+      // Force state update with new array reference
+      setFareData([...freshData]);
+
+      console.log('📊 DataSummary refreshed with', freshData.length, 'entries');
+      console.log('🔄 DataSummary UI state updated successfully');
+    };
+
+    const handleFareUpdate = (event) => {
+      handleInstantDataUpdate(event);
+    };
+
+    const handleDataUpdate = (event) => {
+      handleInstantDataUpdate(event);
+    };
+
+    const handleStorageUpdate = (event) => {
+      if (event.key === 'fare_receipts_data') {
+        handleInstantDataUpdate(event);
+      }
+    };
+
+    // Listen for immediate data updates
+    window.addEventListener('fareDataUpdated', handleFareUpdate);
+    window.addEventListener('dataUpdated', handleDataUpdate);
+    window.addEventListener('storage', handleStorageUpdate);
+
+    return () => {
+      window.removeEventListener('fareDataUpdated', handleFareUpdate);
+      window.removeEventListener('dataUpdated', handleDataUpdate);
+      window.removeEventListener('storage', handleStorageUpdate);
+    };
+  }, []);
 
   return (
     <div className="approval-container">

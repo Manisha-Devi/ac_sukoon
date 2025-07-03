@@ -66,33 +66,48 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
   // Real-time data update listener for immediate UI refresh
   useEffect(() => {
-    const handleInstantDataUpdate = () => {
+    const handleInstantDataUpdate = (event) => {
       console.log('Step 4: Instant data update detected - refreshing UI immediately (FareRecipt component)');
       
       // Load fresh data from localStorage immediately
       const freshData = localStorageService.loadFareData();
-      console.log('📂 Fresh data loaded:', freshData.length, 'entries');
+      console.log('📂 Fresh data loaded for FareRecipt:', freshData.length, 'entries');
       
-      setFareData(freshData);
+      // Force state update even if data appears same
+      setFareData([...freshData]);
       
       // Recalculate total earnings
       const total = freshData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
       setTotalEarnings(total);
       
-      console.log('💰 Updated total earnings:', total);
+      console.log('💰 Updated total earnings in FareRecipt:', total);
+      console.log('🔄 FareRecipt UI state updated successfully');
     };
 
-    // Listen for immediate data updates
-    window.addEventListener('fareDataUpdated', handleInstantDataUpdate);
-    window.addEventListener('dataUpdated', handleInstantDataUpdate);
-    
-    // Also listen for storage changes for cross-tab sync
-    window.addEventListener('storage', handleInstantDataUpdate);
+    // Listen for immediate data updates with immediate execution
+    const handleFareUpdate = (event) => {
+      handleInstantDataUpdate(event);
+    };
+
+    const handleDataUpdate = (event) => {
+      handleInstantDataUpdate(event);
+    };
+
+    const handleStorageUpdate = (event) => {
+      if (event.key === 'fare_receipts_data') {
+        handleInstantDataUpdate(event);
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener('fareDataUpdated', handleFareUpdate);
+    window.addEventListener('dataUpdated', handleDataUpdate);
+    window.addEventListener('storage', handleStorageUpdate);
 
     return () => {
-      window.removeEventListener('fareDataUpdated', handleInstantDataUpdate);
-      window.removeEventListener('dataUpdated', handleInstantDataUpdate);
-      window.removeEventListener('storage', handleInstantDataUpdate);
+      window.removeEventListener('fareDataUpdated', handleFareUpdate);
+      window.removeEventListener('dataUpdated', handleDataUpdate);
+      window.removeEventListener('storage', handleStorageUpdate);
     };
   }, [setFareData, setTotalEarnings]);
 
@@ -117,9 +132,10 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
       // Always load from localStorage for consistent UI
       const freshLocalData = localStorageService.loadFareData();
-      console.log('📂 Fresh data from localStorage:', freshLocalData.length, 'entries');
+      console.log('📂 Fresh data from localStorage for sync update:', freshLocalData.length, 'entries');
 
-      setFareData(freshLocalData);
+      // Force state update with new array reference
+      setFareData([...freshLocalData]);
 
       // Calculate total earnings from localStorage
       const total = freshLocalData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
@@ -127,6 +143,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
       // Update sync status immediately
       updateSyncStatus();
+      
+      console.log('🔄 FareRecipt data refreshed after background sync');
     };
 
     window.addEventListener('syncStatusChanged', handleSyncStatusChange);
