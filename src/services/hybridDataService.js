@@ -76,13 +76,8 @@ class HybridDataService {
           pendingSync: false,
           // Ensure date is date only (YYYY-MM-DD format)
           date: entry.date ? new Date(entry.date).toISOString().split('T')[0] : entry.date,
-          // Ensure timestamp is time only
-          timestamp: entry.timestamp || new Date().toLocaleTimeString('en-IN', { 
-            hour12: false, 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit' 
-          })
+          // Keep full timestamp from server or generate if missing
+          timestamp: entry.timestamp || new Date().toISOString()
         }))];
       }
 
@@ -96,13 +91,8 @@ class HybridDataService {
           // Ensure dates are date only (YYYY-MM-DD format)
           dateFrom: entry.dateFrom ? new Date(entry.dateFrom).toISOString().split('T')[0] : entry.dateFrom,
           dateTo: entry.dateTo ? new Date(entry.dateTo).toISOString().split('T')[0] : entry.dateTo,
-          // Ensure timestamp is time only
-          timestamp: entry.timestamp || new Date().toLocaleTimeString('en-IN', { 
-            hour12: false, 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit' 
-          })
+          // Keep full timestamp from server or generate if missing
+          timestamp: entry.timestamp || new Date().toISOString()
         }))];
       }
 
@@ -115,13 +105,8 @@ class HybridDataService {
           pendingSync: false,
           // Ensure date is date only (YYYY-MM-DD format)
           date: entry.date ? new Date(entry.date).toISOString().split('T')[0] : entry.date,
-          // Ensure timestamp is time only
-          timestamp: entry.timestamp || new Date().toLocaleTimeString('en-IN', { 
-            hour12: false, 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit' 
-          })
+          // Keep full timestamp from server or generate if missing
+          timestamp: entry.timestamp || new Date().toISOString()
         }))];
       }
 
@@ -154,12 +139,7 @@ class HybridDataService {
       const newEntry = {
         ...entryData,
         entryId: Date.now(),
-        timestamp: new Date().toLocaleTimeString('en-IN', { 
-          hour12: false, 
-          hour: '2-digit', 
-          minute: '2-digit', 
-          second: '2-digit' 
-        }),
+        timestamp: new Date().toISOString(), // Full timestamp for local storage
         synced: false,
         pendingSync: true
       };
@@ -281,12 +261,7 @@ class HybridDataService {
           ? { 
               ...entry, 
               ...updatedData, 
-              lastModified: new Date().toLocaleTimeString('en-IN', { 
-                hour12: false, 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit' 
-              }),
+              lastModified: new Date().toISOString(),
               synced: false,
               pendingSync: true
             }
