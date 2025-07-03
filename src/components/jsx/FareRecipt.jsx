@@ -119,11 +119,24 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       try {
         console.log('🚀 Loading data from Google Sheets...');
 
-        // Fetch all types of entries separately
+        // Add timeout and retry logic
+        const loadWithRetry = async (fn, retries = 2) => {
+          for (let i = 0; i <= retries; i++) {
+            try {
+              return await fn();
+            } catch (error) {
+              if (i === retries) throw error;
+              console.log(`⚠️ Retry ${i + 1}/${retries} after error:`, error.message);
+              await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+            }
+          }
+        };
+
+        // Fetch all types of entries separately with retry
         const [fareReceipts, bookingEntries, offDays] = await Promise.all([
-          authService.getFareReceipts(),
-          authService.getBookingEntries(),
-          authService.getOffDays()
+          loadWithRetry(() => authService.getFareReceipts()),
+          loadWithRetry(() => authService.getBookingEntries()),
+          loadWithRetry(() => authService.getOffDays())
         ]);
 
         let allData = [];

@@ -886,36 +886,43 @@ class AuthService {
     }
   }
 
-  // Test connection to Google Sheets database
+  // Test database connection with timeout
   async testConnection() {
     try {
       console.log('🔍 Testing Google Sheets database connection...');
       console.log('📍 API URL:', this.API_URL);
 
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
+          'Content-Type': 'application/json',
         },
-        mode: 'cors',
-        redirect: 'follow',
         body: JSON.stringify({
           action: 'test'
-        })
+        }),
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
       console.log('Response status:', response.status);
 
-      if (response.ok) {
-        const result = await response.json();
-        console.log('✅ Database connection successful:', result);
-        return true;
-      } else {
-        console.log('❌ Database connection failed');
-        return false;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const data = await response.json();
+      console.log('✅ Database connection successful:', data);
+      return true;
     } catch (error) {
-      console.error('❌ Database connection error:', error);
+      if (error.name === 'AbortError') {
+        console.error('❌ Database connection timeout after 15 seconds');
+      } else {
+        console.error('❌ Database connection failed:', error);
+      }
       return false;
     }
   }
