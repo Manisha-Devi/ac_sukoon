@@ -84,7 +84,7 @@ class SimpleDataService {
         result = await authService.addFareReceipt({
           entryId: newEntry.entryId,
           timestamp: newEntry.timestamp,
-          date: entryData.date,
+          date: entryData.date, // Already in YYYY-MM-DD format from form
           route: entryData.route,
           cashAmount: entryData.cashAmount || 0,
           bankAmount: entryData.bankAmount || 0,
@@ -96,8 +96,8 @@ class SimpleDataService {
           entryId: newEntry.entryId,
           timestamp: newEntry.timestamp,
           bookingDetails: entryData.bookingDetails,
-          dateFrom: entryData.dateFrom,
-          dateTo: entryData.dateTo,
+          dateFrom: entryData.dateFrom, // Already in YYYY-MM-DD format from form
+          dateTo: entryData.dateTo, // Already in YYYY-MM-DD format from form
           cashAmount: entryData.cashAmount || 0,
           bankAmount: entryData.bankAmount || 0,
           totalAmount: entryData.totalAmount,
@@ -107,7 +107,7 @@ class SimpleDataService {
         result = await authService.addOffDay({
           entryId: newEntry.entryId,
           timestamp: newEntry.timestamp,
-          date: entryData.date,
+          date: entryData.date, // Already in YYYY-MM-DD format from form
           reason: entryData.reason,
           submittedBy: submittedBy
         });

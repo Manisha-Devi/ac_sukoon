@@ -272,7 +272,7 @@ function getFareReceipts() {
         const rowData = {
           entryId: row[7], // Entry ID from column H
           timestamp: row[0] ? new Date(row[0]).toISOString() : new Date().toISOString(), // Convert to ISO string
-          date: row[1], // Date from column B
+          date: row[1] ? (row[1] instanceof Date ? row[1].toISOString().split('T')[0] : row[1]) : row[1], // Format date as YYYY-MM-DD
           route: row[2], // Route from column C
           cashAmount: row[3], // Cash amount from column D
           bankAmount: row[4], // Bank amount from column E
@@ -465,8 +465,8 @@ function getBookingEntries() {
           entryId: row[8], // Entry ID from column I
           timestamp: row[0] ? new Date(row[0]).toISOString() : new Date().toISOString(), // Convert to ISO string
           bookingDetails: row[1], // Booking details from column B
-          dateFrom: row[2], // Date from from column C
-          dateTo: row[3], // Date to from column D
+          dateFrom: row[2] ? (row[2] instanceof Date ? row[2].toISOString().split('T')[0] : row[2]) : row[2], // Format date as YYYY-MM-DD
+          dateTo: row[3] ? (row[3] instanceof Date ? row[3].toISOString().split('T')[0] : row[3]) : row[3], // Format date as YYYY-MM-DD
           cashAmount: row[4], // Cash amount from column E
           bankAmount: row[5], // Bank amount from column F
           totalAmount: row[6], // Total amount from column G
@@ -653,7 +653,7 @@ function getOffDays() {
       const rowData = {
         entryId: row[4], // Entry ID from column E
         timestamp: row[0] ? new Date(row[0]).toISOString() : new Date().toISOString(), // Convert to ISO string
-        date: row[1], // Date from column B
+        date: row[1] ? (row[1] instanceof Date ? row[1].toISOString().split('T')[0] : row[1]) : row[1], // Format date as YYYY-MM-DD
         reason: row[2], // Reason from column C
         entryType: row[3], // Static entry type
         submittedBy: row[5], // Submitted by from column F
