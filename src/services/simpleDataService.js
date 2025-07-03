@@ -83,6 +83,7 @@ class SimpleDataService {
       if (entryData.type === 'daily') {
         result = await authService.addFareReceipt({
           entryId: newEntry.entryId,
+          timestamp: newEntry.timestamp,
           date: entryData.date,
           route: entryData.route,
           cashAmount: entryData.cashAmount || 0,
@@ -93,6 +94,7 @@ class SimpleDataService {
       } else if (entryData.type === 'booking') {
         result = await authService.addBookingEntry({
           entryId: newEntry.entryId,
+          timestamp: newEntry.timestamp,
           bookingDetails: entryData.bookingDetails,
           dateFrom: entryData.dateFrom,
           dateTo: entryData.dateTo,
@@ -104,6 +106,7 @@ class SimpleDataService {
       } else if (entryData.type === 'off') {
         result = await authService.addOffDay({
           entryId: newEntry.entryId,
+          timestamp: newEntry.timestamp,
           date: entryData.date,
           reason: entryData.reason,
           submittedBy: submittedBy

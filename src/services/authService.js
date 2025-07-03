@@ -141,6 +141,7 @@ class AuthService {
       const requestBody = JSON.stringify({
         action: 'addFareReceipt',
         entryId: data.entryId,
+        timestamp: data.timestamp,
         date: data.date,
         route: data.route,
         cashAmount: data.cashAmount || 0,
@@ -225,6 +226,7 @@ class AuthService {
       const requestBody = JSON.stringify({
         action: 'addBookingEntry',
         entryId: data.entryId,
+        timestamp: data.timestamp,
         bookingDetails: data.bookingDetails,
         dateFrom: data.dateFrom,
         dateTo: data.dateTo,
@@ -422,6 +424,7 @@ class AuthService {
       const requestBody = JSON.stringify({
         action: 'addOffDay',
         entryId: data.entryId,
+        timestamp: data.timestamp,
         date: data.date,
         reason: data.reason,
         submittedBy: data.submittedBy || 'driver'
