@@ -531,12 +531,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
               // Get current user info for filtering
               const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
               const currentUserName = currentUser.fullName || currentUser.username;
-              
+
               // Filter entries by current user only
               const userEntries = fareData.filter(entry => 
                 entry.submittedBy === currentUserName
               );
-              
+
               return userEntries.length > 0 ? (
                 <div className="row mb-4">
                   <div className="col-md-3 col-sm-6 mb-3">
@@ -884,7 +884,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                                   className="btn btn-sm btn-edit" 
                                   onClick={() => handleEditEntry(entry)}
                                   title="Edit Entry"
-                                >
+                                                               >
                                   <i className="bi bi-pencil"></i>
                                 </button>
                                 <button 

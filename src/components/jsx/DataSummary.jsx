@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../css/DataSummary.css";
+import hybridDataService from '../../services/hybridDataService.js';
 
 function DataSummary({ fareData, expenseData, cashBookEntries }) {
   const [showApprovalModal, setShowApprovalModal] = useState(false);
@@ -786,6 +787,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
               </div>
             </div>
           ) : (
+```javascript
             <div className="no-entries-message text-center py-5">
               <i className="bi bi-clipboard-data display-1 text-muted"></i>
               <h4 className="mt-3 text-muted">No Data Found</h4>
