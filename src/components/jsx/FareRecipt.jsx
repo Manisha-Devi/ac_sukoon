@@ -28,24 +28,34 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     reason: "",
   });
 
-  // Initialize data and setup sync status updates
+  // Initialize data from localStorage first
   useEffect(() => {
     const initializeData = async () => {
       setIsLoading(true);
       try {
-        console.log('🚀 Initializing data for FareReceipt component...');
-        const initialData = await hybridDataService.initializeData();
-        console.log('📊 Initial data loaded:', initialData.length, 'entries');
+        console.log('🚀 Loading data from localStorage for immediate UI...');
+        
+        // Load from localStorage immediately for instant UI
+        const localData = localStorageService.loadFareData();
+        console.log('📂 Loaded from localStorage:', localData.length, 'entries');
 
-        setFareData(initialData);
+        setFareData(localData);
 
-        // Calculate total earnings
-        const total = initialData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+        // Calculate total earnings from localStorage data
+        const total = localData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
         setTotalEarnings(total);
 
-        console.log('💰 Total earnings calculated:', total);
+        console.log('💰 Total earnings calculated from localStorage:', total);
+
+        // Start background sync but don't wait for it
+        if (hybridDataService.isOnline) {
+          hybridDataService.backgroundSync().catch(error => {
+            console.error('⚠️ Background sync failed:', error);
+          });
+        }
+
       } catch (error) {
-        console.error('Error initializing data:', error);
+        console.error('Error loading data:', error);
       } finally {
         setIsLoading(false);
       }
@@ -71,13 +81,16 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
     // Listen for data updates from background sync
     const handleDataUpdate = (event) => {
-      const updatedData = event.detail;
-      console.log('📱 UI received data update from background sync:', updatedData.length, 'entries');
+      console.log('📱 Background sync completed, loading fresh data from localStorage...');
 
-      setFareData(updatedData);
+      // Always load from localStorage for consistent UI
+      const freshLocalData = localStorageService.loadFareData();
+      console.log('📂 Fresh data from localStorage:', freshLocalData.length, 'entries');
 
-      // Calculate total earnings
-      const total = updatedData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+      setFareData(freshLocalData);
+
+      // Calculate total earnings from localStorage
+      const total = freshLocalData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
       setTotalEarnings(total);
 
       // Update sync status immediately

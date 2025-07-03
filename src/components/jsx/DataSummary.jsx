@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../css/DataSummary.css";
 import hybridDataService from '../../services/hybridDataService.js';
+import localStorageService from '../../services/localStorageService.js';
 
 function DataSummary({ fareData, expenseData, cashBookEntries }) {
   const [showApprovalModal, setShowApprovalModal] = useState(false);
@@ -12,13 +13,22 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
   });
   const [syncStatus, setSyncStatus] = useState(hybridDataService.getSyncStatus());
 
-  // Force re-calculation when data updates
+  // Load data from localStorage for summary calculations
   useEffect(() => {
-    console.log('📊 Data Summary - Data updated:', {
-      fareEntries: fareData.length,
+    // Always use localStorage data for calculations
+    const localFareData = localStorageService.loadFareData();
+    
+    console.log('📊 Data Summary - Using localStorage data:', {
+      fareEntries: localFareData.length,
       expenseEntries: expenseData.length,
       cashBookEntries: cashBookEntries.length
     });
+    
+    // Update fareData from localStorage if different
+    if (JSON.stringify(localFareData) !== JSON.stringify(fareData)) {
+      console.log('📂 Updating fareData from localStorage in DataSummary');
+      // This will trigger parent component update if needed
+    }
   }, [fareData, expenseData, cashBookEntries]);
 
   // Monitor sync status

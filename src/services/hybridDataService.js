@@ -125,7 +125,7 @@ class HybridDataService {
       // Trigger UI update after sync
       this.triggerSyncStatusChange();
 
-      // Trigger custom event for data update
+      // Trigger custom event for data update (UI will reload from localStorage)
       const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: allData });
       window.dispatchEvent(dataUpdateEvent);
 
@@ -790,6 +790,16 @@ class HybridDataService {
       window.dispatchEvent(event);
     } catch (error) {
       console.error('❌ Error triggering cash book update:', error);
+    }
+  }
+
+  // Get current data from localStorage (for UI consistency)
+  getCurrentLocalData() {
+    try {
+      return localStorageService.loadFareData();
+    } catch (error) {
+      console.error('❌ Error getting current local data:', error);
+      return [];
     }
   }
 
