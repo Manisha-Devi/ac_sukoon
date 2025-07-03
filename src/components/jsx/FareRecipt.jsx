@@ -488,10 +488,25 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     setOffDayData({ date: "", reason: "" });
   };
 
-  // Calculate totals for summary
-  const totalCash = fareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
-  const totalBank = fareData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
-  const grandTotal = totalCash + totalBank;
+  // Calculate totals for summary - only for current user
+  const calculateSummaryTotals = () => {
+    // Get current user info for filtering
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const currentUserName = currentUser.fullName || currentUser.username;
+
+    // Filter data by current user only
+    const userFareData = fareData.filter(entry => 
+      entry.submittedBy === currentUserName
+    );
+
+    const totalCash = userFareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
+    const totalBank = userFareData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+    const grandTotal = totalCash + totalBank;
+
+    return { totalCash, totalBank, grandTotal };
+  };
+
+  const { totalCash, totalBank, grandTotal } = calculateSummaryTotals();
 
   return (
     <div className="fare-entry-container">
