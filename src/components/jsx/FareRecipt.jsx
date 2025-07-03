@@ -34,7 +34,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       setIsLoading(true);
       try {
         console.log('🚀 Loading data from localStorage for immediate UI...');
-        
+
         // Load from localStorage immediately for instant UI
         const localData = localStorageService.loadFareData();
         console.log('📂 Loaded from localStorage:', localData.length, 'entries');
@@ -245,9 +245,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         }, fareData);
 
         if (result.success) {
+          // UI instantly updated with localStorage data
           setFareData(result.data);
           setTotalEarnings((prev) => prev - oldTotal + totalAmount);
           setEditingEntry(null);
+          console.log('✅ Daily entry updated instantly - UI updated!');
         }
       } else {
         // Create new entry using hybrid service
@@ -312,9 +314,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         }, fareData);
 
         if (result.success) {
+          // UI instantly updated with localStorage data
           setFareData(result.data);
           setTotalEarnings((prev) => prev - oldTotal + totalAmount);
           setEditingEntry(null);
+          console.log('✅ Booking entry updated instantly - UI updated!');
         }
       } else {
         // Create new entry using hybrid service

@@ -13,7 +13,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
   });
   const [syncStatus, setSyncStatus] = useState(hybridDataService.getSyncStatus());
 
-  // Load data from localStorage for summary calculations
+  // Load data from localStorage for summary calculations and real-time updates
   useEffect(() => {
     // Always use localStorage data for calculations
     const localFareData = localStorageService.loadFareData();
@@ -23,12 +23,23 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
       expenseEntries: expenseData.length,
       cashBookEntries: cashBookEntries.length
     });
-    
-    // Update fareData from localStorage if different
-    if (JSON.stringify(localFareData) !== JSON.stringify(fareData)) {
-      console.log('📂 Updating fareData from localStorage in DataSummary');
-      // This will trigger parent component update if needed
-    }
+
+    // Listen for real-time data updates from localStorage
+    const handleDataUpdate = () => {
+      console.log('📊 DataSummary detected data change - refreshing from localStorage');
+      const freshData = localStorageService.loadFareData();
+      // Force component re-render with fresh localStorage data
+      window.dispatchEvent(new CustomEvent('fareDataUpdated', { detail: freshData }));
+    };
+
+    // Listen for localStorage changes
+    window.addEventListener('storage', handleDataUpdate);
+    window.addEventListener('dataUpdated', handleDataUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleDataUpdate);
+      window.removeEventListener('dataUpdated', handleDataUpdate);
+    };
   }, [fareData, expenseData, cashBookEntries]);
 
   // Monitor sync status
