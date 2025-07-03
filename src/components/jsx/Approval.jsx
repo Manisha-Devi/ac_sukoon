@@ -183,14 +183,14 @@ function Approval({ fareData, expenseData, cashBookEntries }) {
                   // Get current user info for filtering
                   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
                   const currentUserName = currentUser.fullName || currentUser.username;
-                  
+
                   // Filter entries by current user and show last 3
                   const userEntries = fareData.filter(entry => 
                     entry.submittedBy === currentUserName || 
                     entry.submittedBy === 'driver' || // Fallback for old entries
                     !entry.submittedBy // Handle entries without submittedBy field
                   );
-                  
+
                   return userEntries.slice(-3).map((entry) => (
                     <div key={entry.entryId || entry.id} className="entry-preview">
                       <span className="entry-type">{entry.type === 'daily' ? 'Daily' : entry.type === 'booking' ? 'Booking' : 'Off Day'}</span>
@@ -599,3 +599,4 @@ function Approval({ fareData, expenseData, cashBookEntries }) {
 }
 
 export default Approval;
+// Added filtering by current user in the Approval component.

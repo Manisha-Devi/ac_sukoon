@@ -1,4 +1,3 @@
-
 import authService from './authService.js';
 import localStorageService from './localStorageService.js';
 
@@ -125,11 +124,11 @@ class HybridDataService {
 
       // Trigger UI update after sync
       this.triggerSyncStatusChange();
-      
+
       // Trigger custom event for data update
       const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: allData });
       window.dispatchEvent(dataUpdateEvent);
-      
+
       // Trigger cash book update
       this.triggerCashBookUpdate();
 
@@ -170,7 +169,7 @@ class HybridDataService {
 
       // Trigger sync status change event for UI update
       this.triggerSyncStatusChange();
-      
+
       // Trigger cash book update event
       this.triggerCashBookUpdate();
 
@@ -189,7 +188,7 @@ class HybridDataService {
             );
             localStorageService.saveFareData(finalData);
             localStorageService.removePendingSync(newEntry.entryId);
-            
+
             // Trigger sync status change event for UI update
             this.triggerSyncStatusChange();
           }
@@ -214,7 +213,7 @@ class HybridDataService {
 
       // Get current user info
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const submittedBy = currentUser.fullName || currentUser.username || 'driver';
+      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
 
       // Add to appropriate Google Sheet based on type
       if (entry.type === 'daily') {
@@ -305,7 +304,7 @@ class HybridDataService {
 
       // Get current user info
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const submittedBy = currentUser.fullName || currentUser.username || 'driver';
+      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
 
       // Add to appropriate Google Sheet based on type
       if (entry.type === 'daily') {
@@ -403,7 +402,7 @@ class HybridDataService {
 
       // Trigger sync status change event for UI update
       this.triggerSyncStatusChange();
-      
+
       // Trigger cash book update
       this.triggerCashBookUpdate();
 
@@ -429,7 +428,7 @@ class HybridDataService {
             );
             localStorageService.saveFareData(finalData);
             localStorageService.removePendingSync(entryId);
-            
+
             // Trigger sync status change event for UI update
             this.triggerSyncStatusChange();
           }
@@ -634,7 +633,7 @@ class HybridDataService {
 
       console.log('🔄 Manual sync started...');
       const result = await this.backgroundSync();
-      
+
       // Also refresh the UI data
       return result;
 
@@ -687,18 +686,18 @@ class HybridDataService {
 
       // Get existing cash book entries
       let cashBookEntries = JSON.parse(localStorage.getItem('cashBookEntries') || '[]');
-      
+
       // Remove existing entry if updating
       cashBookEntries = cashBookEntries.filter(entry => entry.sourceId !== fareEntry.entryId);
-      
+
       // Add new entry
       cashBookEntries.unshift(cashBookEntry);
-      
+
       // Save to localStorage
       localStorage.setItem('cashBookEntries', JSON.stringify(cashBookEntries));
-      
+
       console.log('📖 Cash book entry generated:', cashBookEntry);
-      
+
     } catch (error) {
       console.error('❌ Error generating cash book entry:', error);
     }
@@ -732,9 +731,9 @@ class HybridDataService {
   generateAllCashBookEntries(fareData) {
     try {
       console.log('📖 Generating all cash book entries from fare data...');
-      
+
       let cashBookEntries = [];
-      
+
       fareData.forEach(fareEntry => {
         if (fareEntry.type !== 'off') { // Skip off days
           const cashBookEntry = {
@@ -751,19 +750,19 @@ class HybridDataService {
             description: fareEntry.bookingDetails || fareEntry.route,
             timestamp: fareEntry.timestamp
           };
-          
+
           cashBookEntries.push(cashBookEntry);
         }
       });
-      
+
       // Sort by timestamp (newest first)
       cashBookEntries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-      
+
       // Save to localStorage
       localStorage.setItem('cashBookEntries', JSON.stringify(cashBookEntries));
-      
+
       console.log('📖 Generated', cashBookEntries.length, 'cash book entries');
-      
+
     } catch (error) {
       console.error('❌ Error generating all cash book entries:', error);
     }
@@ -775,9 +774,9 @@ class HybridDataService {
       let cashBookEntries = JSON.parse(localStorage.getItem('cashBookEntries') || '[]');
       cashBookEntries = cashBookEntries.filter(entry => entry.sourceId !== sourceId);
       localStorage.setItem('cashBookEntries', JSON.stringify(cashBookEntries));
-      
+
       console.log('📖 Cash book entry removed for:', sourceId);
-      
+
     } catch (error) {
       console.error('❌ Error removing cash book entry:', error);
     }

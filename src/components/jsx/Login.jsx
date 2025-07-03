@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import "../css/Login.css";
 import authService from "../../services/authService";
@@ -40,30 +39,30 @@ function Login({ onLogin }) {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.username.trim()) {
       newErrors.username = "Username is required";
     }
-    
+
     if (!formData.password.trim()) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 4) {
       newErrors.password = "Password must be at least 4 characters";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     try {
       // Authenticate against Google Sheets database
       const authResult = await authService.authenticateUser(
@@ -71,15 +70,22 @@ function Login({ onLogin }) {
         formData.password,
         formData.userType
       );
-      
+
       setIsLoading(false);
-      
+
       if (authResult.success) {
-        // Valid credentials - login successful
-        console.log('✅ Login successful for user:', authResult.user.fullName);
-        onLogin(authResult.user);
+        // Store user details locally (without password)
+        const userDetails = {
+          username: authResult.user.username,
+          userType: authResult.user.userType,
+          fullName: authResult.user.fullName,
+          status: authResult.user.status,
+          isAuthenticated: true
+        };
+        localStorage.setItem('user', JSON.stringify(userDetails));
+        console.log('👤 User details stored locally:', userDetails);
+        onLogin(userDetails);
       } else {
-        // Invalid credentials
         setErrors({
           password: authResult.message || "Invalid username or password for selected user type"
         });

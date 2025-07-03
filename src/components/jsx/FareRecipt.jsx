@@ -880,7 +880,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                               </small>
                             </div>
                             <div className="entry-content">
-                              {entry.type === "daily" && <p>{entry.route}</p>}
+                              {entry.type === "daily" && <p>{entry.routep>
+                              }
                               {entry.type === "booking" && <p>{entry.bookingDetails?.substring(0, 60)}...</p>}
                               {entry.type === "off" && <p>{entry.reason}</p>}
                             </div>
@@ -900,16 +901,14 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       </div>
                     ))}
                   </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <i className="bi bi-receipt display-4 text-muted"></i>
+                      <p className="text-muted mt-2">No entries found for current user</p>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="recent-entries mt-4">
-                  <h4>Recent Entries</h4>
-                  <div className="text-center py-4">
-                    <i className="bi bi-receipt display-4 text-muted"></i>
-                    <p className="text-muted mt-2">No entries found for current user</p>
-                  </div>
-                </div>
-              );
+              ) : null;
             })()}
       </div>
     </div>

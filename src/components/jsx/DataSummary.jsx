@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import "../css/DataSummary.css";
 
@@ -80,48 +79,70 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
       return;
     }
 
+    // Calculate summary data for current user only
+    const calculateSummary = () => {
+      // Get current user info for filtering
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const currentUserName = currentUser.fullName || currentUser.username;
+
+      // Filter data by current user
+      const userFareData = fareData.filter(entry => 
+        entry.submittedBy === currentUserName ||
+        (!entry.submittedBy && entry.type) // Handle old entries without submittedBy
+      );
+
+      const userExpenseData = expenseData.filter(entry => 
+        entry.submittedBy === currentUserName ||
+        (!entry.submittedBy && entry.type) // Handle old entries without submittedBy
+      );
+
+      return {
+        fareReceipts: {
+          totalEntries: userFareData.length,
+          cashCollection: userFareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
+          bankCollection: userFareData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
+          totalIncome: userFareData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
+        },
+        fuelPayments: {
+          totalEntries: userExpenseData.filter(entry => entry.type === 'fuel').length,
+          cashExpense: userExpenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
+          bankExpense: userExpenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
+          totalExpense: userExpenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
+        },
+        addaPayments: {
+          totalEntries: userExpenseData.filter(entry => entry.type === 'fees').length,
+          cashExpense: userExpenseData.filter(entry => entry.type === 'fees').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
+          bankExpense: userExpenseData.filter(entry => entry.type === 'fees').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
+          totalExpense: userExpenseData.filter(entry => entry.type === 'fees').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
+        },
+        servicePayments: {
+          totalEntries: userExpenseData.filter(entry => entry.type === 'service').length,
+          cashExpense: userExpenseData.filter(entry => entry.type === 'service').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
+          bankExpense: userExpenseData.filter(entry => entry.type === 'service').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
+          totalExpense: userExpenseData.filter(entry => entry.type === 'service').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
+        },
+        unionPayments: {
+          totalEntries: userExpenseData.filter(entry => entry.type === 'union').length,
+          cashExpense: userExpenseData.filter(entry => entry.type === 'union').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
+          bankExpense: userExpenseData.filter(entry => entry.type === 'union').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
+          totalExpense: userExpenseData.filter(entry => entry.type === 'union').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
+        },
+        otherPayments: {
+          totalEntries: userExpenseData.filter(entry => entry.type === 'other').length,
+          cashExpense: userExpenseData.filter(entry => entry.type === 'other').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
+          bankExpense: userExpenseData.filter(entry => entry.type === 'other').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
+          totalExpense: userExpenseData.filter(entry => entry.type === 'other').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
+        }
+      };
+    };
+
+    const summaryData = calculateSummary();
+
     const submissionData = {
       timestamp: new Date().toISOString(),
       totals,
       settlementData,
-      summaryData: {
-        fareReceipts: {
-          totalEntries: fareData.length,
-          cashCollection: fareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
-          bankCollection: fareData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
-          totalIncome: fareData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
-        },
-        fuelPayments: {
-          totalEntries: expenseData.filter(entry => entry.type === 'fuel').length,
-          cashExpense: expenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
-          bankExpense: expenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
-          totalExpense: expenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
-        },
-        addaPayments: {
-          totalEntries: expenseData.filter(entry => entry.type === 'fees').length,
-          cashExpense: expenseData.filter(entry => entry.type === 'fees').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
-          bankExpense: expenseData.filter(entry => entry.type === 'fees').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
-          totalExpense: expenseData.filter(entry => entry.type === 'fees').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
-        },
-        servicePayments: {
-          totalEntries: expenseData.filter(entry => entry.type === 'service').length,
-          cashExpense: expenseData.filter(entry => entry.type === 'service').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
-          bankExpense: expenseData.filter(entry => entry.type === 'service').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
-          totalExpense: expenseData.filter(entry => entry.type === 'service').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
-        },
-        unionPayments: {
-          totalEntries: expenseData.filter(entry => entry.type === 'union').length,
-          cashExpense: expenseData.filter(entry => entry.type === 'union').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
-          bankExpense: expenseData.filter(entry => entry.type === 'union').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
-          totalExpense: expenseData.filter(entry => entry.type === 'union').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
-        },
-        otherPayments: {
-          totalEntries: expenseData.filter(entry => entry.type === 'other').length,
-          cashExpense: expenseData.filter(entry => entry.type === 'other').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
-          bankExpense: expenseData.filter(entry => entry.type === 'other').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
-          totalExpense: expenseData.filter(entry => entry.type === 'other').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
-        }
-      }
+      summaryData
     };
 
     // Here you can handle the approval submission
@@ -208,14 +229,14 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                   // Get current user info for filtering
                   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
                   const currentUserName = currentUser.fullName || currentUser.username;
-                  
+
                   // Filter entries by current user and show last 3
                   const userEntries = fareData.filter(entry => 
                     entry.submittedBy === currentUserName || 
                     entry.submittedBy === 'driver' || // Fallback for old entries
                     !entry.submittedBy // Handle entries without submittedBy field
                   );
-                  
+
                   return userEntries.slice(-3).map((entry) => (
                     <div key={entry.entryId || entry.id} className="entry-preview">
                       <span className="entry-type">{entry.type === 'daily' ? 'Daily' : entry.type === 'booking' ? 'Booking' : 'Off Day'}</span>
@@ -268,7 +289,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                   // Get current user info for filtering
                   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
                   const currentUserName = currentUser.fullName || currentUser.username;
-                  
+
                   // Filter fuel entries by current user and show last 3
                   const userFuelEntries = expenseData.filter(entry => 
                     entry.type === 'fuel' && (
@@ -276,7 +297,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                       !entry.submittedBy // Handle entries without submittedBy field
                     )
                   );
-                  
+
                   return userFuelEntries.slice(-3).map((entry) => (
                     <div key={entry.entryId || entry.id} className="entry-preview">
                       <span className="entry-type">Fuel</span>
@@ -328,7 +349,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                   // Get current user info for filtering
                   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
                   const currentUserName = currentUser.fullName || currentUser.username;
-                  
+
                   // Filter fees entries by current user and show last 3
                   const userFeesEntries = expenseData.filter(entry => 
                     entry.type === 'fees' && (
@@ -336,7 +357,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                       !entry.submittedBy // Handle entries without submittedBy field
                     )
                   );
-                  
+
                   return userFeesEntries.slice(-3).map((entry) => (
                     <div key={entry.entryId || entry.id} className="entry-preview">
                       <span className="entry-type">Adda</span>
@@ -387,7 +408,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                   // Get current user info for filtering
                   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
                   const currentUserName = currentUser.fullName || currentUser.username;
-                  
+
                   // Filter service entries by current user and show last 3
                   const userServiceEntries = expenseData.filter(entry => 
                     entry.type === 'service' && (
@@ -395,7 +416,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                       !entry.submittedBy // Handle entries without submittedBy field
                     )
                   );
-                  
+
                   return userServiceEntries.slice(-3).map((entry) => (
                     <div key={entry.entryId || entry.id} className="entry-preview">
                       <span className="entry-type">Service</span>
@@ -447,7 +468,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                   // Get current user info for filtering
                   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
                   const currentUserName = currentUser.fullName || currentUser.username;
-                  
+
                   // Filter union entries by current user and show last 3
                   const userUnionEntries = expenseData.filter(entry => 
                     entry.type === 'union' && (
@@ -455,7 +476,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                       !entry.submittedBy // Handle entries without submittedBy field
                     )
                   );
-                  
+
                   return userUnionEntries.slice(-3).map((entry) => (
                     <div key={entry.entryId || entry.id} className="entry-preview">
                       <span className="entry-type">Union</span>
@@ -506,7 +527,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                   // Get current user info for filtering
                   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
                   const currentUserName = currentUser.fullName || currentUser.username;
-                  
+
                   // Filter other entries by current user and show last 3
                   const userOtherEntries = expenseData.filter(entry => 
                     entry.type === 'other' && (
@@ -514,7 +535,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                       !entry.submittedBy // Handle entries without submittedBy field
                     )
                   );
-                  
+
                   return userOtherEntries.slice(-3).map((entry) => (
                     <div key={entry.entryId || entry.id} className="entry-preview">
                       <span className="entry-type">Other</span>
@@ -587,7 +608,107 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
           </div>
         </div>
 
+        {/* Recent Entries */}
+        <div className="recent-entries mt-4">
+          <h4><i className="bi bi-clock-history"></i> Recent Entries</h4>
+          <div className="row">
+            {(() => {
+              // Get current user info for filtering
+              const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+              const currentUserName = currentUser.fullName || currentUser.username;
 
+              // Filter entries by current user
+              const userFareEntries = fareData.filter(entry => 
+                entry.submittedBy === currentUserName ||
+                (!entry.submittedBy && entry.type)
+              );
+
+              const userExpenseEntries = expenseData.filter(entry => 
+                entry.submittedBy === currentUserName ||
+                (!entry.submittedBy && entry.type)
+              );
+
+              return [...userFareEntries, ...userExpenseEntries]
+                .sort((a, b) => new Date(b.timestamp || b.date) - new Date(a.timestamp || a.date))
+                .slice(0, 6)
+                .map((entry, index) => (
+                  <div key={index} className="col-md-4 mb-3">
+                    <div className="entry-card">
+                      <div className="entry-header">
+                        <h6 className="entry-title">
+                          {entry.type === 'daily' && <><i className="bi bi-calendar-day"></i> Daily Fare</>}
+                          {entry.type === 'booking' && <><i className="bi bi-calendar-range"></i> Booking</>}
+                          {entry.type === 'off' && <><i className="bi bi-x-octagon"></i> Off Day</>}
+                          {entry.type === 'fuel' && <><i className="bi bi-fuel-pump"></i> Fuel</>}
+                          {entry.type === 'fees' && <><i className="bi bi-building"></i> Adda Fees</>}
+                          {entry.type === 'service' && <><i className="bi bi-tools"></i> Service</>}
+                          {entry.type === 'union' && <><i className="bi bi-people"></i> Union</>}
+                          {entry.type === 'other' && <><i className="bi bi-credit-card"></i> Other</>}
+                        </h6>
+                        <small className="entry-date">
+                          {new Date(entry.timestamp || entry.date).toLocaleDateString()}
+                        </small>
+                      </div>
+                      <div className="entry-body">
+                        {entry.type === 'daily' && (
+                          <>
+                            <p><strong>Route:</strong> {entry.route}</p>
+                            <p><strong>Amount:</strong> ₹{entry.totalAmount}</p>
+                          </>
+                        )}
+                        {entry.type === 'booking' && (
+                          <>
+                            <p><strong>Details:</strong> {entry.bookingDetails}</p>
+                            <p><strong>From:</strong> {entry.dateFrom}</p>
+                            <p><strong>To:</strong> {entry.dateTo}</p>
+                            <p><strong>Amount:</strong> ₹{entry.totalAmount}</p>
+                          </>
+                        )}
+                        {entry.type === 'off' && (
+                          <>
+                            <p><strong>Reason:</strong> {entry.reason}</p>
+                          </>
+                        )}
+                        {entry.type === 'fuel' && (
+                          <>
+                            <p><strong>Pump:</strong> {entry.pumpName}</p>
+                            <p><strong>Liters:</strong> {entry.liters}</p>
+                            <p><strong>Amount:</strong> ₹{entry.totalAmount}</p>
+                          </>
+                        )}
+                        {entry.type === 'fees' && (
+                          <>
+                            <p><strong>Description:</strong> {entry.description}</p>
+                            <p><strong>Amount:</strong> ₹{entry.totalAmount}</p>
+                          </>
+                        )}
+                        {entry.type === 'service' && (
+                          <>
+                            <p><strong>Service:</strong> {entry.serviceType || entry.description}</p>
+                            <p><strong>Vendor:</strong> {entry.vendor}</p>
+                            <p><strong>Amount:</strong> ₹{entry.totalAmount}</p>
+                          </>
+                        )}
+                        {entry.type === 'union' && (
+                          <>
+                            <p><strong>Description:</strong> {entry.description}</p>
+                            <p><strong>Amount:</strong> ₹{entry.totalAmount}</p>
+                          </>
+                        )}
+                        {entry.type === 'other' && (
+                          <>
+                            <p><strong>Details:</strong> {entry.paymentDetails}</p>
+                            <p><strong>Vendor:</strong> {entry.vendor}</p>
+                            <p><strong>Amount:</strong> ₹{entry.totalAmount}</p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ));
+            })()}
+          </div>
+        </div>
 
         {/* Send for Approval Button */}
         <div className="text-center">
@@ -633,7 +754,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                           type="number"
                           className="form-control"
                           value={settlementData.cashSettlement}
-                          onChange={(e) => setSettlementData({...settlementData, cashSettlement: e.target.value})}
+                          onChange={(e) => setSettlementData({...settlementData, cashSettement: e.target.value})}
                           placeholder="Enter cash amount"
                           max={Math.max(0, totals.cashBalance)}
                         />
