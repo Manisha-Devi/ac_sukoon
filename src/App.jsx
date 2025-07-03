@@ -6,7 +6,7 @@ import Login from "./components/jsx/Login";
 import Dashboard from "./components/jsx/Dashboard";
 import FareEntry from "./components/jsx/FareRecipt";
 import FuelEntry from "./components/jsx/FuelPayment";
-import AddaFeesEntry from "./components/jsx/FeesPayment";
+import AddaPayment from "./components/jsx/AddaPayment";
 import UnionPayment from "./components/jsx/UnionPayment";
 import ServiceEntry from "./components/jsx/ServicePayment";
 import OtherPayment from "./components/jsx/OtherPayment";
@@ -237,10 +237,10 @@ function App() {
               Fuel Payment
             </button>
             <button
-              className={`menu-item ${activeTab === "adda-fees" ? "active" : ""}`}
-              onClick={() => handleMenuClick("adda-fees")}
+              className={`menu-item ${activeTab === "adda-payment" ? "active" : ""}`}
+              onClick={() => handleMenuClick("adda-payment")}
             >
-              <i className="bi bi-credit-card"></i>
+              <i className="bi bi-building"></i>
               Adda Payment
             </button>
             <button
@@ -337,8 +337,8 @@ function App() {
               setCashBookEntries={setCashBookEntries}
             />
           )}
-          {activeTab === "adda-fees" && (
-            <AddaFeesEntry
+          {activeTab === "adda-payment" && (
+            <AddaPayment
               expenseData={expenseData}
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}

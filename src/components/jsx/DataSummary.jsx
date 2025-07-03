@@ -125,7 +125,12 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
         },
         addaPayments: {
           totalEntries: userExpenseData.filter(entry => entry.type === 'fees').length,
-          cashExpense: userExpenseData.filter(entry => entry.type === 'fees').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
+          cashExpense: userExpenseData.filter(entry => 
+                          entry.type === 'adda' && (
+                            entry.submittedBy === currentUserName || 
+                            (!entry.submittedBy && entry.type)
+                          )
+                        ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
           bankExpense: userExpenseData.filter(entry => entry.type === 'fees').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
           totalExpense: userExpenseData.filter(entry => entry.type === 'fees').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
         },
@@ -188,7 +193,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
     });
   };
 
-  
+
 
   return (
     <div className="approval-container">
@@ -199,7 +204,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
               <h2><i className="bi bi-check-circle"></i> Data Summary & Approval</h2>
               <p>Review your financial data and send for approval</p>
             </div>
-            
+
           </div>
         </div>
 
@@ -426,7 +431,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
                         const currentUserName = currentUser.fullName || currentUser.username;
                         return expenseData.filter(entry => 
-                          entry.type === 'fees' && (
+                          entry.type === 'adda' && (
                             entry.submittedBy === currentUserName || 
                             (!entry.submittedBy && entry.type)
                           )

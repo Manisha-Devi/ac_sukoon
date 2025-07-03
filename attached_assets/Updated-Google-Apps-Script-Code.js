@@ -963,7 +963,6 @@ function updateAddaPayment(data) {
     };
 
   } catch (error) {
-```text
     console.error('Update adda payment error:', error);
     return {
       success: false,
@@ -1043,7 +1042,7 @@ function addFuelPayment(data) {
     }
 
     const entryId = data.entryId;
-    const timeOnly = data.timestamp || formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
+    const timeOnly = data.timestamp || formatISTTimestamp().split(' ')[1] + ' ' + formatISTtimestamp().split(' ')[2];
 
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
