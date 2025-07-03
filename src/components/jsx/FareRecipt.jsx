@@ -412,7 +412,14 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         return;
       }
 
-      // DELETE: First update React state immediately
+      // Confirm delete
+      if (!confirm(`Are you sure you want to delete this ${entryToDelete.type} entry?`)) {
+        return;
+      }
+
+      console.log('🗑️ Deleting entry:', { entryId, type: entryToDelete.type });
+
+      // DELETE: First update React state immediately for better UX
       const updatedData = fareData.filter(entry => entry.entryId !== entryId);
       setFareData(updatedData);
 
@@ -422,15 +429,24 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
       setCashBookEntries(prev => prev.filter(entry => entry.source === 'fare-entry' && !entry.jfNo?.includes(entryId.toString())));
 
+      console.log('✅ Entry removed from React state immediately');
+
       // Then sync deletion to Google Sheets in background
-      simpleDataService.deleteFareEntry(entryId, entryToDelete.type).catch(error => {
-        console.error('Background delete sync failed:', error);
-        // Optionally, you could revert the state here if delete fails
-        // But for better UX, we'll keep the optimistic update
-      });
+      try {
+        const deleteResult = await simpleDataService.deleteFareEntry(entryId, entryToDelete.type);
+        if (deleteResult.success) {
+          console.log('✅ Entry successfully deleted from Google Sheets');
+        } else {
+          console.warn('⚠️ Delete from Google Sheets failed but entry removed locally:', deleteResult.error);
+          // Don't revert the state - keep the optimistic update for better UX
+        }
+      } catch (syncError) {
+        console.warn('⚠️ Background delete sync failed but entry removed locally:', syncError.message);
+        // Don't revert the state - keep the optimistic update for better UX
+      }
 
     } catch (error) {
-      console.error('Error deleting entry:', error);
+      console.error('❌ Error in delete process:', error);
       alert('Error deleting entry. Please try again.');
     }
   };

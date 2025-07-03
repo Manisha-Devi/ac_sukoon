@@ -149,18 +149,30 @@ class SimpleDataService {
     try {
       this.checkOnlineStatus();
 
+      console.log('🗑️ Attempting to delete entry from Google Sheets:', { entryId, entryType });
+
       const result = await authService.deleteFareEntry(entryId, entryType);
 
       if (result && result.success) {
-        console.log('✅ Entry deleted from Google Sheets successfully');
-        return { success: true };
+        console.log('✅ Entry deleted from Google Sheets successfully:', entryId);
+        return { success: true, message: 'Entry deleted successfully' };
       } else {
-        throw new Error(result?.error || 'Failed to delete entry from Google Sheets');
+        // Log the error but don't throw - let the optimistic update stand
+        console.warn('⚠️ Failed to delete from Google Sheets:', result?.error || 'Unknown error');
+        return { 
+          success: false, 
+          error: result?.error || 'Failed to delete entry from Google Sheets',
+          note: 'Entry was removed locally but Google Sheets sync failed'
+        };
       }
 
     } catch (error) {
-      console.error('❌ Error deleting fare entry:', error);
-      return { success: false, error: error.message };
+      console.warn('⚠️ Delete sync error (entry removed locally):', error.message);
+      return { 
+        success: false, 
+        error: error.message,
+        note: 'Entry was removed locally but Google Sheets sync failed'
+      };
     }
   }
 }
