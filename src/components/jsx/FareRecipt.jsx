@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../css/FareRecipt.css";
 import hybridDataService from '../../services/hybridDataService.js';
+import localStorageService from '../../services/localStorageService.js';
 
 function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries }) {
   const [activeTab, setActiveTab] = useState("daily");
@@ -519,8 +520,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
                 </div>
                 <div className="sync-status">
-                  <div className={`simple-sync-indicator ${syncStatus.pendingSync > 0 || syncStatus.syncInProgress || isLoading ? 'pending' : 'synced'}`}>
-                    <i className={`bi ${syncStatus.pendingSync > 0 || syncStatus.syncInProgress || isLoading ? 'bi-arrow-repeat' : 'bi-check-circle'}`}></i>
+                  <div className={`simple-sync-indicator ${syncStatus.pendingSync > 0 || syncStatus.syncInProgress || isLoading ? 'syncing' : 'synced'}`}>
+                    {syncStatus.pendingSync > 0 || syncStatus.syncInProgress || isLoading ? (
+                      <i className="bi bi-arrow-clockwise"></i>
+                    ) : (
+                      <i className="bi bi-check-circle"></i>
+                    )}
                   </div>
                 </div>
               </div>

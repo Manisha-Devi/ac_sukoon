@@ -49,35 +49,26 @@
 }
 
 .simple-sync-indicator {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  font-size: 1.2rem;
-  transition: all 0.3s ease;
+  font-size: 16px;
 }
 
-.simple-sync-indicator.pending {
-  background: transparent;
+.simple-sync-indicator.syncing {
   color: #dc3545;
-  border: none;
 }
 
-.simple-sync-indicator.pending i {
+.simple-sync-indicator.syncing i {
   animation: spin 1s linear infinite;
 }
 
-.simple-sync-indicator.synced {
-  background: transparent;
-  color: #28a745;
-  border: none;
-}
-
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .sync-btn {
