@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../css/FareRecipt.css";
-import simpleDataService from '../../services/simpleDataService.js';
+import directDataService from '../../services/directDataService.js';
 
 function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries }) {
   const [activeTab, setActiveTab] = useState("daily");
@@ -31,7 +31,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const data = await simpleDataService.initializeData();
+        const data = await directDataService.initializeData();
         setFareData(data);
 
         const total = data.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
@@ -343,7 +343,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     try {
       const entryToDelete = fareData.find(entry => entry.entryId === entryId);
 
-      const result = await simpleDataService.deleteFareEntry(entryId, entryToDelete.type);
+      const result = await directDataService.deleteFareEntry(entryId, entryToDelete.type);
 
       if (result.success) {
         const updatedData = fareData.filter(entry => entry.entryId !== entryId);
