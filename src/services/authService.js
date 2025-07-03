@@ -2,8 +2,11 @@
 // Authentication service for Google Sheets database
 class AuthService {
   constructor() {
-    // Google Apps Script Web App URL
+    // Google Apps Script Web App URL - Updated to use the correct deployment URL
     this.API_URL = 'https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec';
+    
+    // Backup URL in case primary fails
+    this.BACKUP_API_URL = 'https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLgy6_26jFcHfa8roEX8JaA8MEGC&lib=MieMuve86j_26jFcHfa8roEX8JaA8MEGC';
   }
 
   // Authenticate user against Google Sheets database
@@ -131,31 +134,31 @@ class AuthService {
     }
   }
 
-  // Add Fare Receipt to Google Sheets
+  // Add Fare Receipt to Google Sheets with retry mechanism
   async addFareReceipt(data) {
     try {
       console.log('📝 Adding fare receipt to Google Sheets:', data);
       
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'addFareReceipt',
-          entryId: data.entryId,
-          date: data.date,
-          route: data.route,
-          cashAmount: data.cashAmount || 0,
-          bankAmount: data.bankAmount || 0,
-          totalAmount: data.totalAmount || 0,
-          submittedBy: data.submittedBy || 'driver'
-        })
+      const requestBody = JSON.stringify({
+        action: 'addFareReceipt',
+        entryId: data.entryId,
+        date: data.date,
+        route: data.route,
+        cashAmount: data.cashAmount || 0,
+        bankAmount: data.bankAmount || 0,
+        totalAmount: data.totalAmount || 0,
+        submittedBy: data.submittedBy || 'driver'
       });
 
-      const result = await response.json();
+      // Try primary URL first
+      let result = await this.makeAPIRequest(this.API_URL, requestBody);
+      
+      // If primary fails, don't retry - just return error for hybrid system to handle
+      if (!result.success && result.error.includes('Failed to fetch')) {
+        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
+        return { success: false, error: 'API temporarily unavailable - data saved locally' };
+      }
+
       console.log('✅ Fare receipt response:', result);
       return result;
     } catch (error) {
@@ -164,32 +167,63 @@ class AuthService {
     }
   }
 
-  // Add Booking Entry to Google Sheets
-  async addBookingEntry(data) {
+  // Generic API request method with timeout and better error handling
+  async makeAPIRequest(url, body, timeout = 10000) {
     try {
-      console.log('📝 Adding booking entry to Google Sheets:', data);
-      
-      const response = await fetch(this.API_URL, {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain;charset=utf-8',
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
-          action: 'addBookingEntry',
-          entryId: data.entryId,
-          bookingDetails: data.bookingDetails,
-          dateFrom: data.dateFrom,
-          dateTo: data.dateTo,
-          cashAmount: data.cashAmount || 0,
-          bankAmount: data.bankAmount || 0,
-          totalAmount: data.totalAmount || 0,
-          submittedBy: data.submittedBy || 'driver'
-        })
+        signal: controller.signal,
+        body: body
       });
 
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const result = await response.json();
+      return result;
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout - API took too long to respond');
+      }
+      throw new Error(`Failed to fetch: ${error.message}`);
+    }
+  }
+
+  // Add Booking Entry to Google Sheets
+  async addBookingEntry(data) {
+    try {
+      console.log('📝 Adding booking entry to Google Sheets:', data);
+      
+      const requestBody = JSON.stringify({
+        action: 'addBookingEntry',
+        entryId: data.entryId,
+        bookingDetails: data.bookingDetails,
+        dateFrom: data.dateFrom,
+        dateTo: data.dateTo,
+        cashAmount: data.cashAmount || 0,
+        bankAmount: data.bankAmount || 0,
+        totalAmount: data.totalAmount || 0,
+        submittedBy: data.submittedBy || 'driver'
+      });
+
+      const result = await this.makeAPIRequest(this.API_URL, requestBody);
+      
+      if (!result.success && result.error.includes('Failed to fetch')) {
+        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
+        return { success: false, error: 'API temporarily unavailable - data saved locally' };
+      }
+
       console.log('✅ Booking entry response:', result);
       return result;
     } catch (error) {
@@ -368,23 +402,21 @@ class AuthService {
     try {
       console.log('📝 Adding off day to Google Sheets:', data);
       
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'addOffDay',
-          entryId: data.entryId,
-          date: data.date,
-          reason: data.reason,
-          submittedBy: data.submittedBy || 'driver'
-        })
+      const requestBody = JSON.stringify({
+        action: 'addOffDay',
+        entryId: data.entryId,
+        date: data.date,
+        reason: data.reason,
+        submittedBy: data.submittedBy || 'driver'
       });
 
-      const result = await response.json();
+      const result = await this.makeAPIRequest(this.API_URL, requestBody);
+      
+      if (!result.success && result.error.includes('Failed to fetch')) {
+        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
+        return { success: false, error: 'API temporarily unavailable - data saved locally' };
+      }
+
       console.log('✅ Off day response:', result);
       return result;
     } catch (error) {

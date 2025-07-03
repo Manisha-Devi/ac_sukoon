@@ -204,9 +204,12 @@ class HybridDataService {
 
             // Trigger sync status change event for UI update
             this.triggerSyncStatusChange();
+          } else {
+            console.log('⚠️ Background sync failed but data is safely stored locally');
           }
         }).catch(syncError => {
-          console.error('⚠️ Background sync failed, will retry later:', syncError);
+          console.log('⚠️ Background sync failed but data is safely stored locally:', syncError.message);
+          // Don't show error to user since data is saved locally
         });
       }
 
