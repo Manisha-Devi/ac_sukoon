@@ -31,14 +31,52 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const data = await authService.getAllFareReceipts();
-        setFareData(data);
+        console.log('🚀 Loading data from Google Sheets...');
 
-        const total = data.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+        // Fetch all types of entries separately
+        const [fareReceipts, bookingEntries, offDays] = await Promise.all([
+          authService.getFareReceipts(),
+          authService.getBookingEntries(),
+          authService.getOffDays()
+        ]);
+
+        let allData = [];
+
+        // Process fare receipts (daily entries)
+        if (fareReceipts.success && fareReceipts.data) {
+          allData = [...allData, ...fareReceipts.data.map(entry => ({
+            ...entry,
+            type: 'daily'
+          }))];
+        }
+
+        // Process booking entries
+        if (bookingEntries.success && bookingEntries.data) {
+          allData = [...allData, ...bookingEntries.data.map(entry => ({
+            ...entry,
+            type: 'booking'
+          }))];
+        }
+
+        // Process off days
+        if (offDays.success && offDays.data) {
+          allData = [...allData, ...offDays.data.map(entry => ({
+            ...entry,
+            type: 'off'
+          }))];
+        }
+
+        // Sort by timestamp (newest first)
+        allData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        console.log('✅ Data loaded successfully:', allData.length, 'entries');
+        setFareData(allData);
+
+        const total = allData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
         setTotalEarnings(total);
 
         // Generate cash book entries
-        const cashBookEntries = data
+        const cashBookEntries = allData
           .filter(entry => entry.type !== 'off')
           .map(entry => ({
             id: `fare-${entry.entryId}`,
