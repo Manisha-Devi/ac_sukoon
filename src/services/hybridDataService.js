@@ -120,6 +120,13 @@ class HybridDataService {
       // Sync pending entries
       await this.syncPendingEntries();
 
+      // Trigger UI update after sync
+      this.triggerSyncStatusChange();
+      
+      // Trigger custom event for data update
+      const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: allData });
+      window.dispatchEvent(dataUpdateEvent);
+
       console.log('✅ Background sync completed:', allData.length, 'entries');
       return allData;
 

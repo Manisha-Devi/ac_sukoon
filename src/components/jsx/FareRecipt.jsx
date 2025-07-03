@@ -32,13 +32,17 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     const initializeData = async () => {
       setIsLoading(true);
       try {
+        console.log('🚀 Initializing data for FareReceipt component...');
         const initialData = await hybridDataService.initializeData();
-        if (initialData.length > 0) {
-          setFareData(initialData);
-          // Calculate total earnings
-          const total = initialData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
-          setTotalEarnings(total);
-        }
+        console.log('📊 Initial data loaded:', initialData.length, 'entries');
+        
+        setFareData(initialData);
+        
+        // Calculate total earnings
+        const total = initialData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+        setTotalEarnings(total);
+        
+        console.log('💰 Total earnings calculated:', total);
       } catch (error) {
         console.error('Error initializing data:', error);
       } finally {
@@ -64,13 +68,30 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       updateSyncStatus();
     };
 
+    // Listen for data updates from background sync
+    const handleDataUpdate = (event) => {
+      const updatedData = event.detail;
+      console.log('📱 UI received data update from background sync:', updatedData.length, 'entries');
+      
+      setFareData(updatedData);
+      
+      // Calculate total earnings
+      const total = updatedData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+      setTotalEarnings(total);
+      
+      // Update sync status immediately
+      updateSyncStatus();
+    };
+
     window.addEventListener('syncStatusChanged', handleSyncStatusChange);
+    window.addEventListener('dataUpdated', handleDataUpdate);
 
     return () => {
       clearInterval(interval);
       window.removeEventListener('syncStatusChanged', handleSyncStatusChange);
+      window.removeEventListener('dataUpdated', handleDataUpdate);
     };
-  }, []);
+  }, [setFareData, setTotalEarnings]);
 
   // Function to check if a date is disabled for daily collection
   const isDailyDateDisabled = (selectedDate, selectedRoute) => {
@@ -483,9 +504,15 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                   
                 </div>
                 <div className="sync-status">
-                  <div className={`simple-sync-indicator ${syncStatus.pendingSync > 0 || syncStatus.syncInProgress ? 'pending' : 'synced'}`}>
-                    <i className={`bi ${syncStatus.pendingSync > 0 || syncStatus.syncInProgress ? 'bi-arrow-repeat' : 'bi-check-circle'}`}></i>
+                  <div className={`simple-sync-indicator ${syncStatus.pendingSync > 0 || syncStatus.syncInProgress || isLoading ? 'pending' : 'synced'}`}>
+                    <i className={`bi ${syncStatus.pendingSync > 0 || syncStatus.syncInProgress || isLoading ? 'bi-arrow-repeat' : 'bi-check-circle'}`}></i>
                   </div>
+                  <small className="sync-info">
+                    {isLoading ? 'Loading...' : 
+                     syncStatus.pendingSync > 0 ? `${syncStatus.pendingSync} pending` : 
+                     syncStatus.syncInProgress ? 'Syncing...' : 
+                     'Synced'}
+                  </small>
                 </div>
               </div>
             </div>
