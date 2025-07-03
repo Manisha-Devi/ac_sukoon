@@ -19,15 +19,30 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
     });
   }, [fareData, expenseData, cashBookEntries]);
 
-  // Calculate totals from fareData and expenseData directly
+  // Calculate totals from fareData and expenseData directly - only for current user
   const calculateTotals = () => {
-    // Calculate from fare data (receipts)
-    let totalCashReceipts = fareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
-    let totalBankReceipts = fareData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+    // Get current user info for filtering
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const currentUserName = currentUser.fullName || currentUser.username;
 
-    // Calculate from expense data (payments)
-    let totalCashPayments = expenseData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
-    let totalBankPayments = expenseData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+    // Filter data by current user only
+    const userFareData = fareData.filter(entry => 
+      entry.submittedBy === currentUserName || 
+      (!entry.submittedBy && entry.type) // Handle old entries without submittedBy
+    );
+
+    const userExpenseData = expenseData.filter(entry => 
+      entry.submittedBy === currentUserName || 
+      (!entry.submittedBy && entry.type) // Handle old entries without submittedBy
+    );
+
+    // Calculate from filtered fare data (receipts)
+    let totalCashReceipts = userFareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
+    let totalBankReceipts = userFareData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+
+    // Calculate from filtered expense data (payments)
+    let totalCashPayments = userExpenseData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
+    let totalBankPayments = userExpenseData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
 
     // Also calculate from cash book entries as backup
     let cbCashReceipts = 0;
@@ -200,25 +215,53 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
               <div className="col-md-3">
                 <div className="mini-card">
                   <h6>Total Entries</h6>
-                  <h5>{fareData.length}</h5>
+                  <h5>{(() => {
+                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                    const currentUserName = currentUser.fullName || currentUser.username;
+                    return fareData.filter(entry => 
+                      entry.submittedBy === currentUserName || 
+                      (!entry.submittedBy && entry.type)
+                    ).length;
+                  })()}</h5>
                 </div>
               </div>
               <div className="col-md-3">
                 <div className="mini-card">
                   <h6>Cash Collection</h6>
-                  <h5>₹{fareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString()}</h5>
+                  <h5>₹{(() => {
+                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                    const currentUserName = currentUser.fullName || currentUser.username;
+                    return fareData.filter(entry => 
+                      entry.submittedBy === currentUserName || 
+                      (!entry.submittedBy && entry.type)
+                    ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString();
+                  })()}</h5>
                 </div>
               </div>
               <div className="col-md-3">
                 <div className="mini-card">
                   <h6>Bank Collection</h6>
-                  <h5>₹{fareData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString()}</h5>
+                  <h5>₹{(() => {
+                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                    const currentUserName = currentUser.fullName || currentUser.username;
+                    return fareData.filter(entry => 
+                      entry.submittedBy === currentUserName || 
+                      (!entry.submittedBy && entry.type)
+                    ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString();
+                  })()}</h5>
                 </div>
               </div>
               <div className="col-md-3">
                 <div className="mini-card total">
                   <h6>Total Fare Income</h6>
-                  <h5>₹{fareData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</h5>
+                  <h5>₹{(() => {
+                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                    const currentUserName = currentUser.fullName || currentUser.username;
+                    return fareData.filter(entry => 
+                      entry.submittedBy === currentUserName || 
+                      (!entry.submittedBy && entry.type)
+                    ).reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString();
+                  })()}</h5>
                 </div>
               </div>
             </div>
@@ -260,25 +303,61 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
               <div className="col-md-3">
                 <div className="mini-card">
                   <h6>Total Entries</h6>
-                  <h5>{expenseData.filter(entry => entry.type === 'fuel').length}</h5>
+                  <h5>{(() => {
+                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                    const currentUserName = currentUser.fullName || currentUser.username;
+                    return expenseData.filter(entry => 
+                      entry.type === 'fuel' && (
+                        entry.submittedBy === currentUserName || 
+                        (!entry.submittedBy && entry.type)
+                      )
+                    ).length;
+                  })()}</h5>
                 </div>
               </div>
               <div className="col-md-3">
                 <div className="mini-card">
                   <h6>Cash Expense</h6>
-                  <h5>₹{expenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString()}</h5>
+                  <h5>₹{(() => {
+                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                    const currentUserName = currentUser.fullName || currentUser.username;
+                    return expenseData.filter(entry => 
+                      entry.type === 'fuel' && (
+                        entry.submittedBy === currentUserName || 
+                        (!entry.submittedBy && entry.type)
+                      )
+                    ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0).toLocaleString();
+                  })()}</h5>
                 </div>
               </div>
               <div className="col-md-3">
                 <div className="mini-card">
                   <h6>Bank Expense</h6>
-                  <h5>₹{expenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString()}</h5>
+                  <h5>₹{(() => {
+                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                    const currentUserName = currentUser.fullName || currentUser.username;
+                    return expenseData.filter(entry => 
+                      entry.type === 'fuel' && (
+                        entry.submittedBy === currentUserName || 
+                        (!entry.submittedBy && entry.type)
+                      )
+                    ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0).toLocaleString();
+                  })()}</h5>
                 </div>
               </div>
               <div className="col-md-3">
                 <div className="mini-card total">
                   <h6>Total Fuel Expense</h6>
-                  <h5>₹{expenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</h5>
+                  <h5>₹{(() => {
+                    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                    const currentUserName = currentUser.fullName || currentUser.username;
+                    return expenseData.filter(entry => 
+                      entry.type === 'fuel' && (
+                        entry.submittedBy === currentUserName || 
+                        (!entry.submittedBy && entry.type)
+                      )
+                    ).reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString();
+                  })()}</h5>
                 </div>
               </div>
             </div>

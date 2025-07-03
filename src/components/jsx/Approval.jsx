@@ -19,14 +19,24 @@ function Approval({ fareData, expenseData, cashBookEntries }) {
     });
   }, [fareData, expenseData, cashBookEntries]);
 
-  // Calculate totals from cashBookEntries
+  // Calculate totals from cashBookEntries - only for current user
   const calculateTotals = () => {
+    // Get current user info for filtering
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const currentUserName = currentUser.fullName || currentUser.username;
+
+    // Filter cashBookEntries by current user
+    const userCashBookEntries = cashBookEntries.filter(entry => 
+      entry.submittedBy === currentUserName || 
+      (!entry.submittedBy && entry.source) // Handle entries without submittedBy
+    );
+
     let totalCashReceipts = 0;
     let totalCashPayments = 0;
     let totalBankReceipts = 0;
     let totalBankPayments = 0;
 
-    cashBookEntries.forEach(entry => {
+    userCashBookEntries.forEach(entry => {
       if (entry.type === 'dr') {
         totalCashReceipts += entry.cashAmount || 0;
         totalBankReceipts += entry.bankAmount || 0;
@@ -64,22 +74,58 @@ function Approval({ fareData, expenseData, cashBookEntries }) {
       return;
     }
 
+    // Get current user info for filtering
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const currentUserName = currentUser.fullName || currentUser.username;
+
     const submissionData = {
       timestamp: new Date().toISOString(),
       totals,
       settlementData,
       summaryData: {
         fareReceipts: {
-          totalEntries: fareData.length,
-          cashCollection: fareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
-          bankCollection: fareData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
-          totalIncome: fareData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
+          totalEntries: fareData.filter(entry => 
+            entry.submittedBy === currentUserName || 
+            (!entry.submittedBy && entry.type)
+          ).length,
+          cashCollection: fareData.filter(entry => 
+            entry.submittedBy === currentUserName || 
+            (!entry.submittedBy && entry.type)
+          ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
+          bankCollection: fareData.filter(entry => 
+            entry.submittedBy === currentUserName || 
+            (!entry.submittedBy && entry.type)
+          ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
+          totalIncome: fareData.filter(entry => 
+            entry.submittedBy === currentUserName || 
+            (!entry.submittedBy && entry.type)
+          ).reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
         },
         fuelPayments: {
-          totalEntries: expenseData.filter(entry => entry.type === 'fuel').length,
-          cashExpense: expenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
-          bankExpense: expenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
-          totalExpense: expenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
+          totalEntries: expenseData.filter(entry => 
+            entry.type === 'fuel' && (
+              entry.submittedBy === currentUserName || 
+              (!entry.submittedBy && entry.type)
+            )
+          ).length,
+          cashExpense: expenseData.filter(entry => 
+            entry.type === 'fuel' && (
+              entry.submittedBy === currentUserName || 
+              (!entry.submittedBy && entry.type)
+            )
+          ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
+          bankExpense: expenseData.filter(entry => 
+            entry.type === 'fuel' && (
+              entry.submittedBy === currentUserName || 
+              (!entry.submittedBy && entry.type)
+            )
+          ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
+          totalExpense: expenseData.filter(entry => 
+            entry.type === 'fuel' && (
+              entry.submittedBy === currentUserName || 
+              (!entry.submittedBy && entry.type)
+            )
+          ).reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
         },
         addaPayments: {
           totalEntries: expenseData.filter(entry => entry.type === 'fees').length,
