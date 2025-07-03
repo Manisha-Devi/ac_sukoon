@@ -1,4 +1,3 @@
-
 // AC Sukoon Transport Management - Google Apps Script API
 // Organized by Entry Types with Complete CRUD Operations
 
@@ -226,7 +225,10 @@ function addFareReceipt(data) {
     );
 
     const entryId = data.entryId;
-    const timestamp = data.timestamp ? new Date(data.timestamp) : new Date(); // Use frontend timestamp
+    // Create IST timestamp
+    const now = new Date();
+    const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
+    const timestamp = new Date(now.getTime() + istOffset);
 
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
@@ -243,11 +245,11 @@ function addFareReceipt(data) {
     ]]);
 
     return {
-      success: true,
-      entryId: entryId,
-      message: "Fare receipt added successfully",
-      timestamp: timestamp.toISOString(),
-    };
+        success: true,
+        entryId: entryId,
+        message: "Fare receipt added successfully",
+        timestamp: timestamp.toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'}),
+      };
   } catch (error) {
     return {
       success: false,
@@ -415,7 +417,10 @@ function addBookingEntry(data) {
     );
 
     const entryId = data.entryId;
-    const timestamp = data.timestamp ? new Date(data.timestamp) : new Date(); // Use frontend timestamp
+        // Create IST timestamp
+    const now = new Date();
+    const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
+    const timestamp = new Date(now.getTime() + istOffset);
 
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
@@ -437,7 +442,7 @@ function addBookingEntry(data) {
         success: true,
         entryId: entryId,
         message: "Booking entry added successfully",
-        timestamp: timestamp.toISOString(),
+        timestamp: timestamp.toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'}),
       }),
     );
   } catch (error) {
@@ -611,7 +616,10 @@ function addOffDay(data) {
     );
 
     const entryId = data.entryId;
-    const timestamp = data.timestamp ? new Date(data.timestamp) : new Date(); // Use frontend timestamp
+        // Create IST timestamp
+    const now = new Date();
+    const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
+    const timestamp = new Date(now.getTime() + istOffset);
 
     // Insert at row 2 to keep new entries at top
     sheet.insertRowBefore(2);
@@ -629,7 +637,7 @@ function addOffDay(data) {
         success: true,
         entryId: entryId,
         message: "Off day added successfully",
-        timestamp: timestamp.toISOString(),
+        timestamp: timestamp.toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'}),
       }),
     );
   } catch (error) {
