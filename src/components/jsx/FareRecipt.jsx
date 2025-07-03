@@ -88,8 +88,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           }))];
         }
 
-        // Sort by timestamp (newest first)
-        allData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        // Sort by entryId (newest first) since timestamp is now time-only string
+        allData.sort((a, b) => b.entryId - a.entryId);
 
         console.log('✅ Data loaded successfully:', allData.length, 'entries');
         setFareData(allData);
@@ -220,7 +220,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
       const now = new Date();
-      const timeOnly = now.toTimeString().split(' ')[0]; // Returns HH:MM:SS format
+      const timeOnly = now.toTimeString().split(' ')[0]; // Returns HH:MM:SS format as string
+      const dateOnly = dailyFareData.date; // Keep date as string (YYYY-MM-DD)
 
       if (editingEntry) {
         // UPDATE: First update React state immediately
@@ -232,7 +233,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                 cashAmount: cashAmount,
                 bankAmount: bankAmount,
                 totalAmount: totalAmount,
-                date: dailyFareData.date,
+                date: dateOnly, // Use string date
               }
             : entry
         );
@@ -247,7 +248,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         authService.updateFareReceipt({
           entryId: editingEntry.entryId,
           updatedData: {
-            date: dailyFareData.date,
+            date: dateOnly, // Send date as string
             route: dailyFareData.route,
             cashAmount: cashAmount,
             bankAmount: bankAmount,
@@ -261,13 +262,13 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         // ADD: First create entry and update React state immediately
         const newEntry = {
           entryId: Date.now(),
-          timestamp: timeOnly,
+          timestamp: timeOnly, // Time as string (HH:MM:SS)
           type: "daily",
           route: dailyFareData.route,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
           totalAmount: totalAmount,
-          date: dailyFareData.date,
+          date: dateOnly, // Date as string (YYYY-MM-DD)
           submittedBy: submittedBy
         };
 
@@ -280,8 +281,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         // Then sync to Google Sheets in background
         authService.addFareReceipt({
           entryId: newEntry.entryId,
-          timestamp: timeOnly,
-          date: dailyFareData.date,
+          timestamp: timeOnly, // Send time as string
+          date: dateOnly, // Send date as string
           route: dailyFareData.route,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
@@ -303,8 +304,13 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     setIsLoading(true);
 
     try {
-      const startDate = new Date(bookingData.dateFrom);
-      const endDate = new Date(bookingData.dateTo);
+      // Handle date strings directly without converting to Date objects
+      const startDateStr = bookingData.dateFrom; // Keep as string (YYYY-MM-DD)
+      const endDateStr = bookingData.dateTo; // Keep as string (YYYY-MM-DD)
+      
+      // Generate date range as strings
+      const startDate = new Date(startDateStr);
+      const endDate = new Date(endDateStr);
 
       for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
         const dateStr = d.toISOString().split('T')[0];
@@ -321,7 +327,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
       const now = new Date();
-      const timeOnly = now.toTimeString().split(' ')[0]; // Returns HH:MM:SS format
+      const timeOnly = now.toTimeString().split(' ')[0]; // Returns HH:MM:SS format as string
 
       if (editingEntry) {
         // UPDATE: First update React state immediately
@@ -333,8 +339,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                 cashAmount: cashAmount,
                 bankAmount: bankAmount,
                 totalAmount: totalAmount,
-                dateFrom: bookingData.dateFrom,
-                dateTo: bookingData.dateTo,
+                dateFrom: startDateStr, // Use string date
+                dateTo: endDateStr, // Use string date
               }
             : entry
         );
@@ -353,8 +359,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
             cashAmount: cashAmount,
             bankAmount: bankAmount,
             totalAmount: totalAmount,
-            dateFrom: bookingData.dateFrom,
-            dateTo: bookingData.dateTo,
+            dateFrom: startDateStr, // Send date as string
+            dateTo: endDateStr, // Send date as string
           }
         }).catch(error => {
           console.error('Background booking update sync failed:', error);
@@ -364,14 +370,14 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         // ADD: First create entry and update React state immediately
         const newEntry = {
           entryId: Date.now(),
-          timestamp: timeOnly,
+          timestamp: timeOnly, // Time as string (HH:MM:SS)
           type: "booking",
           bookingDetails: bookingData.bookingDetails,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
           totalAmount: totalAmount,
-          dateFrom: bookingData.dateFrom,
-          dateTo: bookingData.dateTo,
+          dateFrom: startDateStr, // Date as string (YYYY-MM-DD)
+          dateTo: endDateStr, // Date as string (YYYY-MM-DD)
           submittedBy: submittedBy
         };
 
@@ -384,13 +390,13 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         // Then sync to Google Sheets in background
         authService.addBookingEntry({
           entryId: newEntry.entryId,
-          timestamp: timeOnly,
+          timestamp: timeOnly, // Send time as string
           bookingDetails: bookingData.bookingDetails,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
           totalAmount: totalAmount,
-          dateFrom: bookingData.dateFrom,
-          dateTo: bookingData.dateTo,
+          dateFrom: startDateStr, // Send date as string
+          dateTo: endDateStr, // Send date as string
           submittedBy: submittedBy
         }).catch(error => {
           console.error('Background booking add sync failed:', error);
@@ -417,13 +423,14 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
       const now = new Date();
-      const timeOnly = now.toTimeString().split(' ')[0]; // Returns HH:MM:SS format
+      const timeOnly = now.toTimeString().split(' ')[0]; // Returns HH:MM:SS format as string
+      const dateOnly = offDayData.date; // Keep date as string (YYYY-MM-DD)
 
       if (editingEntry) {
         // UPDATE: First update React state immediately
         const updatedData = fareData.map(entry => 
           entry.entryId === editingEntry.entryId 
-            ? { ...entry, date: offDayData.date, reason: offDayData.reason }
+            ? { ...entry, date: dateOnly, reason: offDayData.reason } // Use string date
             : entry
         );
         setFareData(updatedData);
@@ -435,7 +442,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         authService.updateOffDay({
           entryId: editingEntry.entryId,
           updatedData: {
-            date: offDayData.date,
+            date: dateOnly, // Send date as string
             reason: offDayData.reason,
           }
         }).catch(error => {
@@ -446,9 +453,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         // ADD: First create entry and update React state immediately
         const newEntry = {
           entryId: Date.now(),
-          timestamp: timeOnly,
+          timestamp: timeOnly, // Time as string (HH:MM:SS)
           type: "off",
-          date: offDayData.date,
+          date: dateOnly, // Date as string (YYYY-MM-DD)
           reason: offDayData.reason,
           cashAmount: 0,
           bankAmount: 0,
@@ -464,8 +471,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         // Then sync to Google Sheets in background
         authService.addOffDay({
           entryId: newEntry.entryId,
-          timestamp: timeOnly,
-          date: offDayData.date,
+          timestamp: timeOnly, // Send time as string
+          date: dateOnly, // Send date as string
           reason: offDayData.reason,
           submittedBy: submittedBy
         }).catch(error => {
