@@ -281,6 +281,39 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         combinedCashBookEntries = [...combinedCashBookEntries, ...addaCashEntries];
       }
 
+      // Process Service Payments (same format as ServicePayment component)
+      if (servicePayments.success && servicePayments.data) {
+        const processedServicePayments = servicePayments.data.map(entry => ({
+          id: entry.entryId,
+          entryId: entry.entryId,
+          timestamp: convertToTimeString(entry.timestamp),
+          date: convertToDateString(entry.date),
+          serviceType: entry.serviceType,
+          serviceDetails: entry.serviceDetails,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          totalAmount: entry.totalAmount || 0,
+          submittedBy: entry.submittedBy,
+          type: 'service'
+        }));
+        combinedExpenseData = [...combinedExpenseData, ...processedServicePayments];
+
+        // Generate cash book entries from service payments
+        const serviceCashEntries = processedServicePayments.map(entry => ({
+          id: `service-${entry.entryId}`,
+          date: entry.date,
+          particulars: "Service",
+          description: `Service expense - ${entry.serviceType || 'Service'}`,
+          jfNo: `SERVICE-${entry.entryId}`,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          type: 'cr',
+          timestamp: entry.timestamp,
+          source: 'service-payment'
+        }));
+        combinedCashBookEntries = [...combinedCashBookEntries, ...serviceCashEntries];
+      }
+
       // Process Other Payments (same format as OtherPayment component)
       if (otherPayments.success && otherPayments.data) {
         const processedOtherPayments = otherPayments.data.map(entry => ({

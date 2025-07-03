@@ -75,7 +75,7 @@ const convertToDateString = (date) => {
   return String(date);
 };
 
-function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
+function ServicePayment({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
   const [editingEntry, setEditingEntry] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -367,7 +367,7 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           <div className="header-content">
             <div>
               <h2><i className="bi bi-tools"></i> Service Payment Entry</h2>
-              <p>Record your vehicle service and maintenance expenses (Payment)</p>
+              <p>Record your service and maintenance expenses (Payment)</p>
             </div>
             <div className="sync-status">
               <div className={`simple-sync-indicator ${isLoading ? 'syncing' : 'synced'}`}>
@@ -450,20 +450,6 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
             </div>
 
             <div className="row">
-              <div className="col-md-12 mb-3">
-                <label className="form-label">Service Details</label>
-                <textarea
-                  className="form-control"
-                  rows={3}
-                  value={formData.serviceDetails}
-                  onChange={(e) => setFormData({ ...formData, serviceDetails: e.target.value })}
-                  placeholder="Enter detailed description of service work"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="row">
               <div className="col-md-6 mb-3">
                 <label className="form-label">Cash Amount (₹)</label>
                 <input
@@ -488,6 +474,19 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
               </div>
             </div>
 
+            <div className="row">
+              <div className="col-md-12 mb-3">
+                <label className="form-label">Service Details (Optional)</label>
+                <textarea
+                  className="form-control"
+                  rows={3}
+                  value={formData.serviceDetails}
+                  onChange={(e) => setFormData({ ...formData, serviceDetails: e.target.value })}
+                  placeholder="Enter service details"
+                />
+              </div>
+            </div>
+
             <div className="amount-summary mb-3">
               <div className="row">
                 <div className="col-4">
@@ -505,7 +504,7 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
             <div className="button-group">
               <button type="submit" className="btn service-entry-btn" disabled={isLoading}>
                 <i className={isLoading ? "bi bi-hourglass-split" : editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
-                {isLoading ? "Saving..." : editingEntry ? "Update Entry" : "Add Service Entry"}
+                {isLoading ? "Saving..." : editingEntry ? "Update Entry" : "Add Service Payment"}
               </button>
               {editingEntry && (
                 <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
@@ -554,8 +553,8 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                       </div>
                       <div className="entry-content">
                         <p>
-                          {entry.serviceType && <><strong>Type:</strong> {entry.serviceType}<br/></>}
-                          {entry.serviceDetails && <><strong>Details:</strong> {entry.serviceDetails.substring(0, 60)}...<br/></>}
+                          <strong>Service:</strong> {entry.serviceType || 'N/A'}<br/>
+                          {entry.serviceDetails && <><strong>Details:</strong> {entry.serviceDetails.substring(0, 50)}...</>}
                         </p>
                       </div>
                       <div className="entry-amounts">
@@ -579,4 +578,4 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
   );
 }
 
-export default ServiceEntry;
+export default ServicePayment;

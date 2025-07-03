@@ -373,8 +373,8 @@ function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
         <div className="other-header">
           <div className="header-content">
             <div>
-              <h2><i className="bi bi-receipt"></i> Other Payment Entry</h2>
-              <p>Record your miscellaneous expenses (Payment)</p>
+              <h2><i className="bi bi-credit-card"></i> Other Payment Entry</h2>
+              <p>Record your miscellaneous and other expenses (Payment)</p>
             </div>
             <div className="sync-status">
               <div className={`simple-sync-indicator ${isLoading ? 'syncing' : 'synced'}`}>
@@ -427,7 +427,7 @@ function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
         )}
 
         <div className="other-form-card">
-          <h4><i className="bi bi-receipt"></i> {editingEntry ? "Edit Other Payment" : "Add Other Payment"}</h4>
+          <h4><i className="bi bi-credit-card"></i> {editingEntry ? "Edit Other Payment" : "Add Other Payment"}</h4>
           <form onSubmit={handleSubmit}>
             <div className="row">
               <div className="col-md-6 mb-3">
@@ -457,33 +457,6 @@ function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
             </div>
 
             <div className="row">
-              <div className="col-md-12 mb-3">
-                <label className="form-label">Description</label>
-                <textarea
-                  className="form-control"
-                  rows={3}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Enter detailed description of payment"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="col-md-6 mb-3">
-                <label className="form-label">Category (Optional)</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  placeholder="Enter category"
-                />
-              </div>
-            </div>
-
-            <div className="row">
               <div className="col-md-6 mb-3">
                 <label className="form-label">Cash Amount (₹)</label>
                 <input
@@ -504,6 +477,30 @@ function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                   onChange={(e) => setFormData({ ...formData, bankAmount: e.target.value })}
                   placeholder="Enter bank amount"
                   min="0"
+                />
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Category</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  placeholder="Enter category"
+                />
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Description</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Enter description"
+                  required
                 />
               </div>
             </div>
@@ -574,8 +571,8 @@ function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                       </div>
                       <div className="entry-content">
                         <p>
-                          {entry.paymentType && <><strong>Type:</strong> {entry.paymentType}<br/></>}
-                          {entry.description && <><strong>Description:</strong> {entry.description.substring(0, 60)}...<br/></>}
+                          <strong>Type:</strong> {entry.paymentType || 'N/A'}<br/>
+                          <strong>Description:</strong> {entry.description || 'N/A'}<br/>
                           {entry.category && <><strong>Category:</strong> {entry.category}</>}
                         </p>
                       </div>
