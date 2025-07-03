@@ -1,129 +1,254 @@
+import React, { useState, useEffect } from "react";
+import "../css/FareRecipt.css";
+import hybridDataService from '../../services/hybridDataService.js';
+import localStorageService from '../../services/localStorageService.js';
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import '../css/FareRecipt.css';
-import localStorageService from '../../services/localStorageService';
-import hybridDataService from '../../services/hybridDataService';
-
-const FareRecipt = () => {
-  // State management
-  const [fareData, setFareData] = useState([]);
-  const [totalEarnings, setTotalEarnings] = useState(0);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [isSyncing, setIsSyncing] = useState(false);
-  
-  // Form states
-  const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
-    route: '',
-    cashAmount: '',
-    bankAmount: '',
-    bookingDetails: '',
-    dateFrom: new Date().toISOString().split('T')[0],
-    dateTo: new Date().toISOString().split('T')[0],
-    reason: ''
-  });
-  
-  const [selectedEntryType, setSelectedEntryType] = useState('daily');
-  const [isLoading, setIsLoading] = useState(false);
+function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries }) {
+  const [activeTab, setActiveTab] = useState("daily");
   const [editingEntry, setEditingEntry] = useState(null);
-  const [showForm, setShowForm] = useState(false);
+  const [syncStatus, setSyncStatus] = useState(hybridDataService.getSyncStatus());
+  const [isLoading, setIsLoading] = useState(false);
+  const [dailyFareData, setDailyFareData] = useState({
+    route: "",
+    cashAmount: "",
+    bankAmount: "",
+    date: "",
+  });
 
-  // Load data on component mount
+  const [bookingData, setBookingData] = useState({
+    bookingDetails: "",
+    cashAmount: "",
+    bankAmount: "",
+    dateFrom: "",
+    dateTo: "",
+  });
+
+  const [offDayData, setOffDayData] = useState({
+    date: "",
+    reason: "",
+  });
+
+  // Initialize data and setup sync status updates
   useEffect(() => {
-    loadInitialData();
-    
-    // Listen for network status changes
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    const initializeData = async () => {
+      setIsLoading(true);
+      try {
+        console.log('🚀 Initializing data for FareReceipt component...');
+        const initialData = await hybridDataService.initializeData();
+        console.log('📊 Initial data loaded:', initialData.length, 'entries');
 
-    // Listen for sync status changes
-    const handleSyncStatusChange = (event) => {
-      setIsSyncing(event.detail.syncing);
+        setFareData(initialData);
+
+        // Calculate total earnings
+        const total = initialData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+        setTotalEarnings(total);
+
+        console.log('💰 Total earnings calculated:', total);
+      } catch (error) {
+        console.error('Error initializing data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeData();
+  }, [setFareData, setTotalEarnings]);
+
+  // Update sync status periodically and on changes
+  useEffect(() => {
+    const updateSyncStatus = () => {
+      const newStatus = hybridDataService.getSyncStatus();
+      setSyncStatus(newStatus);
+    };
+
+    updateSyncStatus();
+    const interval = setInterval(updateSyncStatus, 1000); // Update every 1 second for better responsiveness
+
+    // Listen for custom sync status changes
+    const handleSyncStatusChange = () => {
+      updateSyncStatus();
+    };
+
+    // Listen for data updates from background sync
+    const handleDataUpdate = (event) => {
+      const updatedData = event.detail;
+      console.log('📱 UI received data update from background sync:', updatedData.length, 'entries');
+
+      setFareData(updatedData);
+
+      // Calculate total earnings
+      const total = updatedData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+      setTotalEarnings(total);
+
+      // Update sync status immediately
+      updateSyncStatus();
     };
 
     window.addEventListener('syncStatusChanged', handleSyncStatusChange);
+    window.addEventListener('dataUpdated', handleDataUpdate);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      clearInterval(interval);
       window.removeEventListener('syncStatusChanged', handleSyncStatusChange);
+      window.removeEventListener('dataUpdated', handleDataUpdate);
     };
-  }, []);
+  }, [setFareData, setTotalEarnings]);
 
-  // Load initial data from localStorage and sync with Google Sheets
-  const loadInitialData = async () => {
-    try {
-      console.log('🔄 Loading initial data...');
-      
-      // Load from localStorage first for instant display
-      const localData = localStorageService.loadFareData();
-      setFareData(localData);
-      
-      // Calculate total earnings
-      const total = localData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
-      setTotalEarnings(total);
-      
-      // Background sync with Google Sheets
-      if (navigator.onLine) {
-        console.log('🌐 Syncing with Google Sheets...');
-        const result = await hybridDataService.syncFromGoogleSheets();
-        if (result.success && result.data) {
-          setFareData(result.data);
-          const syncedTotal = result.data.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
-          setTotalEarnings(syncedTotal);
+  // Function to check if a date is disabled for daily collection
+  const isDailyDateDisabled = (selectedDate, selectedRoute) => {
+    if (!selectedDate || !selectedRoute) return false;
+
+    // Check if same route and date already exists in daily entries
+    const existingDailyEntry = fareData.find(entry => 
+      entry.type === 'daily' && 
+      entry.date === selectedDate && 
+      entry.route === selectedRoute &&
+      (!editingEntry || entry.entryId !== editingEntry.entryId)
+    );
+
+    // Check if date is used in booking entries
+    const existingBookingEntry = fareData.find(entry => 
+      entry.type === 'booking' && 
+      selectedDate >= entry.dateFrom && 
+      selectedDate <= entry.dateTo &&
+      (!editingEntry || entry.entryId !== editingEntry.entryId)
+    );
+
+    // Check if date is used in off day entries
+    const existingOffEntry = fareData.find(entry => 
+      entry.type === 'off' && 
+      entry.date === selectedDate &&
+      (!editingEntry || entry.entryId !== editingEntry.entryId)
+    );
+
+    return existingDailyEntry || existingBookingEntry || existingOffEntry;
+  };
+
+  // Function to check if a date is disabled for booking
+  const isBookingDateDisabled = (selectedDate) => {
+    if (!selectedDate) return false;
+
+    // Check if date is used in daily entries
+    const existingDailyEntry = fareData.find(entry => 
+      entry.type === 'daily' && 
+      entry.date === selectedDate &&
+      (!editingEntry || entry.entryId !== editingEntry.entryId)
+    );
+
+    // Check if date is used in off day entries
+    const existingOffEntry = fareData.find(entry => 
+      entry.type === 'off' && 
+      entry.date === selectedDate &&
+      (!editingEntry || entry.entryId !== editingEntry.entryId)
+    );
+
+    return existingDailyEntry || existingOffEntry;
+  };
+
+  // Function to check if a date is disabled for off day
+  const isOffDayDateDisabled = (selectedDate) => {
+    if (!selectedDate) return false;
+
+    // Check if date is used in daily entries
+    const existingDailyEntry = fareData.find(entry => 
+      entry.type === 'daily' && 
+      entry.date === selectedDate &&
+      (!editingEntry || entry.entryId !== editingEntry.entryId)
+    );
+
+    // Check if date is used in booking entries
+    const existingBookingEntry = fareData.find(entry => 
+      entry.type === 'booking' && 
+      selectedDate >= entry.dateFrom && 
+      selectedDate <= entry.dateTo &&
+      (!editingEntry || entry.entryId !== editingEntry.entryId)
+    );
+
+    return existingDailyEntry || existingBookingEntry;
+  };
+
+  // Function to get min date for date inputs (today)
+  const getTodayDate = () => {
+    return new Date().toISOString().split('T')[0];
+  };
+
+  // Function to get disabled dates for HTML date input
+  const getDisabledDatesForDaily = () => {
+    if (!dailyFareData.route) return [];
+
+    const disabledDates = [];
+    fareData.forEach(entry => {
+      if (editingEntry && entry.entryId === editingEntry.entryId) return;
+
+      if (entry.type === 'daily' && entry.route === dailyFareData.route) {
+        disabledDates.push(entry.date);
+      } else if (entry.type === 'booking') {
+        const startDate = new Date(entry.dateFrom);
+        const endDate = new Date(entry.dateTo);
+        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+          disabledDates.push(d.toISOString().split('T')[0]);
         }
+      } else if (entry.type === 'off') {
+        disabledDates.push(entry.date);
       }
-    } catch (error) {
-      console.error('❌ Error loading initial data:', error);
-    }
+    });
+
+    return disabledDates;
   };
 
-  // Handle form input changes
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  const routes = [
+    "Ghuraka to Bhaderwah",
+    "Bhaderwah to Pul Doda", 
+    "Pul Doda to Thatri",
+    "Thatri to Pul Doda",
+    "Pul Doda to Bhaderwah",
+    "Bhaderwah to Ghuraka",
+  ];
 
-  // Calculate total amount
-  const totalAmount = useMemo(() => {
-    const cash = parseFloat(formData.cashAmount) || 0;
-    const bank = parseFloat(formData.bankAmount) || 0;
-    return cash + bank;
-  }, [formData.cashAmount, formData.bankAmount]);
-
-  // Add new entry
-  const handleAddEntry = async (e) => {
+  const handleDailySubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const submittedBy = currentUser.fullName || currentUser.username || 'driver';
+      // Validate if date is disabled
+      if (isDailyDateDisabled(dailyFareData.date, dailyFareData.route)) {
+        alert('This date is already taken for this route or conflicts with existing bookings/off days!');
+        return;
+      }
 
-      let entryData = {
-        submittedBy,
-        timestamp: new Date().toISOString(),
-        entryId: `${selectedEntryType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      };
+      const cashAmount = parseInt(dailyFareData.cashAmount) || 0;
+      const bankAmount = parseInt(dailyFareData.bankAmount) || 0;
+      const totalAmount = cashAmount + bankAmount;
 
-      if (selectedEntryType === 'daily') {
-        entryData = {
-          ...entryData,
-          date: formData.date,
-          route: formData.route,
-          cashAmount: parseFloat(formData.cashAmount) || 0,
-          bankAmount: parseFloat(formData.bankAmount) || 0,
+      if (editingEntry) {
+        // Update existing entry using hybrid service
+        const oldTotal = editingEntry.totalAmount;
+        const result = await hybridDataService.updateFareEntry(editingEntry.entryId, {
+          route: dailyFareData.route,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
           totalAmount: totalAmount,
-          type: 'daily'
+          date: dailyFareData.date,
+        }, fareData);
+
+        if (result.success) {
+          setFareData(result.data);
+          setTotalEarnings((prev) => prev - oldTotal + totalAmount);
+          setEditingEntry(null);
+        }
+      } else {
+        // Create new entry using hybrid service
+        const newEntryData = {
+          type: "daily",
+          route: dailyFareData.route,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
+          totalAmount: totalAmount,
+          date: dailyFareData.date,
         };
 
-        const result = await hybridDataService.addFareEntry(entryData);
+        const result = await hybridDataService.addFareEntry(newEntryData, fareData);
+
         if (result.success) {
           // UI instantly updated with localStorage data
           setFareData(result.data);
@@ -141,20 +266,67 @@ const FareRecipt = () => {
           console.log('✅ Daily entry added instantly - UI updated!');
         }
       }
-      
-      if (selectedEntryType === 'booking') {
-        entryData = {
-          ...entryData,
-          bookingDetails: formData.bookingDetails,
-          dateFrom: formData.dateFrom,
-          dateTo: formData.dateTo,
-          cashAmount: parseFloat(formData.cashAmount) || 0,
-          bankAmount: parseFloat(formData.bankAmount) || 0,
+      setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
+    } catch (error) {
+      console.error('Error submitting daily fare:', error);
+      alert('Error saving data. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleBookingSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      // Validate date range for conflicts
+      const startDate = new Date(bookingData.dateFrom);
+      const endDate = new Date(bookingData.dateTo);
+
+      for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+        const dateStr = d.toISOString().split('T')[0];
+        if (isBookingDateDisabled(dateStr)) {
+          alert(`Date ${dateStr} conflicts with existing daily collection or off day entries!`);
+          return;
+        }
+      }
+
+      const cashAmount = parseInt(bookingData.cashAmount) || 0;
+      const bankAmount = parseInt(bookingData.bankAmount) || 0;
+      const totalAmount = cashAmount + bankAmount;
+
+      if (editingEntry) {
+        // Update existing entry using hybrid service
+        const oldTotal = editingEntry.totalAmount;
+        const result = await hybridDataService.updateFareEntry(editingEntry.entryId, {
+          bookingDetails: bookingData.bookingDetails,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
           totalAmount: totalAmount,
-          type: 'booking'
+          dateFrom: bookingData.dateFrom,
+          dateTo: bookingData.dateTo,
+        }, fareData);
+
+        if (result.success) {
+          setFareData(result.data);
+          setTotalEarnings((prev) => prev - oldTotal + totalAmount);
+          setEditingEntry(null);
+        }
+      } else {
+        // Create new entry using hybrid service
+        const newEntryData = {
+          type: "booking",
+          bookingDetails: bookingData.bookingDetails,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
+          totalAmount: totalAmount,
+          dateFrom: bookingData.dateFrom,
+          dateTo: bookingData.dateTo,
         };
 
-        const result = await hybridDataService.addFareEntry(entryData);
+        const result = await hybridDataService.addFareEntry(newEntryData, fareData);
+
         if (result.success) {
           // UI instantly updated with localStorage data
           setFareData(result.data);
@@ -172,16 +344,50 @@ const FareRecipt = () => {
           console.log('✅ Booking entry added instantly - UI updated!');
         }
       }
-      
-      if (selectedEntryType === 'off') {
-        entryData = {
-          ...entryData,
-          date: formData.date,
-          reason: formData.reason,
-          type: 'off'
+      setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
+    } catch (error) {
+      console.error('Error submitting booking entry:', error);
+      alert('Error saving data. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOffDaySubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      // Validate if date is disabled
+      if (isOffDayDateDisabled(offDayData.date)) {
+        alert('This date conflicts with existing daily collection or booking entries!');
+        return;
+      }
+
+      if (editingEntry) {
+        // Update existing entry using hybrid service
+        const result = await hybridDataService.updateFareEntry(editingEntry.entryId, {
+          date: offDayData.date,
+          reason: offDayData.reason
+        }, fareData);
+
+        if (result.success) {
+          setFareData(result.data);
+          setEditingEntry(null);
+        }
+      } else {
+        // Create new entry using hybrid service
+        const newEntryData = {
+          type: "off",
+          date: offDayData.date,
+          reason: offDayData.reason,
+          cashAmount: 0,
+          bankAmount: 0,
+          totalAmount: 0,
         };
 
-        const result = await hybridDataService.addFareEntry(entryData);
+        const result = await hybridDataService.addFareEntry(newEntryData, fareData);
+
         if (result.success) {
           // UI instantly updated with localStorage data
           setFareData(result.data);
@@ -198,556 +404,538 @@ const FareRecipt = () => {
           console.log('✅ Off day entry added instantly - UI updated!');
         }
       }
-
-      // Reset form
-      setFormData({
-        date: new Date().toISOString().split('T')[0],
-        route: '',
-        cashAmount: '',
-        bankAmount: '',
-        bookingDetails: '',
-        dateFrom: new Date().toISOString().split('T')[0],
-        dateTo: new Date().toISOString().split('T')[0],
-        reason: ''
-      });
-      setShowForm(false);
-
+      setOffDayData({ date: "", reason: "" });
     } catch (error) {
-      console.error('❌ Error adding entry:', error);
-      alert('Error adding entry. Please try again.');
+      console.error('Error submitting off day:', error);
+      alert('Error saving data. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Delete entry
-  const handleDeleteEntry = async (entryId, entryType) => {
-    if (!confirm('Are you sure you want to delete this entry?')) {
-      return;
-    }
-
+  const handleDeleteEntry = async (entryId) => {
     try {
-      const result = await hybridDataService.deleteFareEntry(entryId, entryType);
+      const entryToDelete = fareData.find(entry => entry.entryId === entryId);
+
+      const result = await hybridDataService.deleteFareEntry(entryId, fareData);
+
       if (result.success) {
         setFareData(result.data);
-        
-        // Trigger immediate UI refresh for all components
-        setTimeout(() => {
-          const event = new CustomEvent('fareDataUpdated', { detail: result.data });
-          window.dispatchEvent(event);
-        }, 0);
-        
-        console.log('✅ Entry deleted instantly - UI updated!');
+
+        if (entryToDelete && entryToDelete.totalAmount) {
+          setTotalEarnings((prev) => prev - entryToDelete.totalAmount);
+        }
+
+        // Remove corresponding cash book entry
+        setCashBookEntries(prev => prev.filter(entry => entry.source === 'fare-entry' && !entry.jfNo?.includes(entryId.toString())));
       }
     } catch (error) {
-      console.error('❌ Error deleting entry:', error);
+      console.error('Error deleting entry:', error);
       alert('Error deleting entry. Please try again.');
     }
   };
 
-  // Update entry
-  const handleUpdateEntry = async (e) => {
-    e.preventDefault();
-    if (!editingEntry) return;
-
-    try {
-      setIsLoading(true);
-      
-      let updatedData = {};
-      
-      if (editingEntry.type === 'daily') {
-        updatedData = {
-          date: formData.date,
-          route: formData.route,
-          cashAmount: parseFloat(formData.cashAmount) || 0,
-          bankAmount: parseFloat(formData.bankAmount) || 0,
-          totalAmount: totalAmount
-        };
-      } else if (editingEntry.type === 'booking') {
-        updatedData = {
-          bookingDetails: formData.bookingDetails,
-          dateFrom: formData.dateFrom,
-          dateTo: formData.dateTo,
-          cashAmount: parseFloat(formData.cashAmount) || 0,
-          bankAmount: parseFloat(formData.bankAmount) || 0,
-          totalAmount: totalAmount
-        };
-      } else if (editingEntry.type === 'off') {
-        updatedData = {
-          date: formData.date,
-          reason: formData.reason
-        };
-      }
-
-      const result = await hybridDataService.updateFareEntry(editingEntry.entryId, updatedData, editingEntry.type);
-      
-      if (result.success) {
-        setFareData(result.data);
-        
-        // Trigger immediate UI refresh for all components
-        setTimeout(() => {
-          const event = new CustomEvent('fareDataUpdated', { detail: result.data });
-          window.dispatchEvent(event);
-        }, 0);
-        
-        setEditingEntry(null);
-        setShowForm(false);
-        console.log('✅ Entry updated instantly - UI updated!');
-      }
-    } catch (error) {
-      console.error('❌ Error updating entry:', error);
-      alert('Error updating entry. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Start editing an entry
-  const startEditing = (entry) => {
+  const handleEditEntry = (entry) => {
     setEditingEntry(entry);
-    
-    if (entry.type === 'daily') {
-      setFormData({
-        date: entry.date,
+    if (entry.type === "daily") {
+      setActiveTab("daily");
+      setDailyFareData({
         route: entry.route,
-        cashAmount: entry.cashAmount?.toString() || '',
-        bankAmount: entry.bankAmount?.toString() || '',
-        bookingDetails: '',
-        dateFrom: new Date().toISOString().split('T')[0],
-        dateTo: new Date().toISOString().split('T')[0],
-        reason: ''
+        cashAmount: entry.cashAmount.toString(),
+        bankAmount: entry.bankAmount.toString(),
+        date: entry.date,
       });
-      setSelectedEntryType('daily');
-    } else if (entry.type === 'booking') {
-      setFormData({
-        date: new Date().toISOString().split('T')[0],
-        route: '',
-        cashAmount: entry.cashAmount?.toString() || '',
-        bankAmount: entry.bankAmount?.toString() || '',
-        bookingDetails: entry.bookingDetails || '',
+    } else if (entry.type === "booking") {
+      setActiveTab("booking");
+      setBookingData({
+        bookingDetails: entry.bookingDetails,
+        cashAmount: entry.cashAmount.toString(),
+        bankAmount: entry.bankAmount.toString(),
         dateFrom: entry.dateFrom,
         dateTo: entry.dateTo,
-        reason: ''
       });
-      setSelectedEntryType('booking');
-    } else if (entry.type === 'off') {
-      setFormData({
+    } else if (entry.type === "off") {
+      setActiveTab("off");
+      setOffDayData({
         date: entry.date,
-        route: '',
-        cashAmount: '',
-        bankAmount: '',
-        bookingDetails: '',
-        dateFrom: new Date().toISOString().split('T')[0],
-        dateTo: new Date().toISOString().split('T')[0],
-        reason: entry.reason || ''
+        reason: entry.reason,
       });
-      setSelectedEntryType('off');
     }
-    
-    setShowForm(true);
   };
 
-  // Cancel editing
-  const cancelEditing = () => {
+  const handleCancelEdit = () => {
     setEditingEntry(null);
-    setShowForm(false);
-    setFormData({
-      date: new Date().toISOString().split('T')[0],
-      route: '',
-      cashAmount: '',
-      bankAmount: '',
-      bookingDetails: '',
-      dateFrom: new Date().toISOString().split('T')[0],
-      dateTo: new Date().toISOString().split('T')[0],
-      reason: ''
-    });
+    setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
+    setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
+    setOffDayData({ date: "", reason: "" });
   };
 
-  // Get current user entries
-  const getCurrentUserEntries = useCallback(() => {
+  // Calculate totals for summary - only for current user
+  const calculateSummaryTotals = () => {
+    // Get current user info for filtering
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     const currentUserName = currentUser.fullName || currentUser.username;
-    
-    return fareData.filter(entry => 
-      entry.submittedBy === currentUserName || 
-      entry.submittedBy === 'driver' || 
-      !entry.submittedBy
-    );
-  }, [fareData]);
 
-  const userEntries = getCurrentUserEntries();
+    // Filter data by current user only
+    const userFareData = fareData.filter(entry => 
+      entry.submittedBy === currentUserName
+    );
+
+    const totalCash = userFareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
+    const totalBank = userFareData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+    const grandTotal = totalCash + totalBank;
+
+    return { totalCash, totalBank, grandTotal };
+  };
+
+  const { totalCash, totalBank, grandTotal } = calculateSummaryTotals();
 
   return (
     <div className="fare-entry-container">
       <div className="container-fluid">
-        {/* Header */}
-        <div className="fare-header">
-          <div className="header-content">
-            <div>
-              <h2><i className="bi bi-receipt"></i> Fare Entry Management</h2>
-              <p className="text-muted">Manage daily fares, bookings, and off days</p>
-            </div>
-            <div className="sync-status">
-              <div className={`simple-sync-indicator ${isSyncing ? 'syncing' : 'synced'}`}>
-                <i className={`bi ${isSyncing ? 'bi-arrow-repeat' : isOnline ? 'bi-check-circle-fill' : 'bi-wifi-off'}`}></i>
+            <div className="fare-header">
+              <div className="header-content">
+                <div>
+                  <h2><i className="bi bi-receipt"></i> Fare Receipt Entry</h2>
+                  <p>Record your daily earnings and bookings (Income)</p>
+
+                </div>
+                <div className="sync-status">
+                  <div className={`simple-sync-indicator ${syncStatus.pendingSync > 0 || syncStatus.syncInProgress || isLoading ? 'syncing' : 'synced'}`}>
+                    {syncStatus.pendingSync > 0 || syncStatus.syncInProgress || isLoading ? (
+                      <i className="bi bi-arrow-clockwise"></i>
+                    ) : (
+                      <i className="bi bi-check-circle"></i>
+                    )}
+                  </div>
+                  {syncStatus.pendingSync > 0 && (
+                    <button 
+                      className="btn btn-sm btn-outline-primary ms-2"
+                      onClick={async () => {
+                        try {
+                          setIsLoading(true);
+                          await hybridDataService.forceSync();
+                          console.log('✅ Manual sync completed');
+                        } catch (error) {
+                          console.error('❌ Manual sync failed:', error);
+                        } finally {
+                          setIsLoading(false);
+                        }
+                      }}
+                      disabled={isLoading || syncStatus.syncInProgress}
+                      title="Force sync pending entries"
+                    >
+                      <i className="bi bi-cloud-upload"></i> Sync
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="action-buttons mb-4">
-          <button 
-            className="btn btn-primary me-2"
-            onClick={() => setShowForm(!showForm)}
-          >
-            <i className="bi bi-plus-circle"></i> Add New Entry
-          </button>
-        </div>
+            {/* Summary Cards - Only show when user has entries */}
+            {(() => {
+              // Get current user info for filtering
+              const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+              const currentUserName = currentUser.fullName || currentUser.username;
 
-        {/* Entry Form */}
-        {showForm && (
-          <div className="entry-form-card mb-4">
-            <div className="card">
-              <div className="card-header">
-                <h5>{editingEntry ? 'Edit Entry' : 'Add New Entry'}</h5>
-              </div>
-              <div className="card-body">
-                {/* Entry Type Selection */}
-                {!editingEntry && (
-                  <div className="mb-3">
-                    <label className="form-label">Entry Type</label>
-                    <div className="btn-group w-100" role="group">
-                      <input 
-                        type="radio" 
-                        className="btn-check" 
-                        name="entryType" 
-                        id="daily" 
-                        value="daily"
-                        checked={selectedEntryType === 'daily'}
-                        onChange={(e) => setSelectedEntryType(e.target.value)}
-                      />
-                      <label className="btn btn-outline-primary" htmlFor="daily">Daily Fare</label>
+              // Filter entries by current user only
+              const userEntries = fareData.filter(entry => 
+                entry.submittedBy === currentUserName
+              );
 
-                      <input 
-                        type="radio" 
-                        className="btn-check" 
-                        name="entryType" 
-                        id="booking" 
-                        value="booking"
-                        checked={selectedEntryType === 'booking'}
-                        onChange={(e) => setSelectedEntryType(e.target.value)}
-                      />
-                      <label className="btn btn-outline-primary" htmlFor="booking">Booking</label>
-
-                      <input 
-                        type="radio" 
-                        className="btn-check" 
-                        name="entryType" 
-                        id="off" 
-                        value="off"
-                        checked={selectedEntryType === 'off'}
-                        onChange={(e) => setSelectedEntryType(e.target.value)}
-                      />
-                      <label className="btn btn-outline-primary" htmlFor="off">Off Day</label>
+              return userEntries.length > 0 ? (
+                <div className="row mb-4">
+                  <div className="col-md-3 col-sm-6 mb-3">
+                    <div className="summary-card cash-card">
+                      <div className="card-body">
+                        <h6>Cash Collection</h6>
+                        <h4>₹{totalCash.toLocaleString('en-IN')}</h4>
+                      </div>
                     </div>
                   </div>
-                )}
+                  <div className="col-md-3 col-sm-6 mb-3">
+                    <div className="summary-card bank-card">
+                      <div className="card-body">
+                        <h6>Bank Transfer</h6>
+                        <h4>₹{totalBank.toLocaleString('en-IN')}</h4>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-3 col-sm-6 mb-3">
+                    <div className="summary-card total-card">
+                      <div className="card-body">
+                        <h6>Total Earnings</h6>
+                        <h4>₹{grandTotal.toLocaleString('en-IN')}</h4>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-3 col-sm-6 mb-3">
+                    <div className="summary-card entries-card">
+                      <div className="card-body">
+                        <h6>Total Entries</h6>
+                        <h4>{userEntries.length}</h4>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : null;
+            })()}
 
-                <form onSubmit={editingEntry ? handleUpdateEntry : handleAddEntry}>
-                  {/* Daily Fare Fields */}
-                  {selectedEntryType === 'daily' && (
-                    <>
+            {/* Tab Navigation */}
+            <div className="tab-navigation mb-4">
+              <ul className="nav nav-tabs" role="tablist">
+                <li className="nav-item">
+                  <button 
+                    className={`nav-link ${activeTab === 'daily' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('daily')}
+                  >
+                    <i className="bi bi-calendar-day"></i> Daily Fare
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button 
+                    className={`nav-link ${activeTab === 'booking' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('booking')}
+                  >
+                    <i className="bi bi-journal-bookmark"></i> Booking 
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button 
+                    className={`nav-link ${activeTab === 'off' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('off')}
+                  >
+                    <i className="bi bi-x-circle"></i> Off Day
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            {/* Tab Content */}
+            <div className="tab-content">
+              {activeTab === 'daily' && (
+                <div className="fare-form-card">
+                  <h4><i className="bi bi-calendar-day"></i> Daily Collection</h4>
+                  <form onSubmit={handleDailySubmit}>
+                    <div className="row">
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Route</label>
+                        <select
+                          className="form-select"
+                          value={dailyFareData.route}
+                          onChange={(e) => setDailyFareData({ ...dailyFareData, route: e.target.value })}
+                          required
+                        >
+                          <option value="">Select Route</option>
+                          {routes.map((route) => (
+                            <option key={route} value={route}>{route}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Date</label>
+                        <input
+                          type="date"
+                          className={`form-control date-input ${isDailyDateDisabled(dailyFareData.date, dailyFareData.route) ? 'is-invalid' : ''}`}
+                          value={dailyFareData.date}
+                          onChange={(e) => setDailyFareData({ ...dailyFareData, date: e.target.value })}
+                          onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+                          placeholder="Select date"
+                          min={getTodayDate()}
+                          required
+                        />
+                        {isDailyDateDisabled(dailyFareData.date, dailyFareData.route) && (
+                          <div className="invalid-feedback">
+                            This date is already taken for this route or conflicts with existing entries!
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Cash Amount (₹)</label>
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={dailyFareData.cashAmount}
+                          onChange={(e) => setDailyFareData({ ...dailyFareData, cashAmount: e.target.value })}
+                          placeholder="Enter cash amount"
+                          min="0"
+                        />
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Bank Amount (₹)</label>
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={dailyFareData.bankAmount}
+                          onChange={(e) => setDailyFareData({ ...dailyFareData, bankAmount: e.target.value })}
+                          placeholder="Enter bank amount"
+                          min="0"
+                        />
+                      </div>
+                    </div>
+                    <div className="amount-summary mb-3">
                       <div className="row">
-                        <div className="col-md-6 mb-3">
-                          <label className="form-label">Date</label>
-                          <input
-                            type="date"
-                            className="form-control"
-                            name="date"
-                            value={formData.date}
-                            onChange={handleInputChange}
-                            required
-                          />
+                        <div className="col-4">
+                          <span>Cash: ₹{parseInt(dailyFareData.cashAmount) || 0}</span>
                         </div>
-                        <div className="col-md-6 mb-3">
-                          <label className="form-label">Route</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            name="route"
-                            value={formData.route}
-                            onChange={handleInputChange}
-                            placeholder="e.g., Ghuraka to Bhaderwah"
-                            required
-                          />
+                        <div className="col-4">
+                          <span>Bank: ₹{parseInt(dailyFareData.bankAmount) || 0}</span>
+                        </div>
+                        <div className="col-4">
+                          <strong>Total: ₹{(parseInt(dailyFareData.cashAmount) || 0) + (parseInt(dailyFareData.bankAmount) || 0)}</strong>
                         </div>
                       </div>
-                      <div className="row">
-                        <div className="col-md-4 mb-3">
-                          <label className="form-label">Cash Amount</label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            name="cashAmount"
-                            value={formData.cashAmount}
-                            onChange={handleInputChange}
-                            placeholder="0"
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
-                        <div className="col-md-4 mb-3">
-                          <label className="form-label">Bank Amount</label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            name="bankAmount"
-                            value={formData.bankAmount}
-                            onChange={handleInputChange}
-                            placeholder="0"
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
-                        <div className="col-md-4 mb-3">
-                          <label className="form-label">Total Amount</label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            value={totalAmount}
-                            readOnly
-                          />
-                        </div>
-                      </div>
-                    </>
-                  )}
+                    </div>
+                    <div className="button-group">
+                      <button type="submit" className="btn fare-entry-btn" disabled={isLoading}>
+                        <i className={isLoading ? "bi bi-hourglass-split" : editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
+                        {isLoading ? "Saving..." : editingEntry ? "Update Entry" : "Add Daily Entry"}
+                      </button>
+                      {editingEntry && (
+                        <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
+                          <i className="bi bi-x-circle"></i> Cancel
+                        </button>
+                      )}
+                    </div>
+                  </form>
+                </div>
+              )}
 
-                  {/* Booking Fields */}
-                  {selectedEntryType === 'booking' && (
-                    <>
-                      <div className="mb-3">
+              {activeTab === 'booking' && (
+                <div className="fare-form-card">
+                  <h4><i className="bi bi-journal-bookmark"></i> Booking Entry</h4>
+                  <form onSubmit={handleBookingSubmit}>
+                    <div className="row">
+                      <div className="col-12 mb-3">
                         <label className="form-label">Booking Details</label>
                         <textarea
                           className="form-control"
-                          name="bookingDetails"
-                          value={formData.bookingDetails}
-                          onChange={handleInputChange}
-                          placeholder="Enter booking details"
-                          rows="3"
+                          rows={3}
+                          value={bookingData.bookingDetails}
+                          onChange={(e) => setBookingData({ ...bookingData, bookingDetails: e.target.value })}
+                          placeholder="Enter booking details..."
                           required
                         />
                       </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">From Date</label>
+                        <input
+                          type="date"
+                          className={`form-control date-input ${isBookingDateDisabled(bookingData.dateFrom) ? 'is-invalid' : ''}`}
+                          value={bookingData.dateFrom}
+                          onChange={(e) => setBookingData({ ...bookingData, dateFrom: e.target.value })}
+                          onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+                          placeholder="Select from date"
+                          min={getTodayDate()}
+                          required
+                        />
+                        {isBookingDateDisabled(bookingData.dateFrom) && (
+                          <div className="invalid-feedback">
+                            This date conflicts with existing entries!
+                          </div>
+                        )}
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">To Date</label>
+                        <input
+                          type="date"
+                          className={`form-control date-input ${isBookingDateDisabled(bookingData.dateTo) ? 'is-invalid' : ''}`}
+                          value={bookingData.dateTo}
+                          onChange={(e) => setBookingData({ ...bookingData, dateTo: e.target.value })}
+                          onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+                          placeholder="Select to date"
+                          min={bookingData.dateFrom || getTodayDate()}
+                          required
+                        />
+                        {isBookingDateDisabled(bookingData.dateTo) && (
+                          <div className="invalid-feedback">
+                            This date conflicts with existing entries!
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Cash Amount (₹)</label>
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={bookingData.cashAmount}
+                          onChange={(e) => setBookingData({ ...bookingData, cashAmount: e.target.value })}
+                          placeholder="Enter cash amount"
+                          min="0"
+                        />
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Bank Amount (₹)</label>
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={bookingData.bankAmount}
+                          onChange={(e) => setBookingData({ ...bookingData, bankAmount: e.target.value })}
+                          placeholder="Enter bank amount"
+                          min="0"
+                        />
+                      </div>
+                    </div>
+                    <div className="amount-summary mb-3">
                       <div className="row">
-                        <div className="col-md-6 mb-3">
-                          <label className="form-label">From Date</label>
-                          <input
-                            type="date"
-                            className="form-control"
-                            name="dateFrom"
-                            value={formData.dateFrom}
-                            onChange={handleInputChange}
-                            required
-                          />
+                        <div className="col-4">
+                          <span>Cash: ₹{parseInt(bookingData.cashAmount) || 0}</span>
                         </div>
-                        <div className="col-md-6 mb-3">
-                          <label className="form-label">To Date</label>
-                          <input
-                            type="date"
-                            className="form-control"
-                            name="dateTo"
-                            value={formData.dateTo}
-                            onChange={handleInputChange}
-                            required
-                          />
+                        <div className="col-4">
+                          <span>Bank: ₹{parseInt(bookingData.bankAmount) || 0}</span>
+                        </div>
+                        <div className="col-4">
+                          <strong>Total: ₹{(parseInt(bookingData.cashAmount) || 0) + (parseInt(bookingData.bankAmount) || 0)}</strong>
                         </div>
                       </div>
-                      <div className="row">
-                        <div className="col-md-4 mb-3">
-                          <label className="form-label">Cash Amount</label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            name="cashAmount"
-                            value={formData.cashAmount}
-                            onChange={handleInputChange}
-                            placeholder="0"
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
-                        <div className="col-md-4 mb-3">
-                          <label className="form-label">Bank Amount</label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            name="bankAmount"
-                            value={formData.bankAmount}
-                            onChange={handleInputChange}
-                            placeholder="0"
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
-                        <div className="col-md-4 mb-3">
-                          <label className="form-label">Total Amount</label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            value={totalAmount}
-                            readOnly
-                          />
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {/* Off Day Fields */}
-                  {selectedEntryType === 'off' && (
-                    <>
-                      <div className="row">
-                        <div className="col-md-6 mb-3">
-                          <label className="form-label">Date</label>
-                          <input
-                            type="date"
-                            className="form-control"
-                            name="date"
-                            value={formData.date}
-                            onChange={handleInputChange}
-                            required
-                          />
-                        </div>
-                        <div className="col-md-6 mb-3">
-                          <label className="form-label">Reason</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            name="reason"
-                            value={formData.reason}
-                            onChange={handleInputChange}
-                            placeholder="Reason for off day"
-                            required
-                          />
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {/* Form Actions */}
-                  <div className="d-flex justify-content-end gap-2">
-                    <button 
-                      type="button" 
-                      className="btn btn-secondary"
-                      onClick={cancelEditing}
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      type="submit" 
-                      className="btn btn-primary"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <>
-                          <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                          {editingEntry ? 'Updating...' : 'Adding...'}
-                        </>
-                      ) : (
-                        editingEntry ? 'Update Entry' : 'Add Entry'
+                    </div>
+                    <div className="button-group">
+                      <button type="submit" className="btn fare-entry-btn"  disabled={isLoading}>
+                        <i className={isLoading ? "bi bi-hourglass-split" : editingEntry ? "bi bi-check-circle" : "bi bi-journal-plus"}></i> 
+                        {isLoading ? "Saving..." : editingEntry ? "Update Entry" : "Add Booking Entry"}
+                      </button>
+                      {editingEntry && (
+                        <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
+                          <i className="bi bi-x-circle"></i> Cancel
+                        </button>
                       )}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Entries List */}
-        <div className="entries-list">
-          <div className="card">
-            <div className="card-header">
-              <h5>Recent Entries ({userEntries.length})</h5>
-            </div>
-            <div className="card-body">
-              {userEntries.length === 0 ? (
-                <div className="text-center py-4">
-                  <i className="bi bi-inbox display-4 text-muted"></i>
-                  <p className="text-muted mt-2">No entries found. Add your first entry!</p>
+                    </div>
+                  </form>
                 </div>
-              ) : (
-                <div className="table-responsive">
-                  <table className="table table-striped">
-                    <thead>
-                      <tr>
-                        <th>Type</th>
-                        <th>Date</th>
-                        <th>Details</th>
-                        <th>Amount</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {userEntries.slice().reverse().map((entry) => (
-                        <tr key={entry.entryId || entry.id}>
-                          <td>
-                            <span className={`badge ${
-                              entry.type === 'daily' ? 'bg-primary' : 
-                              entry.type === 'booking' ? 'bg-success' : 'bg-warning'
-                            }`}>
-                              {entry.type === 'daily' ? 'Daily' : 
-                               entry.type === 'booking' ? 'Booking' : 'Off Day'}
-                            </span>
-                          </td>
-                          <td>
-                            {entry.type === 'booking' 
-                              ? `${entry.dateFrom} to ${entry.dateTo}`
-                              : entry.date
-                            }
-                          </td>
-                          <td>
-                            {entry.type === 'daily' && entry.route}
-                            {entry.type === 'booking' && (
-                              <span title={entry.bookingDetails}>
-                                {entry.bookingDetails?.substring(0, 50)}
-                                {entry.bookingDetails?.length > 50 ? '...' : ''}
-                              </span>
-                            )}
-                            {entry.type === 'off' && entry.reason}
-                          </td>
-                          <td>
-                            {entry.type !== 'off' ? `₹${entry.totalAmount || 0}` : '-'}
-                          </td>
-                          <td>
-                            <div className="btn-group btn-group-sm">
-                              <button
-                                className="btn btn-outline-primary"
-                                onClick={() => startEditing(entry)}
-                                title="Edit"
-                              >
-                                <i className="bi bi-pencil"></i>
-                              </button>
-                              <button
-                                className="btn btn-outline-danger"
-                                onClick={() => handleDeleteEntry(entry.entryId, entry.type)}
-                                title="Delete"
-                              >
-                                <i className="bi bi-trash"></i>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              )}
+
+              {activeTab === 'off' && (
+                <div className="fare-form-card">
+                  <h4><i className="bi bi-x-circle"></i> Off Day Entry</h4>
+                  <form onSubmit={handleOffDaySubmit}>
+                    <div className="row">
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Date</label>
+                        <input
+                          type="date"
+                          className={`form-control date-input ${isOffDayDateDisabled(offDayData.date) ? 'is-invalid' : ''}`}
+                          value={offDayData.date}
+                          onChange={(e) => setOffDayData({ ...offDayData, date: e.target.value })}
+                          onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+                          placeholder="Select off day date"
+                          min={getTodayDate()}
+                          required
+                        />
+                        {isOffDayDateDisabled(offDayData.date) && (
+                          <div className="invalid-feedback">
+                            This date conflicts with existing entries!
+                          </div>
+                        )}
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Reason</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={offDayData.reason}
+                          onChange={(e) => setOffDayData({ ...offDayData, reason: e.target.value })}
+                          placeholder="Enter reason for off day"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="button-group">
+                      <button type="submit" className="btn fare-entry-btn"  disabled={isLoading}>
+                        <i className={isLoading ? "bi bi-hourglass-split" : editingEntry ? "bi bi-check-circle" : "bi bi-check-circle"}></i> 
+                        {isLoading ? "Saving..." : editingEntry ? "Update Entry" : "Mark Day as Off"}
+                      </button>
+                      {editingEntry && (
+                        <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
+                          <i className="bi bi-x-circle"></i> Cancel
+                        </button>
+                      )}
+                    </div>
+                  </form>
                 </div>
               )}
             </div>
-          </div>
-        </div>
+
+            {/* Recent Entries */}
+            {(() => {
+              // Get current user info for filtering
+              const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+              const currentUserName = currentUser.fullName || currentUser.username;
+
+              // Filter entries by current user
+              const userEntries = fareData.filter(entry => 
+                entry.submittedBy === currentUserName
+              );
+
+              return userEntries.length > 0 ? (
+                <div className="recent-entries mt-4">
+                  <h4>Recent Entries</h4>
+                  <div className="row">
+                    {userEntries.slice(-6).reverse().map((entry) => (
+                      <div key={entry.entryId} className="col-md-6 col-lg-4 mb-3">
+                        <div className="entry-card">
+                          <div className="card-body">
+                            <div className="entry-header">
+                              <span className={`entry-type ${entry.type}`}>
+                                {entry.type === "daily" ? "Daily" : 
+                                 entry.type === "booking" ? "Booking" : "Off Day"}
+                              </span>
+                              <div className="entry-actions">
+                                <button 
+                                  className="btn btn-sm btn-edit" 
+                                  onClick={() => handleEditEntry(entry)}
+                                  title="Edit Entry"
+                                                               >
+                                  <i className="bi bi-pencil"></i>
+                                </button>
+                                <button 
+                                  className="btn btn-sm btn-delete" 
+                                  onClick={() => handleDeleteEntry(entry.entryId)}
+                                  title="Delete Entry"
+                                >
+                                  <i className="bi bi-trash"></i>
+                                </button>
+                              </div>
+                            </div>
+                            <div className="entry-date">
+                              <small className="text-muted">
+                                {entry.type === "daily" && entry.date}
+                                {entry.type === "booking" && `${entry.dateFrom} - ${entry.dateTo}`}
+                                {entry.type === "off" && entry.date}
+                              </small>
+                            </div>
+                            <div className="entry-content">
+                              {entry.type === "daily" && <p>{entry.route}</p>}
+                              {entry.type === "booking" && <p>{entry.bookingDetails?.substring(0, 60)}...</p>}
+                              {entry.type === "off" && <p>{entry.reason}</p>}
+                            </div>
+                            {entry.type !== "off" && (
+                              <div className="entry-amounts">
+                                <div className="amount-row">
+                                  <span>Cash: ₹{entry.cashAmount}</span>
+                                  <span>Bank: ₹{entry.bankAmount}</span>
+                                </div>
+                                <div className="total-amount">
+                                  <strong>Total: ₹{entry.totalAmount}</strong>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null;
+            })()}
       </div>
     </div>
   );
-};
+}
 
-export default FareRecipt;
+export default FareEntry;

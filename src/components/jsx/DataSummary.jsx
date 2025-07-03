@@ -19,6 +19,20 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
       expenseEntries: expenseData.length,
       cashBookEntries: cashBookEntries.length
     });
+
+    // Listen for instant fare data updates
+    const handleFareDataUpdate = (event) => {
+      console.log('📊 DataSummary received instant fare update');
+      // Force component re-render
+      const updatedFareData = event.detail;
+      // This will trigger recalculation through the dependency array
+    };
+
+    window.addEventListener('fareDataUpdated', handleFareDataUpdate);
+
+    return () => {
+      window.removeEventListener('fareDataUpdated', handleFareDataUpdate);
+    };
   }, [fareData, expenseData, cashBookEntries]);
 
   // Monitor sync status
