@@ -14,6 +14,17 @@ class LocalStorageService {
     try {
       localStorage.setItem(this.STORAGE_KEYS.FARE_DATA, JSON.stringify(data));
       console.log('💾 Data saved to localStorage:', data.length, 'entries');
+      console.log('📄 Saved entries:', data.map(entry => ({
+        entryId: entry.entryId,
+        type: entry.type,
+        date: entry.date || entry.dateFrom,
+        route: entry.route,
+        bookingDetails: entry.bookingDetails?.substring(0, 30) + (entry.bookingDetails?.length > 30 ? '...' : ''),
+        reason: entry.reason,
+        totalAmount: entry.totalAmount,
+        synced: entry.synced,
+        pendingSync: entry.pendingSync
+      })));
       return true;
     } catch (error) {
       console.error('❌ Error saving to localStorage:', error);
@@ -28,6 +39,17 @@ class LocalStorageService {
       if (data) {
         const parsedData = JSON.parse(data);
         console.log('📂 Data loaded from localStorage:', parsedData.length, 'entries');
+        console.log('📄 Loaded entries:', parsedData.map(entry => ({
+          entryId: entry.entryId,
+          type: entry.type,
+          date: entry.date || entry.dateFrom,
+          route: entry.route,
+          bookingDetails: entry.bookingDetails?.substring(0, 30) + (entry.bookingDetails?.length > 30 ? '...' : ''),
+          reason: entry.reason,
+          totalAmount: entry.totalAmount,
+          synced: entry.synced,
+          pendingSync: entry.pendingSync
+        })));
         return parsedData;
       }
       return [];
