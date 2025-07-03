@@ -226,7 +226,9 @@ function addFareReceipt(data) {
 
     const entryId = data.entryId;
 
-    sheet.appendRow([
+    // Insert at row 2 to keep new entries at top
+    sheet.insertRowBefore(2);
+    sheet.getRange(2, 1, 1, 9).setValues([[
       new Date(), // A: Timestamp
       data.date, // B: Date
       data.route, // C: Route
@@ -236,7 +238,7 @@ function addFareReceipt(data) {
       "daily", // G: EntryType
       entryId, // H: EntryId (use provided ID)
       data.submittedBy || "", // I: SubmittedBy
-    ]);
+    ]]);
 
     return {
       success: true,
@@ -412,7 +414,9 @@ function addBookingEntry(data) {
 
     const entryId = data.entryId;
 
-    sheet.appendRow([
+    // Insert at row 2 to keep new entries at top
+    sheet.insertRowBefore(2);
+    sheet.getRange(2, 1, 1, 10).setValues([[
       new Date(), // A: Timestamp
       data.bookingDetails || "", // B: BookingDetails
       data.dateFrom, // C: DateFrom
@@ -423,7 +427,7 @@ function addBookingEntry(data) {
       "booking", // H: EntryType
       entryId, // I: EntryId (use provided ID)
       data.submittedBy || "", // J: SubmittedBy
-    ]);
+    ]]);
 
     return ContentService.createTextOutput(
       JSON.stringify({
@@ -605,14 +609,16 @@ function addOffDay(data) {
 
     const entryId = data.entryId;
 
-    sheet.appendRow([
+    // Insert at row 2 to keep new entries at top
+    sheet.insertRowBefore(2);
+    sheet.getRange(2, 1, 1, 6).setValues([[
       new Date(), // A: Timestamp
       data.date, // B: Date
       data.reason || "", // C: Reason
       "off", // D: EntryType
       entryId, // E: EntryId (use provided ID)
       data.submittedBy || "", // F: SubmittedBy
-    ]);
+    ]]);
 
     return ContentService.createTextOutput(
       JSON.stringify({
