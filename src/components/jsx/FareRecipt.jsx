@@ -73,28 +73,50 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const freshData = localStorageService.loadFareData();
       console.log('📂 Fresh data loaded for FareRecipt:', freshData.length, 'entries');
       
-      // Force state update even if data appears same
-      setFareData([...freshData]);
+      // Force state update with functional setState to ensure React detects change
+      setFareData(prevData => {
+        console.log('🔄 Updating FareRecipt state from', prevData.length, 'to', freshData.length, 'entries');
+        return [...freshData];
+      });
       
-      // Recalculate total earnings
-      const total = freshData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
-      setTotalEarnings(total);
+      // Recalculate total earnings with functional setState
+      setTotalEarnings(prevTotal => {
+        const newTotal = freshData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+        console.log('💰 Updated total earnings in FareRecipt from', prevTotal, 'to', newTotal);
+        return newTotal;
+      });
       
-      console.log('💰 Updated total earnings in FareRecipt:', total);
       console.log('🔄 FareRecipt UI state updated successfully');
     };
 
     // Listen for immediate data updates with immediate execution
     const handleFareUpdate = (event) => {
-      handleInstantDataUpdate(event);
+      console.log('🎯 FareRecipt received fareDataUpdated event');
+      if (event.detail && Array.isArray(event.detail)) {
+        console.log('📊 Using event data directly:', event.detail.length, 'entries');
+        setFareData(prevData => [...event.detail]);
+        const newTotal = event.detail.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+        setTotalEarnings(prevTotal => newTotal);
+      } else {
+        handleInstantDataUpdate(event);
+      }
     };
 
     const handleDataUpdate = (event) => {
-      handleInstantDataUpdate(event);
+      console.log('🎯 FareRecipt received dataUpdated event');
+      if (event.detail && Array.isArray(event.detail)) {
+        console.log('📊 Using event data directly:', event.detail.length, 'entries');
+        setFareData(prevData => [...event.detail]);
+        const newTotal = event.detail.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+        setTotalEarnings(prevTotal => newTotal);
+      } else {
+        handleInstantDataUpdate(event);
+      }
     };
 
     const handleStorageUpdate = (event) => {
       if (event.key === 'fare_receipts_data') {
+        console.log('🎯 FareRecipt received storage update event');
         handleInstantDataUpdate(event);
       }
     };
@@ -109,13 +131,13 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       window.removeEventListener('dataUpdated', handleDataUpdate);
       window.removeEventListener('storage', handleStorageUpdate);
     };
-  }, [setFareData, setTotalEarnings]);
+  }, []); // Remove dependencies to prevent recreation
 
   // Update sync status periodically and on changes
   useEffect(() => {
     const updateSyncStatus = () => {
       const newStatus = hybridDataService.getSyncStatus();
-      setSyncStatus(newStatus);
+      setSyncStatus(prevStatus => ({...newStatus}));
     };
 
     updateSyncStatus();
@@ -127,19 +149,25 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     };
 
     // Listen for data updates from background sync
-    const handleDataUpdate = (event) => {
+    const handleBackgroundSyncUpdate = (event) => {
       console.log('📱 Background sync completed, loading fresh data from localStorage...');
 
       // Always load from localStorage for consistent UI
       const freshLocalData = localStorageService.loadFareData();
       console.log('📂 Fresh data from localStorage for sync update:', freshLocalData.length, 'entries');
 
-      // Force state update with new array reference
-      setFareData([...freshLocalData]);
+      // Force state update with functional setState
+      setFareData(prevData => {
+        console.log('🔄 Background sync updating FareRecipt state from', prevData.length, 'to', freshLocalData.length, 'entries');
+        return [...freshLocalData];
+      });
 
-      // Calculate total earnings from localStorage
-      const total = freshLocalData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
-      setTotalEarnings(total);
+      // Calculate total earnings from localStorage with functional setState
+      setTotalEarnings(prevTotal => {
+        const newTotal = freshLocalData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+        console.log('💰 Background sync updated total earnings from', prevTotal, 'to', newTotal);
+        return newTotal;
+      });
 
       // Update sync status immediately
       updateSyncStatus();
@@ -148,14 +176,14 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     };
 
     window.addEventListener('syncStatusChanged', handleSyncStatusChange);
-    window.addEventListener('dataUpdated', handleDataUpdate);
+    window.addEventListener('dataUpdated', handleBackgroundSyncUpdate);
 
     return () => {
       clearInterval(interval);
       window.removeEventListener('syncStatusChanged', handleSyncStatusChange);
-      window.removeEventListener('dataUpdated', handleDataUpdate);
+      window.removeEventListener('dataUpdated', handleBackgroundSyncUpdate);
     };
-  }, [setFareData, setTotalEarnings]);
+  }, []); // Remove dependencies
 
   // Function to check if a date is disabled for daily collection
   const isDailyDateDisabled = (selectedDate, selectedRoute) => {

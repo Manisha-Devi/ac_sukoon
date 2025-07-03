@@ -21,7 +21,10 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
     // Initial load from localStorage
     const loadLocalData = () => {
       const localData = localStorageService.loadFareData();
-      setLocalFareData(localData);
+      setLocalFareData(prevData => {
+        console.log('📊 DataSummary updating from', prevData.length, 'to', localData.length, 'entries');
+        return [...localData];
+      });
 
       console.log('📊 Data Summary - Using localStorage data:', {
         fareEntries: localData.length,
@@ -34,32 +37,48 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
     loadLocalData();
 
     // Listen for real-time data updates from localStorage
-    const handleDataUpdate = () => {
+    const handleDataUpdate = (event) => {
       console.log('Step 4: Instant data update detected - refreshing UI immediately (DataSummary component)');
-      loadLocalData(); // Reload data immediately
+      
+      // Load fresh data and force state update
+      const freshData = localStorageService.loadFareData();
+      setLocalFareData(prevData => {
+        console.log('🔄 DataSummary force update from', prevData.length, 'to', freshData.length, 'entries');
+        return [...freshData];
+      });
     };
 
     // Listen for immediate fare data updates
     const handleFareDataUpdate = (event) => {
       console.log('Step 4: DataSummary received immediate fare data update');
-      if (event.detail) {
-        setLocalFareData(event.detail); // Use the updated data directly
+      if (event.detail && Array.isArray(event.detail)) {
+        console.log('📊 DataSummary using event data directly:', event.detail.length, 'entries');
+        setLocalFareData(prevData => [...event.detail]);
       } else {
-        loadLocalData(); // Fallback to localStorage
+        const freshData = localStorageService.loadFareData();
+        setLocalFareData(prevData => [...freshData]);
       }
     };
 
     // Listen for localStorage changes and immediate updates
-    window.addEventListener('storage', handleDataUpdate);
+    const handleStorageUpdate = (event) => {
+      if (event.key === 'fare_receipts_data') {
+        console.log('🎯 DataSummary received storage update event');
+        handleDataUpdate(event);
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener('storage', handleStorageUpdate);
     window.addEventListener('dataUpdated', handleDataUpdate);
     window.addEventListener('fareDataUpdated', handleFareDataUpdate);
 
     return () => {
-      window.removeEventListener('storage', handleDataUpdate);
+      window.removeEventListener('storage', handleStorageUpdate);
       window.removeEventListener('dataUpdated', handleDataUpdate);
       window.removeEventListener('fareDataUpdated', handleFareDataUpdate);
     };
-  }, [expenseData, cashBookEntries]);
+  }, []); // Remove dependencies to prevent recreation
 
   // Monitor sync status
   useEffect(() => {

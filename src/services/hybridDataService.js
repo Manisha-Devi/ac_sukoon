@@ -184,13 +184,25 @@ class HybridDataService {
       console.log('Step 4: Entry marked for sync');
 
       // Trigger immediate data update events for real-time UI refresh (Step 5)
-      const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: updatedData });
-      window.dispatchEvent(dataUpdateEvent);
       console.log('Step 5: Instant data update detected - refreshing UI immediately');
       
-      // Also trigger fare-specific update event
-      const fareUpdateEvent = new CustomEvent('fareDataUpdated', { detail: updatedData });
-      window.dispatchEvent(fareUpdateEvent);
+      // Trigger with small delay to ensure localStorage is written
+      setTimeout(() => {
+        const dataUpdateEvent = new CustomEvent('dataUpdated', { 
+          detail: updatedData,
+          bubbles: true
+        });
+        window.dispatchEvent(dataUpdateEvent);
+        
+        // Also trigger fare-specific update event
+        const fareUpdateEvent = new CustomEvent('fareDataUpdated', { 
+          detail: updatedData,
+          bubbles: true
+        });
+        window.dispatchEvent(fareUpdateEvent);
+        
+        console.log('🚀 Data update events dispatched with', updatedData.length, 'entries');
+      }, 10);
 
       // Generate and save cash book entry immediately
       this.generateCashBookEntry(newEntry);
@@ -426,13 +438,25 @@ class HybridDataService {
       console.log('Step 3: Entry updated in localStorage immediately - UI updated instantly!');
 
       // Trigger immediate data update events for real-time UI refresh (Step 4)
-      const dataUpdateEvent = new CustomEvent('dataUpdated', { detail: updatedFareData });
-      window.dispatchEvent(dataUpdateEvent);
       console.log('Step 4: Instant data update detected - refreshing UI immediately');
       
-      // Also trigger fare-specific update event
-      const fareUpdateEvent = new CustomEvent('fareDataUpdated', { detail: updatedFareData });
-      window.dispatchEvent(fareUpdateEvent);
+      // Trigger with small delay to ensure localStorage is written
+      setTimeout(() => {
+        const dataUpdateEvent = new CustomEvent('dataUpdated', { 
+          detail: updatedFareData,
+          bubbles: true
+        });
+        window.dispatchEvent(dataUpdateEvent);
+        
+        // Also trigger fare-specific update event
+        const fareUpdateEvent = new CustomEvent('fareDataUpdated', { 
+          detail: updatedFareData,
+          bubbles: true
+        });
+        window.dispatchEvent(fareUpdateEvent);
+        
+        console.log('🚀 Update events dispatched with', updatedFareData.length, 'entries');
+      }, 10);
 
       // Update cash book entry
       const updatedEntry = updatedFareData.find(entry => entry.entryId === entryId);
