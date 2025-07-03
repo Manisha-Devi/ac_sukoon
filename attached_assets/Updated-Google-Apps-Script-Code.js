@@ -273,8 +273,8 @@ function getFareReceipts() {
     const data = values.slice(1).map((row, index) => {
         const rowData = {
           entryId: row[7], // Entry ID from column H
-          timestamp: row[0], // Time only from sheet (HH:MM:SS)
-          date: row[1], // Use date as-is from sheet
+          timestamp: String(row[0] || ''), // Convert timestamp to string
+          date: String(row[1] || ''), // Convert date to string 
           route: row[2], // Route from column C
           cashAmount: row[3], // Cash amount from column D
           bankAmount: row[4], // Bank amount from column E
@@ -463,10 +463,10 @@ function getBookingEntries() {
     const data = values.slice(1).map((row, index) => {
         const rowData = {
           entryId: row[8], // Entry ID from column I
-          timestamp: row[0], // Time only from sheet (HH:MM:SS)
+          timestamp: String(row[0] || ''), // Convert timestamp to string
           bookingDetails: row[1], // Booking details from column B
-          dateFrom: row[2], // Use date as-is from sheet
-          dateTo: row[3], // Use date as-is from sheet
+          dateFrom: String(row[2] || ''), // Convert date to string
+          dateTo: String(row[3] || ''), // Convert date to string
           cashAmount: row[4], // Cash amount from column E
           bankAmount: row[5], // Bank amount from column F
           totalAmount: row[6], // Total amount from column G
@@ -650,8 +650,8 @@ function getOffDays() {
     const data = values.slice(1).map((row, index) => {
       const rowData = {
         entryId: row[4], // Entry ID from column E
-        timestamp: row[0], // Time only from sheet (HH:MM:SS)
-        date: row[1], // Use date as-is from sheet
+        timestamp: String(row[0] || ''), // Convert timestamp to string
+        date: String(row[1] || ''), // Convert date to string
         reason: row[2], // Reason from column C
         entryType: row[3], // Static entry type
         submittedBy: row[5], // Submitted by from column F

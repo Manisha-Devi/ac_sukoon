@@ -2,6 +2,51 @@ import React, { useState, useEffect } from "react";
 import "../css/FareRecipt.css";
 import authService from '../../services/authService.js';
 
+// Helper functions to convert ISO strings to proper format
+const convertToTimeString = (timestamp) => {
+  if (!timestamp) return '';
+  
+  // If it's already in HH:MM:SS format, return as is
+  if (typeof timestamp === 'string' && timestamp.match(/^\d{2}:\d{2}:\d{2}$/)) {
+    return timestamp;
+  }
+  
+  // If it's an ISO string, extract just the time part
+  if (typeof timestamp === 'string' && timestamp.includes('T')) {
+    return timestamp.split('T')[1]?.split('.')[0] || timestamp;
+  }
+  
+  // If it's a Date object, convert to time string
+  if (timestamp instanceof Date) {
+    return timestamp.toTimeString().split(' ')[0];
+  }
+  
+  // Return as string fallback
+  return String(timestamp);
+};
+
+const convertToDateString = (date) => {
+  if (!date) return '';
+  
+  // If it's already in YYYY-MM-DD format, return as is
+  if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    return date;
+  }
+  
+  // If it's an ISO string, extract just the date part
+  if (typeof date === 'string' && date.includes('T')) {
+    return date.split('T')[0];
+  }
+  
+  // If it's a Date object, convert to date string
+  if (date instanceof Date) {
+    return date.toISOString().split('T')[0];
+  }
+  
+  // Return as string fallback
+  return String(date);
+};
+
 function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries }) {
   const [activeTab, setActiveTab] = useState("daily");
   const [editingEntry, setEditingEntry] = useState(null);
@@ -46,8 +91,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         if (fareReceipts.success && fareReceipts.data) {
           allData = [...allData, ...fareReceipts.data.map(entry => ({
             entryId: entry.entryId,
-            timestamp: entry.timestamp,
-            date: entry.date,
+            timestamp: convertToTimeString(entry.timestamp), // Convert any ISO strings to time-only
+            date: convertToDateString(entry.date), // Convert any ISO strings to date-only
             route: entry.route,
             cashAmount: entry.cashAmount || 0,
             bankAmount: entry.bankAmount || 0,
@@ -61,10 +106,10 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         if (bookingEntries.success && bookingEntries.data) {
           allData = [...allData, ...bookingEntries.data.map(entry => ({
             entryId: entry.entryId,
-            timestamp: entry.timestamp,
+            timestamp: convertToTimeString(entry.timestamp), // Convert any ISO strings to time-only
             bookingDetails: entry.bookingDetails,
-            dateFrom: entry.dateFrom,
-            dateTo: entry.dateTo,
+            dateFrom: convertToDateString(entry.dateFrom), // Convert any ISO strings to date-only
+            dateTo: convertToDateString(entry.dateTo), // Convert any ISO strings to date-only
             cashAmount: entry.cashAmount || 0,
             bankAmount: entry.bankAmount || 0,
             totalAmount: entry.totalAmount || 0,
@@ -77,8 +122,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         if (offDays.success && offDays.data) {
           allData = [...allData, ...offDays.data.map(entry => ({
             entryId: entry.entryId,
-            timestamp: entry.timestamp,
-            date: entry.date,
+            timestamp: convertToTimeString(entry.timestamp), // Convert any ISO strings to time-only
+            date: convertToDateString(entry.date), // Convert any ISO strings to date-only
             reason: entry.reason,
             submittedBy: entry.submittedBy,
             cashAmount: 0,
