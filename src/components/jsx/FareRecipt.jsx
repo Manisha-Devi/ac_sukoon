@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../css/FareRecipt.css";
 import simpleDataService from '../../services/simpleDataService.js';
+import reactStateService from '../../services/reactStateService.js';
 
 function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries }) {
   const [activeTab, setActiveTab] = useState("daily");
@@ -26,45 +27,19 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     reason: "",
   });
 
-  // Load data on component mount
+  // Initialize component - no localStorage
   useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      try {
-        const data = await simpleDataService.initializeData();
-        setFareData(data);
+    console.log('🔄 Initializing fare receipt component...');
+    console.log('📊 Current fare data:', fareData.length, 'entries');
 
-        const total = data.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
-        setTotalEarnings(total);
+    // Calculate totals from current data
+    const totals = reactStateService.calculateTotals(fareData);
+    setTotalEarnings(totals.totalEarnings);
 
-        // Generate cash book entries
-        const cashBookEntries = data
-          .filter(entry => entry.type !== 'off')
-          .map(entry => ({
-            id: `fare-${entry.entryId}`,
-            date: entry.date || entry.dateFrom,
-            description: entry.type === 'daily' ? `Daily Collection - ${entry.route}` : `Booking - ${entry.bookingDetails}`,
-            cashReceived: entry.cashAmount || 0,
-            bankReceived: entry.bankAmount || 0,
-            cashPaid: 0,
-            bankPaid: 0,
-            source: 'fare-entry',
-            jfNo: `JF-${entry.entryId}`,
-            submittedBy: entry.submittedBy
-          }));
-
-        setCashBookEntries(cashBookEntries);
-
-      } catch (error) {
-        console.error('Error loading data:', error);
-        alert('Error loading data. Please check your internet connection.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-  }, [setFareData, setTotalEarnings, setCashBookEntries]);
+    // Generate cash book entries
+    const cashBookEntries = reactStateService.generateCashBookEntries(fareData);
+    setCashBookEntries(cashBookEntries);
+  }, []);
 
   // Function to check if a date is disabled for daily collection
   const isDailyDateDisabled = (selectedDate, selectedRoute) => {
@@ -406,7 +381,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
   const handleDeleteEntry = async (entryId) => {
     try {
       const entryToDelete = fareData.find(entry => entry.entryId === entryId);
-      
+
       if (!entryToDelete) {
         alert('Entry not found!');
         return;

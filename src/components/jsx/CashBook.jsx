@@ -11,15 +11,8 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
   const [showSummary, setShowSummary] = useState(true);
 
   useEffect(() => {
-    // Load initial cash book entries from localStorage
-    const loadCashBookEntries = () => {
-      const storedEntries = JSON.parse(localStorage.getItem('cashBookEntries') || '[]');
-      console.log('📖 Loading cash book entries from localStorage:', storedEntries.length);
-      setCashBookEntries(storedEntries);
-    };
-
-    // Load entries on component mount
-    loadCashBookEntries();
+    // Initialize cash book entries from props
+    console.log('📖 Initializing cash book entries from props:', cashBookEntries.length);
 
     // Listen for cash book updates
     const handleCashBookUpdate = (event) => {
@@ -28,14 +21,7 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
       setCashBookEntries(updatedEntries);
     };
 
-    // Listen for data updates that might affect cash book
-    const handleDataUpdate = () => {
-      console.log('📖 Data updated - refreshing cash book entries');
-      loadCashBookEntries();
-    };
-
     window.addEventListener('cashBookUpdated', handleCashBookUpdate);
-    window.addEventListener('dataUpdated', handleDataUpdate);
 
     return () => {
       window.removeEventListener('cashBookUpdated', handleCashBookUpdate);
