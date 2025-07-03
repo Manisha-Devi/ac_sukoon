@@ -10,6 +10,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
     settlementWith: "",
     remarks: ""
   });
+  const [syncStatus, setSyncStatus] = useState(hybridDataService.getSyncStatus());
 
   // Force re-calculation when data updates
   useEffect(() => {
@@ -19,6 +20,29 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
       cashBookEntries: cashBookEntries.length
     });
   }, [fareData, expenseData, cashBookEntries]);
+
+  // Monitor sync status
+  useEffect(() => {
+    const updateSyncStatus = () => {
+      const newStatus = hybridDataService.getSyncStatus();
+      setSyncStatus(newStatus);
+    };
+
+    updateSyncStatus();
+    const interval = setInterval(updateSyncStatus, 1000);
+
+    // Listen for sync status changes
+    const handleSyncStatusChange = () => {
+      updateSyncStatus();
+    };
+
+    window.addEventListener('syncStatusChanged', handleSyncStatusChange);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('syncStatusChanged', handleSyncStatusChange);
+    };
+  }, []);
 
   // Calculate totals from fareData and expenseData directly - only for current user
   const calculateTotals = () => {
@@ -200,8 +224,12 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
               <p>Review your financial data and send for approval</p>
             </div>
             <div className="sync-status">
-              <div className="simple-sync-indicator synced">
-                <i className="bi bi-check-circle"></i>
+              <div className={`simple-sync-indicator ${syncStatus.syncing ? 'syncing' : 'synced'}`}>
+                {syncStatus.syncing ? (
+                  <i className="bi bi-arrow-clockwise"></i>
+                ) : (
+                  <i className="bi bi-check-circle"></i>
+                )}
               </div>
             </div>
           </div>
@@ -787,7 +815,6 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
               </div>
             </div>
           ) : (
-```javascript
             <div className="no-entries-message text-center py-5">
               <i className="bi bi-clipboard-data display-1 text-muted"></i>
               <h4 className="mt-3 text-muted">No Data Found</h4>

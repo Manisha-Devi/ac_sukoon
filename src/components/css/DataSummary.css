@@ -54,6 +54,14 @@
   animation: spin 2s linear infinite;
 }
 
+.simple-sync-indicator.pending {
+  color: #dc3545;
+}
+
+.simple-sync-indicator.pending i {
+  animation: spin 1s linear infinite;
+}
+
 .simple-sync-indicator.synced {
   color: #28a745;
 }
