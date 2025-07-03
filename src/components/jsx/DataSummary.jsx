@@ -794,61 +794,87 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
           );
         })()}
 
-        {/* Overall Summary Cards - First Row */}
-        <div className="row mb-3">
-          <div className="col-lg-4 col-md-6 col-sm-6 mb-3">
-            <div className="summary-card cash-receipts">
-              <div className="card-body">
-                <h6>Total Cash Receipts</h6>
-                <h4>₹{totals.totalCashReceipts.toLocaleString()}</h4>
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-4 col-md-6 col-sm-6 mb-3">
-            <div className="summary-card cash-payments">
-              <div className="card-body">
-                <h6>Total Cash Payments</h6>
-                <h4>₹{totals.totalCashPayments.toLocaleString()}</h4>
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-4 col-md-6 col-sm-6 mb-3">
-            <div className="summary-card bank-receipts">
-              <div className="card-body">
-                <h6>Total Bank Receipts</h6>
-                <h4>₹{totals.totalBankReceipts.toLocaleString()}</h4>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Overall Summary Cards - First Row - Only show if user has entries */}
+        {(() => {
+          // Get current user info for filtering
+          const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+          const currentUserName = currentUser.fullName || currentUser.username;
 
-        {/* Overall Summary Cards - Second Row */}
-        <div className="row mb-4">
-          <div className="col-lg-4 col-md-6 col-sm-6 mb-3">
-            <div className="summary-card bank-payments">
-              <div className="card-body">
-                <h6>Total Bank Payments</h6>
-                <h4>₹{totals.totalBankPayments.toLocaleString()}</h4>
+          // Check if current user has any entries
+          const userFareEntries = fareData.filter(entry => entry.submittedBy === currentUserName);
+          const userExpenseEntries = expenseData.filter(entry => entry.submittedBy === currentUserName);
+          const hasUserEntries = userFareEntries.length > 0 || userExpenseEntries.length > 0;
+
+          return hasUserEntries ? (
+            <div className="row mb-3">
+              <div className="col-lg-4 col-md-6 col-sm-6 mb-3">
+                <div className="summary-card cash-receipts">
+                  <div className="card-body">
+                    <h6>Total Cash Receipts</h6>
+                    <h4>₹{totals.totalCashReceipts.toLocaleString()}</h4>
+                  </div>
+                </div>
+              </div>
+              <div className="col-lg-4 col-md-6 col-sm-6 mb-3">
+                <div className="summary-card cash-payments">
+                  <div className="card-body">
+                    <h6>Total Cash Payments</h6>
+                    <h4>₹{totals.totalCashPayments.toLocaleString()}</h4>
+                  </div>
+                </div>
+              </div>
+              <div className="col-lg-4 col-md-6 col-sm-6 mb-3">
+                <div className="summary-card bank-receipts">
+                  <div className="card-body">
+                    <h6>Total Bank Receipts</h6>
+                    <h4>₹{totals.totalBankReceipts.toLocaleString()}</h4>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="col-lg-4 col-md-6 col-sm-6 mb-3">
-            <div className="summary-card cash-balance">
-              <div className="card-body">
-                <h6>Cash Balance</h6>
-                <h4>₹{totals.cashBalance.toLocaleString()}</h4>
+          ) : null;
+        })()}
+
+        {/* Overall Summary Cards - Second Row - Only show if user has entries */}
+        {(() => {
+          // Get current user info for filtering
+          const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+          const currentUserName = currentUser.fullName || currentUser.username;
+
+          // Check if current user has any entries
+          const userFareEntries = fareData.filter(entry => entry.submittedBy === currentUserName);
+          const userExpenseEntries = expenseData.filter(entry => entry.submittedBy === currentUserName);
+          const hasUserEntries = userFareEntries.length > 0 || userExpenseEntries.length > 0;
+
+          return hasUserEntries ? (
+            <div className="row mb-4">
+              <div className="col-lg-4 col-md-6 col-sm-6 mb-3">
+                <div className="summary-card bank-payments">
+                  <div className="card-body">
+                    <h6>Total Bank Payments</h6>
+                    <h4>₹{totals.totalBankPayments.toLocaleString()}</h4>
+                  </div>
+                </div>
+              </div>
+              <div className="col-lg-4 col-md-6 col-sm-6 mb-3">
+                <div className="summary-card cash-balance">
+                  <div className="card-body">
+                    <h6>Cash Balance</h6>
+                    <h4>₹{totals.cashBalance.toLocaleString()}</h4>
+                  </div>
+                </div>
+              </div>
+              <div className="col-lg-4 col-md-6 col-sm-6 mb-3">
+                <div className="summary-card bank-balance">
+                  <div className="card-body">
+                    <h6>Bank Balance</h6>
+                    <h4>₹{totals.bankBalance.toLocaleString()}</h4>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="col-lg-4 col-md-6 col-sm-6 mb-3">
-            <div className="summary-card bank-balance">
-              <div className="card-body">
-                <h6>Bank Balance</h6>
-                <h4>₹{totals.bankBalance.toLocaleString()}</h4>
-              </div>
-            </div>
-          </div>
-        </div>
+          ) : null;
+        })()}
 
 
 
