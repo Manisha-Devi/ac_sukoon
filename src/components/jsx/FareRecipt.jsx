@@ -241,7 +241,6 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const startDate = new Date(bookingData.dateFrom);
       const endDate = new Date(bookingData.dateTo);
 
-      // Validate date range conflicts
       for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
         const dateStr = d.toISOString().split('T')[0];
         if (isBookingDateDisabled(dateStr)) {
@@ -263,14 +262,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         const updatedData = fareData.map(entry => 
           entry.entryId === editingEntry.entryId 
             ? { ...entry,
-                type: "booking",
                 bookingDetails: bookingData.bookingDetails,
                 cashAmount: cashAmount,
                 bankAmount: bankAmount,
                 totalAmount: totalAmount,
                 dateFrom: bookingData.dateFrom,
                 dateTo: bookingData.dateTo,
-                date: bookingData.dateFrom, // Add date for consistency
               }
             : entry
         );
@@ -281,15 +278,15 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
         setIsLoading(false);
 
-        // Then sync to Google Sheets in background using proper booking API
-        simpleDataService.updateBookingEntry(editingEntry.entryId, {
+        // Then sync to Google Sheets in background
+        simpleDataService.updateFareEntry(editingEntry.entryId, {
           bookingDetails: bookingData.bookingDetails,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
           totalAmount: totalAmount,
           dateFrom: bookingData.dateFrom,
           dateTo: bookingData.dateTo,
-        }).catch(error => {
+        }, editingEntry.type).catch(error => {
           console.error('Background booking update sync failed:', error);
         });
 
@@ -305,7 +302,6 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           totalAmount: totalAmount,
           dateFrom: bookingData.dateFrom,
           dateTo: bookingData.dateTo,
-          date: bookingData.dateFrom, // Add date for consistency
           submittedBy: submittedBy
         };
 
@@ -315,17 +311,15 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
         setIsLoading(false);
 
-        // Then sync to Google Sheets in background using proper booking API
-        simpleDataService.addBookingEntry({
-          entryId: newEntry.entryId,
-          timestamp: newEntry.timestamp,
+        // Then sync to Google Sheets in background
+        simpleDataService.addFareEntry({
+          type: "booking",
           bookingDetails: bookingData.bookingDetails,
-          dateFrom: bookingData.dateFrom,
-          dateTo: bookingData.dateTo,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
           totalAmount: totalAmount,
-          submittedBy: submittedBy
+          dateFrom: bookingData.dateFrom,
+          dateTo: bookingData.dateTo,
         }).catch(error => {
           console.error('Background booking add sync failed:', error);
         });
