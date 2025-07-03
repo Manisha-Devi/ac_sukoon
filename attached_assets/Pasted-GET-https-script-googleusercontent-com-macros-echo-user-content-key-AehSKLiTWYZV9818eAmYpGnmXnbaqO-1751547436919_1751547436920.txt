@@ -1,0 +1,380 @@
+GET https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLiTWYZV9818eAmYpGnmXnbaqO02bWm91Jc6YdDSd3gcNKA35J17ONgeaZflHrKteaiAGTuvCElSXuY_lGDrsa9kQzI60zO7aEITrb5oek6iT1n9JA5k81QmMWkFe4K60fDEeR0zrKU9ThFaPrd5gMh-bPzXfh73QSWg7pfcVBPLvsJ-y2HIdc5IETeK7oROkO9oAofE3cIHVTFTjhLEPQboLQ3TVstafK0dz-77K1h20BR7swPjLafbk-TrjLBGo5KoShcZG0bEECdqk3b0hky0y_FGVuG8QafrLw-p&lib=MieMuve86j_26jFcHfa8roEX8JaA8MEGC net::ERR_CONNECTION_CLOSED
+getBookingEntries @ authService.js:597
+loadData @ FareRecipt.jsx:125
+(anonymous) @ FareRecipt.jsx:212
+react-stack-bottom-frame @ react-dom_client.js?v=270ab2c0:17478
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+commitHookEffectListMount @ react-dom_client.js?v=270ab2c0:8460
+commitHookPassiveMountEffects @ react-dom_client.js?v=270ab2c0:8518
+reconnectPassiveEffects @ react-dom_client.js?v=270ab2c0:10016
+doubleInvokeEffectsOnFiber @ react-dom_client.js?v=270ab2c0:11461
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11432
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11438
+commitDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11469
+flushPassiveEffects @ react-dom_client.js?v=270ab2c0:11309
+flushPendingEffects @ react-dom_client.js?v=270ab2c0:11276
+flushSpawnedWork @ react-dom_client.js?v=270ab2c0:11250
+commitRoot @ react-dom_client.js?v=270ab2c0:11081
+commitRootWhenReady @ react-dom_client.js?v=270ab2c0:10512
+performWorkOnRoot @ react-dom_client.js?v=270ab2c0:10457
+performSyncWorkOnRoot @ react-dom_client.js?v=270ab2c0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=270ab2c0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=270ab2c0:11558
+(anonymous) @ react-dom_client.js?v=270ab2c0:11649
+<FareEntry>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=270ab2c0:250
+App @ App.jsx:325
+react-stack-bottom-frame @ react-dom_client.js?v=270ab2c0:17424
+renderWithHooksAgain @ react-dom_client.js?v=270ab2c0:4281
+renderWithHooks @ react-dom_client.js?v=270ab2c0:4217
+updateFunctionComponent @ react-dom_client.js?v=270ab2c0:6619
+beginWork @ react-dom_client.js?v=270ab2c0:7654
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+performUnitOfWork @ react-dom_client.js?v=270ab2c0:10868
+workLoopSync @ react-dom_client.js?v=270ab2c0:10728
+renderRootSync @ react-dom_client.js?v=270ab2c0:10711
+performWorkOnRoot @ react-dom_client.js?v=270ab2c0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=270ab2c0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=270ab2c0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=270ab2c0:11558
+(anonymous) @ react-dom_client.js?v=270ab2c0:11649Understand this error
+authService.js:613 ❌ Error fetching booking entries: TypeError: Failed to fetch
+    at AuthService.getBookingEntries (authService.js:597:30)
+    at loadData (FareRecipt.jsx:125:23)
+    at FareRecipt.jsx:212:5
+    at react-stack-bottom-frame (react-dom_client.js?v=270ab2c0:17478:20)
+    at runWithFiberInDEV (react-dom_client.js?v=270ab2c0:1485:72)
+    at commitHookEffectListMount (react-dom_client.js?v=270ab2c0:8460:122)
+    at commitHookPassiveMountEffects (react-dom_client.js?v=270ab2c0:8518:60)
+    at reconnectPassiveEffects (react-dom_client.js?v=270ab2c0:10016:13)
+    at doubleInvokeEffectsOnFiber (react-dom_client.js?v=270ab2c0:11461:207)
+    at runWithFiberInDEV (react-dom_client.js?v=270ab2c0:1485:72)
+getBookingEntries @ authService.js:613
+await in getBookingEntries
+loadData @ FareRecipt.jsx:125
+(anonymous) @ FareRecipt.jsx:212
+react-stack-bottom-frame @ react-dom_client.js?v=270ab2c0:17478
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+commitHookEffectListMount @ react-dom_client.js?v=270ab2c0:8460
+commitHookPassiveMountEffects @ react-dom_client.js?v=270ab2c0:8518
+reconnectPassiveEffects @ react-dom_client.js?v=270ab2c0:10016
+doubleInvokeEffectsOnFiber @ react-dom_client.js?v=270ab2c0:11461
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11432
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11438
+commitDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11469
+flushPassiveEffects @ react-dom_client.js?v=270ab2c0:11309
+flushPendingEffects @ react-dom_client.js?v=270ab2c0:11276
+flushSpawnedWork @ react-dom_client.js?v=270ab2c0:11250
+commitRoot @ react-dom_client.js?v=270ab2c0:11081
+commitRootWhenReady @ react-dom_client.js?v=270ab2c0:10512
+performWorkOnRoot @ react-dom_client.js?v=270ab2c0:10457
+performSyncWorkOnRoot @ react-dom_client.js?v=270ab2c0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=270ab2c0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=270ab2c0:11558
+(anonymous) @ react-dom_client.js?v=270ab2c0:11649
+<FareEntry>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=270ab2c0:250
+App @ App.jsx:325
+react-stack-bottom-frame @ react-dom_client.js?v=270ab2c0:17424
+renderWithHooksAgain @ react-dom_client.js?v=270ab2c0:4281
+renderWithHooks @ react-dom_client.js?v=270ab2c0:4217
+updateFunctionComponent @ react-dom_client.js?v=270ab2c0:6619
+beginWork @ react-dom_client.js?v=270ab2c0:7654
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+performUnitOfWork @ react-dom_client.js?v=270ab2c0:10868
+workLoopSync @ react-dom_client.js?v=270ab2c0:10728
+renderRootSync @ react-dom_client.js?v=270ab2c0:10711
+performWorkOnRoot @ react-dom_client.js?v=270ab2c0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=270ab2c0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=270ab2c0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=270ab2c0:11558
+(anonymous) @ react-dom_client.js?v=270ab2c0:11649Understand this error
+authService.js:571 
+            
+            
+           GET https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLgstsv2ihLgJFRG8NKt3yCoQ9F-d7Tk149PesHUCfoM2Y2aCXWJswRJ3PrBfnx9dAeE_lh-4VQa18FIInJBvfncjPTAJVDwqoso5ahcHlcKEPTtAXouZFXNM7s85teuS1qF-j8Yr5LeQKKpFQE-RSyxVKuBXlj2yV4e3TyICViLBIW1tRSOAbDwtNkhY4C_AytFez8rX4z8l7Jxx5lmQ6NA5NdYNktojDZS6XKnlZKns9HqRAK8RuUWEO5BhFxZR6BYyAh3UqTro4ctYKsGNKzAFXAfGPObtFWmIfgE&lib=MieMuve86j_26jFcHfa8roEX8JaA8MEGC net::ERR_CONNECTION_CLOSED
+getFareReceipts @ authService.js:571
+loadData @ FareRecipt.jsx:124
+(anonymous) @ FareRecipt.jsx:212
+react-stack-bottom-frame @ react-dom_client.js?v=270ab2c0:17478
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+commitHookEffectListMount @ react-dom_client.js?v=270ab2c0:8460
+commitHookPassiveMountEffects @ react-dom_client.js?v=270ab2c0:8518
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9887
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9899
+flushPassiveEffects @ react-dom_client.js?v=270ab2c0:11302
+flushPendingEffects @ react-dom_client.js?v=270ab2c0:11276
+flushSpawnedWork @ react-dom_client.js?v=270ab2c0:11250
+commitRoot @ react-dom_client.js?v=270ab2c0:11081
+commitRootWhenReady @ react-dom_client.js?v=270ab2c0:10512
+performWorkOnRoot @ react-dom_client.js?v=270ab2c0:10457
+performSyncWorkOnRoot @ react-dom_client.js?v=270ab2c0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=270ab2c0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=270ab2c0:11558
+(anonymous) @ react-dom_client.js?v=270ab2c0:11649
+<FareEntry>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=270ab2c0:250
+App @ App.jsx:325
+react-stack-bottom-frame @ react-dom_client.js?v=270ab2c0:17424
+renderWithHooksAgain @ react-dom_client.js?v=270ab2c0:4281
+renderWithHooks @ react-dom_client.js?v=270ab2c0:4217
+updateFunctionComponent @ react-dom_client.js?v=270ab2c0:6619
+beginWork @ react-dom_client.js?v=270ab2c0:7654
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+performUnitOfWork @ react-dom_client.js?v=270ab2c0:10868
+workLoopSync @ react-dom_client.js?v=270ab2c0:10728
+renderRootSync @ react-dom_client.js?v=270ab2c0:10711
+performWorkOnRoot @ react-dom_client.js?v=270ab2c0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=270ab2c0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=270ab2c0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=270ab2c0:11558
+(anonymous) @ react-dom_client.js?v=270ab2c0:11649Understand this error
+authService.js:587 ❌ Error fetching fare receipts: TypeError: Failed to fetch
+    at AuthService.getFareReceipts (authService.js:571:30)
+    at loadData (FareRecipt.jsx:124:23)
+    at FareRecipt.jsx:212:5
+    at react-stack-bottom-frame (react-dom_client.js?v=270ab2c0:17478:20)
+    at runWithFiberInDEV (react-dom_client.js?v=270ab2c0:1485:72)
+    at commitHookEffectListMount (react-dom_client.js?v=270ab2c0:8460:122)
+    at commitHookPassiveMountEffects (react-dom_client.js?v=270ab2c0:8518:60)
+    at commitPassiveMountOnFiber (react-dom_client.js?v=270ab2c0:9887:29)
+    at recursivelyTraversePassiveMountEffects (react-dom_client.js?v=270ab2c0:9868:13)
+    at commitPassiveMountOnFiber (react-dom_client.js?v=270ab2c0:9984:13)
+getFareReceipts @ authService.js:587
+await in getFareReceipts
+loadData @ FareRecipt.jsx:124
+(anonymous) @ FareRecipt.jsx:212
+react-stack-bottom-frame @ react-dom_client.js?v=270ab2c0:17478
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+commitHookEffectListMount @ react-dom_client.js?v=270ab2c0:8460
+commitHookPassiveMountEffects @ react-dom_client.js?v=270ab2c0:8518
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9887
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9899
+flushPassiveEffects @ react-dom_client.js?v=270ab2c0:11302
+flushPendingEffects @ react-dom_client.js?v=270ab2c0:11276
+flushSpawnedWork @ react-dom_client.js?v=270ab2c0:11250
+commitRoot @ react-dom_client.js?v=270ab2c0:11081
+commitRootWhenReady @ react-dom_client.js?v=270ab2c0:10512
+performWorkOnRoot @ react-dom_client.js?v=270ab2c0:10457
+performSyncWorkOnRoot @ react-dom_client.js?v=270ab2c0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=270ab2c0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=270ab2c0:11558
+(anonymous) @ react-dom_client.js?v=270ab2c0:11649
+<FareEntry>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=270ab2c0:250
+App @ App.jsx:325
+react-stack-bottom-frame @ react-dom_client.js?v=270ab2c0:17424
+renderWithHooksAgain @ react-dom_client.js?v=270ab2c0:4281
+renderWithHooks @ react-dom_client.js?v=270ab2c0:4217
+updateFunctionComponent @ react-dom_client.js?v=270ab2c0:6619
+beginWork @ react-dom_client.js?v=270ab2c0:7654
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+performUnitOfWork @ react-dom_client.js?v=270ab2c0:10868
+workLoopSync @ react-dom_client.js?v=270ab2c0:10728
+renderRootSync @ react-dom_client.js?v=270ab2c0:10711
+performWorkOnRoot @ react-dom_client.js?v=270ab2c0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=270ab2c0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=270ab2c0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=270ab2c0:11558
+(anonymous) @ react-dom_client.js?v=270ab2c0:11649Understand this error
+authService.js:623 
+            
+            
+           GET https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLhRyXa9oFcBZE7lbMfnouMsBLquFuHHAhHUh-DxcuOU_9smcQuRFk1XGX5ZEXvkTGmRpcR12kX4Nh1Yxj3tANJthOUh-pvj77GrapDGIYSYnkETUunLb5ZKeaed6igL9CIdYQ69QMAeqyUGCog6Sevf_qI_M5vBLM6NqLRAqjHbyL0BgfLCRMKffX5FDuEMt_E1pK1bSv_oVrmroqKPg4N_Xf5_HKvOYqgqHNMhKWSS6AGGlcdqAofa_VeD-U0gCZzhjd-daHKDX3iAZ9hnfmv7jZ-6-WIIdRlexw8H&lib=MieMuve86j_26jFcHfa8roEX8JaA8MEGC net::ERR_CONNECTION_CLOSED
+getOffDays @ authService.js:623
+loadData @ FareRecipt.jsx:126
+(anonymous) @ FareRecipt.jsx:212
+react-stack-bottom-frame @ react-dom_client.js?v=270ab2c0:17478
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+commitHookEffectListMount @ react-dom_client.js?v=270ab2c0:8460
+commitHookPassiveMountEffects @ react-dom_client.js?v=270ab2c0:8518
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9887
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9899
+flushPassiveEffects @ react-dom_client.js?v=270ab2c0:11302
+flushPendingEffects @ react-dom_client.js?v=270ab2c0:11276
+flushSpawnedWork @ react-dom_client.js?v=270ab2c0:11250
+commitRoot @ react-dom_client.js?v=270ab2c0:11081
+commitRootWhenReady @ react-dom_client.js?v=270ab2c0:10512
+performWorkOnRoot @ react-dom_client.js?v=270ab2c0:10457
+performSyncWorkOnRoot @ react-dom_client.js?v=270ab2c0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=270ab2c0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=270ab2c0:11558
+(anonymous) @ react-dom_client.js?v=270ab2c0:11649
+<FareEntry>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=270ab2c0:250
+App @ App.jsx:325
+react-stack-bottom-frame @ react-dom_client.js?v=270ab2c0:17424
+renderWithHooksAgain @ react-dom_client.js?v=270ab2c0:4281
+renderWithHooks @ react-dom_client.js?v=270ab2c0:4217
+updateFunctionComponent @ react-dom_client.js?v=270ab2c0:6619
+beginWork @ react-dom_client.js?v=270ab2c0:7654
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+performUnitOfWork @ react-dom_client.js?v=270ab2c0:10868
+workLoopSync @ react-dom_client.js?v=270ab2c0:10728
+renderRootSync @ react-dom_client.js?v=270ab2c0:10711
+performWorkOnRoot @ react-dom_client.js?v=270ab2c0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=270ab2c0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=270ab2c0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=270ab2c0:11558
+(anonymous) @ react-dom_client.js?v=270ab2c0:11649Understand this error
+authService.js:639 ❌ Error fetching off days: TypeError: Failed to fetch
+    at AuthService.getOffDays (authService.js:623:30)
+    at loadData (FareRecipt.jsx:126:23)
+    at FareRecipt.jsx:212:5
+    at react-stack-bottom-frame (react-dom_client.js?v=270ab2c0:17478:20)
+    at runWithFiberInDEV (react-dom_client.js?v=270ab2c0:1485:72)
+    at commitHookEffectListMount (react-dom_client.js?v=270ab2c0:8460:122)
+    at commitHookPassiveMountEffects (react-dom_client.js?v=270ab2c0:8518:60)
+    at commitPassiveMountOnFiber (react-dom_client.js?v=270ab2c0:9887:29)
+    at recursivelyTraversePassiveMountEffects (react-dom_client.js?v=270ab2c0:9868:13)
+    at commitPassiveMountOnFiber (react-dom_client.js?v=270ab2c0:9984:13)
+getOffDays @ authService.js:639
+await in getOffDays
+loadData @ FareRecipt.jsx:126
+(anonymous) @ FareRecipt.jsx:212
+react-stack-bottom-frame @ react-dom_client.js?v=270ab2c0:17478
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+commitHookEffectListMount @ react-dom_client.js?v=270ab2c0:8460
+commitHookPassiveMountEffects @ react-dom_client.js?v=270ab2c0:8518
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9887
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=270ab2c0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=270ab2c0:9899
+flushPassiveEffects @ react-dom_client.js?v=270ab2c0:11302
+flushPendingEffects @ react-dom_client.js?v=270ab2c0:11276
+flushSpawnedWork @ react-dom_client.js?v=270ab2c0:11250
+commitRoot @ react-dom_client.js?v=270ab2c0:11081
+commitRootWhenReady @ react-dom_client.js?v=270ab2c0:10512
+performWorkOnRoot @ react-dom_client.js?v=270ab2c0:10457
+performSyncWorkOnRoot @ react-dom_client.js?v=270ab2c0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=270ab2c0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=270ab2c0:11558
+(anonymous) @ react-dom_client.js?v=270ab2c0:11649
+<FareEntry>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=270ab2c0:250
+App @ App.jsx:325
+react-stack-bottom-frame @ react-dom_client.js?v=270ab2c0:17424
+renderWithHooksAgain @ react-dom_client.js?v=270ab2c0:4281
+renderWithHooks @ react-dom_client.js?v=270ab2c0:4217
+updateFunctionComponent @ react-dom_client.js?v=270ab2c0:6619
+beginWork @ react-dom_client.js?v=270ab2c0:7654
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+performUnitOfWork @ react-dom_client.js?v=270ab2c0:10868
+workLoopSync @ react-dom_client.js?v=270ab2c0:10728
+renderRootSync @ react-dom_client.js?v=270ab2c0:10711
+performWorkOnRoot @ react-dom_client.js?v=270ab2c0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=270ab2c0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=270ab2c0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=270ab2c0:11558
+(anonymous) @ react-dom_client.js?v=270ab2c0:11649Understand this error
+authService.js:571 
+            
+            
+           GET https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLjEiUWx5Q70glxDOuyDgFXhq7qsZdj0gOlMG9p4Umcg2QBqoNXfXYxZ20_9imXD7gEJNcgxlfGjrR6Nhc6FxZLjIdMtnhdudWJVFUFk85kuVd5oJ_pyETI9fCXs-cBk41r8W2hqek9xWz8CRzohxEWITeUNJdId8AwNn_C9tmVYfNsRmyQzwr7ODPFO_e5b2uFO7gzK9zJT315gLgtMETKhxFvSfBgZafwS3eNUjulSvqVZmbgvrsfRFGZkbCxEa7TCktPskqppr4kMWF02BWHjZ_fPydiBBfzZSf6C&lib=MieMuve86j_26jFcHfa8roEX8JaA8MEGC net::ERR_CONNECTION_CLOSED
+getFareReceipts @ authService.js:571
+loadData @ FareRecipt.jsx:124
+(anonymous) @ FareRecipt.jsx:212
+react-stack-bottom-frame @ react-dom_client.js?v=270ab2c0:17478
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+commitHookEffectListMount @ react-dom_client.js?v=270ab2c0:8460
+commitHookPassiveMountEffects @ react-dom_client.js?v=270ab2c0:8518
+reconnectPassiveEffects @ react-dom_client.js?v=270ab2c0:10016
+doubleInvokeEffectsOnFiber @ react-dom_client.js?v=270ab2c0:11461
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11432
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11438
+commitDoubleInvokeEffectsInDEV @ react-dom_client.js?v=270ab2c0:11469
+flushPassiveEffects @ react-dom_client.js?v=270ab2c0:11309
+flushPendingEffects @ react-dom_client.js?v=270ab2c0:11276
+flushSpawnedWork @ react-dom_client.js?v=270ab2c0:11250
+commitRoot @ react-dom_client.js?v=270ab2c0:11081
+commitRootWhenReady @ react-dom_client.js?v=270ab2c0:10512
+performWorkOnRoot @ react-dom_client.js?v=270ab2c0:10457
+performSyncWorkOnRoot @ react-dom_client.js?v=270ab2c0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=270ab2c0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=270ab2c0:11558
+(anonymous) @ react-dom_client.js?v=270ab2c0:11649
+<FareEntry>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=270ab2c0:250
+App @ App.jsx:325
+react-stack-bottom-frame @ react-dom_client.js?v=270ab2c0:17424
+renderWithHooksAgain @ react-dom_client.js?v=270ab2c0:4281
+renderWithHooks @ react-dom_client.js?v=270ab2c0:4217
+updateFunctionComponent @ react-dom_client.js?v=270ab2c0:6619
+beginWork @ react-dom_client.js?v=270ab2c0:7654
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+performUnitOfWork @ react-dom_client.js?v=270ab2c0:10868
+workLoopSync @ react-dom_client.js?v=270ab2c0:10728
+renderRootSync @ react-dom_client.js?v=270ab2c0:10711
+performWorkOnRoot @ react-dom_client.js?v=270ab2c0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=270ab2c0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=270ab2c0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=270ab2c0:11558
+(anonymous) @ react-dom_client.js?v=270ab2c0:11649Understand this error
+authService.js:587 ❌ Error fetching fare receipts: TypeError: Failed to fetch
+    at AuthService.getFareReceipts (authService.js:571:30)
+    at loadData (FareRecipt.jsx:124:23)
+    at FareRecipt.jsx:212:5
+    at react-stack-bottom-frame (react-dom_client.js?v=270ab2c0:17478:20)
+    at runWithFiberInDEV (react-dom_client.js?v=270ab2c0:1485:72)
+    at commitHookEffectListMount (react-dom_client.js?v=270ab2c0:8460:122)
+    at commitHookPassiveMountEffects (react-dom_client.js?v=270ab2c0:8518:60)
+    at reconnectPassiveEffects (react-dom_client.js?v=270ab2c0:10016:13)
+    at doubleInvokeEffectsOnFiber (react-dom_client.js?v=270ab2c0:11461:207)
+    at runWithFiberInDEV (react-dom_client.js?v=270ab2c0:1485:72)
