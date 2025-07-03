@@ -653,7 +653,7 @@ class AuthService {
   // Delete Fuel Payment
   async deleteFuelPayment(data) {
     try {
-      console.log('🗑️ Deleting fuel payment from Google Sheets:', data);
+      console.log('🗑️ Deleting fuel payment in Google Sheets:', data);
 
       const response = await fetch(this.API_URL, {
         method: 'POST',
@@ -668,12 +668,8 @@ class AuthService {
         })
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
       const result = await response.json();
-      console.log('✅ Fuel payment deletion response:', result);
+      console.log('✅ Fuel payment delete response:', result);
       return result;
     } catch (error) {
       console.error('❌ Error deleting fuel payment:', error);
@@ -681,23 +677,17 @@ class AuthService {
     }
   }
 
-  // ======= SERVICE PAYMENTS =======
-
-  // Add Service Payment
-  async addServicePayment(data) {
+  // Add Off Day to Google Sheets
+  async addOffDay(data) {
     try {
-      console.log('📝 Adding service payment to Google Sheets:', data);
+      console.log('📝 Adding off day to Google Sheets:', data);
 
       const requestBody = JSON.stringify({
-        action: 'addServicePayment',
+        action: 'addOffDay',
         entryId: data.entryId,
         timestamp: data.timestamp,
         date: data.date,
-        serviceType: data.serviceType || '',
-        serviceDetails: data.serviceDetails || '',
-        cashAmount: data.cashAmount || 0,
-        bankAmount: data.bankAmount || 0,
-        totalAmount: data.totalAmount || 0,
+        reason: data.reason,
         submittedBy: data.submittedBy || 'driver'
       });
 
@@ -708,20 +698,20 @@ class AuthService {
         return { success: false, error: 'API temporarily unavailable - data saved locally' };
       }
 
-      console.log('✅ Service payment response:', result);
+      console.log('✅ Off day response:', result);
       return result;
     } catch (error) {
-      console.error('❌ Error adding service payment:', error);
+      console.error('❌ Error adding off day:', error);
       return { success: false, error: error.message };
     }
   }
 
-  // Get all Service Payments from Google Sheets
-  async getServicePayments() {
+  // Get all Fare Receipts from Google Sheets
+  async getFareReceipts() {
     try {
-      console.log('📋 Fetching service payments from Google Sheets...');
+      console.log('📋 Fetching fare receipts from Google Sheets...');
 
-      let controller = new AbortController();
+      const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
       const response = await fetch(this.API_URL, {
@@ -733,7 +723,7 @@ class AuthService {
         redirect: 'follow',
         signal: controller.signal,
         body: JSON.stringify({
-          action: 'getServicePayments'
+          action: 'getFareReceipts'
         })
       });
 
@@ -744,120 +734,25 @@ class AuthService {
       }
 
       const result = await response.json();
-      console.log('✅ Service payments fetched:', result);
+      console.log('✅ Fare receipts fetched:', result);
       return result;
     } catch (error) {
-      console.error('❌ Error fetching service payments:', error);
+      console.error('❌ Error fetching fare receipts:', error);
       // Return empty data structure instead of error to prevent UI crashes
       return { 
         success: true, 
         data: [],
-        message: 'Service payments loaded from local cache (API temporarily unavailable)'
+        message: 'Fare receipts loaded from local cache (API temporarily unavailable)'
       };
     }
   }
 
-  // Update Service Payment
-  async updateServicePayment(data) {
+  // Get Booking Entries from Google Sheets
+  async getBookingEntries() {
     try {
-      console.log('📝 Updating service payment in Google Sheets:', data);
+      console.log('📋 Fetching booking entries from Google Sheets...');
 
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'updateServicePayment',
-          entryId: data.entryId,
-          updatedData: data.updatedData
-        })
-      });
-
-      const result = await response.json();
-      console.log('✅ Service payment update response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error updating service payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Delete Service Payment
-  async deleteServicePayment(data) {
-    try {
-      console.log('🗑️ Deleting service payment from Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'deleteServicePayment',
-          entryId: data.entryId
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Service payment deletion response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error deleting service payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // ======= OTHER PAYMENTS =======
-
-  // Add Other Payment
-  async addOtherPayment(data) {
-    try {
-      console.log('📝 Adding other payment to Google Sheets:', data);
-
-      const requestBody = JSON.stringify({
-        action: 'addOtherPayment',
-        entryId: data.entryId,
-        timestamp: data.timestamp,
-        date: data.date,
-        paymentType: data.paymentType || '',
-        description: data.description || '',
-        category: data.category || '',
-        cashAmount: data.cashAmount || 0,
-        bankAmount: data.bankAmount || 0,
-        totalAmount: data.totalAmount || 0,
-        submittedBy: data.submittedBy || 'driver'
-      });
-
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
-
-      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
-        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
-        return { success: false, error: 'API temporarily unavailable - data saved locally' };
-      }
-
-      console.log('✅ Other payment response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error adding other payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Get all Other Payments from Google Sheets
-  async getOtherPayments() {
-    try {
-      console.log('📋 Fetching other payments from Google Sheets...');
-
-      let controller = new AbortController();
+      const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
       const response = await fetch(this.API_URL, {
@@ -869,7 +764,7 @@ class AuthService {
         redirect: 'follow',
         signal: controller.signal,
         body: JSON.stringify({
-          action: 'getOtherPayments'
+          action: 'getBookingEntries'
         })
       });
 
@@ -880,117 +775,23 @@ class AuthService {
       }
 
       const result = await response.json();
-      console.log('✅ Other payments fetched:', result);
+      console.log('✅ Booking entries fetched:', result);
       return result;
     } catch (error) {
-      console.error('❌ Error fetching other payments:', error);
+      console.error('❌ Error fetching booking entries:', error);
       // Return empty data structure instead of error to prevent UI crashes
       return { 
         success: true, 
         data: [],
-        message: 'Other payments loaded from local cache (API temporarily unavailable)'
+        message: 'Booking entries loaded from local cache (API temporarily unavailable)'
       };
     }
   }
 
-  // Update Other Payment
-  async updateOtherPayment(data) {
+  // Get Off Days from Google Sheets
+  async getOffDays() {
     try {
-      console.log('📝 Updating other payment in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'updateOtherPayment',
-          entryId: data.entryId,
-          updatedData: data.updatedData
-        })
-      });
-
-      const result = await response.json();
-      console.log('✅ Other payment update response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error updating other payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Delete Other Payment
-  async deleteOtherPayment(data) {
-    try {
-      console.log('🗑️ Deleting other payment from Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'deleteOtherPayment',
-          entryId: data.entryId
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Other payment deletion response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error deleting other payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // ======= UNION PAYMENTS =======
-
-  // Add Union Payment
-  async addUnionPayment(data) {
-    try {
-      console.log('📝 Adding union payment to Google Sheets:', data);
-
-      const requestBody = JSON.stringify({
-        action: 'addUnionPayment',
-        entryId: data.entryId,
-        timestamp: data.timestamp,
-        date: data.date,
-        unionName: data.unionName || '',
-        cashAmount: data.cashAmount || 0,
-        bankAmount: data.bankAmount || 0,
-        totalAmount: data.totalAmount || 0,
-        remarks: data.remarks || '',
-        submittedBy: data.submittedBy || 'driver'
-      });
-
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
-
-      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
-        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
-        return { success: false, error: 'API temporarily unavailable - data saved locally' };
-      }
-
-      console.log('✅ Union payment response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error adding union payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Get all Union Payments from Google Sheets
-  async getUnionPayments() {
-    try {
-      console.log('📋 Fetching union payments from Google Sheets...');
+      console.log('📋 Fetching off days from Google Sheets...');
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
@@ -1004,7 +805,7 @@ class AuthService {
         redirect: 'follow',
         signal: controller.signal,
         body: JSON.stringify({
-          action: 'getUnionPayments'
+          action: 'getOffDays'
         })
       });
 
@@ -1015,22 +816,23 @@ class AuthService {
       }
 
       const result = await response.json();
-      console.log('✅ Union payments fetched:', result);
+      console.log('✅ Off days fetched:', result);
       return result;
     } catch (error) {
-      console.error('❌ Error fetching union payments:', error);
+      console.error('❌ Error fetching off days:', error);
+      // Return empty data structure instead of error to prevent UI crashes
       return { 
         success: true, 
         data: [],
-        message: 'Union payments loaded from local cache (API temporarily unavailable)'
+        message: 'Off days loaded from local cache (API temporarily unavailable)'
       };
     }
   }
 
-  // Update Union Payment
-  async updateUnionPayment(data) {
+  // Update existing entry in Google Sheets
+  async updateFareEntry(entryId, updatedData, entryType) {
     try {
-      console.log('📝 Updating union payment in Google Sheets:', data);
+      console.log('📝 Updating entry in Google Sheets:', { entryId, updatedData, entryType });
 
       const response = await fetch(this.API_URL, {
         method: 'POST',
@@ -1040,29 +842,26 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         body: JSON.stringify({
-          action: 'updateUnionPayment',
-          entryId: data.entryId,
-          updatedData: data.updatedData
+          action: 'updateFareEntry',
+          entryId: entryId,
+          updatedData: updatedData,
+          entryType: entryType
         })
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
       const result = await response.json();
-      console.log('✅ Union payment update response:', result);
+      console.log('✅ Update entry response:', result);
       return result;
     } catch (error) {
-      console.error('❌ Error updating union payment:', error);
+      console.error('❌ Error updating entry:', error);
       return { success: false, error: error.message };
     }
   }
 
-  // Delete Union Payment
-  async deleteUnionPayment(data) {
+  // Delete entry from Google Sheets
+  async deleteFareEntry(entryId, entryType) {
     try {
-      console.log('🗑️ Deleting union payment from Google Sheets:', data);
+      console.log('🗑️ Deleting entry from Google Sheets:', { entryId, entryType });
 
       const response = await fetch(this.API_URL, {
         method: 'POST',
@@ -1072,296 +871,17 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         body: JSON.stringify({
-          action: 'deleteUnionPayment',
-          entryId: data.entryId
+          action: 'deleteFareEntry',
+          entryId: entryId,
+          entryType: entryType
         })
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
       const result = await response.json();
-      console.log('✅ Union payment deletion response:', result);
+      console.log('✅ Delete entry response:', result);
       return result;
     } catch (error) {
-      console.error('❌ Error deleting union payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // ======= SERVICE PAYMENTS =======
-
-  // Add Service Payment
-  async addServicePayment(data) {
-    try {
-      console.log('📝 Adding service payment to Google Sheets:', data);
-
-      const requestBody = JSON.stringify({
-        action: 'addServicePayment',
-        entryId: data.entryId,
-        timestamp: data.timestamp,
-        date: data.date,
-        serviceType: data.serviceType || '',
-        cashAmount: data.cashAmount || 0,
-        bankAmount: data.bankAmount || 0,
-        totalAmount: data.totalAmount || 0,
-        serviceDetails: data.serviceDetails || '',
-        submittedBy: data.submittedBy || 'driver'
-      });
-
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
-
-      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
-        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
-        return { success: false, error: 'API temporarily unavailable - data saved locally' };
-      }
-
-      console.log('✅ Service payment response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error adding service payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Get all Service Payments from Google Sheets
-  async getServicePayments() {
-    try {
-      console.log('📋 Fetching service payments from Google Sheets...');
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'getServicePayments'
-        })
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Service payments fetched:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error fetching service payments:', error);
-      return { 
-        success: true, 
-        data: [],
-        message: 'Service payments loaded from local cache (API temporarily unavailable)'
-      };
-    }
-  }
-
-  // Update Service Payment
-  async updateServicePayment(data) {
-    try {
-      console.log('📝 Updating service payment in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'updateServicePayment',
-          entryId: data.entryId,
-          updatedData: data.updatedData
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Service payment update response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error updating service payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Delete Service Payment
-  async deleteServicePayment(data) {
-    try {
-      console.log('🗑️ Deleting service payment from Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'deleteServicePayment',
-          entryId: data.entryId
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Service payment deletion response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error deleting service payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // ======= OTHER PAYMENTS =======
-
-  // Add Other Payment
-  async addOtherPayment(data) {
-    try {
-      console.log('📝 Adding other payment to Google Sheets:', data);
-
-      const requestBody = JSON.stringify({
-        action: 'addOtherPayment',
-        entryId: data.entryId,
-        timestamp: data.timestamp,
-        date: data.date,
-        paymentType: data.paymentType || '',
-        description: data.description || '',
-        cashAmount: data.cashAmount || 0,
-        bankAmount: data.bankAmount || 0,
-        totalAmount: data.totalAmount || 0,
-        category: data.category || '',
-        submittedBy: data.submittedBy || 'driver'
-      });
-
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
-
-      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
-        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
-        return { success: false, error: 'API temporarily unavailable - data saved locally' };
-      }
-
-      console.log('✅ Other payment response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error adding other payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Get all Other Payments from Google Sheets
-  async getOtherPayments() {
-    try {
-      console.log('📋 Fetching other payments from Google Sheets...');
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'getOtherPayments'
-        })
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);      }
-
-      const result = await response.json();
-      console.log('✅ Other payments fetched:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error fetching other payments:', error);
-      return { 
-        success: true, 
-        data: [],
-        message: 'Other payments loaded from local cache (API temporarily unavailable)'
-      };
-    }
-  }
-
-  // Update Other Payment
-  async updateOtherPayment(data) {
-    try {
-      console.log('📝 Updating other payment in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'updateOtherPayment',
-          entryId: data.entryId,
-          updatedData: data.updatedData
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Other payment update response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error updating other payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Delete Other Payment
-  async deleteOtherPayment(data) {
-    try {
-      console.log('🗑️ Deleting other payment from Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'deleteOtherPayment',
-          entryId: data.entryId
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Other payment deletion response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error deleting other payment:', error);
+      console.error('❌ Error deleting entry:', error);
       return { success: false, error: error.message };
     }
   }
