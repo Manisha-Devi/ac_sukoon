@@ -20,31 +20,46 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
     });
   }, [fareData, expenseData, cashBookEntries]);
 
-  // Calculate totals from cashBookEntries
+  // Calculate totals from fareData and expenseData directly
   const calculateTotals = () => {
-    let totalCashReceipts = 0;
-    let totalCashPayments = 0;
-    let totalBankReceipts = 0;
-    let totalBankPayments = 0;
+    // Calculate from fare data (receipts)
+    let totalCashReceipts = fareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
+    let totalBankReceipts = fareData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+
+    // Calculate from expense data (payments)
+    let totalCashPayments = expenseData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
+    let totalBankPayments = expenseData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+
+    // Also calculate from cash book entries as backup
+    let cbCashReceipts = 0;
+    let cbCashPayments = 0;
+    let cbBankReceipts = 0;
+    let cbBankPayments = 0;
 
     cashBookEntries.forEach(entry => {
       if (entry.type === 'dr') {
-        totalCashReceipts += entry.cashAmount || 0;
-        totalBankReceipts += entry.bankAmount || 0;
+        cbCashReceipts += entry.cashAmount || 0;
+        cbBankReceipts += entry.bankAmount || 0;
       } else if (entry.type === 'cr') {
-        totalCashPayments += entry.cashAmount || 0;
-        totalBankPayments += entry.bankAmount || 0;
+        cbCashPayments += entry.cashAmount || 0;
+        cbBankPayments += entry.bankAmount || 0;
       }
     });
 
-    const cashBalance = totalCashReceipts - totalCashPayments;
-    const bankBalance = totalBankReceipts - totalBankPayments;
+    // Use direct data if available, otherwise use cash book data
+    const finalCashReceipts = totalCashReceipts > 0 ? totalCashReceipts : cbCashReceipts;
+    const finalBankReceipts = totalBankReceipts > 0 ? totalBankReceipts : cbBankReceipts;
+    const finalCashPayments = totalCashPayments > 0 ? totalCashPayments : cbCashPayments;
+    const finalBankPayments = totalBankPayments > 0 ? totalBankPayments : cbBankPayments;
+
+    const cashBalance = finalCashReceipts - finalCashPayments;
+    const bankBalance = finalBankReceipts - finalBankPayments;
 
     return {
-      totalCashReceipts,
-      totalCashPayments,
-      totalBankReceipts,
-      totalBankPayments,
+      totalCashReceipts: finalCashReceipts,
+      totalCashPayments: finalCashPayments,
+      totalBankReceipts: finalBankReceipts,
+      totalBankPayments: finalBankPayments,
       cashBalance,
       bankBalance
     };
