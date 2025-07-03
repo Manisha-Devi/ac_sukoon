@@ -538,8 +538,7 @@ function updateBookingEntry(data) {
     if (updatedData.totalAmount !== undefined) {
       sheet.getRange(rowIndex, 7).setValue(updatedData.totalAmount); // G: TotalAmount
     }
-    // Update timestamp
-    sheet.getRange(rowIndex, 1).setValue(new Date()); // A: Timestamp
+    // Keep original timestamp - don't modify it
 
     return {
       success: true,
@@ -711,8 +710,7 @@ function updateOffDay(data) {
     if (updatedData.reason) {
       sheet.getRange(rowIndex, 3).setValue(updatedData.reason); // C: Reason
     }
-    // Update timestamp
-    sheet.getRange(rowIndex, 1).setValue(new Date()); // A: Timestamp
+    // Keep original timestamp - don't modify it
 
     return {
       success: true,
