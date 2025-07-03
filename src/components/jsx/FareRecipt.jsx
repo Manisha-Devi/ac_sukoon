@@ -325,6 +325,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                 bankAmount: bankAmount,
                 totalAmount: totalAmount,
                 date: dateOnly, // Use string date
+                timestamp: timeOnly, // Update timestamp
               }
             : entry
         );
@@ -431,6 +432,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                 totalAmount: totalAmount,
                 dateFrom: startDateStr, // Use string date
                 dateTo: endDateStr, // Use string date
+                timestamp: timeOnly, // Update timestamp
               }
             : entry
         );
@@ -525,7 +527,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         // UPDATE: First update React state immediately
         const updatedData = fareData.map(entry => 
           entry.entryId === editingEntry.entryId 
-            ? { ...entry, date: dateOnly, reason: offDayData.reason } // Use string date
+            ? { ...entry, date: dateOnly, reason: offDayData.reason, timestamp: timeOnly } // Use string date and update timestamp
             : entry
         );
         setFareData(updatedData);
