@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../css/FareRecipt.css";
-import simpleDataService from '../../services/simpleDataService.js';
+import * as authService from '../../services/authService.js';
 
 function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries }) {
   const [activeTab, setActiveTab] = useState("daily");
@@ -31,7 +31,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const data = await simpleDataService.initializeData();
+        const data = await authService.getAllFareReceipts();
         setFareData(data);
 
         const total = data.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
@@ -182,15 +182,17 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         setIsLoading(false);
 
         // Then sync to Google Sheets in background
-        simpleDataService.updateFareEntry(editingEntry.entryId, {
-          route: dailyFareData.route,
-          cashAmount: cashAmount,
-          bankAmount: bankAmount,
-          totalAmount: totalAmount,
-          date: dailyFareData.date,
-        }, editingEntry.type).catch(error => {
-          console.error('Background update sync failed:', error);
-          // Could add a retry mechanism or show a subtle notification
+        authService.updateFareReceipt({
+          entryId: editingEntry.entryId,
+          updatedData: {
+            date: dailyFareData.date,
+            route: dailyFareData.route,
+            cashAmount: cashAmount,
+            bankAmount: bankAmount,
+            totalAmount: totalAmount,
+          }
+        }).catch(error => {
+          console.error('Background daily update sync failed:', error);
         });
 
       } else {
@@ -214,16 +216,17 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         setIsLoading(false);
 
         // Then sync to Google Sheets in background
-        simpleDataService.addFareEntry({
-          type: "daily",
+        authService.addFareReceipt({
+          entryId: newEntry.entryId,
+          timestamp: newEntry.timestamp,
+          date: dailyFareData.date,
           route: dailyFareData.route,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
           totalAmount: totalAmount,
-          date: dailyFareData.date,
+          submittedBy: submittedBy
         }).catch(error => {
-          console.error('Background add sync failed:', error);
-          // Could add a retry mechanism or show a subtle notification
+          console.error('Background daily add sync failed:', error);
         });
       }
     } catch (error) {
@@ -279,14 +282,17 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         setIsLoading(false);
 
         // Then sync to Google Sheets in background
-        simpleDataService.updateFareEntry(editingEntry.entryId, {
-          bookingDetails: bookingData.bookingDetails,
-          cashAmount: cashAmount,
-          bankAmount: bankAmount,
-          totalAmount: totalAmount,
-          dateFrom: bookingData.dateFrom,
-          dateTo: bookingData.dateTo,
-        }, editingEntry.type).catch(error => {
+        authService.updateFareReceipt({
+          entryId: editingEntry.entryId,
+          updatedData: {
+            bookingDetails: bookingData.bookingDetails,
+            cashAmount: cashAmount,
+            bankAmount: bankAmount,
+            totalAmount: totalAmount,
+            dateFrom: bookingData.dateFrom,
+            dateTo: bookingData.dateTo,
+          }
+        }).catch(error => {
           console.error('Background booking update sync failed:', error);
         });
 
@@ -312,14 +318,16 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         setIsLoading(false);
 
         // Then sync to Google Sheets in background
-        simpleDataService.addFareEntry({
-          type: "booking",
+        authService.addFareReceipt({
+          entryId: newEntry.entryId,
+          timestamp: newEntry.timestamp,
           bookingDetails: bookingData.bookingDetails,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
           totalAmount: totalAmount,
           dateFrom: bookingData.dateFrom,
           dateTo: bookingData.dateTo,
+          submittedBy: submittedBy
         }).catch(error => {
           console.error('Background booking add sync failed:', error);
         });
@@ -358,10 +366,13 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         setIsLoading(false);
 
         // Then sync to Google Sheets in background
-        simpleDataService.updateFareEntry(editingEntry.entryId, {
-          date: offDayData.date,
-          reason: offDayData.reason
-        }, editingEntry.type).catch(error => {
+        authService.updateOffDay({
+          entryId: editingEntry.entryId,
+          updatedData: {
+            date: offDayData.date,
+            reason: offDayData.reason,
+          }
+        }).catch(error => {
           console.error('Background off day update sync failed:', error);
         });
 
@@ -385,13 +396,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         setIsLoading(false);
 
         // Then sync to Google Sheets in background
-        simpleDataService.addFareEntry({
-          type: "off",
+        authService.addOffDay({
+          entryId: newEntry.entryId,
+          timestamp: newEntry.timestamp,
           date: offDayData.date,
           reason: offDayData.reason,
-          cashAmount: 0,
-          bankAmount: 0,
-          totalAmount: 0,
+          submittedBy: submittedBy
         }).catch(error => {
           console.error('Background off day add sync failed:', error);
         });
@@ -406,7 +416,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
   const handleDeleteEntry = async (entryId) => {
     try {
       const entryToDelete = fareData.find(entry => entry.entryId === entryId);
-      
+
       if (!entryToDelete) {
         alert('Entry not found!');
         return;
@@ -428,7 +438,14 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
       // Then sync deletion to Google Sheets in background
       try {
-        const deleteResult = await simpleDataService.deleteFareEntry(entryId, entryToDelete.type);
+        let deleteResult;
+        if (entryToDelete.type === 'daily') {
+          deleteResult = await authService.deleteFareReceipt({ entryId: entryToDelete.entryId });
+        } else if (entryToDelete.type === 'booking') {
+          deleteResult = await authService.deleteBookingEntry({ entryId: entryToDelete.entryId });
+        } else if (entryToDelete.type === 'off') {
+          deleteResult = await authService.deleteOffDay({ entryId: entryToDelete.entryId });
+        }
         if (deleteResult.success) {
           console.log('✅ Entry successfully deleted from Google Sheets');
         } else {
@@ -864,7 +881,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       <div className="card-body">
                         <div className="entry-header">
                           <span className={`entry-type ${entry.type}`}>
-                            {entry.type === "daily" ? "Daily" : 
+{entry.type === "daily" ? "Daily" : 
                              entry.type === "booking" ? "Booking" : "Off Day"}
                           </span>
                           <div className="entry-actions">
