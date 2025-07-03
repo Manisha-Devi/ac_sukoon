@@ -837,9 +837,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
               // Filter entries by current user
               const userEntries = fareData.filter(entry => 
-                entry.submittedBy === currentUserName || 
-                entry.submittedBy === 'driver' || // Fallback for old entries
-                !entry.submittedBy // Handle entries without submittedBy field
+                entry.submittedBy === currentUserName
               );
 
               return userEntries.length > 0 ? (
