@@ -840,30 +840,33 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                             {entry.type === "daily" && (
                               <>
                                 <div>{entry.date}</div>
-                                <div className="timestamp">{entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString('en-IN', { 
+                                <div className="timestamp">{entry.timestamp ? new Date(entry.timestamp).toLocaleDateString('en-CA') + ' ' + new Date(entry.timestamp).toLocaleTimeString('en-IN', { 
                                   hour: '2-digit', 
                                   minute: '2-digit',
-                                  hour12: true 
+                                  second: '2-digit',
+                                  hour12: false 
                                 }) : ''}</div>
                               </>
                             )}
                             {entry.type === "booking" && (
                               <>
                                 <div>{entry.dateFrom} - {entry.dateTo}</div>
-                                <div className="timestamp">{entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString('en-IN', { 
+                                <div className="timestamp">{entry.timestamp ? new Date(entry.timestamp).toLocaleDateString('en-CA') + ' ' + new Date(entry.timestamp).toLocaleTimeString('en-IN', { 
                                   hour: '2-digit', 
                                   minute: '2-digit',
-                                  hour12: true 
+                                  second: '2-digit',
+                                  hour12: false 
                                 }) : ''}</div>
                               </>
                             )}
                             {entry.type === "off" && (
                               <>
                                 <div>{entry.date}</div>
-                                <div className="timestamp">{entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString('en-IN', { 
+                                <div className="timestamp">{entry.timestamp ? new Date(entry.timestamp).toLocaleDateString('en-CA') + ' ' + new Date(entry.timestamp).toLocaleTimeString('en-IN', { 
                                   hour: '2-digit', 
                                   minute: '2-digit',
-                                  hour12: true 
+                                  second: '2-digit',
+                                  hour12: false 
                                 }) : ''}</div>
                               </>
                             )}
