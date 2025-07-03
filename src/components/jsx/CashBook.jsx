@@ -23,19 +23,34 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
 
     // Listen for cash book updates
     const handleCashBookUpdate = (event) => {
-      const updatedEntries = event.detail;
-      console.log('📖 Cash book updated from fare data:', updatedEntries.length, 'entries');
-      setCashBookEntries(updatedEntries);
+      console.log('📖 Cash book updated from fare data - immediate refresh');
+      loadCashBookEntries();
     };
 
     // Listen for data updates that might affect cash book
     const handleDataUpdate = () => {
-      console.log('📖 Data updated - refreshing cash book entries');
+      console.log('📖 Data updated - refreshing cash book entries immediately');
       loadCashBookEntries();
     };
 
+    // Listen for fare data updates
+    const handleFareDataUpdate = () => {
+      console.log('📖 Fare data updated - refreshing cash book immediately');
+      loadCashBookEntries();
+    };
+
+    // Listen for all update events for immediate refresh
     window.addEventListener('cashBookUpdated', handleCashBookUpdate);
     window.addEventListener('dataUpdated', handleDataUpdate);
+    window.addEventListener('fareDataUpdated', handleFareDataUpdate);
+    window.addEventListener('storage', handleDataUpdate);
+
+    return () => {
+      window.removeEventListener('cashBookUpdated', handleCashBookUpdate);
+      window.removeEventListener('dataUpdated', handleDataUpdate);
+      window.removeEventListener('fareDataUpdated', handleFareDataUpdate);
+      window.removeEventListener('storage', handleDataUpdate);
+    };aUpdate);
 
     return () => {
       window.removeEventListener('cashBookUpdated', handleCashBookUpdate);
