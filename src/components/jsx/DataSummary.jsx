@@ -3,123 +3,93 @@ import React, { useState, useEffect } from "react";
 import "../css/DataApproval.css";
 import authService from "../../services/authService.js";
 
-function DataSummary() {
+function DataSummary({ fareData, expenseData }) {
   const [pendingData, setPendingData] = useState([]);
   const [waitingData, setWaitingData] = useState([]);
   const [approvedData, setApprovedData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('waiting');
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     setCurrentUser(user);
-    loadAllData();
   }, []);
 
-  const loadAllData = async () => {
+  // Process data whenever fareData or expenseData changes
+  useEffect(() => {
+    processAllData();
+  }, [fareData, expenseData]);
+
+  const processAllData = () => {
     try {
       setLoading(true);
-      await loadApprovalData();
-    } catch (error) {
-      console.error('Error loading data:', error);
-      alert('Error loading data: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadApprovalData = async () => {
-    try {
-      // Get all data types
-      const [fareReceipts, bookingEntries, offDays, fuelPayments, addaPayments, 
-             servicePayments, unionPayments, otherPayments] = await Promise.all([
-        authService.getFareReceipts(),
-        authService.getBookingEntries(), 
-        authService.getOffDays(),
-        authService.getFuelPayments(),
-        authService.getAddaPayments(),
-        authService.getServicePayments(),
-        authService.getUnionPayments(),
-        authService.getOtherPayments()
-      ]);
-
       let allEntries = [];
 
-      // Process Fare Receipts
-      if (fareReceipts.success && fareReceipts.data) {
-        allEntries = [...allEntries, ...fareReceipts.data.map(entry => ({
-          ...entry,
-          dataType: 'Fare Receipt',
-          entryStatus: entry.entryStatus || 'pending',
-          displayName: `Fare: ${entry.route || 'Daily Collection'}`,
-          description: entry.route || 'Fare receipt'
-        }))];
+      // Process Fare Data
+      if (fareData && fareData.length > 0) {
+        fareData.forEach(entry => {
+          if (entry.type !== 'off') { // Exclude off days from approval
+            allEntries.push({
+              ...entry,
+              dataType: entry.type === 'daily' ? 'Fare Receipt' : 'Booking Entry',
+              entryStatus: entry.entryStatus || 'pending',
+              displayName: entry.type === 'daily' ? 
+                `Fare: ${entry.route || 'Daily Collection'}` : 
+                `Booking: ${entry.bookingDetails || 'Booking Entry'}`,
+              description: entry.type === 'daily' ? entry.route : entry.bookingDetails
+            });
+          }
+        });
       }
 
-      // Process Booking Entries
-      if (bookingEntries.success && bookingEntries.data) {
-        allEntries = [...allEntries, ...bookingEntries.data.map(entry => ({
-          ...entry,
-          dataType: 'Booking Entry',
-          entryStatus: entry.entryStatus || 'pending',
-          displayName: `Booking: ${entry.bookingDetails || 'Booking Entry'}`,
-          description: entry.bookingDetails || 'Booking entry'
-        }))];
-      }
+      // Process Expense Data
+      if (expenseData && expenseData.length > 0) {
+        expenseData.forEach(entry => {
+          let dataType = '';
+          let displayName = '';
+          let description = '';
 
-      // Process Fuel Payments
-      if (fuelPayments.success && fuelPayments.data) {
-        allEntries = [...allEntries, ...fuelPayments.data.map(entry => ({
-          ...entry,
-          dataType: 'Fuel Payment',
-          entryStatus: entry.entryStatus || 'pending',
-          displayName: `Fuel: ${entry.pumpName || 'Fuel Station'}`,
-          description: entry.pumpName || 'Fuel payment'
-        }))];
-      }
+          switch(entry.type) {
+            case 'fuel':
+              dataType = 'Fuel Payment';
+              displayName = `Fuel: ${entry.pumpName || 'Fuel Station'}`;
+              description = entry.pumpName || 'Fuel payment';
+              break;
+            case 'adda':
+              dataType = 'Adda Payment';
+              displayName = `Adda: ${entry.addaName || entry.description || 'Adda Fees'}`;
+              description = entry.addaName || entry.description || 'Adda payment';
+              break;
+            case 'service':
+              dataType = 'Service Payment';
+              displayName = `Service: ${entry.serviceType || entry.description || 'Service'}`;
+              description = entry.serviceType || entry.description || 'Service payment';
+              break;
+            case 'union':
+              dataType = 'Union Payment';
+              displayName = `Union: ${entry.unionName || entry.description || 'Union Fees'}`;
+              description = entry.unionName || entry.description || 'Union payment';
+              break;
+            case 'other':
+              dataType = 'Other Payment';
+              displayName = `Other: ${entry.paymentDetails || entry.description || 'Other Payment'}`;
+              description = entry.paymentDetails || entry.description || 'Other payment';
+              break;
+            default:
+              dataType = 'Payment';
+              displayName = `Payment: ${entry.description || 'Payment Entry'}`;
+              description = entry.description || 'Payment';
+          }
 
-      // Process Adda Payments
-      if (addaPayments.success && addaPayments.data) {
-        allEntries = [...allEntries, ...addaPayments.data.map(entry => ({
-          ...entry,
-          dataType: 'Adda Payment',
-          entryStatus: entry.entryStatus || 'pending',
-          displayName: `Adda: ${entry.addaName || 'Adda Fees'}`,
-          description: entry.addaName || 'Adda payment'
-        }))];
-      }
-
-      // Process Service Payments
-      if (servicePayments.success && servicePayments.data) {
-        allEntries = [...allEntries, ...servicePayments.data.map(entry => ({
-          ...entry,
-          dataType: 'Service Payment',
-          entryStatus: entry.entryStatus || 'pending',
-          displayName: `Service: ${entry.serviceType || 'Service'}`,
-          description: entry.serviceType || 'Service payment'
-        }))];
-      }
-
-      // Process Union Payments
-      if (unionPayments.success && unionPayments.data) {
-        allEntries = [...allEntries, ...unionPayments.data.map(entry => ({
-          ...entry,
-          dataType: 'Union Payment',
-          entryStatus: entry.entryStatus || 'pending',
-          displayName: `Union: ${entry.unionName || 'Union Fees'}`,
-          description: entry.unionName || 'Union payment'
-        }))];
-      }
-
-      if (otherPayments.success && otherPayments.data) {
-        allEntries = [...allEntries, ...otherPayments.data.map(entry => ({
-          ...entry,
-          dataType: 'Other Payment',
-          entryStatus: entry.entryStatus || 'pending',
-          displayName: `Other: ${entry.paymentDetails || 'Other Payment'}`,
-          description: entry.paymentDetails || 'Other payment'
-        }))];
+          allEntries.push({
+            ...entry,
+            dataType: dataType,
+            entryStatus: entry.entryStatus || 'pending',
+            displayName: displayName,
+            description: description
+          });
+        });
       }
 
       // Sort by timestamp (newest first)
@@ -130,9 +100,10 @@ function DataSummary() {
       setWaitingData(allEntries.filter(entry => entry.entryStatus === 'waiting'));
       setApprovedData(allEntries.filter(entry => entry.entryStatus === 'approved'));
 
+      setLoading(false);
     } catch (error) {
-      console.error('Error loading approval data:', error);
-      throw error;
+      console.error('Error processing data:', error);
+      setLoading(false);
     }
   };
 
@@ -191,7 +162,7 @@ function DataSummary() {
 
       if (result.success) {
         alert(`Entry approved successfully by ${approverName}`);
-        await loadApprovalData(); // Reload data
+        processAllData(); // Reprocess current data
       } else {
         alert('Error approving entry: ' + result.error);
       }
@@ -247,7 +218,7 @@ function DataSummary() {
 
       if (result.success) {
         alert('Entry sent back for correction');
-        await loadApprovalData(); // Reload data
+        processAllData(); // Reprocess current data
       } else {
         alert('Error resending entry: ' + result.error);
       }
@@ -376,7 +347,7 @@ function DataSummary() {
       <div className="data-approval-container">
         <div className="loading-spinner">
           <i className="bi bi-arrow-clockwise spin"></i>
-          <p>Loading data...</p>
+          <p>Processing data...</p>
         </div>
       </div>
     );
@@ -386,9 +357,9 @@ function DataSummary() {
     <div className="data-approval-container">
       <div className="container-fluid">
         <div className="approval-header">
-          <h2><i className="bi bi-clipboard-check"></i> Data Approval</h2>
+          <h2><i className="bi bi-clipboard-check"></i> Data Summary</h2>
           <p>Review and approve submitted entries</p>
-          <small className="text-muted">Use navbar refresh icon to update data</small>
+          <small className="text-muted">Data automatically synced from React state</small>
         </div>
 
         {/* Approval Tabs */}
