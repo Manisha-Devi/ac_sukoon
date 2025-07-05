@@ -355,7 +355,7 @@ function App() {
                 onClick={() => handleMenuClick("data-summary")}
               >
                 <i className="bi bi-clipboard-check"></i>
-                Data Summary
+                Data
               </button>
               <button
                 className={`menu-item ${activeTab === "cash-summary" ? "active" : ""}`}
