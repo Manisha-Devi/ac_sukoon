@@ -504,8 +504,8 @@ function UnionPaymentEntry({ expenseData, setExpenseData, setTotalExpenses, setC
 
             <div className="button-group">
               <button type="submit" className="btn union-entry-btn" disabled={isLoading}>
-                <i className={isLoading ? "bi bi-hourglass-split" : editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
-                {isLoading ? "Saving..." : editingEntry ? "Update Entry" : "Add Union Entry"}
+                <i className={isLoading ? "bi bi-arrow-repeat" : editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
+                {isLoading ? "Processing..." : editingEntry ? "Update Entry" : "Add Union Entry"}
               </button>
               {editingEntry && (
                 <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>

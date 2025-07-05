@@ -503,8 +503,8 @@ function AddaPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBoo
 
             <div className="button-group">
               <button type="submit" className="btn adda-entry-btn" disabled={isLoading}>
-                <i className={isLoading ? "bi bi-hourglass-split" : editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
-                {isLoading ? "Saving..." : editingEntry ? "Update Entry" : "Add Adda Entry"}
+                <i className={isLoading ? "bi bi-arrow-repeat" : editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
+                {isLoading ? "Processing..." : editingEntry ? "Update Entry" : "Add Adda Entry"}
               </button>
               {editingEntry && (
                 <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
