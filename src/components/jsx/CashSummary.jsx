@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import "../css/CashSummary.css";
 
@@ -56,7 +55,7 @@ function CashSummary({ fareData, expenseData }) {
       const fromDate = new Date(dateFrom);
       const toDate = new Date(dateTo);
       toDate.setHours(23, 59, 59);
-      
+
       allData = allData.filter(entry => {
         const entryDate = new Date(entry.date);
         return entryDate >= fromDate && entryDate <= toDate;
@@ -94,7 +93,7 @@ function CashSummary({ fareData, expenseData }) {
   // Handle select all checkbox
   const handleSelectAll = () => {
     const allCurrentEntryIds = currentEntries.map(entry => entry.entryId);
-    
+
     if (selectedEntries.length === allCurrentEntryIds.length) {
       setSelectedEntries([]);
     } else {
@@ -112,7 +111,7 @@ function CashSummary({ fareData, expenseData }) {
       alert('Please select entries to forward for approval');
       return;
     }
-    
+
     // Here you would call your API to forward entries
     console.log('Forwarding entries for approval:', selectedEntries);
     alert(`${selectedEntries.length} entries forwarded for approval!`);
@@ -219,7 +218,7 @@ function CashSummary({ fareData, expenseData }) {
             </button>
           )}
         </div>
-        
+
         {filteredData.length > 0 ? (
           <>
             <div className="table-responsive">
@@ -281,7 +280,7 @@ function CashSummary({ fareData, expenseData }) {
                       Previous
                     </button>
                   </li>
-                  
+
                   {[...Array(totalPages)].map((_, index) => {
                     const pageNumber = index + 1;
                     return (
@@ -295,7 +294,7 @@ function CashSummary({ fareData, expenseData }) {
                       </li>
                     );
                   })}
-                  
+
                   <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
                     <button 
                       className="page-link" 

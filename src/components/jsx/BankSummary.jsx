@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import "../css/BankSummary.css";
 
@@ -56,7 +55,7 @@ function BankSummary({ fareData, expenseData }) {
       const fromDate = new Date(dateFrom);
       const toDate = new Date(dateTo);
       toDate.setHours(23, 59, 59);
-      
+
       allData = allData.filter(entry => {
         const entryDate = new Date(entry.date);
         return entryDate >= fromDate && entryDate <= toDate;
@@ -94,7 +93,7 @@ function BankSummary({ fareData, expenseData }) {
   // Handle select all checkbox
   const handleSelectAll = () => {
     const allCurrentEntryIds = currentEntries.map(entry => entry.entryId);
-    
+
     if (selectedEntries.length === allCurrentEntryIds.length) {
       setSelectedEntries([]);
     } else {
@@ -112,7 +111,7 @@ function BankSummary({ fareData, expenseData }) {
       alert('Please select entries to forward for approval');
       return;
     }
-    
+
     // Here you would call your API to forward entries
     console.log('Forwarding entries for approval:', selectedEntries);
     alert(`${selectedEntries.length} entries forwarded for approval!`);
@@ -219,7 +218,7 @@ function BankSummary({ fareData, expenseData }) {
             </button>
           )}
         </div>
-        
+
         {filteredData.length > 0 ? (
           <>
             <div className="table-responsive">
@@ -227,8 +226,9 @@ function BankSummary({ fareData, expenseData }) {
                 <thead>
                   <tr>
                     <th>Date</th>
-                    <th>Description</th>
+                    <th>Date Range</th>
                     <th>Type</th>
+                    <th>Description</th>
                     <th>Bank Amount</th>
                     <th width="50">
                       <input 
@@ -245,12 +245,17 @@ function BankSummary({ fareData, expenseData }) {
                   {currentEntries.map((entry, index) => (
                     <tr key={`${entry.entryId || index}`}>
                       <td>{new Date(entry.date).toLocaleDateString('en-IN')}</td>
-                      <td>{entry.description}</td>
+                      <td>
+                        {entry.type === 'income' || entry.type === 'expense' ? '-' :
+                          (entry.dateFrom && entry.dateTo ? `${new Date(entry.dateFrom).toLocaleDateString('en-IN')} to ${new Date(entry.dateTo).toLocaleDateString('en-IN')}` : '-')
+                        }
+                      </td>
                       <td>
                         <span className={`badge ${entry.type === 'income' ? 'bg-success' : 'bg-danger'}`}>
                           {entry.type === 'income' ? 'Income' : 'Expense'}
                         </span>
                       </td>
+                      <td>{entry.description}</td>
                       <td className={entry.type === 'income' ? 'text-success' : 'text-danger'}>
                         ₹{(entry.bankAmount || 0).toLocaleString()}
                       </td>
@@ -281,7 +286,7 @@ function BankSummary({ fareData, expenseData }) {
                       Previous
                     </button>
                   </li>
-                  
+
                   {[...Array(totalPages)].map((_, index) => {
                     const pageNumber = index + 1;
                     return (
@@ -295,7 +300,7 @@ function BankSummary({ fareData, expenseData }) {
                       </li>
                     );
                   })}
-                  
+
                   <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
                     <button 
                       className="page-link" 
