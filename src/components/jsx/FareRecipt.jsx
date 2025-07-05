@@ -593,7 +593,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
   const getCurrentUserNonApprovedEntries = () => {
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     const currentUserName = currentUser.fullName || currentUser.username;
-    
+
     return fareData.filter(entry => 
       entry.submittedBy === currentUserName && entry.entryStatus !== 'approved'
     );
@@ -601,9 +601,49 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
   const { totalCash, totalBank, grandTotal } = calculateSummaryTotals();
 
+  const handleSendForApproval = async (entryId) => {
+    try {
+      const entry = fareData.find(e => e.entryId === entryId);
+      if (!entry) return;
+
+      let result;
+      if (entry.type === 'daily') {
+        result = await authService.updateFareReceiptStatus({
+          entryId: entryId,
+          newStatus: 'waiting',
+          approverName: ''
+        });
+      } else if (entry.type === 'booking') {
+        result = await authService.updateBookingEntryStatus({
+          entryId: entryId,
+          newStatus: 'waiting',
+          approverName: ''
+        });
+      } else if (entry.type === 'off') {
+        result = await authService.updateOffDayStatus({
+          entryId: entryId,
+          newStatus: 'waiting',
+          approverName: ''
+        });
+      }
+
+      if (result.success) {
+        // Update local state
+        const updatedData = fareData.map(e => 
+          e.entryId === entryId ? { ...e, entryStatus: 'waiting' } : e
+        );
+        setFareData(updatedData);
+        alert('Entry sent for approval successfully!');
+      }
+    } catch (error) {
+      console.error('Error sending for approval:', error);
+      alert('Error sending for approval: ' + error.message);
+    }
+  };
+
   // Load data on component mount and listen for refresh events
   useEffect(() => {
-    
+
 
     // Listen for centralized refresh events
     const handleDataRefresh = () => {
@@ -986,6 +1026,14 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                               >
                                 <i className="bi bi-trash"></i>
                               </button>
+                                                            
+                                <button
+                                    className="btn btn-sm btn-send-approval"
+                                    onClick={() => handleSendForApproval(entry.entryId)}
+                                    title="Send for Approval"
+                                >
+                                    <i className="bi bi-send"></i>
+                                </button>
                             </>
                           )}
 

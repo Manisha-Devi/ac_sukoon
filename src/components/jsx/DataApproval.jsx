@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import "../css/DataApproval.css";
 import authService from "../../services/authService.js";
@@ -146,7 +145,7 @@ function DataApproval() {
     }
   };
 
-  
+
 
   const handleApprove = async (entry) => {
     try {
@@ -193,6 +192,12 @@ function DataApproval() {
           break;
         case 'Union Payment':
           result = await authService.approveUnionPayment({
+            entryId: entry.entryId,
+            approverName: approverName
+          });
+          break;
+           case 'Off Day':
+          result = await authService.approveOffDay({
             entryId: entry.entryId,
             approverName: approverName
           });
@@ -250,6 +255,11 @@ function DataApproval() {
           break;
         case 'Union Payment':
           result = await authService.resendUnionPayment({
+            entryId: entry.entryId
+          });
+          break;
+           case 'Off Day':
+          result = await authService.resendOffDay({
             entryId: entry.entryId
           });
           break;
