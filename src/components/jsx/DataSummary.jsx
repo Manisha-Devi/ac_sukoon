@@ -10,12 +10,18 @@ function DataSummary({ fareData, expenseData }) {
   const [approvedData, setApprovedData] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [currentUser, setCurrentUser] = useState(null);
+
   // Check if user has permission to access this component
-  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-  const userRole = currentUser.role;
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    setCurrentUser(user);
+  }, []);
+
+  const userRole = currentUser?.role;
 
   // Only allow Manager and Admin access
-  if (!userRole || (userRole !== 'Manager' && userRole !== 'Admin')) {
+  if (currentUser && (!userRole || (userRole !== 'Manager' && userRole !== 'Admin'))) {
     return (
       <div className="data-approval-container">
         <div className="container-fluid">
@@ -28,13 +34,6 @@ function DataSummary({ fareData, expenseData }) {
       </div>
     );
   }
-
-  const [currentUser, setCurrentUser] = useState(null);
-
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    setCurrentUser(user);
-  }, []);
 
   // Process data whenever fareData or expenseData changes
   useEffect(() => {
@@ -115,10 +114,14 @@ function DataSummary({ fareData, expenseData }) {
       // Sort by timestamp (newest first)
       allEntries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-      // Separate by status - Updated status flow
+      // Separate by status - New 6-step flow
       setPendingData(allEntries.filter(entry => entry.entryStatus === 'pending'));
-      setBankData(allEntries.filter(entry => entry.entryStatus === 'bank'));
-      setCashData(allEntries.filter(entry => entry.entryStatus === 'cash'));
+      setBankData(allEntries.filter(entry => 
+        entry.entryStatus === 'forwardedBank' || entry.entryStatus === 'approvedBank'
+      ));
+      setCashData(allEntries.filter(entry => 
+        entry.entryStatus === 'forwardedCash' || entry.entryStatus === 'approvedCash'
+      ));
       setApprovedData(allEntries.filter(entry => entry.entryStatus === 'approved'));
 
       setLoading(false);
@@ -296,16 +299,16 @@ function DataSummary({ fareData, expenseData }) {
                 PENDING
               </>
             )}
-            {entry.entryStatus === 'bank' && (
+            {(entry.entryStatus === 'forwardedBank' || entry.entryStatus === 'approvedBank') && (
               <>
                 <i className="bi bi-bank me-1"></i>
-                BANK APPROVAL
+                {entry.entryStatus === 'forwardedBank' ? 'FORWARDED TO BANK' : 'BANK APPROVED'}
               </>
             )}
-            {entry.entryStatus === 'cash' && (
+            {(entry.entryStatus === 'forwardedCash' || entry.entryStatus === 'approvedCash') && (
               <>
                 <i className="bi bi-cash-stack me-1"></i>
-                CASH APPROVAL
+                {entry.entryStatus === 'forwardedCash' ? 'FORWARDED TO CASH' : 'CASH APPROVED'}
               </>
             )}
             {entry.entryStatus === 'approved' && (
@@ -365,14 +368,14 @@ function DataSummary({ fareData, expenseData }) {
         </div>
 
         <div className="entry-actions">
-          {entry.entryStatus === 'cash' && (
+          {entry.entryStatus === 'approvedCash' && (
             <>
               <button 
                 className="btn btn-success btn-sm"
                 onClick={() => handleApprove(entry)}
-                title="Approve this entry"
+                title="Final approval"
               >
-                <i className="bi bi-check-circle"></i> Approve
+                <i className="bi bi-check-circle"></i> Final Approve
               </button>
               <button 
                 className="btn btn-warning btn-sm"
@@ -392,7 +395,10 @@ function DataSummary({ fareData, expenseData }) {
               <i className="bi bi-arrow-clockwise"></i> Resend for Edit
             </button>
           )}
-          {(entry.entryStatus === 'pending' || entry.entryStatus === 'bank') && (
+          {(entry.entryStatus === 'pending' || 
+            entry.entryStatus === 'forwardedBank' || 
+            entry.entryStatus === 'approvedBank' || 
+            entry.entryStatus === 'forwardedCash') && (
             <span className="badge bg-secondary">
               <i className="bi bi-clock"></i> In process
             </span>
