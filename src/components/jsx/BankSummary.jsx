@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import "../css/BankSummary.css";
 import authService from "../../services/authService.js";
 
+// Debug: Log authService on component load
+console.log('🔍 BankSummary: authService loaded:', authService);
+console.log('🔍 Available methods:', Object.getOwnPropertyNames(authService));
+
 function BankSummary({ bankData }) {
   const [filteredData, setFilteredData] = useState([]);
   const [dateFrom, setDateFrom] = useState('');
@@ -144,13 +148,23 @@ function BankSummary({ bankData }) {
   const handleSendForApproval = async () => {
     try {
       console.log('🔄 Sending entries for bank approval...');
+      console.log('📋 authService available methods:', Object.getOwnPropertyNames(authService));
       
       for (const entry of approvalPopup.entries) {
         let result;
         
+        console.log(`🔧 Processing entry: ${entry.entryId}, type: ${entry.type}`);
+        
         // Update entry status based on type
         if (entry.type === 'daily' || entry.type === 'fare') {
           // Fare Receipt
+          console.log('📝 Calling updateFareReceiptStatus for:', entry.entryId);
+          
+          // Check if function exists
+          if (typeof authService.updateFareReceiptStatus !== 'function') {
+            throw new Error('updateFareReceiptStatus is not available in authService');
+          }
+          
           result = await authService.updateFareReceiptStatus({
             entryId: entry.entryId,
             newStatus: 'bank',
@@ -158,15 +172,27 @@ function BankSummary({ bankData }) {
           });
         } else if (entry.type === 'booking') {
           // Booking Entry
+          console.log('📝 Calling updateBookingEntryStatus for:', entry.entryId);
+          
+          // Check if function exists
+          if (typeof authService.updateBookingEntryStatus !== 'function') {
+            throw new Error('updateBookingEntryStatus is not available in authService');
+          }
+          
           result = await authService.updateBookingEntryStatus({
             entryId: entry.entryId,
             newStatus: 'bank', 
             approverName: ''
           });
+        } else {
+          console.warn(`⚠️ Unknown entry type: ${entry.type} for entry: ${entry.entryId}`);
+          continue;
         }
         
-        if (!result.success) {
-          throw new Error(`Failed to update ${entry.entryId}: ${result.error}`);
+        console.log(`✅ Update result for ${entry.entryId}:`, result);
+        
+        if (!result || !result.success) {
+          throw new Error(`Failed to update ${entry.entryId}: ${result?.error || 'Unknown error'}`);
         }
       }
       
@@ -187,6 +213,7 @@ function BankSummary({ bankData }) {
       
     } catch (error) {
       console.error('❌ Error sending for approval:', error);
+      console.error('❌ Full error object:', error);
       alert('Error updating entries: ' + error.message);
     }
   };
