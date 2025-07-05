@@ -172,15 +172,6 @@ function BankSummary({ bankData }) {
       
       alert(`${approvalPopup.count} entries successfully forwarded for bank approval!`);
       
-      // Trigger custom event for other components to listen
-      window.dispatchEvent(new CustomEvent('dataUpdated', { 
-        detail: { 
-          action: 'bankApproval', 
-          entriesCount: approvalPopup.count,
-          entryIds: approvalPopup.entries.map(e => e.entryId)
-        }
-      }));
-      
       // STEP 2: Update Google Sheets in background (don't await)
       approvalPopup.entries.forEach(async (entry) => {
         try {
@@ -250,27 +241,17 @@ function BankSummary({ bankData }) {
     filterUserData();
   }, [bankData, dateFrom, dateTo, currentUser]);
 
-  // Listen for centralized refresh events and data updates
+  // Listen for centralized refresh events
   useEffect(() => {
     const handleDataRefresh = () => {
       console.log('🔄 BankSummary: Recalculating from centralized refresh');
       filterUserData();
     };
 
-    const handleDataUpdate = (event) => {
-      console.log('🔄 BankSummary: Received data update event:', event.detail);
-      // Force reprocessing of data after updates
-      setTimeout(() => {
-        filterUserData();
-      }, 1000); // Small delay to ensure data is updated
-    };
-
     window.addEventListener('dataRefreshed', handleDataRefresh);
-    window.addEventListener('dataUpdated', handleDataUpdate);
 
     return () => {
       window.removeEventListener('dataRefreshed', handleDataRefresh);
-      window.removeEventListener('dataUpdated', handleDataUpdate);
     };
   }, [bankData, dateFrom, dateTo, currentUser]);
 
