@@ -5,7 +5,7 @@ function CashSummary({ fareData, expenseData }) {
   // 📊 RECEIVED DATA EXPLANATION:
   // fareData = Daily entries (income) + Booking entries + Off days
   // expenseData = Fuel + Adda + Union + Service + Other payments
-  
+
   const [filteredData, setFilteredData] = useState([]);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -23,11 +23,11 @@ function CashSummary({ fareData, expenseData }) {
     console.log('🔄 CashSummary: Props data updated');
     console.log('📈 FareData (Income):', fareData?.length || 0, 'entries');
     console.log('📉 ExpenseData (Expense):', expenseData?.length || 0, 'entries');
-    
+
     // Debug: Log complete data structure
     console.log('💰 CASH SUMMARY - Complete FareData:', fareData);
     console.log('💸 CASH SUMMARY - Complete ExpenseData:', expenseData);
-    
+
     // Sample entries for debugging
     if (fareData && fareData.length > 0) {
       console.log('📊 CASH SUMMARY - Sample FareData Entry:', fareData[0]);
@@ -35,7 +35,7 @@ function CashSummary({ fareData, expenseData }) {
     if (expenseData && expenseData.length > 0) {
       console.log('📊 CASH SUMMARY - Sample ExpenseData Entry:', expenseData[0]);
     }
-    
+
     filterUserData();
   }, [fareData, expenseData, dateFrom, dateTo, currentUser]);
 
@@ -50,14 +50,14 @@ function CashSummary({ fareData, expenseData }) {
 
     console.log('👤 Filtering data for user:', currentUserName);
     console.log('📊 FareData Filtered Structure:');
-    
+
     // Log sample objects for debugging  
     if (fareData && fareData.length > 0) {
       console.log('🔸 Daily Entry Sample:', fareData.find(e => e.type === 'daily'));
       console.log('🔸 Booking Entry Sample:', fareData.find(e => e.type === 'booking'));
       console.log('🔸 All Entry Types in FareData:', [...new Set(fareData.map(e => e.type))]);
     }
-    
+
     // Debug expense data types  
     if (expenseData && expenseData.length > 0) {
       console.log('🔸 All Entry Types in ExpenseData:', [...new Set(expenseData.map(e => e.type))]);
@@ -74,7 +74,7 @@ function CashSummary({ fareData, expenseData }) {
       );
       console.log('💰 Cash Income entries found:', userFareData.length);
       console.log('📋 Sample Filtered Cash Entry:', userFareData[0]);
-      
+
       allData = [...allData, ...userFareData.map(entry => ({
         entryId: entry.entryId,
         date: entry.date,
@@ -96,7 +96,7 @@ function CashSummary({ fareData, expenseData }) {
       );
       console.log('💸 Cash Expense entries found:', userExpenseData.length);
       console.log('📋 Sample Filtered Expense Entry:', userExpenseData[0]);
-      
+
       allData = [...allData, ...userExpenseData.map(entry => ({
         entryId: entry.entryId,
         date: entry.date,
@@ -125,14 +125,14 @@ function CashSummary({ fareData, expenseData }) {
 
     // Sort by date (newest first)
     allData.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
+
     // Debug: Log final filtered data
     console.log('✅ CASH SUMMARY - Final filtered data:', allData);
     console.log('📊 CASH SUMMARY - Data breakdown:');
     console.log('   - Income entries:', allData.filter(e => e.type === 'income').length);
     console.log('   - Expense entries:', allData.filter(e => e.type === 'expense').length);
     console.log('   - Entry types:', [...new Set(allData.map(e => e.entryType))]);
-    
+
     setFilteredData(allData);
   };
 
@@ -175,16 +175,103 @@ function CashSummary({ fareData, expenseData }) {
     currentEntries.every(entry => selectedEntries.includes(entry.entryId));
 
   // Forward selected entries for approval
-  const handleForwardForApproval = () => {
+  const handleForwardForApproval = async () => {
     if (selectedEntries.length === 0) {
       alert('Please select entries to forward for approval');
       return;
     }
 
-    // Here you would call your API to forward entries
-    console.log('Forwarding entries for approval:', selectedEntries);
-    alert(`${selectedEntries.length} entries forwarded for approval!`);
-    setSelectedEntries([]);
+    try {
+      console.log('🔄 CashSummary: Forwarding entries for cash approval:', selectedEntries);
+
+      // Process each selected entry
+      for (const entryId of selectedEntries) {
+        const entry = filteredData.find(e => e.entryId === entryId);
+        if (!entry) continue;
+
+        // Update status locally first (for immediate UI feedback)
+        updateEntryStatus(entryId, "cash");
+
+        // Update parent state
+        if (window.updateEntryStatusInParent) {
+          window.updateEntryStatusInParent(entryId, "cash", entry.entryType);
+        }
+
+        // Background API call to Google Sheets (don't wait for it)
+        try {
+          const authService = (await import('../../services/authService.js')).default;
+
+          if (entry.entryType === 'daily') {
+            authService.updateFareReceiptStatus({
+              entryId: entryId,
+              newStatus: "cash",
+              approverName: ""
+            }).catch(error => {
+              console.error('Background API sync failed for fare receipt:', error);
+            });
+          } else if (entry.entryType === 'booking') {
+            authService.updateBookingEntryStatus({
+              entryId: entryId,
+              newStatus: "cash", 
+              approverName: ""
+            }).catch(error => {
+              console.error('Background API sync failed for booking entry:', error);
+            });
+          } else if (entry.entryType === 'fuel') {
+            authService.updateFuelPaymentStatus({
+              entryId: entryId,
+              newStatus: "cash",
+              approverName: ""
+            }).catch(error => {
+              console.error('Background API sync failed for fuel payment:', error);
+            });
+          } else if (entry.entryType === 'adda') {
+            authService.updateAddaPaymentStatus({
+              entryId: entryId,
+              newStatus: "cash",
+              approverName: ""
+            }).catch(error => {
+              console.error('Background API sync failed for adda payment:', error);
+            });
+          } else if (entry.entryType === 'union') {
+            authService.updateUnionPaymentStatus({
+              entryId: entryId,
+              newStatus: "cash",
+              approverName: ""
+            }).catch(error => {
+              console.error('Background API sync failed for union payment:', error);
+            });
+          } else if (entry.entryType === 'service') {
+            authService.updateServicePaymentStatus({
+              entryId: entryId,
+              newStatus: "cash",
+              approverName: ""
+            }).catch(error => {
+              console.error('Background API sync failed for service payment:', error);
+            });
+          } else if (entry.entryType === 'other') {
+            authService.updateOtherPaymentStatus({
+              entryId: entryId,
+              newStatus: "cash",
+              approverName: ""
+            }).catch(error => {
+              console.error('Background API sync failed for other payment:', error);
+            });
+          }
+        } catch (error) {
+          console.error('Error importing authService:', error);
+        }
+      }
+
+      alert(`✅ ${selectedEntries.length} entries forwarded for cash approval!`);
+      setSelectedEntries([]);
+
+      console.log('✅ CashSummary: Status update completed');
+
+    } catch (error) {
+      console.error('❌ Error forwarding entries:', error);
+      alert('Error forwarding entries for approval');
+    }
   };
 
   // Calculate totals

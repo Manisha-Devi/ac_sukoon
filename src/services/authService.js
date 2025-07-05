@@ -1664,6 +1664,87 @@ class AuthService {
   }
 
   // ============================================================================
+  // STATUS UPDATE FUNCTIONS
+  // ============================================================================
+
+  // Update Fare Receipt Status
+  async updateFareReceiptStatus(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('updateFareReceiptStatus', data);
+      return response;
+    } catch (error) {
+      console.error('Error updating fare receipt status:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Update Booking Entry Status
+  async updateBookingEntryStatus(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('updateBookingEntryStatus', data);
+      return response;
+    } catch (error) {
+      console.error('Error updating booking entry status:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Update Fuel Payment Status
+  async updateFuelPaymentStatus(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('updateFuelPaymentStatus', data);
+      return response;
+    } catch (error) {
+      console.error('Error updating fuel payment status:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Update Adda Payment Status
+  async updateAddaPaymentStatus(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('updateAddaPaymentStatus', data);
+      return response;
+    } catch (error) {
+      console.error('Error updating adda payment status:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Update Union Payment Status
+  async updateUnionPaymentStatus(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('updateUnionPaymentStatus', data);
+      return response;
+    } catch (error) {
+      console.error('Error updating union payment status:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Update Service Payment Status
+  async updateServicePaymentStatus(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('updateServicePaymentStatus', data);
+      return response;
+    } catch (error) {
+      console.error('Error updating service payment status:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Update Other Payment Status
+  async updateOtherPaymentStatus(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('updateOtherPaymentStatus', data);
+      return response;
+    } catch (error) {
+      console.error('Error updating other payment status:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ============================================================================
   // ANALYTICS FUNCTIONS
   // ============================================================================
 }

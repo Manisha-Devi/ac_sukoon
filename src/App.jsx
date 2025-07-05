@@ -75,6 +75,42 @@ function App() {
     }
   };
 
+  // Function to update entry status in parent state
+  const updateEntryStatusInParent = (entryId, newStatus, entryType) => {
+    console.log(`🔄 App.jsx: Updating entry ${entryId} status to ${newStatus}`);
+    
+    if (entryType === 'daily' || entryType === 'booking') {
+      // Update fareData
+      setFareData(prevData => 
+        prevData.map(entry => 
+          entry.entryId === entryId 
+            ? { ...entry, entryStatus: newStatus }
+            : entry
+        )
+      );
+    } else {
+      // Update expenseData for fuel, adda, union, service, other
+      setExpenseData(prevData => 
+        prevData.map(entry => 
+          entry.entryId === entryId 
+            ? { ...entry, entryStatus: newStatus }
+            : entry
+        )
+      );
+    }
+    
+    console.log(`✅ App.jsx: Entry ${entryId} status updated to ${newStatus}`);
+  };
+
+  // Expose status update function globally
+  useEffect(() => {
+    window.updateEntryStatusInParent = updateEntryStatusInParent;
+    
+    return () => {
+      delete window.updateEntryStatusInParent;
+    };
+  }, []);
+
   // Update data stats when data changes
   useEffect(() => {
     setDataStats({
