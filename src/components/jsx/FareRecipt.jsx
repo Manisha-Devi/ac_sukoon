@@ -950,7 +950,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
           const currentUserName = currentUser.fullName || currentUser.username;
           const userEntries = fareData.filter(entry => 
-            entry.submittedBy === currentUserName
+            entry.submittedBy === currentUserName && entry.entryStatus !== 'approved'
           );
 
           return userEntries.length > 0 ? (
@@ -988,12 +988,17 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                             </>
                           )}
 
+                          {(entry.entryStatus === 'cash' || entry.entryStatus === 'bank') && (
+                            <span className={`status-badge status-locked`}>
+                              <i className="bi bi-lock-fill"></i> {entry.entryStatus?.toUpperCase()}
+                            </span>
+                          )}
 
-                                          {entry.entryStatus !== 'pending' && (
-                                            <span className={`status-badge status-${entry.entryStatus}`}>
-                                              {entry.entryStatus?.toUpperCase()}
-                                            </span>
-                                          )}
+                          {entry.entryStatus === 'waiting' && (
+                            <span className={`status-badge status-waiting`}>
+                              {entry.entryStatus?.toUpperCase()}
+                            </span>
+                          )}
 
                         </div>
                         <div className="entry-date">
