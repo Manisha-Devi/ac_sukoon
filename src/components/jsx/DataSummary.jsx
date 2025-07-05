@@ -14,7 +14,14 @@ function DataSummary({ fareData, expenseData }) {
 
   // Check if user has permission to access this component
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userString = localStorage.getItem('user');
+    console.log('🔍 DataSummary - Raw localStorage user:', userString);
+    
+    const user = JSON.parse(userString || '{}');
+    console.log('👤 DataSummary - Parsed user object:', user);
+    console.log('🔑 DataSummary - User role:', user?.role);
+    console.log('🔑 DataSummary - User type:', user?.userType);
+    
     setCurrentUser(user);
   }, []);
 
@@ -389,10 +396,11 @@ function DataSummary({ fareData, expenseData }) {
     );
   };
 
-  const userRole = currentUser?.role;
+  // Get user role from different possible fields
+  const userRole = currentUser?.role || currentUser?.userType;
 
   // Show loading while checking user data
-  if (!currentUser) {
+  if (!currentUser || Object.keys(currentUser).length === 0) {
     return (
       <div className="data-approval-container">
         <div className="loading-spinner">
@@ -422,6 +430,7 @@ function DataSummary({ fareData, expenseData }) {
               <p><strong>Full Name:</strong> <code>{currentUser.fullName || 'undefined'}</code></p>
               <p><strong>User Type:</strong> <code>{currentUser.userType || 'undefined'}</code></p>
               <p><strong>Is Authenticated:</strong> <code>{String(currentUser.isAuthenticated)}</code></p>
+              <p><strong>Raw localStorage:</strong> <code>{localStorage.getItem('user')}</code></p>
               <p><strong>User Object:</strong> <code>{JSON.stringify(currentUser, null, 2)}</code></p>
             </div>
 
