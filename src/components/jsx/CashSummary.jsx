@@ -148,10 +148,10 @@ function CashSummary({ fareData, expenseData }) {
   const currentEntries = filteredData.slice(indexOfFirstEntry, indexOfLastEntry);
   const totalPages = Math.ceil(filteredData.length / entriesPerPage);
 
-  // Handle checkbox selection for individual rows (only for bank status)
+  // Handle checkbox selection for individual rows (only for approvedBank status)
   const handleSelectEntry = (entryId) => {
     const entry = currentEntries.find(e => e.entryId === entryId);
-    if (entry && entry.entryStatus === 'bank') {
+    if (entry && entry.entryStatus === 'approvedBank') {
       setSelectedEntries(prev => {
         if (prev.includes(entryId)) {
           return prev.filter(id => id !== entryId);
@@ -162,34 +162,38 @@ function CashSummary({ fareData, expenseData }) {
     }
   };
 
-  // Handle select all checkbox (only bank status entries)
+  // Handle select all checkbox (only approvedBank status entries)
   const handleSelectAll = () => {
-    const bankEntries = currentEntries.filter(entry => entry.entryStatus === 'bank');
-    const bankEntryIds = bankEntries.map(entry => entry.entryId);
+    const approvedBankEntries = currentEntries.filter(entry => entry.entryStatus === 'approvedBank');
+    const approvedBankEntryIds = approvedBankEntries.map(entry => entry.entryId);
 
-    if (selectedEntries.length === bankEntryIds.length && bankEntryIds.length > 0) {
+    if (selectedEntries.length === approvedBankEntryIds.length && approvedBankEntryIds.length > 0) {
       setSelectedEntries([]);
     } else {
-      setSelectedEntries(bankEntryIds);
+      setSelectedEntries(approvedBankEntryIds);
     }
   };
 
-  // Check if all visible bank entries are selected
-  const bankEntries = currentEntries.filter(entry => entry.entryStatus === 'bank');
-  const isAllSelected = bankEntries.length > 0 && 
-    bankEntries.every(entry => selectedEntries.includes(entry.entryId));
+  // Check if all visible approvedBank entries are selected
+  const approvedBankEntries = currentEntries.filter(entry => entry.entryStatus === 'approvedBank');
+  const isAllSelected = approvedBankEntries.length > 0 && 
+    approvedBankEntries.every(entry => selectedEntries.includes(entry.entryId));
 
   // Get status icon for entry
   const getStatusIcon = (entryStatus) => {
     switch (entryStatus) {
       case 'pending':
         return <i className="bi bi-dash text-muted" title="Pending"></i>; // - icon
-      case 'bank':
+      case 'forwardedBank':
+        return <i className="bi bi-dash text-muted" title="Forwarded to Bank"></i>; // - icon
+      case 'approvedBank':
         return null; // Show checkbox
-      case 'cash':
-        return <i className="bi bi-lock-fill text-warning" title="Cash Locked"></i>;
+      case 'forwardedCash':
+        return <i className="bi bi-lock-fill text-warning" title="Forwarded to Cash"></i>; // lock icon
+      case 'approvedCash':
+        return <i className="bi bi-lock-fill text-warning" title="Cash Approved"></i>; // lock icon
       case 'approved':
-        return <i className="bi bi-check-circle-fill text-success" title="Approved"></i>;
+        return <i className="bi bi-check-circle-fill text-success" title="Final Approved"></i>; // tick icon
       default:
         return null;
     }
@@ -231,11 +235,11 @@ function CashSummary({ fareData, expenseData }) {
         if (!entry) continue;
 
         // Update status locally first (for immediate UI feedback)
-        updateEntryStatus(entryId, "cash");
+        updateEntryStatus(entryId, "forwardedCash");
 
         // Update parent state
         if (window.updateEntryStatusInParent) {
-          window.updateEntryStatusInParent(entryId, "cash", entry.entryType);
+          window.updateEntryStatusInParent(entryId, "forwardedCash", entry.entryType);
         }
 
         // Background API call to Google Sheets (don't wait for it)
@@ -245,7 +249,7 @@ function CashSummary({ fareData, expenseData }) {
           if (entry.entryType === 'daily') {
             authService.updateFareReceiptStatus({
               entryId: entryId,
-              newStatus: "cash",
+              newStatus: "forwardedCash",
               approverName: ""
             }).catch(error => {
               console.error('Background API sync failed for fare receipt:', error);
@@ -253,7 +257,7 @@ function CashSummary({ fareData, expenseData }) {
           } else if (entry.entryType === 'booking') {
             authService.updateBookingEntryStatus({
               entryId: entryId,
-              newStatus: "cash", 
+              newStatus: "forwardedCash", 
               approverName: ""
             }).catch(error => {
               console.error('Background API sync failed for booking entry:', error);
@@ -261,7 +265,7 @@ function CashSummary({ fareData, expenseData }) {
           } else if (entry.entryType === 'fuel') {
             authService.updateFuelPaymentStatus({
               entryId: entryId,
-              newStatus: "cash",
+              newStatus: "forwardedCash",
               approverName: ""
             }).catch(error => {
               console.error('Background API sync failed for fuel payment:', error);
@@ -269,7 +273,7 @@ function CashSummary({ fareData, expenseData }) {
           } else if (entry.entryType === 'adda') {
             authService.updateAddaPaymentStatus({
               entryId: entryId,
-              newStatus: "cash",
+              newStatus: "forwardedCash",
               approverName: ""
             }).catch(error => {
               console.error('Background API sync failed for adda payment:', error);
@@ -277,7 +281,7 @@ function CashSummary({ fareData, expenseData }) {
           } else if (entry.entryType === 'union') {
             authService.updateUnionPaymentStatus({
               entryId: entryId,
-              newStatus: "cash",
+              newStatus: "forwardedCash",
               approverName: ""
             }).catch(error => {
               console.error('Background API sync failed for union payment:', error);
@@ -285,7 +289,7 @@ function CashSummary({ fareData, expenseData }) {
           } else if (entry.entryType === 'service') {
             authService.updateServicePaymentStatus({
               entryId: entryId,
-              newStatus: "cash",
+              newStatus: "forwardedCash",
               approverName: ""
             }).catch(error => {
               console.error('Background API sync failed for service payment:', error);
@@ -293,7 +297,7 @@ function CashSummary({ fareData, expenseData }) {
           } else if (entry.entryType === 'other') {
             authService.updateOtherPaymentStatus({
               entryId: entryId,
-              newStatus: "cash",
+              newStatus: "forwardedCash",
               approverName: ""
             }).catch(error => {
               console.error('Background API sync failed for other payment:', error);
@@ -449,8 +453,8 @@ function CashSummary({ fareData, expenseData }) {
                         className="form-check-input"
                         onChange={handleSelectAll}
                         checked={isAllSelected}
-                        disabled={bankEntries.length === 0}
-                        title="Select all bank entries"
+                        disabled={approvedBankEntries.length === 0}
+                        title="Select all approved bank entries"
                       />
                     </th>
                   </tr>
@@ -478,7 +482,7 @@ function CashSummary({ fareData, expenseData }) {
                         ₹{(entry.cashAmount || 0).toLocaleString()}
                       </td>
                       <td>
-                        {entry.entryStatus === 'bank' ? (
+                        {entry.entryStatus === 'approvedBank' ? (
                           <input 
                             type="checkbox" 
                             className="form-check-input"

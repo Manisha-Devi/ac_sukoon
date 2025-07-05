@@ -185,12 +185,16 @@ function BankSummary({ fareData, expenseData }) {
     switch (entryStatus) {
       case 'pending':
         return null; // Show checkbox
-      case 'bank':
-        return <i className="bi bi-lock-fill text-warning" title="Bank Approval"></i>;
-      case 'cash':
-        return <i className="bi bi-check-circle-fill text-success" title="Cash Approved"></i>;
+      case 'forwardedBank':
+        return <i className="bi bi-lock-fill text-warning" title="Forwarded to Bank"></i>; // lock icon
+      case 'approvedBank':
+        return <i className="bi bi-lock-fill text-warning" title="Bank Approved"></i>; // lock icon
+      case 'forwardedCash':
+        return <i className="bi bi-lock-fill text-warning" title="Forwarded to Cash"></i>; // lock icon
+      case 'approvedCash':
+        return <i className="bi bi-lock-fill text-warning" title="Cash Approved"></i>; // lock icon
       case 'approved':
-        return <i className="bi bi-check-circle-fill text-success" title="Approved"></i>;
+        return <i className="bi bi-check-circle-fill text-success" title="Final Approved"></i>; // tick icon
       default:
         return null;
     }
@@ -231,11 +235,11 @@ function BankSummary({ fareData, expenseData }) {
         if (!entry) continue;
 
         // Update status locally first (for immediate UI feedback)
-        updateEntryStatus(entryId, "bank");
+        updateEntryStatus(entryId, "forwardedBank");
 
         // Update parent state
         if (window.updateEntryStatusInParent) {
-          window.updateEntryStatusInParent(entryId, "bank", entry.entryType);
+          window.updateEntryStatusInParent(entryId, "forwardedBank", entry.entryType);
         }
 
         // Background API call to Google Sheets (don't wait for it)
@@ -245,7 +249,7 @@ function BankSummary({ fareData, expenseData }) {
           if (entry.entryType === 'daily') {
             authService.updateFareReceiptStatus({
               entryId: entryId,
-              newStatus: "bank",
+              newStatus: "forwardedBank",
               approverName: ""
             }).catch(error => {
               console.error('Background API sync failed for fare receipt:', error);
@@ -253,7 +257,7 @@ function BankSummary({ fareData, expenseData }) {
           } else if (entry.entryType === 'booking') {
             authService.updateBookingEntryStatus({
               entryId: entryId,
-              newStatus: "bank", 
+              newStatus: "forwardedBank", 
               approverName: ""
             }).catch(error => {
               console.error('Background API sync failed for booking entry:', error);
@@ -261,7 +265,7 @@ function BankSummary({ fareData, expenseData }) {
           } else if (entry.entryType === 'fuel') {
             authService.updateFuelPaymentStatus({
               entryId: entryId,
-              newStatus: "bank",
+              newStatus: "forwardedBank",
               approverName: ""
             }).catch(error => {
               console.error('Background API sync failed for fuel payment:', error);
@@ -269,7 +273,7 @@ function BankSummary({ fareData, expenseData }) {
           } else if (entry.entryType === 'adda') {
             authService.updateAddaPaymentStatus({
               entryId: entryId,
-              newStatus: "bank",
+              newStatus: "forwardedBank",
               approverName: ""
             }).catch(error => {
               console.error('Background API sync failed for adda payment:', error);
@@ -277,7 +281,7 @@ function BankSummary({ fareData, expenseData }) {
           } else if (entry.entryType === 'union') {
             authService.updateUnionPaymentStatus({
               entryId: entryId,
-              newStatus: "bank",
+              newStatus: "forwardedBank",
               approverName: ""
             }).catch(error => {
               console.error('Background API sync failed for union payment:', error);
@@ -285,7 +289,7 @@ function BankSummary({ fareData, expenseData }) {
           } else if (entry.entryType === 'service') {
             authService.updateServicePaymentStatus({
               entryId: entryId,
-              newStatus: "bank",
+              newStatus: "forwardedBank",
               approverName: ""
             }).catch(error => {
               console.error('Background API sync failed for service payment:', error);
@@ -293,7 +297,7 @@ function BankSummary({ fareData, expenseData }) {
           } else if (entry.entryType === 'other') {
             authService.updateOtherPaymentStatus({
               entryId: entryId,
-              newStatus: "bank",
+              newStatus: "forwardedBank",
               approverName: ""
             }).catch(error => {
               console.error('Background API sync failed for other payment:', error);
