@@ -6,11 +6,8 @@
 // All other functions are imported from separate files
 // ============================================================================
 
-// Get Spreadsheet ID from Script Properties (more secure)
-// To set: Go to Project Settings > Script Properties > Add Property
-// Key: SPREADSHEET_ID, Value: Your actual spreadsheet ID
-const SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID') || 
-                       "1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidEmhzgM"; // Fallback ID
+// IMPORTANT: Replace this with your actual Google Sheets ID
+const SPREADSHEET_ID = "1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidEmhzgM";
 
 // Sheet names configuration - must match exactly with your Google Sheets
 const SHEET_NAMES = {
