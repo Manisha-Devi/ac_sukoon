@@ -405,6 +405,11 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
       
       // Store bankData globally for BankSummary
       window.bankData = combinedBankData;
+      
+      // Trigger state update for BankSummary if callback exists
+      if (window.updateBankData) {
+        window.updateBankData(combinedBankData);
+      }
 
       // Update local state for dashboard display
       setAllData({

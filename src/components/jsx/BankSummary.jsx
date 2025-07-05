@@ -27,7 +27,7 @@ function BankSummary({ bankData }) {
 
     console.log('👤 Filtering bank data for user:', currentUserName);
     console.log('📊 BankData Structure Examples:');
-    
+
     // Log sample objects for debugging
     if (bankData && bankData.length > 0) {
       console.log('🔸 Daily Entry Sample:', bankData.find(e => e.type === 'daily'));
@@ -42,7 +42,7 @@ function BankSummary({ bankData }) {
       );
       console.log('💰 Bank entries found:', userBankData.length);
       console.log('📋 Sample Bank Entry:', userBankData[0]);
-      
+
       allData = [...allData, ...userBankData.map(entry => ({
         entryId: entry.entryId,
         date: entry.date || entry.dateFrom, // Use dateFrom for booking entries
@@ -72,7 +72,7 @@ function BankSummary({ bankData }) {
     // Sort by date (newest first)
     allData.sort((a, b) => new Date(b.date) - new Date(a.date));
     setFilteredData(allData);
-    
+
     console.log('📊 Filtered bank data:', allData.length, 'entries');
   };
 
@@ -140,7 +140,7 @@ function BankSummary({ bankData }) {
 
   useEffect(() => {
     filterUserData();
-  }, [fareData, expenseData, dateFrom, dateTo, currentUser]);
+  }, [bankData, dateFrom, dateTo, currentUser]);
 
   // Listen for centralized refresh events
   useEffect(() => {
