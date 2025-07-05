@@ -294,11 +294,34 @@ function updateOffDayStatus(data) {
       throw new Error(`Off day not found with ID: ${entryId}`);
     }
 
-    // Update status
-    sheet.getRange(rowIndex, 7).setValue(newStatus); // Column G: EntryStatus
+    // Update status based on approval workflow
+    let finalStatus = newStatus;
+    
+    // Map approval workflow statuses correctly
+    switch(newStatus) {
+      case 'approved':
+        finalStatus = 'approved';
+        break;
+      case 'approvedBank':
+        finalStatus = 'approvedBank';
+        break;
+      case 'approvedCash':
+        finalStatus = 'approvedCash';
+        break;
+      case 'forwardedBank':
+        finalStatus = 'forwardedBank';
+        break;
+      case 'forwardedCash':
+        finalStatus = 'forwardedCash';
+        break;
+      default:
+        finalStatus = newStatus;
+    }
+    
+    sheet.getRange(rowIndex, 7).setValue(finalStatus); // Column G: EntryStatus
 
-    // Update approver name if status is approved
-    if (newStatus === 'approved') {
+    // Update approver name for all approved statuses
+    if (finalStatus.includes('approved') || finalStatus === 'approved') {
       sheet.getRange(rowIndex, 8).setValue(approverName); // Column H: ApprovedBy
     } else {
       sheet.getRange(rowIndex, 8).setValue(""); // Clear approver for other statuses

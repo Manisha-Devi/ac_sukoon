@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import "../css/DataApproval.css";
 import authService from "../../services/authService.js";
@@ -17,12 +16,12 @@ function DataSummary({ fareData, expenseData }) {
   useEffect(() => {
     const userString = localStorage.getItem('user');
     console.log('🔍 DataSummary - Raw localStorage user:', userString);
-    
+
     const user = JSON.parse(userString || '{}');
     console.log('👤 DataSummary - Parsed user object:', user);
     console.log('🔑 DataSummary - User role:', user?.role);
     console.log('🔑 DataSummary - User type:', user?.userType);
-    
+
     setCurrentUser(user);
   }, []);
 
@@ -166,7 +165,7 @@ function DataSummary({ fareData, expenseData }) {
   const handleSelectAll = () => {
     const currentData = getCurrentTabData();
     const currentIds = currentData.map(entry => entry.entryId);
-    
+
     if (selectedEntries.length === currentIds.length && currentIds.length > 0) {
       setSelectedEntries([]);
     } else {
@@ -212,7 +211,7 @@ function DataSummary({ fareData, expenseData }) {
 
       // First update local UI state immediately
       const updatedEntryIds = [...selectedEntries];
-      
+
       // Update local state for immediate UI feedback
       const updateLocalData = (dataArray) => {
         return dataArray.map(entry => {
@@ -341,7 +340,7 @@ function DataSummary({ fareData, expenseData }) {
   // Render entry card
   const renderEntryCard = (entry) => {
     const isSelected = selectedEntries.includes(entry.entryId);
-    
+
     return (
       <div 
         key={entry.entryId} 
@@ -427,6 +426,18 @@ function DataSummary({ fareData, expenseData }) {
               <span className="label">Time:</span>
               <span className="value">{entry.timestamp}</span>
             </div>
+            {entry.approvedBy && (
+              <div className="entry-row">
+                <span className="label">Approved By:</span>
+                <span className="value">{entry.approvedBy}</span>
+              </div>
+            )}
+            {entry.dataType === 'Off Day' && (
+              <div className="entry-row">
+                <span className="label">Reason:</span>
+                <span className="value">{entry.reason || entry.description}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -538,7 +549,7 @@ function DataSummary({ fareData, expenseData }) {
                 Select All ({selectedEntries.length}/{currentData.length})
               </label>
             </div>
-            
+
             {selectedEntries.length > 0 && (
               <button 
                 className="btn btn-success approve-btn"

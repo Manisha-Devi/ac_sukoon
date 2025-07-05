@@ -416,7 +416,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       }
 
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+      const submittedBy = currentUser?.fullName || currentUser?.username || 'Unknown User';
       const now = new Date();
       const timeOnly = now.toLocaleTimeString('en-US', { 
         hour12: true, 
@@ -593,7 +593,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
   const getCurrentUserNonApprovedEntries = () => {
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     const currentUserName = currentUser.fullName || currentUser.username;
-    
+
     return fareData.filter(entry => 
       entry.submittedBy === currentUserName && entry.entryStatus !== 'approved'
     );
@@ -603,7 +603,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
   // Load data on component mount and listen for refresh events
   useEffect(() => {
-    
+
 
     // Listen for centralized refresh events
     const handleDataRefresh = () => {
