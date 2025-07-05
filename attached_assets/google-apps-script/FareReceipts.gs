@@ -273,14 +273,14 @@ function deleteFareReceipt(data) {
 }
 
 /**
- * Update Fare Receipt Status (New 6-step flow)
+ * Update Fare Receipt Status (Bank/Cash/Approved)
  * @param {Object} data - Status update data containing entryId, newStatus, and approverName
  * @returns {Object} Success/error response
  */
 function updateFareReceiptStatus(data) {
   try {
     const entryId = data.entryId;
-    const newStatus = data.newStatus; // 'forwardedBank', 'approvedBank', 'forwardedCash', 'approvedCash', or 'approved'
+    const newStatus = data.newStatus; // 'bank', 'cash', or 'approved'
     const approverName = data.approverName || "";
 
     console.log(`📋 Updating fare receipt status - ID: ${entryId}, Status: ${newStatus}`);

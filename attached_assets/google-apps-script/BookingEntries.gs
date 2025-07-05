@@ -287,14 +287,14 @@ function deleteBookingEntry(data) {
 }
 
 /**
- * Update Booking Entry Status (New 6-step flow)
+ * Update Booking Entry Status (Bank/Cash/Approved)
  * @param {Object} data - Status update data containing entryId, newStatus, and approverName
  * @returns {Object} Success/error response
  */
 function updateBookingEntryStatus(data) {
   try {
     const entryId = data.entryId;
-    const newStatus = data.newStatus; // 'forwardedBank', 'approvedBank', 'forwardedCash', 'approvedCash', or 'approved'
+    const newStatus = data.newStatus; // 'bank', 'cash', or 'approved'
     const approverName = data.approverName || "";
 
     console.log(`📋 Updating booking entry status - ID: ${entryId}, Status: ${newStatus}`);
