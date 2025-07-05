@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import "../css/CashSummary.css";
 
-function CashSummary({ fareData, expenseData, onRefresh }) {
+function CashSummary({ fareData, expenseData }) {
   const [filteredData, setFilteredData] = useState([]);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -85,13 +85,7 @@ function CashSummary({ fareData, expenseData, onRefresh }) {
     <div className="cash-summary-container">
       <div className="summary-header">
         <h3><i className="bi bi-cash-stack"></i> Cash Summary</h3>
-        <button 
-          className="btn btn-primary btn-sm refresh-btn"
-          onClick={onRefresh}
-          title="Refresh all data from Google Sheets"
-        >
-          <i className="bi bi-arrow-clockwise"></i> Refresh
-        </button>
+        <small className="text-muted">Use navbar refresh icon to update data</small>
       </div>
 
       {/* Date Filter */}

@@ -25,6 +25,14 @@ function App() {
   const [cashBookEntries, setCashBookEntries] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefreshTime, setLastRefreshTime] = useState(null);
+  const [dataStats, setDataStats] = useState({
+    totalRecords: 0,
+    fareRecords: 0,
+    expenseRecords: 0,
+    lastSync: null
+  });
 
   const handleLogin = (userData) => {
     setUser(userData);
@@ -34,6 +42,39 @@ function App() {
     setUser(null);
     setActiveTab("dashboard");
   };
+
+  // Centralized refresh function
+  const handleCentralizedRefresh = async () => {
+    if (isRefreshing) return; // Prevent multiple simultaneous refreshes
+    
+    setIsRefreshing(true);
+    try {
+      console.log('🔄 Starting centralized data refresh...');
+      
+      // Load data from Dashboard component method
+      const dashboardRef = document.querySelector('.dashboard-container');
+      if (dashboardRef && window.refreshAllData) {
+        await window.refreshAllData();
+      }
+      
+      setLastRefreshTime(new Date());
+      console.log('✅ Centralized refresh completed');
+    } catch (error) {
+      console.error('❌ Centralized refresh failed:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Update data stats when data changes
+  useEffect(() => {
+    setDataStats({
+      totalRecords: fareData.length + expenseData.length,
+      fareRecords: fareData.length,
+      expenseRecords: expenseData.length,
+      lastSync: lastRefreshTime
+    });
+  }, [fareData, expenseData, lastRefreshTime]);
 
   // Handle window resize
   useEffect(() => {
@@ -193,6 +234,17 @@ function App() {
 
           {/* Right Side Controls */}
           <div className="d-flex align-items-center">
+            {/* Centralized Refresh Icon */}
+            <button 
+              className={`btn btn-link text-white p-2 me-2 ${isRefreshing ? 'disabled' : ''}`}
+              onClick={handleCentralizedRefresh}
+              disabled={isRefreshing}
+              title={isRefreshing ? 'Refreshing data...' : 'Refresh all data from Google Sheets'}
+              type="button"
+            >
+              <i className={`bi ${isRefreshing ? 'bi-arrow-clockwise' : (lastRefreshTime ? 'bi-check-circle' : 'bi-arrow-clockwise')} fs-5 ${isRefreshing ? 'rotating' : ''}`}></i>
+            </button>
+
             {/* Desktop Toggle and User Info */}
             <div className="d-none d-lg-flex align-items-center">
               <button 
@@ -347,6 +399,9 @@ function App() {
               setFareData={setFareData}
               setExpenseData={setExpenseData}
               setCashBookEntries={setCashBookEntries}
+              isRefreshing={isRefreshing}
+              dataStats={dataStats}
+              onRefreshComplete={() => setLastRefreshTime(new Date())}
             />
           )}
           {activeTab === "fare-entry" && (
@@ -393,22 +448,12 @@ function App() {
             <CashSummary 
               fareData={fareData} 
               expenseData={expenseData}
-              onRefresh={() => {
-                // Refresh data by reloading from dashboard
-                setActiveTab("dashboard");
-                setTimeout(() => setActiveTab("cash-summary"), 100);
-              }}
             />
           )}
           {activeTab === "bank-summary" && (
             <BankSummary 
               fareData={fareData} 
               expenseData={expenseData}
-              onRefresh={() => {
-                // Refresh data by reloading from dashboard
-                setActiveTab("dashboard");
-                setTimeout(() => setActiveTab("bank-summary"), 100);
-              }}
             />
           )}
         </div>

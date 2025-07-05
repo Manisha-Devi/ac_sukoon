@@ -25,7 +25,7 @@ ChartJS.register(
   ArcElement,
 );
 
-function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, setFareData, setExpenseData, setCashBookEntries }) {
+function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, setFareData, setExpenseData, setCashBookEntries, isRefreshing, dataStats, onRefreshComplete }) {
   const [isLoading, setIsLoading] = useState(false);
   const [allData, setAllData] = useState({
     fareReceipts: [],
@@ -432,9 +432,20 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
   }, []);
 
   // Refresh data function (can be called manually)
-  const refreshAllData = () => {
-    loadAllDataFromSheets();
+  const refreshAllData = async () => {
+    await loadAllDataFromSheets();
+    if (onRefreshComplete) {
+      onRefreshComplete();
+    }
   };
+
+  // Expose refresh function globally for centralized access
+  useEffect(() => {
+    window.refreshAllData = refreshAllData;
+    return () => {
+      delete window.refreshAllData;
+    };
+  }, []);
   const lineData = {
     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
     datasets: [
@@ -560,14 +571,34 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
                 day: 'numeric' 
               })}
             </div>
-            <button 
-              className="btn btn-outline-primary btn-sm" 
-              onClick={refreshAllData}
-              disabled={isLoading}
-            >
-              <i className="bi bi-arrow-clockwise me-1"></i>
-              {isLoading ? 'Loading...' : 'Refresh Data'}
-            </button>
+            {dataStats && (
+              <div className="data-stats-card bg-white p-3 rounded shadow-sm">
+                <h6 className="mb-2 text-primary">
+                  <i className="bi bi-database me-2"></i>
+                  Data Statistics
+                </h6>
+                <div className="row text-center">
+                  <div className="col-4">
+                    <div className="fw-bold text-success">{dataStats.fareRecords}</div>
+                    <small className="text-muted">Income</small>
+                  </div>
+                  <div className="col-4">
+                    <div className="fw-bold text-danger">{dataStats.expenseRecords}</div>
+                    <small className="text-muted">Expenses</small>
+                  </div>
+                  <div className="col-4">
+                    <div className="fw-bold text-info">{dataStats.totalRecords}</div>
+                    <small className="text-muted">Total</small>
+                  </div>
+                </div>
+                {dataStats.lastSync && (
+                  <small className="text-muted d-block mt-2">
+                    <i className="bi bi-clock me-1"></i>
+                    Last sync: {new Date(dataStats.lastSync).toLocaleTimeString()}
+                  </small>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -380,12 +380,7 @@ function DataApproval() {
         <div className="approval-header">
           <h2><i className="bi bi-clipboard-check"></i> Data Approval</h2>
           <p>Review and approve submitted entries</p>
-          <button 
-            className="btn btn-primary btn-sm refresh-btn"
-            onClick={loadAllData}
-          >
-            <i className="bi bi-arrow-clockwise"></i> Refresh Data
-          </button>
+          <small className="text-muted">Use navbar refresh icon to update data</small>
         </div>
 
         {/* Approval Tabs */}

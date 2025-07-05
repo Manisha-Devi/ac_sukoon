@@ -821,3 +821,24 @@ html, body {
   font-size: 0.75rem;
   margin: 0;
 }
+/* Main layout styles */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Rotating animation for refresh icon */
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rotating {
+  animation: rotate 1s linear infinite;
+}
