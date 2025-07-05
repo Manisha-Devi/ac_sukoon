@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import "../css/CashSummary.css";
 
@@ -229,13 +230,12 @@ function CashSummary({ fareData, expenseData }) {
                     <th>Type</th>
                     <th>I/E</th>
                     <th>Cash</th>
-                    <th width="50">
+                    <th>
                       <input 
                         type="checkbox" 
                         className="form-check-input"
                         onChange={handleSelectAll}
                         checked={isAllSelected}
-                        indeterminate={selectedEntries.length > 0 && !isAllSelected}
                       />
                     </th>
                   </tr>
@@ -251,14 +251,7 @@ function CashSummary({ fareData, expenseData }) {
                       </td>
                       <td>
                         <span className="badge bg-info">
-                          {entry.entryType === 'booking' ? 'booking' :
-                           entry.entryType === 'daily' ? 'daily' :
-                           entry.entryType === 'fuel' ? 'fuel' :
-                           entry.entryType === 'adda' ? 'adda' :
-                           entry.entryType === 'union' ? 'union' :
-                           entry.entryType === 'service' ? 'service' :
-                           entry.entryType === 'other' ? 'other' :
-                           entry.entryType || 'cash'}
+                          {entry.entryType || 'cash'}
                         </span>
                       </td>
                       <td>
