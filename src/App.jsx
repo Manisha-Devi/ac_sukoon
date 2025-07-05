@@ -10,7 +10,6 @@ import MiscPayment from "./components/jsx/MiscPayment";
 import BonusCalculator from "./components/jsx/BonusCalculator";
 import Analytics from "./components/jsx/Analytics";
 import CashBook from "./components/jsx/CashBook";
-import DataSummary from './components/jsx/DataSummary.jsx';
 import DataApproval from './components/jsx/DataApproval.jsx';
 import localStorageService from "./services/localStorageService.js";
 
@@ -304,13 +303,6 @@ function App() {
                 <i className="bi bi-clipboard-check"></i>
                 Data Approval
               </button>
-              <button
-                className={`menu-item ${activeTab === "approval" ? "active" : ""}`}
-                onClick={() => handleMenuClick("approval")}
-              >
-                <i className="bi bi-check-circle"></i>
-                Data Summary
-              </button>
             </div>
           )}
 
@@ -381,13 +373,6 @@ function App() {
             />
           )}
           {activeTab === "data-approval" && <DataApproval />}
-          {activeTab === "approval" && (
-            <DataSummary
-              fareData={fareData}
-              expenseData={expenseData}
-              cashBookEntries={cashBookEntries}
-            />
-          )}
         </div>
       </div>
     </div>
