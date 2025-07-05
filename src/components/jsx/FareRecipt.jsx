@@ -601,15 +601,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
               <h2><i className="bi bi-receipt"></i> Fare Receipt Entry</h2>
               <p>Record your daily earnings and bookings (Income)</p>
             </div>
-            <div className="sync-status">
-              <div className={`simple-sync-indicator ${isLoading ? 'syncing' : 'synced'}`}>
-                {isLoading ? (
-                  <i className="bi bi-arrow-clockwise"></i>
-                ) : (
-                  <i className="bi bi-check-circle"></i>
-                )}
-              </div>
-            </div>
+            
           </div>
         </div>
 

@@ -406,15 +406,7 @@ function MiscPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBoo
               <h2><i className="bi bi-credit-card"></i> Misc Payment Entry</h2>
               <p>Record your miscellaneous expenses - Service & Other payments</p>
             </div>
-            <div className="sync-status">
-              <div className={`simple-sync-indicator ${isLoading ? 'syncing' : 'synced'}`}>
-                {isLoading ? (
-                  <i className="bi bi-arrow-clockwise"></i>
-                ) : (
-                  <i className="bi bi-check-circle"></i>
-                )}
-              </div>
-            </div>
+            
           </div>
         </div>
 

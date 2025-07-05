@@ -472,15 +472,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
               <h2><i className="bi bi-credit-card"></i> Basic Payment Entry</h2>
               <p>Record your basic expenses - Fuel, Adda & Union payments</p>
             </div>
-            <div className="sync-status">
-              <div className={`simple-sync-indicator ${isLoading ? 'syncing' : 'synced'}`}>
-                {isLoading ? (
-                  <i className="bi bi-arrow-clockwise"></i>
-                ) : (
-                  <i className="bi bi-check-circle"></i>
-                )}
-              </div>
-            </div>
+            
           </div>
         </div>
 
