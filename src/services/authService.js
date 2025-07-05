@@ -820,6 +820,134 @@ class AuthService {
     }
   }
 
+  // ====================================================================
+  // OTHER PAYMENTS OPERATIONS
+  // ====================================================================
+
+  // Add Other Payment
+  async addOtherPayment(data) {
+    try {
+      console.log('📝 Adding other payment to Google Sheets:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'addOtherPayment',
+          ...data
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Other payment added:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error adding other payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Get Other Payments
+  async getOtherPayments() {
+    try {
+      console.log('📋 Fetching other payments from Google Sheets...');
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'getOtherPayments'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Other payments fetched:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error fetching other payments:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Update Other Payment
+  async updateOtherPayment(data) {
+    try {
+      console.log('📝 Updating other payment in Google Sheets:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'updateOtherPayment',
+          entryId: data.entryId,
+          updatedData: data.updatedData
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Other payment updated:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating other payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Delete Other Payment
+  async deleteOtherPayment(data) {
+    try {
+      console.log('🗑️ Deleting other payment from Google Sheets:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'deleteOtherPayment',
+          entryId: data.entryId
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Other payment deleted:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error deleting other payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // ======= FUEL PAYMENTS API METHODS =======
 
   // Add Fuel Payment to Google Sheets

@@ -1,4 +1,3 @@
-
 // ============================================================================
 // AC SUKOON TRANSPORT MANAGEMENT - MAIN FILE (Code.gs)
 // ============================================================================
@@ -159,6 +158,20 @@ function doPost(e) {
         result = deleteServicePayment(data);
         break;
 
+      // ==================== Other PAYMENTS ====================
+      case "addOtherPayment":
+        result = addOtherPayment(data);
+        break;
+      case "getOtherPayments":
+        result = getOtherPayments();
+        break;
+      case "updateOtherPayment":
+        result = updateOtherPayment(data);
+        break;
+      case "deleteOtherPayment":
+        result = deleteOtherPayment(data);
+        break;
+
       // ==================== LEGACY SUPPORT ====================
       case "updateFareEntry":
         result = updateFareEntryLegacy(data);
@@ -181,7 +194,7 @@ function doPost(e) {
 
   } catch (error) {
     console.error(`❌ POST request error:`, error);
-    
+
     return ContentService.createTextOutput(JSON.stringify({
       success: false,
       error: "Server Error: " + error.toString(),
@@ -246,7 +259,7 @@ function doGet(e) {
 
   } catch (error) {
     console.error(`❌ GET request error:`, error);
-    
+
     return ContentService.createTextOutput(JSON.stringify({
       success: false,
       error: "GET Error: " + error.toString(),

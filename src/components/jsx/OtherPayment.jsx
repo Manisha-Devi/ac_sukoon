@@ -1,9 +1,12 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../css/OtherPayment.css";
+import { authService } from "../../services/authService";
 
 function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
   const [editingEntry, setEditingEntry] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [otherPaymentsData, setOtherPaymentsData] = useState([]);
   const [formData, setFormData] = useState({
     paymentDetails: "",
     cashAmount: "",
@@ -13,101 +16,209 @@ function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
     vendor: "",
   });
 
+  // Load data on component mount
+  useEffect(() => {
+    loadOtherPayments();
+  }, []);
+
+  // Load Other Payments from Google Sheets
+  const loadOtherPayments = async () => {
+    try {
+      setIsLoading(true);
+      const response = await authService.getOtherPayments();
+      
+      if (response.success) {
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const currentUserName = currentUser.fullName || currentUser.username;
+        
+        // Filter entries for current user
+        const userEntries = response.data.filter(entry => 
+          entry.submittedBy === currentUserName
+        );
+        
+        setOtherPaymentsData(userEntries);
+        console.log('✅ Other payments loaded:', userEntries.length);
+      } else {
+        console.error('❌ Failed to load other payments:', response.error);
+      }
+    } catch (error) {
+      console.error('❌ Error loading other payments:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Function to get min date for date inputs (today)
   const getTodayDate = () => {
     return new Date().toISOString().split('T')[0];
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     const cashAmount = parseInt(formData.cashAmount) || 0;
     const bankAmount = parseInt(formData.bankAmount) || 0;
     const totalAmount = cashAmount + bankAmount;
 
-    if (editingEntry) {
-      // Update existing entry
-      const oldTotal = editingEntry.totalAmount;
-      const updatedEntries = expenseData.map(entry => 
-        entry.id === editingEntry.id 
-          ? {
-              ...entry,
-              paymentDetails: formData.paymentDetails,
-              cashAmount: cashAmount,
-              bankAmount: bankAmount,
-              totalAmount: totalAmount,
-              description: formData.description,
-              date: formData.date,
-              vendor: formData.vendor,
-            }
-          : entry
-      );
-      setExpenseData(updatedEntries);
-      setTotalExpenses((prev) => prev - oldTotal + totalAmount);
-      setEditingEntry(null);
-    } else {
-      // Create new entry
-      const newEntry = {
-        id: Date.now(),
-        type: "other",
-        paymentDetails: formData.paymentDetails,
-        cashAmount: cashAmount,
-        bankAmount: bankAmount,
-        totalAmount: totalAmount,
-        description: formData.description,
-        date: formData.date,
-        vendor: formData.vendor,
-      };
-      setExpenseData([...expenseData, newEntry]);
-      setTotalExpenses((prev) => prev + totalAmount);
-      
-      // Add to cash book - payments go to Cr. side
-      if (cashAmount > 0 || bankAmount > 0) {
-        const cashBookEntry = {
-          id: Date.now() + 1,
+    if (totalAmount <= 0) {
+      alert('Please enter a valid amount (Cash or Bank)');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const currentUserName = currentUser.fullName || currentUser.username;
+
+      if (editingEntry) {
+        // Update existing entry
+        const updateData = {
+          entryId: editingEntry.entryId,
+          updatedData: {
+            date: formData.date,
+            paymentDetails: formData.paymentDetails,
+            description: formData.description,
+            cashAmount: cashAmount,
+            bankAmount: bankAmount,
+            totalAmount: totalAmount,
+            vendor: formData.vendor || "General"
+          }
+        };
+
+        const response = await authService.updateOtherPayment(updateData);
+        
+        if (response.success) {
+          console.log('✅ Other payment updated successfully');
+          await loadOtherPayments(); // Reload data
+          setEditingEntry(null);
+        } else {
+          console.error('❌ Failed to update other payment:', response.error);
+          alert('Failed to update other payment: ' + response.error);
+          return;
+        }
+      } else {
+        // Create new entry
+        const newEntryData = {
           date: formData.date,
-          particulars: "Other",
-          description: `${formData.paymentDetails}${formData.vendor ? ` - ${formData.vendor}` : ''}`,
-          jfNo: `OTHER-${Date.now()}`,
+          paymentDetails: formData.paymentDetails,
+          description: formData.description,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
-          type: 'cr', // Payments go to Cr. side
-          timestamp: new Date().toISOString(),
-          source: 'other-payment'
+          totalAmount: totalAmount,
+          vendor: formData.vendor || "General",
+          submittedBy: currentUserName
         };
-        setCashBookEntries(prev => [cashBookEntry, ...prev]);
+
+        const response = await authService.addOtherPayment(newEntryData);
+        
+        if (response.success) {
+          console.log('✅ Other payment added successfully');
+          await loadOtherPayments(); // Reload data
+          
+          // Update local state for backwards compatibility
+          const newEntry = {
+            id: Date.now(),
+            type: "other",
+            paymentDetails: formData.paymentDetails,
+            cashAmount: cashAmount,
+            bankAmount: bankAmount,
+            totalAmount: totalAmount,
+            description: formData.description,
+            date: formData.date,
+            vendor: formData.vendor,
+          };
+          setExpenseData(prev => [...prev, newEntry]);
+          setTotalExpenses(prev => prev + totalAmount);
+          
+          // Add to cash book - payments go to Cr. side
+          if (cashAmount > 0 || bankAmount > 0) {
+            const cashBookEntry = {
+              id: Date.now() + 1,
+              date: formData.date,
+              particulars: "Other",
+              description: `${formData.paymentDetails}${formData.vendor ? ` - ${formData.vendor}` : ''}`,
+              jfNo: `OTHER-${Date.now()}`,
+              cashAmount: cashAmount,
+              bankAmount: bankAmount,
+              type: 'cr',
+              timestamp: new Date().toISOString(),
+              source: 'other-payment'
+            };
+            setCashBookEntries(prev => [cashBookEntry, ...prev]);
+          }
+        } else {
+          console.error('❌ Failed to add other payment:', response.error);
+          alert('Failed to add other payment: ' + response.error);
+          return;
+        }
       }
+      
+      // Reset form
+      setFormData({
+        paymentDetails: "",
+        cashAmount: "",
+        bankAmount: "",
+        description: "",
+        date: "",
+        vendor: "",
+      });
+      
+    } catch (error) {
+      console.error('❌ Error submitting other payment:', error);
+      alert('Error submitting other payment: ' + error.message);
+    } finally {
+      setIsLoading(false);
     }
-    
-    setFormData({
-      paymentDetails: "",
-      cashAmount: "",
-      bankAmount: "",
-      description: "",
-      date: "",
-      vendor: "",
-    });
   };
 
-  const handleDeleteEntry = (entryId) => {
-    const entryToDelete = expenseData.find(entry => entry.id === entryId);
-    if (entryToDelete && entryToDelete.totalAmount) {
-      setTotalExpenses((prev) => prev - entryToDelete.totalAmount);
+  const handleDeleteEntry = async (entryId, isGoogleSheetsEntry = false) => {
+    if (!confirm('Are you sure you want to delete this entry?')) {
+      return;
     }
-    setExpenseData(expenseData.filter(entry => entry.id !== entryId));
-    
-    // Remove corresponding cash book entry
-    setCashBookEntries(prev => prev.filter(entry => entry.source === 'other-payment' && !entry.jfNo?.includes(entryId.toString())));
+
+    try {
+      setIsLoading(true);
+
+      if (isGoogleSheetsEntry) {
+        // Delete from Google Sheets
+        const response = await authService.deleteOtherPayment({ entryId });
+        
+        if (response.success) {
+          console.log('✅ Other payment deleted successfully');
+          await loadOtherPayments(); // Reload data
+        } else {
+          console.error('❌ Failed to delete other payment:', response.error);
+          alert('Failed to delete other payment: ' + response.error);
+        }
+      } else {
+        // Delete from local state (backwards compatibility)
+        const entryToDelete = expenseData.find(entry => entry.id === entryId);
+        if (entryToDelete && entryToDelete.totalAmount) {
+          setTotalExpenses(prev => prev - entryToDelete.totalAmount);
+        }
+        setExpenseData(expenseData.filter(entry => entry.id !== entryId));
+        
+        // Remove corresponding cash book entry
+        setCashBookEntries(prev => prev.filter(entry => 
+          entry.source === 'other-payment' && !entry.jfNo?.includes(entryId.toString())
+        ));
+      }
+    } catch (error) {
+      console.error('❌ Error deleting other payment:', error);
+      alert('Error deleting other payment: ' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleEditEntry = (entry) => {
+  const handleEditEntry = (entry, isGoogleSheetsEntry = false) => {
     setEditingEntry(entry);
     setFormData({
-      paymentDetails: entry.paymentDetails,
-      cashAmount: entry.cashAmount.toString(),
-      bankAmount: entry.bankAmount.toString(),
-      description: entry.description,
-      date: entry.date,
+      paymentDetails: entry.paymentDetails || entry.paymentType || "",
+      cashAmount: (entry.cashAmount || 0).toString(),
+      bankAmount: (entry.bankAmount || 0).toString(),
+      description: entry.description || "",
+      date: entry.date || "",
       vendor: entry.vendor || "",
     });
   };
@@ -124,24 +235,40 @@ function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
     });
   };
 
-  // Filter other payment entries
+  // Filter other payment entries from local state
   const otherEntries = expenseData.filter(entry => entry.type === "other");
 
+  // Combine Google Sheets data with local data
+  const allOtherEntries = [...otherPaymentsData, ...otherEntries];
+
   // Calculate totals for summary
-  const totalCash = otherEntries.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
-  const totalBank = otherEntries.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+  const totalCash = allOtherEntries.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
+  const totalBank = allOtherEntries.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
   const grandTotal = totalCash + totalBank;
 
   return (
     <div className="other-entry-container">
       <div className="container-fluid">
         <div className="other-header">
-          <h2><i className="bi bi-credit-card"></i> Other Payment Entry</h2>
-          <p>Record your miscellaneous expenses (Payment)</p>
+          <div className="header-content">
+            <div>
+              <h2><i className="bi bi-credit-card"></i> Other Payment Entry</h2>
+              <p>Record your miscellaneous expenses (Payment)</p>
+            </div>
+            <div className="sync-status">
+              <div className={`simple-sync-indicator ${isLoading ? 'syncing' : 'synced'}`}>
+                {isLoading ? (
+                  <i className="bi bi-arrow-clockwise"></i>
+                ) : (
+                  <i className="bi bi-check-circle"></i>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Summary Cards */}
-        {otherEntries.length > 0 && (
+        {allOtherEntries.length > 0 && (
           <div className="row mb-4">
             <div className="col-md-3 col-sm-6 mb-3">
               <div className="summary-card cash-card">
@@ -171,7 +298,7 @@ function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
               <div className="summary-card entries-card">
                 <div className="card-body">
                   <h6>Total Entries</h6>
-                  <h4>{otherEntries.length}</h4>
+                  <h4>{allOtherEntries.length}</h4>
                 </div>
               </div>
             </div>
@@ -276,8 +403,12 @@ function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
             </div>
             
             <div className="button-group">
-              <button type="submit" className="btn other-entry-btn">
-                <i className={editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
+              <button type="submit" className="btn other-entry-btn" disabled={isLoading}>
+                {isLoading ? (
+                  <i className="bi bi-arrow-repeat"></i>
+                ) : (
+                  <i className={editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i>
+                )}
                 {editingEntry ? "Update Entry" : "Add Other Payment"}
               </button>
               {editingEntry && (
@@ -290,12 +421,12 @@ function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
         </div>
 
         {/* Recent Entries */}
-        {otherEntries.length > 0 && (
+        {allOtherEntries.length > 0 && (
           <div className="recent-entries mt-4">
             <h4>Recent Entries</h4>
             <div className="row">
-              {otherEntries.slice(-6).reverse().map((entry) => (
-                <div key={entry.id} className="col-md-6 col-lg-4 mb-3">
+              {allOtherEntries.slice(-6).reverse().map((entry) => (
+                <div key={entry.entryId || entry.id} className="col-md-6 col-lg-4 mb-3">
                   <div className="entry-card">
                     <div className="card-body">
                       <div className="entry-header">
@@ -303,14 +434,14 @@ function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                         <div className="entry-actions">
                           <button 
                             className="btn btn-sm btn-edit" 
-                            onClick={() => handleEditEntry(entry)}
+                            onClick={() => handleEditEntry(entry, !!entry.entryId)}
                             title="Edit Entry"
                           >
                             <i className="bi bi-pencil"></i>
                           </button>
                           <button 
                             className="btn btn-sm btn-delete" 
-                            onClick={() => handleDeleteEntry(entry.id)}
+                            onClick={() => handleDeleteEntry(entry.entryId || entry.id, !!entry.entryId)}
                             title="Delete Entry"
                           >
                             <i className="bi bi-trash"></i>
@@ -319,6 +450,9 @@ function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                       </div>
                       <div className="entry-date">
                         <small className="text-muted">{entry.date}</small>
+                        {entry.timestamp && (
+                          <small className="text-muted d-block">{entry.timestamp}</small>
+                        )}
                       </div>
                       <div className="entry-content">
                         <p><strong>{entry.paymentDetails}</strong></p>

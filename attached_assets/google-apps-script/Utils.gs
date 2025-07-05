@@ -1,4 +1,3 @@
-
 // ============================================================================
 // UTILITY FUNCTIONS (Utils.gs)
 // ============================================================================
@@ -11,7 +10,7 @@
 function testConnection() {
   try {
     console.log("🔍 Testing connection to Google Apps Script...");
-    
+
     return {
       success: true,
       message: "Google Apps Script is working!",
@@ -20,7 +19,7 @@ function testConnection() {
     };
   } catch (error) {
     console.error("❌ Connection test failed:", error);
-    
+
     return {
       success: false,
       error: "Test connection error: " + error.toString()
@@ -34,7 +33,7 @@ function testConnection() {
 function formatISTTimestamp() {
   const now = new Date();
   const istDate = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
-  
+
   return istDate.toLocaleString('en-IN', { 
     timeZone: 'Asia/Kolkata',
     hour12: true,
@@ -53,15 +52,15 @@ function formatISTTimestamp() {
  */
 function setupScriptProperties() {
   const properties = PropertiesService.getScriptProperties();
-  
+
   // Set your actual spreadsheet ID here
   const spreadsheetId = "1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidEmhzgM";
-  
+
   properties.setProperty('SHEET_ID', spreadsheetId);
-  
+
   console.log('✅ Script Properties configured successfully');
   console.log('📋 Spreadsheet ID:', spreadsheetId);
-  
+
   return {
     success: true,
     message: 'Script Properties set up successfully',
@@ -75,9 +74,9 @@ function setupScriptProperties() {
 function getScriptProperties() {
   const properties = PropertiesService.getScriptProperties();
   const allProperties = properties.getProperties();
-  
+
   console.log('📋 Current Script Properties:', allProperties);
-  
+
   return {
     success: true,
     properties: allProperties
@@ -90,3 +89,15 @@ function getScriptProperties() {
 function generateEntryId() {
   return Date.now().toString();
 }
+
+// Sheet names configuration
+const SHEET_NAMES = {
+  FARE_RECEIPTS: 'FareReceipts',
+  BOOKING_ENTRIES: 'BookingEntries', 
+  OFF_DAYS: 'OffDays',
+  FUEL_PAYMENTS: 'FuelPayments',
+  ADDA_PAYMENTS: 'AddaPayments',
+  UNION_PAYMENTS: 'UnionPayments',
+  SERVICE_PAYMENTS: 'ServicePayments',
+  OTHER_PAYMENTS: 'OtherPayments'
+};
