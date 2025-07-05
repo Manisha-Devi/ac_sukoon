@@ -57,19 +57,22 @@ const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
   const formatEntryParticulars = (entry) => {
     switch (entry.source) {
       case 'fare-daily':
-        return `To Daily Fare - ${entry.route || 'Route'}`;
+        return `To Daily Fare - ${entry.route || entry.particulars || 'Route'}`;
       case 'fare-booking':
-        return `To Booking - ${entry.bookingDetails || entry.description}`;
+        return `To Booking - ${entry.bookingDetails || entry.particulars || entry.description}`;
       case 'fees-payment':
-        return `By Fees Payment - ${entry.description}`;
+      case 'adda-payment':
+        return `By Adda Payment - ${entry.particulars || entry.description}`;
       case 'fuel-payment':
-        return `By Fuel Payment - ${entry.description}`;
+        return `By Fuel Payment - ${entry.particulars || entry.description}`;
       case 'service-payment':
-        return `By Service Payment - ${entry.description}`;
+        return `By Service Payment - ${entry.particulars || entry.description}`;
+      case 'union-payment':
+        return `By Union Payment - ${entry.particulars || entry.description}`;
       case 'other-payment':
-        return `By Other Payment - ${entry.description}`;
+        return `By Other Payment - ${entry.particulars || entry.description}`;
       default:
-        return entry.type === 'dr' ? `To ${entry.particulars}` : `By ${entry.particulars}`;
+        return entry.type === 'dr' ? `To ${entry.particulars || entry.description}` : `By ${entry.particulars || entry.description}`;
     }
   };
 

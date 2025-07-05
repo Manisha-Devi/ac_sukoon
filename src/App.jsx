@@ -83,15 +83,46 @@ function App() {
 
       // Add expense entries (Cr - payments)
       expenseData.forEach(expenseEntry => {
+        // Handle different expense types properly
+        let description = '';
+        let particulars = '';
+        
+        switch(expenseEntry.type) {
+          case 'fuel':
+            description = `Fuel Payment - ${expenseEntry.pumpName || 'Fuel Station'}`;
+            particulars = expenseEntry.pumpName || 'Fuel Station';
+            break;
+          case 'fees':
+          case 'adda':
+            description = `Adda Payment - ${expenseEntry.description || 'Adda Fees'}`;
+            particulars = expenseEntry.description || 'Adda Fees';
+            break;
+          case 'service':
+            description = `Service Payment - ${expenseEntry.serviceType || expenseEntry.description || 'Service'}`;
+            particulars = expenseEntry.serviceType || expenseEntry.description || 'Service';
+            break;
+          case 'union':
+            description = `Union Payment - ${expenseEntry.description || 'Union Fees'}`;
+            particulars = expenseEntry.description || 'Union Fees';
+            break;
+          case 'other':
+            description = `Other Payment - ${expenseEntry.paymentDetails || expenseEntry.description || 'Other'}`;
+            particulars = expenseEntry.paymentDetails || expenseEntry.description || 'Other';
+            break;
+          default:
+            description = `${expenseEntry.type} - ${expenseEntry.description || 'Payment'}`;
+            particulars = expenseEntry.description || 'Payment';
+        }
+
         entries.push({
           id: `expense-${expenseEntry.entryId}`,
           date: expenseEntry.date,
-          description: `${expenseEntry.type} - ${expenseEntry.description}`,
+          description: description,
           cashAmount: expenseEntry.cashAmount || 0,
           bankAmount: expenseEntry.bankAmount || 0,
           type: 'cr', // Credit (payment)
           source: `${expenseEntry.type}-payment`,
-          particulars: expenseEntry.description,
+          particulars: particulars,
           jfNo: `PV-${expenseEntry.entryId}`,
           submittedBy: expenseEntry.submittedBy
         });

@@ -39,9 +39,14 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
     let totalCashReceipts = userFareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
     let totalBankReceipts = userFareData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
 
-    // Calculate from filtered expense data (payments)
-    let totalCashPayments = userExpenseData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
-    let totalBankPayments = userExpenseData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+    // Calculate from filtered expense data (payments) - ensure all types are included
+    let totalCashPayments = userExpenseData.filter(entry => 
+      ['fuel', 'fees', 'adda', 'service', 'union', 'other'].includes(entry.type)
+    ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
+    
+    let totalBankPayments = userExpenseData.filter(entry => 
+      ['fuel', 'fees', 'adda', 'service', 'union', 'other'].includes(entry.type)
+    ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
 
     // Also calculate from cash book entries as backup
     let cbCashReceipts = 0;
@@ -124,15 +129,15 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
           totalExpense: userExpenseData.filter(entry => entry.type === 'fuel').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
         },
         addaPayments: {
-          totalEntries: userExpenseData.filter(entry => entry.type === 'fees').length,
+          totalEntries: userExpenseData.filter(entry => entry.type === 'fees' || entry.type === 'adda').length,
           cashExpense: userExpenseData.filter(entry => 
-                          entry.type === 'adda' && (
+                          (entry.type === 'fees' || entry.type === 'adda') && (
                             entry.submittedBy === currentUserName || 
                             (!entry.submittedBy && entry.type)
                           )
                         ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0),
-          bankExpense: userExpenseData.filter(entry => entry.type === 'fees').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
-          totalExpense: userExpenseData.filter(entry => entry.type === 'fees').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
+          bankExpense: userExpenseData.filter(entry => entry.type === 'fees' || entry.type === 'adda').reduce((sum, entry) => sum + (entry.bankAmount || 0), 0),
+          totalExpense: userExpenseData.filter(entry => entry.type === 'fees' || entry.type === 'adda').reduce((sum, entry) => sum + (entry.totalAmount || 0), 0)
         },
         servicePayments: {
           totalEntries: userExpenseData.filter(entry => entry.type === 'service').length,
@@ -431,7 +436,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
                         const currentUserName = currentUser.fullName || currentUser.username;
                         return expenseData.filter(entry => 
-                          entry.type === 'adda' && (
+                          (entry.type === 'fees' || entry.type === 'adda') && (
                             entry.submittedBy === currentUserName || 
                             (!entry.submittedBy && entry.type)
                           )
@@ -461,7 +466,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
                         const currentUserName = currentUser.fullName || currentUser.username;
                         return expenseData.filter(entry => 
-                          entry.type === 'fees' && (
+                          (entry.type === 'fees' || entry.type === 'adda') && (
                             entry.submittedBy === currentUserName || 
                             (!entry.submittedBy && entry.type)
                           )
@@ -478,9 +483,9 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
                       const currentUserName = currentUser.fullName || currentUser.username;
 
-                      // Filter fees entries by current user and show last 3
+                      // Filter fees/adda entries by current user and show last 3
                       const userFeesEntries = expenseData.filter(entry => 
-                        entry.type === 'fees' && (
+                        (entry.type === 'fees' || entry.type === 'adda') && (
                           entry.submittedBy === currentUserName || 
                           !entry.submittedBy // Handle entries without submittedBy field
                         )
