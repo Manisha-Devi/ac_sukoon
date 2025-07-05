@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import "../css/DataApproval.css";
 import authService from "../../services/authService.js";
@@ -8,7 +7,7 @@ function DataApproval() {
   const [waitingData, setWaitingData] = useState([]);
   const [approvedData, setApprovedData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('pending');
+  const [activeTab, setActiveTab] = useState('waiting');
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
@@ -20,7 +19,7 @@ function DataApproval() {
   const loadApprovalData = async () => {
     try {
       setLoading(true);
-      
+
       // Get all data types
       const [fareReceipts, bookingEntries, offDays, fuelPayments, addaPayments, 
              servicePayments, unionPayments, otherPayments] = await Promise.all([
@@ -41,7 +40,9 @@ function DataApproval() {
         allEntries = [...allEntries, ...fareReceipts.data.map(entry => ({
           ...entry,
           dataType: 'Fare Receipt',
-          entryStatus: entry.entryStatus || 'pending'
+          entryStatus: entry.entryStatus || 'pending',
+          displayName: `Fare: ${entry.route || 'Daily Collection'}`,
+          description: entry.route || 'Daily fare collection'
         }))];
       }
 
@@ -50,7 +51,9 @@ function DataApproval() {
         allEntries = [...allEntries, ...bookingEntries.data.map(entry => ({
           ...entry,
           dataType: 'Booking Entry',
-          entryStatus: entry.entryStatus || 'pending'
+          entryStatus: entry.entryStatus || 'pending',
+          displayName: `Booking: ${entry.bookingDetails || 'Booking'}`,
+          description: entry.bookingDetails || 'Booking entry'
         }))];
       }
 
@@ -59,7 +62,10 @@ function DataApproval() {
         allEntries = [...allEntries, ...offDays.data.map(entry => ({
           ...entry,
           dataType: 'Off Day',
-          entryStatus: entry.entryStatus || 'pending'
+          entryStatus: entry.entryStatus || 'pending',
+          displayName: `Off Day: ${entry.reason || 'Off day'}`,
+          description: entry.reason || 'Off day entry',
+          totalAmount: 0
         }))];
       }
 
@@ -68,7 +74,9 @@ function DataApproval() {
         allEntries = [...allEntries, ...fuelPayments.data.map(entry => ({
           ...entry,
           dataType: 'Fuel Payment',
-          entryStatus: entry.entryStatus || 'pending'
+          entryStatus: entry.entryStatus || 'pending',
+          displayName: `Fuel: ${entry.pumpName || 'Fuel Station'}`,
+          description: entry.pumpName || 'Fuel payment'
         }))];
       }
 
@@ -77,7 +85,9 @@ function DataApproval() {
         allEntries = [...allEntries, ...addaPayments.data.map(entry => ({
           ...entry,
           dataType: 'Adda Payment',
-          entryStatus: entry.entryStatus || 'pending'
+          entryStatus: entry.entryStatus || 'pending',
+          displayName: `Adda: ${entry.addaName || 'Adda Fees'}`,
+          description: entry.addaName || 'Adda payment'
         }))];
       }
 
@@ -85,7 +95,9 @@ function DataApproval() {
         allEntries = [...allEntries, ...servicePayments.data.map(entry => ({
           ...entry,
           dataType: 'Service Payment',
-          entryStatus: entry.entryStatus || 'pending'
+          entryStatus: entry.entryStatus || 'pending',
+          displayName: `Service: ${entry.serviceType || 'Service'}`,
+          description: entry.serviceType || 'Service payment'
         }))];
       }
 
@@ -93,7 +105,9 @@ function DataApproval() {
         allEntries = [...allEntries, ...unionPayments.data.map(entry => ({
           ...entry,
           dataType: 'Union Payment',
-          entryStatus: entry.entryStatus || 'pending'
+          entryStatus: entry.entryStatus || 'pending',
+          displayName: `Union: ${entry.unionName || 'Union Fees'}`,
+          description: entry.unionName || 'Union payment'
         }))];
       }
 
@@ -101,7 +115,9 @@ function DataApproval() {
         allEntries = [...allEntries, ...otherPayments.data.map(entry => ({
           ...entry,
           dataType: 'Other Payment',
-          entryStatus: entry.entryStatus || 'pending'
+          entryStatus: entry.entryStatus || 'pending',
+          displayName: `Other: ${entry.paymentDetails || 'Other Payment'}`,
+          description: entry.paymentDetails || 'Other payment'
         }))];
       }
 
@@ -124,7 +140,7 @@ function DataApproval() {
   const handleApprove = async (entry) => {
     try {
       const approverName = currentUser.fullName || currentUser.username;
-      
+
       // Call appropriate approval function based on data type
       let result;
       switch (entry.dataType) {
@@ -152,7 +168,24 @@ function DataApproval() {
             approverName: approverName
           });
           break;
-        // Add other payment types as needed
+        case 'Adda Payment':
+          result = await authService.approveAddaPayment({
+            entryId: entry.entryId,
+            approverName: approverName
+          });
+          break;
+        case 'Service Payment':
+          result = await authService.approveServicePayment({
+            entryId: entry.entryId,
+            approverName: approverName
+          });
+          break;
+        case 'Union Payment':
+          result = await authService.approveUnionPayment({
+            entryId: entry.entryId,
+            approverName: approverName
+          });
+          break;
         default:
           throw new Error('Unknown data type');
       }
@@ -194,13 +227,27 @@ function DataApproval() {
             entryId: entry.entryId
           });
           break;
-        // Add other payment types as needed
+        case 'Adda Payment':
+          result = await authService.resendAddaPayment({
+            entryId: entry.entryId
+          });
+          break;
+        case 'Service Payment':
+          result = await authService.resendServicePayment({
+            entryId: entry.entryId
+          });
+          break;
+        case 'Union Payment':
+          result = await authService.resendUnionPayment({
+            entryId: entry.entryId
+          });
+          break;
         default:
           throw new Error('Unknown data type');
       }
 
       if (result.success) {
-        alert('Entry resent successfully!');
+        alert('Entry resent successfully! User can now edit and resubmit.');
         loadApprovalData(); // Refresh data
       } else {
         throw new Error(result.error);
@@ -219,11 +266,16 @@ function DataApproval() {
             {entry.dataType}
           </div>
           <div className="entry-status-badge" data-status={entry.entryStatus}>
+            {entry.entryStatus === 'waiting' && <i className="bi bi-lock-fill me-1"></i>}
             {entry.entryStatus.toUpperCase()}
           </div>
         </div>
-        
+
         <div className="entry-details">
+          <div className="entry-row">
+            <span className="label">Entry ID:</span>
+            <span className="value">{entry.entryId}</span>
+          </div>
           <div className="entry-row">
             <span className="label">Submitted By:</span>
             <span className="value">{entry.submittedBy}</span>
@@ -232,16 +284,26 @@ function DataApproval() {
             <span className="label">Date:</span>
             <span className="value">{entry.date}</span>
           </div>
-          {entry.totalAmount && (
+          <div className="entry-row">
+            <span className="label">Description:</span>
+            <span className="value">{entry.displayName}</span>
+          </div>
+          {entry.totalAmount > 0 && (
             <div className="entry-row">
-              <span className="label">Amount:</span>
+              <span className="label">Total Amount:</span>
               <span className="value">₹{entry.totalAmount?.toLocaleString()}</span>
             </div>
           )}
-          {entry.description && (
+          {entry.cashAmount > 0 && (
             <div className="entry-row">
-              <span className="label">Description:</span>
-              <span className="value">{entry.description}</span>
+              <span className="label">Cash Amount:</span>
+              <span className="value">₹{entry.cashAmount?.toLocaleString()}</span>
+            </div>
+          )}
+          {entry.bankAmount > 0 && (
+            <div className="entry-row">
+              <span className="label">Bank Amount:</span>
+              <span className="value">₹{entry.bankAmount?.toLocaleString()}</span>
             </div>
           )}
           {entry.approvedBy && (
@@ -258,12 +320,14 @@ function DataApproval() {
               <button 
                 className="btn btn-success btn-sm"
                 onClick={() => handleApprove(entry)}
+                title="Approve this entry"
               >
                 <i className="bi bi-check-circle"></i> Approve
               </button>
               <button 
                 className="btn btn-warning btn-sm"
                 onClick={() => handleResend(entry)}
+                title="Send back for correction"
               >
                 <i className="bi bi-arrow-clockwise"></i> Resend
               </button>
@@ -273,9 +337,15 @@ function DataApproval() {
             <button 
               className="btn btn-secondary btn-sm"
               onClick={() => handleResend(entry)}
+              title="Send back for editing"
             >
               <i className="bi bi-arrow-clockwise"></i> Resend for Edit
             </button>
+          )}
+          {entry.entryStatus === 'pending' && (
+            <span className="badge bg-secondary">
+              <i className="bi bi-clock"></i> Not sent for approval yet
+            </span>
           )}
         </div>
       </div>
@@ -310,40 +380,27 @@ function DataApproval() {
         {/* Tab Navigation */}
         <div className="approval-tabs">
           <button 
-            className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
-            onClick={() => setActiveTab('pending')}
-          >
-            Pending ({pendingData.length})
-          </button>
-          <button 
             className={`tab-btn ${activeTab === 'waiting' ? 'active' : ''}`}
             onClick={() => setActiveTab('waiting')}
           >
-            Waiting for Approval ({waitingData.length})
+            <i className="bi bi-hourglass-split"></i> Waiting for Approval ({waitingData.length})
           </button>
           <button 
             className={`tab-btn ${activeTab === 'approved' ? 'active' : ''}`}
             onClick={() => setActiveTab('approved')}
           >
-            Approved ({approvedData.length})
+            <i className="bi bi-check-circle"></i> Approved ({approvedData.length})
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
+            onClick={() => setActiveTab('pending')}
+          >
+            <i className="bi bi-clock"></i> Pending ({pendingData.length})
           </button>
         </div>
 
         {/* Tab Content */}
         <div className="tab-content">
-          {activeTab === 'pending' && (
-            <div className="entries-grid">
-              {pendingData.length === 0 ? (
-                <div className="no-data">
-                  <i className="bi bi-inbox"></i>
-                  <p>No pending entries</p>
-                </div>
-              ) : (
-                pendingData.map(renderEntryCard)
-              )}
-            </div>
-          )}
-
           {activeTab === 'waiting' && (
             <div className="entries-grid">
               {waitingData.length === 0 ? (
@@ -369,273 +426,17 @@ function DataApproval() {
               )}
             </div>
           )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
-export default DataApproval;
-import React, { useState, useEffect } from 'react';
-import authService from '../../services/authService.js';
-import '../css/DataApproval.css';
-
-function DataApproval() {
-  const [pendingData, setPendingData] = useState([]);
-  const [waitingData, setWaitingData] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    setCurrentUser(user);
-    loadPendingData();
-  }, []);
-
-  const loadPendingData = async () => {
-    setIsLoading(true);
-    try {
-      // Fetch all data types
-      const [fareReceipts, fuelPayments, otherPayments] = await Promise.all([
-        authService.getFareReceipts(),
-        authService.getFuelPayments(),
-        authService.getOtherPayments()
-      ]);
-
-      let allData = [];
-      
-      // Process fare receipts
-      if (fareReceipts.success && fareReceipts.data) {
-        allData.push(...fareReceipts.data.map(entry => ({
-          ...entry,
-          dataType: 'fare',
-          displayName: `Fare: ${entry.route}`,
-          dateInfo: entry.date
-        })));
-      }
-
-      // Process fuel payments
-      if (fuelPayments.success && fuelPayments.data) {
-        allData.push(...fuelPayments.data.map(entry => ({
-          ...entry,
-          dataType: 'fuel',
-          displayName: `Fuel: ${entry.pumpName || 'Fuel Station'}`,
-          dateInfo: entry.date
-        })));
-      }
-
-      // Process other payments
-      if (otherPayments.success && otherPayments.data) {
-        allData.push(...otherPayments.data.map(entry => ({
-          ...entry,
-          dataType: 'other',
-          displayName: `Other: ${entry.paymentDetails}`,
-          dateInfo: entry.date
-        })));
-      }
-
-      // Filter pending and waiting entries
-      const pending = allData.filter(entry => entry.entryStatus === 'pending' || !entry.entryStatus);
-      const waiting = allData.filter(entry => entry.entryStatus === 'waiting');
-
-      setPendingData(pending);
-      setWaitingData(waiting);
-
-    } catch (error) {
-      console.error('Error loading data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleApprove = async (entry) => {
-    try {
-      let result;
-      const approverName = currentUser.fullName || currentUser.username;
-
-      if (entry.dataType === 'fare') {
-        result = await authService.approveFareReceipt({
-          entryId: entry.entryId,
-          approverName: approverName
-        });
-      } else if (entry.dataType === 'fuel') {
-        result = await authService.approveFuelPayment({
-          entryId: entry.entryId,
-          approverName: approverName
-        });
-      } else if (entry.dataType === 'other') {
-        result = await authService.approveOtherPayment({
-          entryId: entry.entryId,
-          approverName: approverName
-        });
-      }
-
-      if (result && result.success) {
-        alert('Entry approved successfully!');
-        loadPendingData(); // Refresh data
-      } else {
-        alert('Failed to approve entry: ' + (result?.error || 'Unknown error'));
-      }
-    } catch (error) {
-      console.error('Error approving entry:', error);
-      alert('Error approving entry');
-    }
-  };
-
-  const handleResend = async (entry) => {
-    try {
-      let result;
-
-      if (entry.dataType === 'fare') {
-        result = await authService.resendFareReceipt({
-          entryId: entry.entryId
-        });
-      } else if (entry.dataType === 'fuel') {
-        result = await authService.resendFuelPayment({
-          entryId: entry.entryId
-        });
-      } else if (entry.dataType === 'other') {
-        result = await authService.resendOtherPayment({
-          entryId: entry.entryId
-        });
-      }
-
-      if (result && result.success) {
-        alert('Entry resent for correction!');
-        loadPendingData(); // Refresh data
-      } else {
-        alert('Failed to resend entry: ' + (result?.error || 'Unknown error'));
-      }
-    } catch (error) {
-      console.error('Error resending entry:', error);
-      alert('Error resending entry');
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="text-center p-4">
-        <div className="spinner-border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-        <p>Loading approval data...</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="data-approval-container">
-      <div className="container-fluid">
-        <div className="approval-header">
-          <h2><i className="bi bi-check2-square"></i> Data Approval Center</h2>
-          <p>Review and approve pending data entries</p>
-        </div>
-
-        {/* Waiting for Approval Section */}
-        <div className="approval-section mb-4">
-          <h4><i className="bi bi-hourglass-split text-info"></i> Waiting for Approval ({waitingData.length})</h4>
-          {waitingData.length === 0 ? (
-            <div className="no-data">
-              <p>No entries waiting for approval</p>
-            </div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Type</th>
-                    <th>Description</th>
-                    <th>Date</th>
-                    <th>Cash Amount</th>
-                    <th>Bank Amount</th>
-                    <th>Total Amount</th>
-                    <th>Submitted By</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {waitingData.map((entry) => (
-                    <tr key={entry.entryId}>
-                      <td>
-                        <span className={`badge bg-${entry.dataType === 'fare' ? 'primary' : entry.dataType === 'fuel' ? 'warning' : 'info'}`}>
-                          {entry.dataType.toUpperCase()}
-                        </span>
-                      </td>
-                      <td>{entry.displayName}</td>
-                      <td>{entry.dateInfo}</td>
-                      <td>₹{entry.cashAmount || 0}</td>
-                      <td>₹{entry.bankAmount || 0}</td>
-                      <td>₹{entry.totalAmount || 0}</td>
-                      <td>{entry.submittedBy}</td>
-                      <td>
-                        <div className="action-buttons">
-                          <button 
-                            className="btn btn-sm btn-success"
-                            onClick={() => handleApprove(entry)}
-                          >
-                            <i className="bi bi-check-circle"></i> Approve
-                          </button>
-                          <button 
-                            className="btn btn-sm btn-warning"
-                            onClick={() => handleResend(entry)}
-                          >
-                            <i className="bi bi-arrow-clockwise"></i> Resend
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        {/* Pending Entries Section */}
-        <div className="approval-section">
-          <h4><i className="bi bi-clock text-warning"></i> Recent Pending Entries ({pendingData.length})</h4>
-          {pendingData.length === 0 ? (
-            <div className="no-data">
-              <p>No pending entries found</p>
-            </div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Type</th>
-                    <th>Description</th>
-                    <th>Date</th>
-                    <th>Cash Amount</th>
-                    <th>Bank Amount</th>
-                    <th>Total Amount</th>
-                    <th>Submitted By</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pendingData.map((entry) => (
-                    <tr key={entry.entryId}>
-                      <td>
-                        <span className={`badge bg-${entry.dataType === 'fare' ? 'primary' : entry.dataType === 'fuel' ? 'warning' : 'info'}`}>
-                          {entry.dataType.toUpperCase()}
-                        </span>
-                      </td>
-                      <td>{entry.displayName}</td>
-                      <td>{entry.dateInfo}</td>
-                      <td>₹{entry.cashAmount || 0}</td>
-                      <td>₹{entry.bankAmount || 0}</td>
-                      <td>₹{entry.totalAmount || 0}</td>
-                      <td>{entry.submittedBy}</td>
-                      <td>
-                        <span className="badge bg-secondary">
-                          <i className="bi bi-clock"></i> Pending
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {activeTab === 'pending' && (
+            <div className="entries-grid">
+              {pendingData.length === 0 ? (
+                <div className="no-data">
+                  <i className="bi bi-inbox"></i>
+                  <p>No pending entries</p>
+                </div>
+              ) : (
+                pendingData.map(renderEntryCard)
+              )}
             </div>
           )}
         </div>

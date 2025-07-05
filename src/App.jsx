@@ -294,16 +294,25 @@ function App() {
             </div>
           )}
 
-          <div className="menu-section">
-            <h6>APPROVAL</h6>
-            <button
-              className={`menu-item ${activeTab === "approval" ? "active" : ""}`}
-              onClick={() => handleMenuClick("approval")}
-            >
-              <i className="bi bi-check-circle"></i>
-              Data Summary
-            </button>
-          </div>
+          {(user.userType === "Manager" || user.userType === "Admin") && (
+            <div className="menu-section">
+              <h6>APPROVAL</h6>
+              <button
+                className={`menu-item ${activeTab === "data-approval" ? "active" : ""}`}
+                onClick={() => handleMenuClick("data-approval")}
+              >
+                <i className="bi bi-clipboard-check"></i>
+                Data Approval
+              </button>
+              <button
+                className={`menu-item ${activeTab === "approval" ? "active" : ""}`}
+                onClick={() => handleMenuClick("approval")}
+              >
+                <i className="bi bi-check-circle"></i>
+                Data Summary
+              </button>
+            </div>
+          )}
 
           <div className="menu-section">
             <h6>REPORTS</h6>
@@ -371,6 +380,7 @@ function App() {
               setCashBookEntries={setCashBookEntries}
             />
           )}
+          {activeTab === "data-approval" && <DataApproval />}
           {activeTab === "approval" && (
             <DataSummary
               fareData={fareData}

@@ -1408,10 +1408,39 @@ class AuthService {
   // APPROVAL WORKFLOW FUNCTIONS
   // ============================================================================
 
+  // Helper method for approval API calls
+  async makeApprovalAPIRequest(action, data, timeout = 15000) {
+    try {
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: action,
+          ...data
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log(`✅ ${action} response:`, result);
+      return result;
+    } catch (error) {
+      console.error(`❌ Error in ${action}:`, error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // Approve Other Payment
   async approveOtherPayment(data) {
     try {
-      const response = await this.makeAPIRequest('approveOtherPayment', data);
+      const response = await this.makeApprovalAPIRequest('approveOtherPayment', data);
       return response;
     } catch (error) {
       console.error('Error approving other payment:', error);
@@ -1419,13 +1448,79 @@ class AuthService {
     }
   }
 
+  // Approve Adda Payment
+  async approveAddaPayment(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('approveAddaPayment', data);
+      return response;
+    } catch (error) {
+      console.error('Error approving adda payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Approve Service Payment
+  async approveServicePayment(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('approveServicePayment', data);
+      return response;
+    } catch (error) {
+      console.error('Error approving service payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Approve Union Payment
+  async approveUnionPayment(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('approveUnionPayment', data);
+      return response;
+    } catch (error) {
+      console.error('Error approving union payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // Resend Other Payment
   async resendOtherPayment(data) {
     try {
-      const response = await this.makeAPIRequest('resendOtherPayment', data);
+      const response = await this.makeApprovalAPIRequest('resendOtherPayment', data);
       return response;
     } catch (error) {
       console.error('Error resending other payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Resend Adda Payment
+  async resendAddaPayment(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('resendAddaPayment', data);
+      return response;
+    } catch (error) {
+      console.error('Error resending adda payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Resend Service Payment
+  async resendServicePayment(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('resendServicePayment', data);
+      return response;
+    } catch (error) {
+      console.error('Error resending service payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Resend Union Payment
+  async resendUnionPayment(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('resendUnionPayment', data);
+      return response;
+    } catch (error) {
+      console.error('Error resending union payment:', error);
       return { success: false, error: error.message };
     }
   }
@@ -1444,7 +1539,7 @@ class AuthService {
   // Generic approval functions for other data types (to be implemented similarly)
   async approveFareReceipt(data) {
     try {
-      const response = await this.makeAPIRequest('approveFareReceipt', data);
+      const response = await this.makeApprovalAPIRequest('approveFareReceipt', data);
       return response;
     } catch (error) {
       console.error('Error approving fare receipt:', error);
@@ -1454,7 +1549,7 @@ class AuthService {
 
   async resendFareReceipt(data) {
     try {
-      const response = await this.makeAPIRequest('resendFareReceipt', data);
+      const response = await this.makeApprovalAPIRequest('resendFareReceipt', data);
       return response;
     } catch (error) {
       console.error('Error resending fare receipt:', error);
@@ -1464,7 +1559,7 @@ class AuthService {
 
   async approveBookingEntry(data) {
     try {
-      const response = await this.makeAPIRequest('approveBookingEntry', data);
+      const response = await this.makeApprovalAPIRequest('approveBookingEntry', data);
       return response;
     } catch (error) {
       console.error('Error approving booking entry:', error);
@@ -1474,7 +1569,7 @@ class AuthService {
 
   async resendBookingEntry(data) {
     try {
-      const response = await this.makeAPIRequest('resendBookingEntry', data);
+      const response = await this.makeApprovalAPIRequest('resendBookingEntry', data);
       return response;
     } catch (error) {
       console.error('Error resending booking entry:', error);
@@ -1484,7 +1579,7 @@ class AuthService {
 
   async approveFuelPayment(data) {
     try {
-      const response = await this.makeAPIRequest('approveFuelPayment', data);
+      const response = await this.makeApprovalAPIRequest('approveFuelPayment', data);
       return response;
     } catch (error) {
       console.error('Error approving fuel payment:', error);
@@ -1494,7 +1589,7 @@ class AuthService {
 
   async resendFuelPayment(data) {
     try {
-      const response = await this.makeAPIRequest('resendFuelPayment', data);
+      const response = await this.makeApprovalAPIRequest('resendFuelPayment', data);
       return response;
     } catch (error) {
       console.error('Error resending fuel payment:', error);

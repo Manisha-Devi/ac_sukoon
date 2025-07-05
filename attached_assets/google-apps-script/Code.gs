@@ -167,24 +167,65 @@ function doPost(e) {
         break;
       case 'resendFareReceipt':
         result = resendFareReceipt(data);
+        break;
       case 'setFareReceiptWaiting':
         result = setFareReceiptWaiting(data);
+        break;
 
       // Fuel Payments Approval
       case 'approveFuelPayment':
         result = approveFuelPayment(data);
+        break;
       case 'resendFuelPayment':
         result = resendFuelPayment(data);
+        break;
       case 'setFuelPaymentWaiting':
         result = setFuelPaymentWaiting(data);
+        break;
 
       // Other Payments Approval
       case 'approveOtherPayment':
         result = approveOtherPayment(data);
+        break;
       case 'resendOtherPayment':
         result = resendOtherPayment(data);
+        break;
       case 'setOtherPaymentWaiting':
         result = setOtherPaymentWaiting(data);
+        break;
+
+      // Adda Payments Approval
+      case 'approveAddaPayment':
+        result = approveAddaPayment(data);
+        break;
+      case 'resendAddaPayment':
+        result = resendAddaPayment(data);
+        break;
+      case 'setAddaPaymentWaiting':
+        result = setAddaPaymentWaiting(data);
+        break;
+
+      // Service Payments Approval
+      case 'approveServicePayment':
+        result = approveServicePayment(data);
+        break;
+      case 'resendServicePayment':
+        result = resendServicePayment(data);
+        break;
+      case 'setServicePaymentWaiting':
+        result = setServicePaymentWaiting(data);
+        break;
+
+      // Union Payments Approval
+      case 'approveUnionPayment':
+        result = approveUnionPayment(data);
+        break;
+      case 'resendUnionPayment':
+        result = resendUnionPayment(data);
+        break;
+      case 'setUnionPaymentWaiting':
+        result = setUnionPaymentWaiting(data);
+        break;
 
       // ==================== LEGACY SUPPORT ====================
       case "updateFareEntry":
