@@ -301,7 +301,7 @@ function App() {
                 onClick={() => handleMenuClick("data-approval")}
               >
                 <i className="bi bi-clipboard-check"></i>
-                Data Approval
+                Data
               </button>
             </div>
           )}
