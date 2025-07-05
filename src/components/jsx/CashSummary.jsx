@@ -227,6 +227,7 @@ function CashSummary({ fareData, expenseData }) {
                   <tr>
                     <th>Date</th>
                     <th>Description</th>
+                    <th>EntryType</th>
                     <th>Type</th>
                     <th>Cash Amount</th>
                     <th width="50">
@@ -243,8 +244,15 @@ function CashSummary({ fareData, expenseData }) {
                 <tbody>
                   {currentEntries.map((entry, index) => (
                     <tr key={`${entry.entryId || index}`}>
-                      <td>{new Date(entry.date).toLocaleDateString('en-IN')}</td>
+                      <td>
+                        {entry.dateFrom ? new Date(entry.dateFrom).toLocaleDateString('en-IN') : new Date(entry.date).toLocaleDateString('en-IN')}
+                      </td>
                       <td>{entry.description}</td>
+                      <td>
+                        <span className="badge bg-info">
+                          {entry.entryType || 'Cash'}
+                        </span>
+                      </td>
                       <td>
                         <span className={`badge ${entry.type === 'income' ? 'bg-success' : 'bg-danger'}`}>
                           {entry.type === 'income' ? 'Income' : 'Expense'}
