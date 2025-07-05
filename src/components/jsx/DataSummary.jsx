@@ -18,23 +18,6 @@ function DataSummary({ fareData, expenseData }) {
     setCurrentUser(user);
   }, []);
 
-  const userRole = currentUser?.role;
-
-  // Only allow Manager and Admin access
-  if (currentUser && (!userRole || (userRole !== 'Manager' && userRole !== 'Admin'))) {
-    return (
-      <div className="data-approval-container">
-        <div className="container-fluid">
-          <div className="alert alert-warning text-center" role="alert">
-            <h4><i className="bi bi-exclamation-triangle"></i> Access Denied</h4>
-            <p>You don't have permission to access this page.</p>
-            <p>Only <strong>Manager</strong> and <strong>Admin</strong> can view the Data Summary.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Process data whenever fareData or expenseData changes
   useEffect(() => {
     processAllData();
@@ -405,6 +388,23 @@ function DataSummary({ fareData, expenseData }) {
       </div>
     );
   };
+
+  const userRole = currentUser?.role;
+
+  // Only allow Manager and Admin access
+  if (currentUser && (!userRole || (userRole !== 'Manager' && userRole !== 'Admin'))) {
+    return (
+      <div className="data-approval-container">
+        <div className="container-fluid">
+          <div className="alert alert-warning text-center" role="alert">
+            <h4><i className="bi bi-exclamation-triangle"></i> Access Denied</h4>
+            <p>You don't have permission to access this page.</p>
+            <p>Only <strong>Manager</strong> and <strong>Admin</strong> can view the Data Summary.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
