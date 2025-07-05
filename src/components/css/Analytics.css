@@ -25,6 +25,8 @@
   margin-bottom: 1.5rem;
   font-weight: 600;
   color: #212529;
+  display: flex;
+  align-items: center;
 }
 
 .analytics-stats-card {
@@ -35,6 +37,7 @@
   border: none;
   transition: var(--transition);
   margin-bottom: 1rem;
+  height: 100%;
 }
 
 .analytics-stats-card:hover {
@@ -47,15 +50,18 @@
 }
 
 .analytics-stats-card .card-title {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .analytics-stats-card .card-text {
   font-size: 1.75rem;
   font-weight: 800;
   margin-bottom: 0.5rem;
+  line-height: 1;
 }
 
 .analytics-summary-card {
@@ -65,6 +71,7 @@
   box-shadow: var(--card-shadow);
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: var(--transition);
+  height: 100%;
 }
 
 .analytics-summary-card:hover {
@@ -76,11 +83,103 @@
   font-weight: 600;
   color: #212529;
   margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
 }
 
-@media (max-width: 575.98px) {
+.analytics-summary-card .card-body {
+  padding: 1.5rem;
+}
+
+/* Key Metrics Cards Styling */
+.analytics-stats-card .text-success {
+  color: #20bf6b !important;
+}
+
+.analytics-stats-card .text-danger {
+  color: #ee5a24 !important;
+}
+
+.analytics-stats-card .text-primary {
+  color: #667eea !important;
+}
+
+.analytics-stats-card .text-info {
+  color: #17a2b8 !important;
+}
+
+/* Chart container specific styling */
+.analytics-chart-card > *:not(h5) {
+  height: calc(100% - 60px);
+}
+
+/* Responsive design */
+@media (max-width: 1199.98px) {
+  .analytics-chart-card {
+    height: 350px;
+  }
+}
+
+@media (max-width: 767.98px) {
   .analytics-chart-card {
     padding: 1.5rem;
     height: 320px;
   }
+  
+  .analytics-stats-card .card-text {
+    font-size: 1.5rem;
+  }
+  
+  .analytics-summary-card .card-body {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .analytics-chart-card {
+    padding: 1rem;
+    height: 280px;
+  }
+  
+  .analytics-chart-card h5 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .analytics-stats-card .card-text {
+    font-size: 1.25rem;
+  }
+}
+
+/* Loading state */
+.analytics-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+}
+
+/* Refresh button styling */
+.btn-primary.btn-sm {
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}
+
+/* Date range selector */
+.form-select.w-auto {
+  width: auto !important;
+  min-width: 150px;
+}
+
+/* Enhanced card hover effects */
+.analytics-stats-card:hover .card-text {
+  color: inherit;
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+.analytics-chart-card:hover h5 {
+  color: #667eea;
+  transition: color 0.2s ease;
 }
