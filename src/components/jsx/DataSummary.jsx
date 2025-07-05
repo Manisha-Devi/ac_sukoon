@@ -188,11 +188,40 @@ function DataSummary({ fareData, expenseData }) {
           throw new Error('Invalid tab for approval');
       }
 
-      // Process each selected entry
-      for (const entryId of selectedEntries) {
+      // First update local UI state immediately
+      const updatedEntryIds = [...selectedEntries];
+      
+      // Update local state for immediate UI feedback
+      const updateLocalData = (dataArray) => {
+        return dataArray.map(entry => {
+          if (updatedEntryIds.includes(entry.entryId)) {
+            return {
+              ...entry,
+              entryStatus: newStatus,
+              approvedBy: approverName
+            };
+          }
+          return entry;
+        });
+      };
+
+      // Update all local data states immediately
+      setPendingData(prev => updateLocalData(prev));
+      setBankApprovalData(prev => updateLocalData(prev));
+      setCashApprovalData(prev => updateLocalData(prev));
+      setApprovedData(prev => updateLocalData(prev));
+
+      // Clear selection immediately
+      setSelectedEntries([]);
+
+      // Show immediate success feedback
+      alert(`${updatedEntryIds.length} entries approved successfully`);
+
+      // Then sync to Google Sheets in background
+      const syncPromises = updatedEntryIds.map(async (entryId) => {
         const currentData = getCurrentTabData();
         const entry = currentData.find(e => e.entryId === entryId);
-        if (!entry) continue;
+        if (!entry) return;
 
         // Call appropriate status update function
         let result;
@@ -247,22 +276,32 @@ function DataSummary({ fareData, expenseData }) {
             });
             break;
           default:
-            throw new Error(`Unsupported data type: ${entry.dataType}`);
+            console.error(`Unsupported data type: ${entry.dataType}`);
+            return;
         }
 
         if (!result.success) {
-          throw new Error(result.error);
+          console.error(`Failed to sync entry ${entryId} to Google Sheets:`, result.error);
+        } else {
+          console.log(`✅ Entry ${entryId} synced to Google Sheets successfully`);
         }
 
-        // Update parent state
+        // Update parent state after successful sync
         if (window.updateEntryStatusInParent) {
           window.updateEntryStatusInParent(entryId, newStatus, entry.type);
         }
-      }
+      });
 
-      alert(`${selectedEntries.length} entries approved successfully`);
-      setSelectedEntries([]);
-      processAllData(); // Refresh data
+      // Wait for all syncs to complete in background
+      Promise.all(syncPromises).then(() => {
+        console.log('✅ All entries synced to Google Sheets');
+        // Refresh local data after sync
+        processAllData();
+      }).catch((error) => {
+        console.error('❌ Some entries failed to sync to Google Sheets:', error);
+        // Still refresh local data to show any partial updates
+        processAllData();
+      });
 
     } catch (error) {
       console.error('Error approving entries:', error);
