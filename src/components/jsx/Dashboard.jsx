@@ -462,21 +462,14 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
       if (setFareData) setFareData(combinedFareData);
       if (setExpenseData) setExpenseData(combinedExpenseData);
       if (setCashBookEntries) setCashBookEntries(combinedCashBookEntries);
-
+      
       // Store filtered bankData globally for BankSummary
       window.bankData = bankSummaryData;
-
-      // Update App.jsx bankData state first
-      if (window.setBankData) {
-        window.setBankData(bankSummaryData);
-      }
-
-      // Trigger BankSummary component update
+      
+      // Trigger state update for BankSummary if callback exists
       if (window.updateBankData) {
-        window.updateBankData(bankSummaryData);
+        window.updateBankData(combinedBankData);
       }
-
-      console.log('✅ Global bankData updated:', bankSummaryData.length, 'records');
 
       // Update local state for dashboard display
       setAllData({
@@ -525,35 +518,19 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
   const refreshAllData = async () => {
     console.log('🔄 Dashboard: Starting comprehensive data refresh...');
     await loadAllDataFromSheets();
-
+    
     // Trigger refresh for other components that might need it
     window.dispatchEvent(new CustomEvent('dataRefreshed', {
       detail: {
         timestamp: new Date(),
-        source: 'centralized-refresh',
-        bankDataUpdated: true
+        source: 'centralized-refresh'
       }
     }));
-
-    // Trigger specific bankData update event
-    window.dispatchEvent(new CustomEvent('bankDataUpdated', {
-      detail: {
-        bankData: window.bankData,
-        timestamp: new Date()
-      }
-    }));
-
-    // Specifically update BankSummary if callback exists
-    if (window.updateBankData && window.bankData) {
-      setTimeout(() => {
-        window.updateBankData(window.bankData);
-      }, 100);
-    }
-
+    
     if (onRefreshComplete) {
       onRefreshComplete();
     }
-
+    
     console.log('✅ Dashboard: All components data refreshed');
   };
 

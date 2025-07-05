@@ -33,7 +33,6 @@ function App() {
     expenseRecords: 0,
     lastSync: null
   });
-  const [bankData, setBankData] = useState([]);
 
   const handleLogin = (userData) => {
     setUser(userData);
@@ -44,29 +43,30 @@ function App() {
     setActiveTab("dashboard");
   };
 
+  // Centralized refresh function with proper icon management
   const handleCentralizedRefresh = async () => {
     if (isRefreshing) return; // Prevent multiple simultaneous refreshes
-
+    
     setIsRefreshing(true);
     setLastRefreshTime(null); // Reset tick mark
-
+    
     try {
       console.log('🔄 Starting centralized data refresh...');
-
+      
       // Load data from Dashboard component method
       if (window.refreshAllData) {
         await window.refreshAllData();
       }
-
+      
       // Set completion time to show tick mark
       setLastRefreshTime(new Date());
       console.log('✅ Centralized refresh completed');
-
+      
       // Auto hide tick mark after 3 seconds and show refresh icon again
       setTimeout(() => {
         setLastRefreshTime(null);
       }, 3000);
-
+      
     } catch (error) {
       console.error('❌ Centralized refresh failed:', error);
       alert('Unable to refresh data. Please check your internet connection.');
@@ -103,14 +103,6 @@ function App() {
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Expose setBankData globally for Dashboard component
-  useEffect(() => {
-    window.setBankData = setBankData;
-    return () => {
-      delete window.setBankData;
-    };
   }, []);
 
   // Generate cash book entries whenever fareData or expenseData changes
@@ -204,31 +196,13 @@ function App() {
   const profit = totalEarnings - totalExpenses;
   const profitPercentage = ((profit / totalExpenses) * 100).toFixed(1);
 
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-
-  const setActiveTabHandler = (tabName) => {
-    setActiveTab(tabName);
-
-    // Trigger tab-specific events for data refresh
-    if (tabName === "fare-entry") {
-      window.dispatchEvent(new Event('fareTabActivated'));
-    } else if (tabName === "basic-payment") {
-      window.dispatchEvent(new Event('paymentTabActivated'));
-    } else if (tabName === "cash-summary") {
-      window.dispatchEvent(new Event('cashSummaryTabActivated'));
-    } else if (tabName === "bank-summary") {
-      window.dispatchEvent(new Event('bankSummaryTabActivated'));
-    }
-
-    // Close sidebar on mobile after selection
+  // Handle menu item click
+  const handleMenuClick = (tab) => {
+    setActiveTab(tab);
+    // Only close sidebar on mobile view
     if (window.innerWidth < 992) {
       setSidebarOpen(false);
     }
-  };
-
-  // Handle menu item click
-  const handleMenuClick = (tab) => {
-    setActiveTabHandler(tab);
   };
 
   return (
@@ -504,7 +478,7 @@ function App() {
           )}
           {activeTab === "bank-summary" && (
             <BankSummary 
-              bankData={bankData}
+              bankData={window.bankData || []}
             />
           )}
         </div>
