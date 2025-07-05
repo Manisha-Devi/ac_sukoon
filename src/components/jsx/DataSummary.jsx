@@ -21,6 +21,25 @@ function DataSummary({ fareData, expenseData }) {
     processAllData();
   }, [fareData, expenseData]);
 
+  // Listen for data update events from other components
+  useEffect(() => {
+    const handleDataUpdate = (event) => {
+      console.log('🔄 DataSummary: Received data update event:', event.detail);
+      // Force reprocessing of data after updates
+      setTimeout(() => {
+        processAllData();
+      }, 1000); // Small delay to ensure data is updated
+    };
+
+    window.addEventListener('dataUpdated', handleDataUpdate);
+    window.addEventListener('dataRefreshed', handleDataUpdate);
+
+    return () => {
+      window.removeEventListener('dataUpdated', handleDataUpdate);
+      window.removeEventListener('dataRefreshed', handleDataUpdate);
+    };
+  }, []);
+
   const processAllData = () => {
     try {
       setLoading(true);
@@ -162,6 +181,21 @@ function DataSummary({ fareData, expenseData }) {
 
       if (result.success) {
         alert(`Entry approved successfully by ${approverName}`);
+        
+        // Trigger centralized refresh to update parent component data
+        if (window.refreshAllData) {
+          await window.refreshAllData();
+        }
+        
+        // Also trigger custom event for parent components to listen
+        window.dispatchEvent(new CustomEvent('dataUpdated', { 
+          detail: { 
+            action: 'approve', 
+            entryId: entry.entryId, 
+            dataType: entry.dataType 
+          }
+        }));
+        
         processAllData(); // Reprocess current data
       } else {
         alert('Error approving entry: ' + result.error);
@@ -218,6 +252,21 @@ function DataSummary({ fareData, expenseData }) {
 
       if (result.success) {
         alert('Entry sent back for correction');
+        
+        // Trigger centralized refresh to update parent component data
+        if (window.refreshAllData) {
+          await window.refreshAllData();
+        }
+        
+        // Also trigger custom event for parent components to listen
+        window.dispatchEvent(new CustomEvent('dataUpdated', { 
+          detail: { 
+            action: 'resend', 
+            entryId: entry.entryId, 
+            dataType: entry.dataType 
+          }
+        }));
+        
         processAllData(); // Reprocess current data
       } else {
         alert('Error resending entry: ' + result.error);
