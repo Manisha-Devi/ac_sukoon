@@ -865,7 +865,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                   </div>
                 </div>
                 <div className="button-group">
-                  <button type="submit" className="btn fare-entry-btn" disabled={isLoading}>                    <i className={isLoading ? "bi bi-arrow-repeat" : editingEntry ? "bi bi-check-circle" : "bi bi-journal-plus"}></i> 
+                  <button type="submit" className="btn fare-entry-btn" disabled={isLoading}>                    <i className={isLoading ? "bi bi bi-arrow-repeat" : editingEntry ? "bi bi-check-circle" : "bi bi-journal-plus"}></i> 
                     {isLoading ? "Processing..." : editingEntry ? "Update Entry" : "Add Booking Entry"}
                   </button>
                   {editingEntry && (
@@ -950,34 +950,35 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 {entry.type === "daily" ? "Daily" : 
                              entry.type === "booking" ? "Booking" : "Off Day"}
                           </span>
-                          
-                                        
-                                          {entry.entryStatus === 'pending' && (
-                                            
-                                              <button 
-                                                className="btn btn-sm btn-edit" 
-                                                onClick={() => handleEditEntry(entry)}
-                                                title="Edit Entry"
-                                              >
-                                                <i className="bi bi-pencil"></i>
-                                              </button>
-                                              <button 
-                                                className="btn btn-sm btn-delete" 
-                                                onClick={() => handleDeleteEntry(entry.entryId)}
-                                                title="Delete Entry"
-                                              >
-                                                <i className="bi bi-trash"></i>
-                                              </button>
-                                            
-                                          )}
 
-                                          
+
+                          
+                            {entry.entryStatus === 'pending' && (
+                            <>
+                              <button 
+                                className="btn btn-sm btn-edit" 
+                                onClick={() => handleEditEntry(entry)}
+                                title="Edit Entry"
+                              >
+                                <i className="bi bi-pencil"></i>
+                              </button>
+                              <button 
+                                className="btn btn-sm btn-delete" 
+                                onClick={() => handleDeleteEntry(entry.entryId)}
+                                title="Delete Entry"
+                              >
+                                <i className="bi bi-trash"></i>
+                              </button>
+                            </>
+                          )}
+
+
                                           {entry.entryStatus !== 'pending' && (
                                             <span className={`status-badge status-${entry.entryStatus}`}>
                                               {entry.entryStatus?.toUpperCase()}
                                             </span>
                                           )}
-                                        
+
                         </div>
                         <div className="entry-date">
                           <small className="text-muted">
