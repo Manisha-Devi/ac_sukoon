@@ -136,3 +136,231 @@ function getFareReceipts() {
     };
   }
 }
+
+/**
+ * Update Fare Receipt Entry
+ * @param {Object} data - Update data containing entryId and updatedData
+ * @returns {Object} Success/error response
+ */
+function updateFareReceipt(data) {
+  try {
+    const entryId = data.entryId;
+    const updatedData = data.updatedData;
+
+    console.log(`📝 Updating fare receipt ID: ${entryId}`, updatedData);
+
+    // Get FareReceipts sheet
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
+
+    if (!sheet) {
+      throw new Error('FareReceipts sheet not found');
+    }
+
+    const entryIdColumn = 9; // Column I contains Entry ID
+
+    // Find the row with matching entryId
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1; // +1 because sheet rows are 1-indexed
+        break;
+      }
+    }
+
+    // Check if entry was found
+    if (rowIndex === -1) {
+      throw new Error(`Fare receipt not found with ID: ${entryId}`);
+    }
+
+    // Update fields that are provided in updatedData
+    if (updatedData.date !== undefined) {
+      sheet.getRange(rowIndex, 2).setValue(updatedData.date);
+    }
+    if (updatedData.route !== undefined) {
+      sheet.getRange(rowIndex, 3).setValue(updatedData.route);
+    }
+    if (updatedData.cashAmount !== undefined) {
+      sheet.getRange(rowIndex, 4).setValue(updatedData.cashAmount);
+    }
+    if (updatedData.bankAmount !== undefined) {
+      sheet.getRange(rowIndex, 5).setValue(updatedData.bankAmount);
+    }
+    if (updatedData.totalAmount !== undefined) {
+      sheet.getRange(rowIndex, 6).setValue(updatedData.totalAmount);
+    }
+
+    // Always keep entryStatus as 'pending' when updating regular data
+    sheet.getRange(rowIndex, 10).setValue("pending"); // Column J: EntryStatus
+
+    console.log(`✅ Fare receipt updated successfully - ID: ${entryId}, Row: ${rowIndex}`);
+
+    return {
+      success: true,
+      message: 'Fare receipt updated successfully',
+      entryId: entryId,
+      updatedRow: rowIndex
+    };
+
+  } catch (error) {
+    console.error('❌ Error updating fare receipt:', error);
+    return {
+      success: false,
+      error: 'Update fare receipt error: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Delete Fare Receipt Entry
+ * @param {Object} data - Delete data containing entryId
+ * @returns {Object} Success/error response
+ */
+function deleteFareReceipt(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log(`🗑️ Deleting fare receipt ID: ${entryId}`);
+
+    // Get FareReceipts sheet
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
+
+    if (!sheet) {
+      throw new Error('FareReceipts sheet not found');
+    }
+
+    const entryIdColumn = 9; // Column I contains Entry ID
+
+    // Find the row with matching entryId
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1; // +1 because sheet rows are 1-indexed
+        break;
+      }
+    }
+
+    // Check if entry was found
+    if (rowIndex === -1) {
+      throw new Error(`Fare receipt not found with ID: ${entryId}`);
+    }
+
+    // Delete the entire row
+    sheet.deleteRow(rowIndex);
+
+    console.log(`✅ Fare receipt deleted successfully - ID: ${entryId}, Row: ${rowIndex}`);
+
+    return {
+      success: true,
+      message: 'Fare receipt deleted successfully',
+      entryId: entryId,
+      deletedRow: rowIndex
+    };
+
+  } catch (error) {
+    console.error('❌ Error deleting fare receipt:', error);
+    return {
+      success: false,
+      error: 'Delete fare receipt error: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Update Fare Receipt Status (Bank/Cash/Approved)
+ * @param {Object} data - Status update data containing entryId, newStatus, and approverName
+ * @returns {Object} Success/error response
+ */
+function updateFareReceiptStatus(data) {
+  try {
+    const entryId = data.entryId;
+    const newStatus = data.newStatus; // 'bank', 'cash', or 'approved'
+    const approverName = data.approverName || "";
+
+    console.log(`📋 Updating fare receipt status - ID: ${entryId}, Status: ${newStatus}`);
+
+    // Get FareReceipts sheet
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
+
+    if (!sheet) {
+      throw new Error('FareReceipts sheet not found');
+    }
+
+    const entryIdColumn = 9; // Column I contains Entry ID
+
+    // Find the row with matching entryId
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1; // +1 because sheet rows are 1-indexed
+        break;
+      }
+    }
+
+    // Check if entry was found
+    if (rowIndex === -1) {
+      throw new Error(`Fare receipt not found with ID: ${entryId}`);
+    }
+
+    // Update status
+    sheet.getRange(rowIndex, 10).setValue(newStatus); // Column J: EntryStatus
+
+    // Update approver name if status is approved
+    if (newStatus === 'approved') {
+      sheet.getRange(rowIndex, 11).setValue(approverName); // Column K: ApprovedBy
+    } else {
+      sheet.getRange(rowIndex, 11).setValue(""); // Clear approver for other statuses
+    }
+
+    console.log(`✅ Fare receipt status updated - ID: ${entryId}, Status: ${newStatus}`);
+
+    return {
+      success: true,
+      message: `Fare receipt status updated to ${newStatus}`,
+      entryId: entryId,
+      newStatus: newStatus
+    };
+
+  } catch (error) {
+    console.error('❌ Error updating fare receipt status:', error);
+    return {
+      success: false,
+      error: 'Update status error: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Approve Fare Receipt Entry
+ * @param {Object} data - Approval data containing entryId and approverName
+ * @returns {Object} Success/error response
+ */
+function approveFareReceipt(data) {
+  try {
+    const entryId = data.entryId;
+    const approverName = data.approverName;
+
+    console.log(`✅ Approving fare receipt ID: ${entryId} by ${approverName}`);
+
+    return updateFareReceiptStatus({
+      entryId: entryId,
+      newStatus: 'approved',
+      approverName: approverName
+    });
+
+  } catch (error) {
+    console.error('❌ Error approving fare receipt:', error);
+    return {
+      success: false,
+      error: 'Approve fare receipt error: ' + error.toString()
+    };
+  }
+}
