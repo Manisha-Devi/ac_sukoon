@@ -987,15 +987,42 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                             </>
                           )}
 
-                          {(entry.entryStatus === 'cash' || entry.entryStatus === 'bank') && (
-                            <span className={`status-badge status-locked`}>
-                              <i className="bi bi-lock-fill"></i>
+                          {entry.entryStatus === 'forwardedBank' && (
+                            <span className={`status-badge status-forwarded-bank`}>
+                              <i className="bi bi-bank"></i> FORWARDED TO BANK
                             </span>
                           )}
 
-                          {entry.entryStatus === 'waiting' && (
-                            <span className={`status-badge status-waiting`}>
-                              {entry.entryStatus?.toUpperCase()}
+                          {entry.entryStatus === 'approvedBank' && (
+                            <span className={`status-badge status-approved-bank`}>
+                              <i className="bi bi-bank2"></i> BANK APPROVED
+                            </span>
+                          )}
+
+                          {entry.entryStatus === 'forwardedCash' && (
+                            <span className={`status-badge status-forwarded-cash`}>
+                              <i className="bi bi-cash-stack"></i> FORWARDED TO CASH
+                            </span>
+                          )}
+
+                          {entry.entryStatus === 'approvedCash' && (
+                            <span className={`status-badge status-approved-cash`}>
+                              <i className="bi bi-cash-coin"></i> CASH APPROVED
+                            </span>
+                          )}
+
+                          {entry.entryStatus === 'approved' && (
+                            <span className={`status-badge status-final-approved`}>
+                              <i className="bi bi-check-circle-fill"></i> FINAL APPROVED
+                            </span>
+                          )}
+
+                          {(entry.entryStatus === 'forwardedBank' || 
+                            entry.entryStatus === 'approvedBank' || 
+                            entry.entryStatus === 'forwardedCash' || 
+                            entry.entryStatus === 'approvedCash') && (
+                            <span className={`status-badge status-locked`}>
+                              <i className="bi bi-lock-fill"></i>
                             </span>
                           )}
 

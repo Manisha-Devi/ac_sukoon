@@ -1,15 +1,34 @@
-
 import React, { useState, useEffect } from "react";
 import "../css/DataApproval.css";
 import authService from "../../services/authService.js";
 
 function DataSummary({ fareData, expenseData }) {
+  const [activeTab, setActiveTab] = useState('pending');
   const [pendingData, setPendingData] = useState([]);
   const [bankData, setBankData] = useState([]);
   const [cashData, setCashData] = useState([]);
   const [approvedData, setApprovedData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('bank');
+  const [loading, setLoading] = useState(true);
+
+  // Check if user has permission to access this component
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const userRole = currentUser.role;
+
+  // Only allow Manager and Admin access
+  if (!userRole || (userRole !== 'Manager' && userRole !== 'Admin')) {
+    return (
+      <div className="data-approval-container">
+        <div className="container-fluid">
+          <div className="alert alert-warning text-center" role="alert">
+            <h4><i className="bi bi-exclamation-triangle"></i> Access Denied</h4>
+            <p>You don't have permission to access this page.</p>
+            <p>Only <strong>Manager</strong> and <strong>Admin</strong> can view the Data Summary.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
@@ -171,12 +190,12 @@ function DataSummary({ fareData, expenseData }) {
 
       if (result.success) {
         alert(`Entry approved successfully by ${approverName}`);
-        
+
         // Update parent state
         if (window.updateEntryStatusInParent) {
           window.updateEntryStatusInParent(entry.entryId, "approved", entry.type);
         }
-        
+
         processAllData(); // Reprocess current data
       } else {
         alert('Error approving entry: ' + result.error);
@@ -247,12 +266,12 @@ function DataSummary({ fareData, expenseData }) {
 
       if (result.success) {
         alert('Entry sent back for correction');
-        
+
         // Update parent state
         if (window.updateEntryStatusInParent) {
           window.updateEntryStatusInParent(entry.entryId, "pending", entry.type);
         }
-        
+
         processAllData(); // Reprocess current data
       } else {
         alert('Error resending entry: ' + result.error);
