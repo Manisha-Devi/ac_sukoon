@@ -1744,17 +1744,6 @@ class AuthService {
     }
   }
 
-  // Update Off Day Status
-  async updateOffDayStatus(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('updateOffDayStatus', data);
-      return response;
-    } catch (error) {
-      console.error('Error updating off day status:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
   // ============================================================================
   // ANALYTICS FUNCTIONS
   // ============================================================================

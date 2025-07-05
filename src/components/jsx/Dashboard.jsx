@@ -59,6 +59,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
       const [
         fareReceipts, 
         bookingEntries, 
+        offDays, 
         fuelPayments, 
         addaPayments,
         unionPayments,
@@ -67,6 +68,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
       ] = await Promise.all([
         loadWithRetry(() => authService.getFareReceipts()),
         loadWithRetry(() => authService.getBookingEntries()),
+        loadWithRetry(() => authService.getOffDays()),
         loadWithRetry(() => authService.getFuelPayments()),
         loadWithRetry(() => authService.getAddaPayments()),
         loadWithRetry(() => authService.getUnionPayments()),
@@ -202,7 +204,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         combinedCashBookEntries = [...combinedCashBookEntries, ...bookingCashEntries];
       }
 
-      // Note: Off Days are not processed in Dashboard as they don't contribute to financial calculations
+      // Skip Off Days - CashSummary doesn't need them (as per requirement)
 
       // Process Fuel Payments - Only required fields for CashSummary
       if (fuelPayments.success && fuelPayments.data) {
@@ -399,6 +401,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
       setAllData({
         fareReceipts: fareReceipts.data || [],
         bookingEntries: bookingEntries.data || [],
+        offDays: offDays.data || [],
         fuelPayments: fuelPayments.data || [],
         addaPayments: addaPayments.data || [],
         unionPayments: unionPayments.data || [],

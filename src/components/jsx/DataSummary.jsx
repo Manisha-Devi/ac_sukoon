@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import "../css/DataApproval.css";
 import authService from "../../services/authService.js";
@@ -16,12 +17,12 @@ function DataSummary({ fareData, expenseData }) {
   useEffect(() => {
     const userString = localStorage.getItem('user');
     console.log('🔍 DataSummary - Raw localStorage user:', userString);
-
+    
     const user = JSON.parse(userString || '{}');
     console.log('👤 DataSummary - Parsed user object:', user);
     console.log('🔑 DataSummary - User role:', user?.role);
     console.log('🔑 DataSummary - User type:', user?.userType);
-
+    
     setCurrentUser(user);
   }, []);
 
@@ -38,39 +39,17 @@ function DataSummary({ fareData, expenseData }) {
       // Process Fare Data
       if (fareData && fareData.length > 0) {
         fareData.forEach(entry => {
-          let dataType = '';
-          let displayName = '';
-          let description = '';
-
-          switch(entry.type) {
-            case 'daily':
-              dataType = 'Fare Receipt';
-              displayName = `Fare: ${entry.route || 'Daily Collection'}`;
-              description = entry.route || 'Daily fare collection';
-              break;
-            case 'booking':
-              dataType = 'Booking Entry';
-              displayName = `Booking: ${entry.bookingDetails || 'Booking Entry'}`;
-              description = entry.bookingDetails || 'Booking entry';
-              break;
-            case 'off':
-              dataType = 'Off Day';
-              displayName = `Off Day: ${entry.reason || 'Day Off'}`;
-              description = entry.reason || 'Day off request';
-              break;
-            default:
-              dataType = 'Fare Entry';
-              displayName = `Entry: ${entry.description || 'Fare Entry'}`;
-              description = entry.description || 'Fare entry';
+          if (entry.type !== 'off') { // Exclude off days from approval
+            allEntries.push({
+              ...entry,
+              dataType: entry.type === 'daily' ? 'Fare Receipt' : 'Booking Entry',
+              entryStatus: entry.entryStatus || 'pending',
+              displayName: entry.type === 'daily' ? 
+                `Fare: ${entry.route || 'Daily Collection'}` : 
+                `Booking: ${entry.bookingDetails || 'Booking Entry'}`,
+              description: entry.type === 'daily' ? entry.route : entry.bookingDetails
+            });
           }
-
-          allEntries.push({
-            ...entry,
-            dataType: dataType,
-            entryStatus: entry.entryStatus || 'pending',
-            displayName: displayName,
-            description: description
-          });
         });
       }
 
@@ -165,7 +144,7 @@ function DataSummary({ fareData, expenseData }) {
   const handleSelectAll = () => {
     const currentData = getCurrentTabData();
     const currentIds = currentData.map(entry => entry.entryId);
-
+    
     if (selectedEntries.length === currentIds.length && currentIds.length > 0) {
       setSelectedEntries([]);
     } else {
@@ -211,7 +190,7 @@ function DataSummary({ fareData, expenseData }) {
 
       // First update local UI state immediately
       const updatedEntryIds = [...selectedEntries];
-
+      
       // Update local state for immediate UI feedback
       const updateLocalData = (dataArray) => {
         return dataArray.map(entry => {
@@ -256,13 +235,6 @@ function DataSummary({ fareData, expenseData }) {
             break;
           case 'Booking Entry':
             result = await authService.updateBookingEntryStatus({
-              entryId: entryId,
-              newStatus: newStatus,
-              approverName: approverName
-            });
-            break;
-          case 'Off Day':
-            result = await authService.updateOffDayStatus({
               entryId: entryId,
               newStatus: newStatus,
               approverName: approverName
@@ -340,7 +312,7 @@ function DataSummary({ fareData, expenseData }) {
   // Render entry card
   const renderEntryCard = (entry) => {
     const isSelected = selectedEntries.includes(entry.entryId);
-
+    
     return (
       <div 
         key={entry.entryId} 
@@ -426,18 +398,6 @@ function DataSummary({ fareData, expenseData }) {
               <span className="label">Time:</span>
               <span className="value">{entry.timestamp}</span>
             </div>
-            {entry.approvedBy && (
-              <div className="entry-row">
-                <span className="label">Approved By:</span>
-                <span className="value">{entry.approvedBy}</span>
-              </div>
-            )}
-            {entry.dataType === 'Off Day' && (
-              <div className="entry-row">
-                <span className="label">Reason:</span>
-                <span className="value">{entry.reason || entry.description}</span>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -549,7 +509,7 @@ function DataSummary({ fareData, expenseData }) {
                 Select All ({selectedEntries.length}/{currentData.length})
               </label>
             </div>
-
+            
             {selectedEntries.length > 0 && (
               <button 
                 className="btn btn-success approve-btn"

@@ -287,14 +287,14 @@ function deleteBookingEntry(data) {
 }
 
 /**
- * Update Booking Entry Status (Bank/Cash/Approved) - Similar to FareReceipts and OffDays
+ * Update Booking Entry Status (Bank/Cash/Approved)
  * @param {Object} data - Status update data containing entryId, newStatus, and approverName
  * @returns {Object} Success/error response
  */
 function updateBookingEntryStatus(data) {
   try {
     const entryId = data.entryId;
-    const newStatus = data.newStatus; // 'pending', 'forwardedBank', 'forwardedCash', 'approvedBank', 'approvedCash', 'approved'
+    const newStatus = data.newStatus; // 'bank', 'cash', or 'approved'
     const approverName = data.approverName || "";
 
     console.log(`📋 Updating booking entry status - ID: ${entryId}, Status: ${newStatus}`);
@@ -325,11 +325,11 @@ function updateBookingEntryStatus(data) {
       throw new Error(`Booking entry not found with ID: ${entryId}`);
     }
 
-    // Update status - exactly like FareReceipts and OffDays
+    // Update status
     sheet.getRange(rowIndex, 11).setValue(newStatus); // Column K: EntryStatus
 
-    // Update approver name based on status - exactly like FareReceipts and OffDays
-    if (newStatus === 'approved' || newStatus === 'approvedBank' || newStatus === 'approvedCash') {
+    // Update approver name if status is approved
+    if (newStatus === 'approved') {
       sheet.getRange(rowIndex, 12).setValue(approverName); // Column L: ApprovedBy
     } else {
       sheet.getRange(rowIndex, 12).setValue(""); // Clear approver for other statuses

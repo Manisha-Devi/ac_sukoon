@@ -256,14 +256,14 @@ function deleteOffDay(data) {
 }
 
 /**
- * Update Off Day Status (Bank/Cash/Approved) - Similar to FareReceipts
+ * Update Off Day Status (Approved/Waiting/Pending)
  * @param {Object} data - Status update data containing entryId, newStatus, and approverName
  * @returns {Object} Success/error response
  */
 function updateOffDayStatus(data) {
   try {
     const entryId = data.entryId;
-    const newStatus = data.newStatus; // 'pending', 'forwardedBank', 'forwardedCash', 'approvedBank', 'approvedCash', 'approved'
+    const newStatus = data.newStatus; // 'pending', 'waiting', or 'approved'
     const approverName = data.approverName || "";
 
     console.log(`📋 Updating off day status - ID: ${entryId}, Status: ${newStatus}`);
@@ -294,11 +294,11 @@ function updateOffDayStatus(data) {
       throw new Error(`Off day not found with ID: ${entryId}`);
     }
 
-    // Update status - exactly like FareReceipts
+    // Update status
     sheet.getRange(rowIndex, 7).setValue(newStatus); // Column G: EntryStatus
 
-    // Update approver name based on status - exactly like FareReceipts
-    if (newStatus === 'approved' || newStatus === 'approvedBank' || newStatus === 'approvedCash') {
+    // Update approver name if status is approved
+    if (newStatus === 'approved') {
       sheet.getRange(rowIndex, 8).setValue(approverName); // Column H: ApprovedBy
     } else {
       sheet.getRange(rowIndex, 8).setValue(""); // Clear approver for other statuses

@@ -416,7 +416,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       }
 
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const submittedBy = currentUser?.fullName || currentUser?.username || 'Unknown User';
+      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
       const now = new Date();
       const timeOnly = now.toLocaleTimeString('en-US', { 
         hour12: true, 
@@ -476,7 +476,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           date: dateOnly, // Send date as string
           reason: offDayData.reason,
           submittedBy: submittedBy,
-          entryStatus: 'pending' // Set initial approval status
+          entryStatus: 'pending' // Send initial approval status
         }).catch(error => {
           console.error('Background off day add sync failed:', error);
         });
@@ -593,7 +593,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
   const getCurrentUserNonApprovedEntries = () => {
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     const currentUserName = currentUser.fullName || currentUser.username;
-
+    
     return fareData.filter(entry => 
       entry.submittedBy === currentUserName && entry.entryStatus !== 'approved'
     );
@@ -603,103 +603,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
   // Load data on component mount and listen for refresh events
   useEffect(() => {
-
-    // Load data from Google Sheets when component mounts
-  const loadDataFromGoogleSheets = async () => {
-    try {
-      setIsLoading(true);
-      console.log('📋 Loading data from Google Sheets...');
-
-      // Fetch Fare Receipts, Booking Entries, and Off Days
-      const [fareReceiptsResult, bookingEntriesResult, offDaysResult] = await Promise.all([
-        authService.getFareReceipts(),
-        authService.getBookingEntries(),
-        authService.getOffDays()
-      ]);
-
-      let allData = [];
-
-      // Transform Fare Receipts data
-      if (fareReceiptsResult.success && fareReceiptsResult.data) {
-        const transformedFareData = fareReceiptsResult.data.map(entry => ({
-          entryId: entry.entryId,
-          timestamp: entry.timestamp,
-          type: "daily",  // All fare receipts are daily type
-          date: entry.date,
-          route: entry.route,
-          cashAmount: entry.cashAmount || 0,
-          bankAmount: entry.bankAmount || 0,
-          totalAmount: entry.totalAmount || 0,
-          submittedBy: entry.submittedBy,
-          entryStatus: entry.entryStatus || 'pending',
-          approvedBy: entry.approvedBy || '',
-          rowIndex: entry.rowIndex
-        }));
-        allData = [...allData, ...transformedFareData];
-      }
-
-      // Transform Booking Entries data
-      if (bookingEntriesResult.success && bookingEntriesResult.data) {
-        const transformedBookingData = bookingEntriesResult.data.map(entry => ({
-          entryId: entry.entryId,
-          timestamp: entry.timestamp,
-          type: "booking",  // All booking entries are booking type
-          bookingDetails: entry.bookingDetails,
-          dateFrom: entry.dateFrom,
-          dateTo: entry.dateTo,
-          cashAmount: entry.cashAmount || 0,
-          bankAmount: entry.bankAmount || 0,
-          totalAmount: entry.totalAmount || 0,
-          submittedBy: entry.submittedBy,
-          entryStatus: entry.entryStatus || 'pending',
-          approvedBy: entry.approvedBy || '',
-          rowIndex: entry.rowIndex
-        }));
-        allData = [...allData, ...transformedBookingData];
-      }
-
-      // Transform Off Days data
-      if (offDaysResult.success && offDaysResult.data) {
-        const transformedOffData = offDaysResult.data.map(entry => ({
-          entryId: entry.entryId,
-          timestamp: entry.timestamp,
-          type: "off",  // All off days are off type
-          date: entry.date,
-          reason: entry.reason,
-          cashAmount: 0,
-          bankAmount: 0,
-          totalAmount: 0,
-          submittedBy: entry.submittedBy,
-          entryStatus: entry.entryStatus || 'pending',
-          approvedBy: entry.approvedBy || '',
-          rowIndex: entry.rowIndex
-        }));
-        allData = [...allData, ...transformedOffData];
-      }
-
-      // Sort by timestamp (newest first) - handle both string and number entryIds
-      allData.sort((a, b) => {
-        const timeA = new Date(`2000-01-01 ${a.timestamp}`).getTime();
-        const timeB = new Date(`2000-01-01 ${b.timestamp}`).getTime();
-        return timeB - timeA; // Newest first
-      });
-
-      setFareData(allData);
-      console.log('✅ Combined data loaded successfully:', allData);
-    } catch (error) {
-      console.error('❌ Error loading data from Google Sheets:', error);
-      setFareData([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-    loadDataFromGoogleSheets();
+    
 
     // Listen for centralized refresh events
     const handleDataRefresh = () => {
       console.log('🔄 FareRecipt: Refreshing data from centralized refresh');
-      loadDataFromGoogleSheets();
     };
 
     window.addEventListener('dataRefreshed', handleDataRefresh);
