@@ -24,27 +24,31 @@ function BankSummary({ bankData }) {
     filterUserData();
   }, [bankData, dateFrom, dateTo, currentUser]);
 
-  // Initialize state from global bankData if available
+  // Load initial data from global bankData on mount
   useEffect(() => {
     if (window.bankData && window.bankData.length > 0) {
       console.log('🔄 BankSummary: Loading from global bankData');
       filterUserData(window.bankData);
+    } else if (bankData && bankData.length > 0) {
+      console.log('🔄 BankSummary: Loading from props bankData');
+      filterUserData(bankData);
     }
   }, [currentUser]);
 
-  // Watch for bankData prop changes and refresh
+  // Primary data source: Use global bankData, fallback to props
   useEffect(() => {
-    console.log('🔄 BankSummary: bankData props updated, refreshing...');
-    if (bankData && bankData.length > 0) {
-      filterUserData(bankData);
+    const dataToUse = window.bankData || bankData;
+    if (dataToUse && dataToUse.length > 0) {
+      console.log('🔄 BankSummary: Data updated, refreshing...', dataToUse.length, 'records');
+      filterUserData(dataToUse);
     }
-  }, [bankData]);
+  }, [bankData, currentUser, dateFrom, dateTo]);
 
-  // Register global data update listener
+  // Register global data update listener for immediate updates
   useEffect(() => {
     // Listen for global setBankData calls
     window.updateBankData = (newBankData) => {
-      console.log('🔄 BankSummary: Global data update received');
+      console.log('🔄 BankSummary: Global data update received', newBankData.length, 'records');
       filterUserData(newBankData);
     };
 
@@ -284,29 +288,21 @@ function BankSummary({ bankData }) {
 
   const bankBalance = totalBankIncome - totalBankExpense;
 
-  useEffect(() => {
-    filterUserData();
-  }, [bankData, dateFrom, dateTo, currentUser]);
+  
 
-  // Watch for bankData prop changes and refresh
-  useEffect(() => {
-    console.log('🔄 BankSummary: bankData props updated, refreshing...');
-    if (bankData && bankData.length > 0) {
-      filterUserData();
-    }
-  }, [bankData]);
-
-  // Listen for centralized refresh events and tab activation
+  // Comprehensive event listeners for all data updates
   useEffect(() => {
     const handleDataRefresh = () => {
-      console.log('🔄 BankSummary: Recalculating from centralized refresh');
-      // Use global bankData if available, fallback to props
+      console.log('🔄 BankSummary: Centralized refresh event received');
+      // Use global bankData first, fallback to props
       const dataToUse = window.bankData || bankData;
-      filterUserData(dataToUse);
+      if (dataToUse) {
+        filterUserData(dataToUse);
+      }
     };
 
     const handleTabActivation = () => {
-      console.log('🔄 BankSummary: Tab activated, refreshing data');
+      console.log('🔄 BankSummary: Tab activated, triggering refresh');
       if (window.refreshAllData) {
         window.refreshAllData().catch(error => {
           console.error('Tab activation refresh failed:', error);
@@ -314,13 +310,27 @@ function BankSummary({ bankData }) {
       }
     };
 
-    // Listen for all relevant events
+    const handleGlobalDataUpdate = (event) => {
+      console.log('🔄 BankSummary: Global data update event received');
+      const dataToUse = window.bankData || bankData;
+      if (dataToUse) {
+        filterUserData(dataToUse);
+      }
+    };
+
+    // Listen for all data refresh events
     window.addEventListener('dataRefreshed', handleDataRefresh);
     window.addEventListener('bankSummaryTabActivated', handleTabActivation);
+    window.addEventListener('globalDataUpdated', handleGlobalDataUpdate);
+
+    // Also listen for custom bank data events
+    window.addEventListener('bankDataUpdated', handleDataRefresh);
 
     return () => {
       window.removeEventListener('dataRefreshed', handleDataRefresh);
       window.removeEventListener('bankSummaryTabActivated', handleTabActivation);
+      window.removeEventListener('globalDataUpdated', handleGlobalDataUpdate);
+      window.removeEventListener('bankDataUpdated', handleDataRefresh);
     };
   }, [bankData, dateFrom, dateTo, currentUser]);
 
