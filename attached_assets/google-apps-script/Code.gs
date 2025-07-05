@@ -146,7 +146,7 @@ function doPost(e) {
         result = deleteServicePayment(data);
         break;
 
-      // ==================== Other PAYMENTS ====================
+      // ==================== OTHER PAYMENTS ====================
       case "addOtherPayment":
         result = addOtherPayment(data);
         break;

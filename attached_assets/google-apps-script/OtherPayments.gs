@@ -1,4 +1,3 @@
-
 // ============================================================================
 // OTHER PAYMENTS - COMPLETE CRUD OPERATIONS
 // ============================================================================
@@ -13,7 +12,7 @@
 function addOtherPayment(data) {
   try {
     console.log("📝 Adding new other payment:", data);
-    
+
     // Get or create OtherPayments sheet
     let sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
       .getSheetByName(SHEET_NAMES.OTHER_PAYMENTS);
@@ -23,7 +22,7 @@ function addOtherPayment(data) {
       console.log("📋 Creating OtherPayments sheet...");
       sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
         .insertSheet(SHEET_NAMES.OTHER_PAYMENTS);
-      
+
       // Add headers exactly as specified
       sheet.getRange(1, 1, 1, 11).setValues([[
         "Timestamp", "Date", "PaymentType", "Description", "CashAmount", 
@@ -40,7 +39,7 @@ function addOtherPayment(data) {
 
     // Insert new row at position 2 (keeps newest entries at top)
     sheet.insertRowBefore(2);
-    
+
     // Add data to the new row
     sheet.getRange(2, 1, 1, 11).setValues([[
       timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
@@ -81,10 +80,10 @@ function addOtherPayment(data) {
 function getOtherPayments() {
   try {
     console.log("📋 Fetching all other payments...");
-    
+
     // Get OtherPayments sheet
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
-      .getSheetByName(SHEET_NAMES.OTHER_PAYMENTS);
+      .getSheetByName("OtherPayments");
 
     if (!sheet) {
       console.log("ℹ️ OtherPayments sheet not found, returning empty data");
@@ -150,7 +149,7 @@ function updateOtherPayment(data) {
 
     // Get OtherPayments sheet
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
-      .getSheetByName(SHEET_NAMES.OTHER_PAYMENTS);
+      .getSheetByName("OtherPayments");
 
     if (!sheet) {
       throw new Error('OtherPayments sheet not found');
@@ -228,7 +227,7 @@ function deleteOtherPayment(data) {
 
     // Get OtherPayments sheet
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
-      .getSheetByName(SHEET_NAMES.OTHER_PAYMENTS);
+      .getSheetByName("OtherPayments");
 
     if (!sheet) {
       throw new Error('OtherPayments sheet not found');
