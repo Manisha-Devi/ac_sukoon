@@ -45,7 +45,7 @@ function addOffDay(data) {
       "off",                         // D: Entry type (static)
       entryId,                       // E: Entry ID
       data.submittedBy || "",        // F: Submitted by
-      "pending",                     // G: Entry Status (pending/approved)
+      "pending",                     // G: Entry Status (pending/waiting/approved)
       "",                            // H: Approved By (empty initially)
     ]]);
 
@@ -73,7 +73,7 @@ function addOffDay(data) {
  */
 function getOffDays() {
   try {
-    console.log("📋 Fetching all off days...");
+    console.log("📅 Fetching all off days...");
 
     // Get OffDays sheet
     let sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
@@ -256,14 +256,14 @@ function deleteOffDay(data) {
 }
 
 /**
- * Update Off Day Status (Approved)
+ * Update Off Day Status (Approved/Waiting/Pending)
  * @param {Object} data - Status update data containing entryId, newStatus, and approverName
  * @returns {Object} Success/error response
  */
 function updateOffDayStatus(data) {
   try {
     const entryId = data.entryId;
-    const newStatus = data.newStatus; // 'approved'
+    const newStatus = data.newStatus; // 'pending', 'waiting', or 'approved'
     const approverName = data.approverName || "";
 
     console.log(`📋 Updating off day status - ID: ${entryId}, Status: ${newStatus}`);
