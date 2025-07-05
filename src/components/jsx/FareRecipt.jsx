@@ -1022,6 +1022,13 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                           {entry.type === "daily" && <p>{entry.route}</p>}
                           {entry.type === "booking" && <p>{entry.bookingDetails?.substring(0, 60)}...</p>}
                           {entry.type === "off" && <p>{entry.reason}</p>}
+                          {entry.approvedBy && (
+                            <div className="approved-by">
+                              <small className="text-muted">
+                                <i className="bi bi-person-check"></i> Approved by: {entry.approvedBy}
+                              </small>
+                            </div>
+                          )}
                         </div>
                         {entry.type !== "off" && (
                           <div className="entry-amounts">

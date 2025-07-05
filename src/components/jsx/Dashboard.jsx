@@ -145,6 +145,8 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
           bankAmount: entry.bankAmount || 0,
           totalAmount: entry.totalAmount || 0,
           submittedBy: entry.submittedBy,
+          entryStatus: entry.entryStatus || 'pending',
+          approvedBy: entry.approvedBy || '',
           type: 'daily'
         }));
         combinedFareData = [...combinedFareData, ...processedFareReceipts];
@@ -177,6 +179,8 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
           bankAmount: entry.bankAmount || 0,
           totalAmount: entry.totalAmount || 0,
           submittedBy: entry.submittedBy,
+          entryStatus: entry.entryStatus || 'pending',
+          approvedBy: entry.approvedBy || '',
           type: 'booking'
         }));
         combinedFareData = [...combinedFareData, ...processedBookingEntries];
@@ -205,6 +209,8 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
           date: convertToDateString(entry.date),
           reason: entry.reason,
           submittedBy: entry.submittedBy,
+          entryStatus: entry.entryStatus || 'pending',
+          approvedBy: entry.approvedBy || '',
           cashAmount: 0,
           bankAmount: 0,
           totalAmount: 0,

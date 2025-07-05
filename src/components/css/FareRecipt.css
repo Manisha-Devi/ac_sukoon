@@ -540,27 +540,35 @@
 }
 
 .entry-amounts {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 8px;
-  padding: 12px;
+  margin-top: 10px;
 }
 
 .amount-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 8px;
-  font-size: 0.9rem;
-  color: #666;
+  margin-bottom: 5px;
+  font-size: 0.9em;
 }
 
 .total-amount {
   text-align: center;
-  padding-top: 8px;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: 5px;
+  border-top: 1px solid #eee;
 }
 
-.total-amount strong {
-  color: #333;
+.approved-by {
+  margin-top: 8px;
+  padding-top: 5px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.approved-by small {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.approved-by .bi {
+  margin-right: 3px;
 }
 
 /* Enhanced date input styling */
