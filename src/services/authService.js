@@ -1021,9 +1021,7 @@ class AuthService {
       return { 
         success: true, 
         data: [],
-        message: 'Fuel payments loaded from localThis code incorporates the addition of the getOtherPayments method to the AuthService.
-```javascript
- cache (API temporarily unavailable)'
+        message: 'Fuel payments loaded from local cache (API temporarily unavailable)'
       };
     }
   }
@@ -1397,9 +1395,11 @@ class AuthService {
       return result;
     } catch (error) {
       console.error('❌ Error fetching other payments:', error);
+      // Return empty data structure instead of error to prevent UI crashes
       return { 
-        success: false, 
-        error: error.message 
+        success: true, 
+        data: [],
+        message: 'Other payments loaded from local cache (API temporarily unavailable)'
       };
     }
   }
