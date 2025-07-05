@@ -573,6 +573,60 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     setOffDayData({ date: "", reason: "" });
   };
 
+  // Handle status updates (bank/cash/approved)
+  const handleStatusUpdate = async (entryId, newStatus, entryType) => {
+    try {
+      console.log(`🔄 Updating entry ${entryId} status to ${newStatus}`);
+      
+      let result;
+      
+      if (entryType === 'daily') {
+        result = await authService.updateFareReceiptStatus({
+          entryId: entryId,
+          newStatus: newStatus,
+          approverName: JSON.parse(localStorage.getItem('user') || '{}').fullName || 'Admin'
+        });
+      } else if (entryType === 'booking') {
+        result = await authService.updateBookingEntryStatus({
+          entryId: entryId,
+          newStatus: newStatus,
+          approverName: JSON.parse(localStorage.getItem('user') || '{}').fullName || 'Admin'
+        });
+      }
+
+      if (result && result.success) {
+        console.log('✅ Status updated successfully:', result);
+        
+        // Update fareData array with new status
+        const updatedFareData = fareData.map(entry => 
+          entry.entryId === entryId 
+            ? { 
+                ...entry, 
+                entryStatus: newStatus,
+                approvedBy: newStatus === 'approved' 
+                  ? JSON.parse(localStorage.getItem('user') || '{}').fullName || 'Admin'
+                  : entry.approvedBy || ''
+              }
+            : entry
+        );
+        
+        setFareData(updatedFareData);
+        console.log('🔄 FareData array updated with new status');
+        
+        // Show success message
+        alert(`Entry status updated to ${newStatus.toUpperCase()}`);
+        
+      } else {
+        console.error('❌ Status update failed:', result);
+        alert('Failed to update entry status. Please try again.');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error updating entry status:', error);
+      alert('Error updating entry status. Please try again.');
+    }
+  };
+
   // Calculate totals for summary - only for current user and exclude approved entries
   const calculateSummaryTotals = () => {
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -1002,12 +1056,29 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                               >
                                 <i className="bi bi-trash"></i>
                               </button>
+                              <div className="btn-group btn-group-sm ms-2">
+                                <button 
+                                  className="btn btn-success btn-sm" 
+                                  onClick={() => handleStatusUpdate(entry.entryId, 'cash', entry.type)}
+                                  title="Mark as Cash"
+                                >
+                                  <i className="bi bi-cash"></i>
+                                </button>
+                                <button 
+                                  className="btn btn-info btn-sm" 
+                                  onClick={() => handleStatusUpdate(entry.entryId, 'bank', entry.type)}
+                                  title="Mark as Bank"
+                                >
+                                  <i className="bi bi-bank"></i>
+                                </button>
+                              </div>
                             </>
                           )}
 
                           {(entry.entryStatus === 'cash' || entry.entryStatus === 'bank') && (
-                            <span className={`status-badge status-locked`}>
-                              <i className="bi bi-lock-fill"></i>
+                            <span className={`status-badge status-${entry.entryStatus}`}>
+                              <i className={entry.entryStatus === 'cash' ? 'bi bi-cash' : 'bi bi-bank'}></i>
+                              {entry.entryStatus.toUpperCase()}
                             </span>
                           )}
 
