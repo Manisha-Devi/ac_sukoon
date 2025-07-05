@@ -198,18 +198,19 @@ function BankSummary({ fareData, expenseData }) {
   };
 
   // Forward selected entries for approval
-  const handleForwardForApproval = async () => {
+  const handleForwardForApproval = () => {
     if (selectedEntries.length === 0) {
       alert('Please select entries to forward for approval');
       return;
     }
 
     try {
-      console.log('Forwarding entries for bank approval:', selectedEntries);
+      console.log('🔄 BankSummary: Forwarding entries for bank approval:', selectedEntries);
       
-      // Update entry status to "bank" for selected entries
+      // Update entry status to "bank" for selected entries in React state only
       const updatedFareData = fareData.map(entry => {
         if (selectedEntries.includes(entry.entryId)) {
+          console.log(`📝 Updating fareData entry ${entry.entryId}: pending → bank`);
           return { ...entry, entryStatus: "bank" };
         }
         return entry;
@@ -217,12 +218,13 @@ function BankSummary({ fareData, expenseData }) {
 
       const updatedExpenseData = expenseData.map(entry => {
         if (selectedEntries.includes(entry.entryId)) {
+          console.log(`📝 Updating expenseData entry ${entry.entryId}: pending → bank`);
           return { ...entry, entryStatus: "bank" };
         }
         return entry;
       });
 
-      // Trigger data refresh with updated status
+      // Trigger centralized data refresh with updated status
       window.dispatchEvent(new CustomEvent('dataStatusUpdated', { 
         detail: { 
           updatedFareData, 
@@ -230,16 +232,13 @@ function BankSummary({ fareData, expenseData }) {
         }
       }));
 
-      alert(`${selectedEntries.length} entries forwarded for bank approval!`);
+      alert(`✅ ${selectedEntries.length} entries forwarded for bank approval!`);
       setSelectedEntries([]);
       
-      // Reload filtered data to reflect changes
-      setTimeout(() => {
-        filterUserData();
-      }, 100);
+      console.log('✅ BankSummary: Status update completed (React state only)');
 
     } catch (error) {
-      console.error('Error forwarding entries:', error);
+      console.error('❌ Error forwarding entries:', error);
       alert('Error forwarding entries for approval');
     }
   };
