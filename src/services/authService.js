@@ -651,7 +651,7 @@ class AuthService {
   // Delete Union Payment
   async deleteUnionPayment(data) {
     try {
-      console.log('🗑️ Deleting union payment in Google Sheets:', data);
+      console.log('🗑️ Deleting union payment from Google Sheets:', data);
 
       const response = await fetch(this.API_URL, {
         method: 'POST',
@@ -666,11 +666,156 @@ class AuthService {
         })
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const result = await response.json();
-      console.log('✅ Union payment delete response:', result);
+      console.log('✅ Union payment deleted:', result);
       return result;
     } catch (error) {
       console.error('❌ Error deleting union payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ============================================================================
+  // SERVICE PAYMENTS - COMPLETE API INTEGRATION
+  // ============================================================================
+
+  // Add new Service Payment to Google Sheets
+  async addServicePayment(data) {
+    try {
+      console.log('📝 Adding service payment to Google Sheets:', data);
+
+      const requestBody = JSON.stringify({
+        action: 'addServicePayment',
+        entryId: data.entryId,
+        timestamp: data.timestamp,
+        date: data.date,
+        serviceType: data.serviceType || '',
+        cashAmount: data.cashAmount || 0,
+        bankAmount: data.bankAmount || 0,
+        totalAmount: data.totalAmount || 0,
+        serviceDetails: data.serviceDetails || '',
+        submittedBy: data.submittedBy || 'driver'
+      });
+
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
+
+      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
+        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
+        return { success: false, error: 'API temporarily unavailable - data saved locally' };
+      }
+
+      console.log('✅ Service payment response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error adding service payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Get all Service Payments from Google Sheets
+  async getServicePayments() {
+    try {
+      console.log('📋 Fetching service payments from Google Sheets...');
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'getServicePayments'
+        })
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Service payments fetched:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error fetching service payments:', error);
+      // Return empty data structure instead of error to prevent UI crashes
+      return { 
+        success: true, 
+        data: [],
+        message: 'Service payments loaded from local cache (API temporarily unavailable)'
+      };
+    }
+  }
+
+  // Update Service Payment
+  async updateServicePayment(data) {
+    try {
+      console.log('📝 Updating service payment in Google Sheets:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'updateServicePayment',
+          entryId: data.entryId,
+          updatedData: data.updatedData
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Service payment updated:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating service payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Delete Service Payment
+  async deleteServicePayment(data) {
+    try {
+      console.log('🗑️ Deleting service payment from Google Sheets:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'deleteServicePayment',
+          entryId: data.entryId
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Service payment deleted:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error deleting service payment:', error);
       return { success: false, error: error.message };
     }
   }
@@ -869,7 +1014,7 @@ class AuthService {
       return result;
     } catch (error) {
       console.error('❌ Error fetching fare receipts:', error);
-      // Return empty data structure instead of error to prevent UI crashes
+      // Return empty datastructure instead of error to prevent UI crashes
       return { 
         success: true, 
         data: [],

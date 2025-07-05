@@ -20,7 +20,8 @@ const SHEET_NAMES = {
   OFF_DAYS: "OffDays",
   ADDA_PAYMENTS: "AddaPayments",
   FUEL_PAYMENTS: "FuelPayments",
-  UNION_PAYMENTS: "UnionPayments"
+  UNION_PAYMENTS: "UnionPayments",
+  SERVICE_PAYMENTS: "ServicePayments"
 };
 
 // ============================================================================
@@ -144,6 +145,20 @@ function doPost(e) {
         result = deleteUnionPayment(data);
         break;
 
+      // ==================== SERVICE PAYMENTS ====================
+      case "addServicePayment":
+        result = addServicePayment(data);
+        break;
+      case "getServicePayments":
+        result = getServicePayments();
+        break;
+      case "updateServicePayment":
+        result = updateServicePayment(data);
+        break;
+      case "deleteServicePayment":
+        result = deleteServicePayment(data);
+        break;
+
       // ==================== LEGACY SUPPORT ====================
       case "updateFareEntry":
         result = updateFareEntryLegacy(data);
@@ -213,6 +228,9 @@ function doGet(e) {
         break;
       case "getUnionPayments":
         result = getUnionPayments();
+        break;
+      case "getServicePayments":
+        result = getServicePayments();
         break;
       default:
         result = { 

@@ -62,14 +62,16 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         offDays, 
         fuelPayments, 
         addaPayments,
-        unionPayments
+        unionPayments,
+        servicePayments
       ] = await Promise.all([
         loadWithRetry(() => authService.getFareReceipts()),
         loadWithRetry(() => authService.getBookingEntries()),
         loadWithRetry(() => authService.getOffDays()),
         loadWithRetry(() => authService.getFuelPayments()),
         loadWithRetry(() => authService.getAddaPayments()),
-        loadWithRetry(() => authService.getUnionPayments())
+        loadWithRetry(() => authService.getUnionPayments()),
+        loadWithRetry(() => authService.getServicePayments())
       ]);
 
       // Process and combine all data
@@ -310,6 +312,39 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         combinedCashBookEntries = [...combinedCashBookEntries, ...unionCashEntries];
       }
 
+      // Process Service Payments (same format as ServicePayment component)
+      if (servicePayments.success && servicePayments.data) {
+        const processedServicePayments = servicePayments.data.map(entry => ({
+          id: entry.entryId,
+          entryId: entry.entryId,
+          timestamp: convertToTimeString(entry.timestamp),
+          date: convertToDateString(entry.date),
+          serviceType: entry.serviceType || entry.serviceDetails,
+          serviceDetails: entry.serviceDetails || entry.serviceType,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          totalAmount: entry.totalAmount || 0,
+          submittedBy: entry.submittedBy,
+          type: 'service'
+        }));
+        combinedExpenseData = [...combinedExpenseData, ...processedServicePayments];
+
+        // Generate cash book entries from service payments
+        const serviceCashEntries = processedServicePayments.map(entry => ({
+          id: `service-${entry.entryId}`,
+          date: entry.date,
+          particulars: "Service Payment",
+          description: `Service payment - ${entry.serviceDetails || entry.serviceType || 'Service'}`,
+          jfNo: `SERVICE-${entry.entryId}`,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          type: 'cr',
+          timestamp: entry.timestamp,
+          source: 'service-payment'
+        }));
+        combinedCashBookEntries = [...combinedCashBookEntries, ...serviceCashEntries];
+      }
+
       // Sort all data by timestamp (newest first)
       combinedFareData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       combinedExpenseData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -328,6 +363,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         fuelPayments: fuelPayments.data || [],
         addaPayments: addaPayments.data || [],
         unionPayments: unionPayments.data || [],
+        servicePayments: servicePayments.data || [],
         totalRecords: combinedFareData.length + combinedExpenseData.length
       });
 
@@ -337,6 +373,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         expenseRecords: combinedExpenseData.length,
         cashBookEntries: combinedCashBookEntries.length,
         unionPayments: unionPayments.data?.length || 0,
+        servicePayments: servicePayments.data?.length || 0,
         totalRecords: combinedFareData.length + combinedExpenseData.length
       });
 

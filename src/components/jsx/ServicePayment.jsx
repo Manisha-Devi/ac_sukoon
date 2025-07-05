@@ -1,9 +1,45 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../css/ServicePayment.css";
+import authService from "../../services/authService";
+
+// Helper functions for date/time conversion
+const convertToTimeString = (timestamp) => {
+  if (!timestamp) return '';
+  try {
+    if (typeof timestamp === 'string' && timestamp.includes(':')) {
+      return timestamp; // Already in time format
+    }
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('en-US', { 
+      hour12: true, 
+      hour: '2-digit', 
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  } catch (error) {
+    console.error('Error converting timestamp:', error);
+    return '';
+  }
+};
+
+const convertToDateString = (dateInput) => {
+  if (!dateInput) return '';
+  try {
+    if (typeof dateInput === 'string' && dateInput.includes('-')) {
+      return dateInput; // Already in YYYY-MM-DD format
+    }
+    const date = new Date(dateInput);
+    return date.toISOString().split('T')[0];
+  } catch (error) {
+    console.error('Error converting date:', error);
+    return '';
+  }
+};
 
 function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
   const [editingEntry, setEditingEntry] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     serviceDetails: "",
     cashAmount: "",
@@ -13,91 +49,246 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
     mechanic: "",
   });
 
+  // Load data on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        console.log('🚀 Loading service payments from Google Sheets...');
+
+        const result = await authService.getServicePayments();
+
+        if (result.success && Array.isArray(result.data)) {
+          const serviceData = result.data.map(entry => ({
+            id: entry.entryId,
+            entryId: entry.entryId,
+            timestamp: convertToTimeString(entry.timestamp),
+            date: convertToDateString(entry.date),
+            serviceDetails: entry.serviceDetails || entry.serviceType || '',
+            serviceType: entry.serviceType || '',
+            cashAmount: entry.cashAmount || 0,
+            bankAmount: entry.bankAmount || 0,
+            totalAmount: entry.totalAmount || 0,
+            submittedBy: entry.submittedBy,
+            description: entry.serviceDetails || "",
+            mechanic: "",
+            type: 'service'
+          }));
+
+          console.log('✅ Service payments loaded:', serviceData.length, 'entries');
+
+          // Update expense data with loaded entries
+          const currentServiceData = expenseData.filter(entry => entry.type !== 'service');
+          const updatedExpenseData = [...currentServiceData, ...serviceData];
+          setExpenseData(updatedExpenseData);
+
+          // Update total expenses
+          const serviceTotalAmount = serviceData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+          setTotalExpenses(prev => {
+            const currentServiceTotal = expenseData
+              .filter(entry => entry.type === 'service')
+              .reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+            return prev - currentServiceTotal + serviceTotalAmount;
+          });
+
+          console.log('💰 Service payments total amount:', serviceTotalAmount);
+        } else {
+          console.log('ℹ️ No service payment data found or invalid response:', result);
+        }
+      } catch (error) {
+        console.error('❌ Error loading service payments:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, []); // Run once on component mount
+
   // Function to get min date for date inputs (today)
   const getTodayDate = () => {
     return new Date().toISOString().split('T')[0];
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const cashAmount = parseInt(formData.cashAmount) || 0;
-    const bankAmount = parseInt(formData.bankAmount) || 0;
-    const totalAmount = cashAmount + bankAmount;
+    if (isLoading) return;
 
-    if (editingEntry) {
-      // Update existing entry
-      const oldTotal = editingEntry.totalAmount;
-      const updatedEntries = expenseData.map(entry => 
-        entry.id === editingEntry.id 
-          ? {
-              ...entry,
-              serviceDetails: formData.serviceDetails,
-              cashAmount: cashAmount,
-              bankAmount: bankAmount,
-              totalAmount: totalAmount,
-              description: formData.description,
-              date: formData.date,
-              mechanic: formData.mechanic,
-            }
-          : entry
-      );
-      setExpenseData(updatedEntries);
-      setTotalExpenses((prev) => prev - oldTotal + totalAmount);
-      setEditingEntry(null);
-    } else {
-      // Create new entry
-      const newEntry = {
-        id: Date.now(),
-        type: "service",
-        serviceDetails: formData.serviceDetails,
-        cashAmount: cashAmount,
-        bankAmount: bankAmount,
-        totalAmount: totalAmount,
-        description: formData.description,
-        date: formData.date,
-        mechanic: formData.mechanic,
-      };
-      setExpenseData([...expenseData, newEntry]);
-      setTotalExpenses((prev) => prev + totalAmount);
-      
-      // Add to cash book - payments go to Cr. side
-      if (cashAmount > 0 || bankAmount > 0) {
-        const cashBookEntry = {
-          id: Date.now() + 1,
-          date: formData.date,
-          particulars: "Service",
-          description: `Service expense - ${formData.serviceDetails}${formData.mechanic ? ` at ${formData.mechanic}` : ''}`,
-          jfNo: `SERVICE-${Date.now()}`,
+    try {
+      setIsLoading(true);
+
+      const cashAmount = parseInt(formData.cashAmount) || 0;
+      const bankAmount = parseInt(formData.bankAmount) || 0;
+      const totalAmount = cashAmount + bankAmount;
+
+      if (totalAmount === 0) {
+        alert('Please enter at least one amount (Cash or Bank)');
+        setIsLoading(false);
+        return;
+      }
+
+      if (editingEntry) {
+        // UPDATE: Update existing entry
+        console.log('📝 Updating service entry:', { entryId: editingEntry.entryId, formData });
+
+        // First update React state immediately for better UX
+        const oldTotal = editingEntry.totalAmount;
+        const updatedEntries = expenseData.map(entry => 
+          entry.entryId === editingEntry.entryId 
+            ? {
+                ...entry,
+                serviceDetails: formData.serviceDetails,
+                serviceType: formData.serviceDetails,
+                cashAmount: cashAmount,
+                bankAmount: bankAmount,
+                totalAmount: totalAmount,
+                description: formData.description,
+                date: formData.date,
+                mechanic: formData.mechanic,
+              }
+            : entry
+        );
+        setExpenseData(updatedEntries);
+        setTotalExpenses((prev) => prev - oldTotal + totalAmount);
+        setEditingEntry(null);
+
+        // Then sync to Google Sheets in background
+        authService.updateServicePayment({
+          entryId: editingEntry.entryId,
+          updatedData: {
+            serviceType: formData.serviceDetails,
+            serviceDetails: formData.description,
+            cashAmount: cashAmount,
+            bankAmount: bankAmount,
+            totalAmount: totalAmount,
+            date: formData.date
+          }
+        }).catch(error => {
+          console.error('Background service update sync failed:', error);
+        });
+
+      } else {
+        // CREATE: Add new entry
+        const currentDate = new Date();
+        const entryId = currentDate.getTime().toString();
+        const timeOnly = currentDate.toLocaleTimeString('en-US', { 
+          hour12: true, 
+          hour: '2-digit', 
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        const dateOnly = formData.date;
+        const submittedBy = localStorage.getItem('submittedBy') || 'driver';
+
+        console.log('📝 Creating new service entry:', { entryId, timeOnly, dateOnly });
+
+        // First update React state immediately for better UX
+        const newEntry = {
+          id: entryId,
+          entryId: entryId,
+          type: "service",
+          serviceDetails: formData.serviceDetails,
+          serviceType: formData.serviceDetails,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
-          type: 'cr', // Payments go to Cr. side
-          timestamp: new Date().toISOString(),
-          source: 'service-payment'
+          totalAmount: totalAmount,
+          description: formData.description,
+          date: formData.date,
+          mechanic: formData.mechanic,
+          timestamp: timeOnly,
+          submittedBy: submittedBy
         };
-        setCashBookEntries(prev => [cashBookEntry, ...prev]);
+
+        setExpenseData(prev => [newEntry, ...prev]);
+        setTotalExpenses((prev) => prev + totalAmount);
+        
+        // Add to cash book - payments go to Cr. side
+        if (cashAmount > 0 || bankAmount > 0) {
+          const cashBookEntry = {
+            id: `service-${entryId}`,
+            date: formData.date,
+            particulars: "Service Payment",
+            description: `Service expense - ${formData.serviceDetails}${formData.mechanic ? ` at ${formData.mechanic}` : ''}`,
+            jfNo: `SERVICE-${entryId}`,
+            cashAmount: cashAmount,
+            bankAmount: bankAmount,
+            type: 'cr', // Payments go to Cr. side
+            timestamp: timeOnly,
+            source: 'service-payment'
+          };
+          setCashBookEntries(prev => [cashBookEntry, ...prev]);
+        }
+
+        // Then sync to Google Sheets in background
+        authService.addServicePayment({
+          entryId: entryId,
+          timestamp: timeOnly,
+          date: dateOnly,
+          serviceType: formData.serviceDetails,
+          serviceDetails: formData.description,
+          cashAmount: cashAmount,
+          bankAmount: bankAmount,
+          totalAmount: totalAmount,
+          submittedBy: submittedBy,
+        }).catch(error => {
+          console.error('Background service add sync failed:', error);
+        });
       }
+
+      // Reset form
+      setFormData({
+        serviceDetails: "",
+        cashAmount: "",
+        bankAmount: "",
+        description: "",
+        date: "",
+        mechanic: "",
+      });
+
+    } catch (error) {
+      console.error('Error submitting service payment:', error);
+      alert(`❌ Error saving data: ${error.message || 'Unknown error'}. Please try again.`);
+    } finally {
+      setIsLoading(false);
     }
-    
-    setFormData({
-      serviceDetails: "",
-      cashAmount: "",
-      bankAmount: "",
-      description: "",
-      date: "",
-      mechanic: "",
-    });
   };
 
-  const handleDeleteEntry = (entryId) => {
-    const entryToDelete = expenseData.find(entry => entry.id === entryId);
-    if (entryToDelete && entryToDelete.totalAmount) {
-      setTotalExpenses((prev) => prev - entryToDelete.totalAmount);
+  const handleDeleteEntry = async (entryId) => {
+    try {
+      const entryToDelete = expenseData.find(entry => entry.entryId === entryId);
+
+      if (!entryToDelete) {
+        alert('Entry not found!');
+        return;
+      }
+
+      console.log('🗑️ Deleting service entry:', { entryId, type: entryToDelete.type });
+
+      // DELETE: First update React state immediately for better UX
+      const updatedData = expenseData.filter(entry => entry.entryId !== entryId);
+      setExpenseData(updatedData);
+
+      if (entryToDelete && entryToDelete.totalAmount) {
+        setTotalExpenses((prev) => prev - entryToDelete.totalAmount);
+      }
+      
+      // Remove corresponding cash book entry
+      setCashBookEntries(prev => prev.filter(entry => 
+        !(entry.source === 'service-payment' && entry.jfNo?.includes(entryId.toString()))
+      ));
+
+      // Then sync deletion to Google Sheets in background
+      authService.deleteServicePayment({
+        entryId: entryId
+      }).catch(error => {
+        console.error('Background service delete sync failed:', error);
+      });
+
+    } catch (error) {
+      console.error('Error deleting service entry:', error);
+      alert('Error deleting entry. Please try again.');
     }
-    setExpenseData(expenseData.filter(entry => entry.id !== entryId));
-    
-    // Remove corresponding cash book entry
-    setCashBookEntries(prev => prev.filter(entry => entry.source === 'service-payment' && !entry.jfNo?.includes(entryId.toString())));
   };
 
   const handleEditEntry = (entry) => {
@@ -276,9 +467,9 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
             </div>
             
             <div className="button-group">
-              <button type="submit" className="btn service-entry-btn">
-                <i className={editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
-                {editingEntry ? "Update Entry" : "Add Service Entry"}
+              <button type="submit" className="btn service-entry-btn" disabled={isLoading}>
+                <i className={isLoading ? "bi bi-arrow-repeat" : (editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle")}></i> 
+                {isLoading ? "Processing..." : (editingEntry ? "Update Entry" : "Add Service Entry")}
               </button>
               {editingEntry && (
                 <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
