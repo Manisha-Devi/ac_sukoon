@@ -10,7 +10,7 @@ import MiscPayment from "./components/jsx/MiscPayment";
 import BonusCalculator from "./components/jsx/BonusCalculator";
 import Analytics from "./components/jsx/Analytics";
 import CashBook from "./components/jsx/CashBook";
-import DataApproval from './components/jsx/DataApproval.jsx';
+import DataSummary from './components/jsx/DataSummary.jsx';
 import CashSummary from './components/jsx/CashSummary.jsx';
 import BankSummary from './components/jsx/BankSummary.jsx';
 import localStorageService from "./services/localStorageService.js";
@@ -351,11 +351,11 @@ function App() {
             <div className="menu-section">
               <h6>MANAGEMENT</h6>
               <button
-                className={`menu-item ${activeTab === "data-approval" ? "active" : ""}`}
-                onClick={() => handleMenuClick("data-approval")}
+                className={`menu-item ${activeTab === "data-summary" ? "active" : ""}`}
+                onClick={() => handleMenuClick("data-summary")}
               >
                 <i className="bi bi-clipboard-check"></i>
-                Data
+                Data Summary
               </button>
               <button
                 className={`menu-item ${activeTab === "cash-summary" ? "active" : ""}`}
@@ -443,7 +443,12 @@ function App() {
               setCashBookEntries={setCashBookEntries}
             />
           )}
-          {activeTab === "data-approval" && <DataApproval />}
+          {activeTab === "data-summary" && (
+            <DataSummary 
+              fareData={fareData}
+              expenseData={expenseData}
+            />
+          )}
           {activeTab === "cash-summary" && (
             <CashSummary 
               fareData={fareData} 
