@@ -227,7 +227,7 @@ function BankSummary({ fareData, expenseData }) {
 
       // Update status for each selected entry using entryId as primary key
       selectedEntries.forEach(entryId => {
-        updateEntryStatus(entryId, "waiting");
+        updateEntryStatus(entryId, "bank");
       });
 
       alert(`✅ ${selectedEntries.length} entries forwarded for bank approval!`);
