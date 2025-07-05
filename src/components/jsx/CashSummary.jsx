@@ -23,6 +23,19 @@ function CashSummary({ fareData, expenseData }) {
     console.log('🔄 CashSummary: Props data updated');
     console.log('📈 FareData (Income):', fareData?.length || 0, 'entries');
     console.log('📉 ExpenseData (Expense):', expenseData?.length || 0, 'entries');
+    
+    // Debug: Log complete data structure
+    console.log('💰 CASH SUMMARY - Complete FareData:', fareData);
+    console.log('💸 CASH SUMMARY - Complete ExpenseData:', expenseData);
+    
+    // Sample entries for debugging
+    if (fareData && fareData.length > 0) {
+      console.log('📊 CASH SUMMARY - Sample FareData Entry:', fareData[0]);
+    }
+    if (expenseData && expenseData.length > 0) {
+      console.log('📊 CASH SUMMARY - Sample ExpenseData Entry:', expenseData[0]);
+    }
+    
     filterUserData();
   }, [fareData, expenseData, dateFrom, dateTo, currentUser]);
 
@@ -42,6 +55,13 @@ function CashSummary({ fareData, expenseData }) {
     if (fareData && fareData.length > 0) {
       console.log('🔸 Daily Entry Sample:', fareData.find(e => e.type === 'daily'));
       console.log('🔸 Booking Entry Sample:', fareData.find(e => e.type === 'booking'));
+      console.log('🔸 All Entry Types in FareData:', [...new Set(fareData.map(e => e.type))]);
+    }
+    
+    // Debug expense data types  
+    if (expenseData && expenseData.length > 0) {
+      console.log('🔸 All Entry Types in ExpenseData:', [...new Set(expenseData.map(e => e.type))]);
+      console.log('🔸 Sample Expense Entry:', expenseData[0]);
     }
 
     // 📈 Filter fare data (INCOME) for current user - Only CASH entries  
@@ -105,6 +125,14 @@ function CashSummary({ fareData, expenseData }) {
 
     // Sort by date (newest first)
     allData.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    // Debug: Log final filtered data
+    console.log('✅ CASH SUMMARY - Final filtered data:', allData);
+    console.log('📊 CASH SUMMARY - Data breakdown:');
+    console.log('   - Income entries:', allData.filter(e => e.type === 'income').length);
+    console.log('   - Expense entries:', allData.filter(e => e.type === 'expense').length);
+    console.log('   - Entry types:', [...new Set(allData.map(e => e.entryType))]);
+    
     setFilteredData(allData);
   };
 
