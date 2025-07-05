@@ -256,14 +256,14 @@ function deleteOffDay(data) {
 }
 
 /**
- * Update Off Day Status (Approved/Waiting/Pending)
+ * Update Off Day Status (Bank/Cash/Approved) - Similar to FareReceipts
  * @param {Object} data - Status update data containing entryId, newStatus, and approverName
  * @returns {Object} Success/error response
  */
 function updateOffDayStatus(data) {
   try {
     const entryId = data.entryId;
-    const newStatus = data.newStatus; // 'pending', 'waiting', or 'approved'
+    const newStatus = data.newStatus; // 'pending', 'forwardedBank', 'forwardedCash', 'approvedBank', 'approvedCash', 'approved'
     const approverName = data.approverName || "";
 
     console.log(`📋 Updating off day status - ID: ${entryId}, Status: ${newStatus}`);
@@ -294,34 +294,11 @@ function updateOffDayStatus(data) {
       throw new Error(`Off day not found with ID: ${entryId}`);
     }
 
-    // Update status based on approval workflow
-    let finalStatus = newStatus;
-    
-    // Map approval workflow statuses correctly
-    switch(newStatus) {
-      case 'approved':
-        finalStatus = 'approved';
-        break;
-      case 'approvedBank':
-        finalStatus = 'approvedBank';
-        break;
-      case 'approvedCash':
-        finalStatus = 'approvedCash';
-        break;
-      case 'forwardedBank':
-        finalStatus = 'forwardedBank';
-        break;
-      case 'forwardedCash':
-        finalStatus = 'forwardedCash';
-        break;
-      default:
-        finalStatus = newStatus;
-    }
-    
-    sheet.getRange(rowIndex, 7).setValue(finalStatus); // Column G: EntryStatus
+    // Update status - exactly like FareReceipts
+    sheet.getRange(rowIndex, 7).setValue(newStatus); // Column G: EntryStatus
 
-    // Update approver name for all approved statuses
-    if (finalStatus.includes('approved') || finalStatus === 'approved') {
+    // Update approver name based on status - exactly like FareReceipts
+    if (newStatus === 'approved' || newStatus === 'approvedBank' || newStatus === 'approvedCash') {
       sheet.getRange(rowIndex, 8).setValue(approverName); // Column H: ApprovedBy
     } else {
       sheet.getRange(rowIndex, 8).setValue(""); // Clear approver for other statuses
