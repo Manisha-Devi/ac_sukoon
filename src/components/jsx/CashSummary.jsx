@@ -226,10 +226,9 @@ function CashSummary({ fareData, expenseData }) {
                 <thead>
                   <tr>
                     <th>Date</th>
-                    <th>Description</th>
-                    <th>EntryType</th>
                     <th>Type</th>
-                    <th>Cash Amount</th>
+                    <th>I/E</th>
+                    <th>Cash</th>
                     <th width="50">
                       <input 
                         type="checkbox" 
@@ -245,9 +244,11 @@ function CashSummary({ fareData, expenseData }) {
                   {currentEntries.map((entry, index) => (
                     <tr key={`${entry.entryId || index}`}>
                       <td>
-                        {entry.dateFrom ? new Date(entry.dateFrom).toLocaleDateString('en-IN') : new Date(entry.date).toLocaleDateString('en-IN')}
+                        {entry.entryType === 'booking' && entry.dateFrom ? 
+                          new Date(entry.dateFrom).toLocaleDateString('en-IN') : 
+                          new Date(entry.date).toLocaleDateString('en-IN')
+                        }
                       </td>
-                      <td>{entry.description}</td>
                       <td>
                         <span className="badge bg-info">
                           {entry.entryType || 'Cash'}
@@ -255,7 +256,7 @@ function CashSummary({ fareData, expenseData }) {
                       </td>
                       <td>
                         <span className={`badge ${entry.type === 'income' ? 'bg-success' : 'bg-danger'}`}>
-                          {entry.type === 'income' ? 'Income' : 'Expense'}
+                          {entry.type === 'income' ? 'I' : 'E'}
                         </span>
                       </td>
                       <td className={entry.type === 'income' ? 'text-success' : 'text-danger'}>
