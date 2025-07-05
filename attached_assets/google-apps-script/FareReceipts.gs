@@ -1,7 +1,8 @@
+
 /**
  * Add new Fare Receipt
  * Sheet Columns: A=Timestamp, B=Date, C=Route, D=CashAmount, E=BankAmount, 
- *                F=TotalAmount, G=SubmittedBy, H=EntryType, I=EntryId,
+ *                F=TotalAmount, G=EntryType, H=EntryId, I=SubmittedBy,
  *                J=EntryStatus, K=ApprovedBy
  * @param {Object} data - Fare receipt data
  * @returns {Object} Success/error response with entry details
@@ -23,7 +24,7 @@ function addFareReceipt(data) {
       // Add headers exactly as specified
       sheet.getRange(1, 1, 1, 11).setValues([[
         "Timestamp", "Date", "Route", "CashAmount", "BankAmount", 
-        "TotalAmount", "SubmittedBy", "EntryType", "EntryId",
+        "TotalAmount", "EntryType", "EntryId", "SubmittedBy",
         "EntryStatus", "ApprovedBy"
       ]]);
     }
@@ -46,9 +47,9 @@ function addFareReceipt(data) {
       data.cashAmount || 0,          // D: Cash amount
       data.bankAmount || 0,          // E: Bank amount
       data.totalAmount || 0,         // F: Total amount
-      data.submittedBy || "",        // G: Submitted by
-      "fare",                        // H: Entry type (static)
-      entryId,                       // I: Entry ID
+      "fare",                        // G: Entry type (static)
+      entryId,                       // H: Entry ID
+      data.submittedBy || "",        // I: Submitted by
       "pending",                     // J: Entry Status (pending/waiting/approved)
       "",                            // K: Approved By (empty initially)
     ]]);
@@ -103,18 +104,18 @@ function getFareReceipts() {
       };
     }
 
-    // Process and format data
+    // Process and format data with CORRECT column mapping
     const data = values.slice(1).map((row, index) => {
       return {
-        entryId: row[8],                      // Entry ID from column I
-        timestamp: String(row[0] || ''),      // Convert timestamp to string
-        date: String(row[1] || ''),           // Convert date to string
+        entryId: row[7],                      // Entry ID from column H (8th column)
+        timestamp: String(row[0] || ''),      // Timestamp from column A
+        date: String(row[1] || ''),           // Date from column B
         route: row[2],                        // Route from column C
         cashAmount: row[3],                   // Cash amount from column D
         bankAmount: row[4],                   // Bank amount from column E
         totalAmount: row[5],                  // Total amount from column F
-        submittedBy: row[6],                  // Submitted by from column G
-        entryType: row[7],                    // Entry type from column H
+        entryType: row[6],                    // Entry type from column G
+        submittedBy: row[8],                  // Submitted by from column I (9th column)
         entryStatus: row[9] || "pending",     // Entry status from column J
         approvedBy: row[10] || "",            // Approved by from column K
         rowIndex: index + 2,                  // Store row index for updates/deletes
@@ -157,7 +158,7 @@ function updateFareReceipt(data) {
       throw new Error('FareReceipts sheet not found');
     }
 
-    const entryIdColumn = 9; // Column I contains Entry ID
+    const entryIdColumn = 8; // Column H contains Entry ID (8th column)
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
@@ -232,7 +233,7 @@ function deleteFareReceipt(data) {
       throw new Error('FareReceipts sheet not found');
     }
 
-    const entryIdColumn = 9; // Column I contains Entry ID
+    const entryIdColumn = 8; // Column H contains Entry ID (8th column)
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
@@ -292,7 +293,7 @@ function updateFareReceiptStatus(data) {
       throw new Error('FareReceipts sheet not found');
     }
 
-    const entryIdColumn = 9; // Column I contains Entry ID
+    const entryIdColumn = 8; // Column H contains Entry ID (8th column)
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
