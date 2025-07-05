@@ -43,24 +43,33 @@ function App() {
     setActiveTab("dashboard");
   };
 
-  // Centralized refresh function
+  // Centralized refresh function with proper icon management
   const handleCentralizedRefresh = async () => {
     if (isRefreshing) return; // Prevent multiple simultaneous refreshes
     
     setIsRefreshing(true);
+    setLastRefreshTime(null); // Reset tick mark
+    
     try {
       console.log('🔄 Starting centralized data refresh...');
       
       // Load data from Dashboard component method
-      const dashboardRef = document.querySelector('.dashboard-container');
-      if (dashboardRef && window.refreshAllData) {
+      if (window.refreshAllData) {
         await window.refreshAllData();
       }
       
+      // Set completion time to show tick mark
       setLastRefreshTime(new Date());
       console.log('✅ Centralized refresh completed');
+      
+      // Auto hide tick mark after 3 seconds and show refresh icon again
+      setTimeout(() => {
+        setLastRefreshTime(null);
+      }, 3000);
+      
     } catch (error) {
       console.error('❌ Centralized refresh failed:', error);
+      alert('Unable to refresh data. Please check your internet connection.');
     } finally {
       setIsRefreshing(false);
     }
@@ -239,10 +248,22 @@ function App() {
               className={`btn btn-link text-white p-2 me-2 ${isRefreshing ? 'disabled' : ''}`}
               onClick={handleCentralizedRefresh}
               disabled={isRefreshing}
-              title={isRefreshing ? 'Refreshing data...' : 'Refresh all data from Google Sheets'}
+              title={
+                isRefreshing 
+                  ? 'Refreshing data...' 
+                  : lastRefreshTime 
+                    ? 'Click to refresh again' 
+                    : 'Refresh all data from Google Sheets'
+              }
               type="button"
             >
-              <i className={`bi ${isRefreshing ? 'bi-arrow-clockwise' : (lastRefreshTime ? 'bi-check-circle' : 'bi-arrow-clockwise')} fs-5 ${isRefreshing ? 'rotating' : ''}`}></i>
+              <i className={`bi ${
+                isRefreshing 
+                  ? 'bi-arrow-clockwise rotating' 
+                  : lastRefreshTime 
+                    ? 'bi-check-circle-fill text-success' 
+                    : 'bi-arrow-clockwise'
+              } fs-5`}></i>
             </button>
 
             {/* Desktop Toggle and User Info */}

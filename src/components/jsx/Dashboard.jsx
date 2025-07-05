@@ -426,17 +426,29 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
     }
   };
 
-  // Load data when dashboard mounts
-  useEffect(() => {
-    loadAllDataFromSheets();
-  }, []);
+  // Remove automatic loading - only manual refresh from navbar
+  // useEffect(() => {
+  //   loadAllDataFromSheets();
+  // }, []);
 
-  // Refresh data function (can be called manually)
+  // Comprehensive refresh function for all components
   const refreshAllData = async () => {
+    console.log('🔄 Dashboard: Starting comprehensive data refresh...');
     await loadAllDataFromSheets();
+    
+    // Trigger refresh for other components that might need it
+    window.dispatchEvent(new CustomEvent('dataRefreshed', {
+      detail: {
+        timestamp: new Date(),
+        source: 'centralized-refresh'
+      }
+    }));
+    
     if (onRefreshComplete) {
       onRefreshComplete();
     }
+    
+    console.log('✅ Dashboard: All components data refreshed');
   };
 
   // Expose refresh function globally for centralized access

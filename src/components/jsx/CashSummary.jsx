@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import "../css/CashSummary.css";
 
@@ -129,6 +128,23 @@ function CashSummary({ fareData, expenseData }) {
     .reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
 
   const cashBalance = totalCashIncome - totalCashExpense;
+
+  useEffect(() => {
+  }, []);
+
+  // Listen for centralized refresh events
+  useEffect(() => {
+    const handleDataRefresh = () => {
+      console.log('🔄 CashSummary: Recalculating from centralized refresh');
+      filterUserData();
+    };
+
+    window.addEventListener('dataRefreshed', handleDataRefresh);
+
+    return () => {
+      window.removeEventListener('dataRefreshed', handleDataRefresh);
+    };
+  }, []);
 
   return (
     <div className="cash-summary-container">

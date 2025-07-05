@@ -463,6 +463,23 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
         console.log("Delete clicked for entryId:", entryId);
     };
 
+  // Load data on component mount
+  useEffect(() => {
+    loadData();
+
+    // Listen for centralized refresh events
+    const handleDataRefresh = () => {
+      console.log('🔄 BasicPayment: Refreshing data from centralized refresh');
+      loadData();
+    };
+
+    window.addEventListener('dataRefreshed', handleDataRefresh);
+
+    return () => {
+      window.removeEventListener('dataRefreshed', handleDataRefresh);
+    };
+  }, []);
+
   return (
     <div className="basic-payment-container">
       <div className="container-fluid">
@@ -472,7 +489,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
               <h2><i className="bi bi-credit-card"></i> Basic Payment Entry</h2>
               <p>Record your basic expenses - Fuel, Adda & Union payments</p>
             </div>
-            
+
           </div>
         </div>
 

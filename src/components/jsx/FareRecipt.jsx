@@ -592,6 +592,22 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
   const { totalCash, totalBank, grandTotal } = calculateSummaryTotals();
 
+  // Load data on component mount and listen for refresh events
+  useEffect(() => {
+    
+
+    // Listen for centralized refresh events
+    const handleDataRefresh = () => {
+      console.log('🔄 FareRecipt: Refreshing data from centralized refresh');
+    };
+
+    window.addEventListener('dataRefreshed', handleDataRefresh);
+
+    return () => {
+      window.removeEventListener('dataRefreshed', handleDataRefresh);
+    };
+  }, []);
+
   return (
     <div className="fare-entry-container">
       <div className="container-fluid">
@@ -952,7 +968,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                           </span>
 
 
-                          
+
                             {entry.entryStatus === 'pending' && (
                             <>
                               <button 

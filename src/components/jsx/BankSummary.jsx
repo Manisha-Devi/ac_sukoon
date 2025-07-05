@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import "../css/BankSummary.css";
 
@@ -129,6 +128,24 @@ function BankSummary({ fareData, expenseData }) {
     .reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
 
   const bankBalance = totalBankIncome - totalBankExpense;
+
+  useEffect(() => {
+    filterUserData();
+  }, [fareData, expenseData, dateFrom, dateTo, currentUser]);
+
+  // Listen for centralized refresh events
+  useEffect(() => {
+    const handleDataRefresh = () => {
+      console.log('🔄 BankSummary: Recalculating from centralized refresh');
+      filterUserData();
+    };
+
+    window.addEventListener('dataRefreshed', handleDataRefresh);
+
+    return () => {
+      window.removeEventListener('dataRefreshed', handleDataRefresh);
+    };
+  }, [fareData, expenseData, dateFrom, dateTo, currentUser]);
 
   return (
     <div className="bank-summary-container">
