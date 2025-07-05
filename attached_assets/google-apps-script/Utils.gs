@@ -48,6 +48,43 @@ function formatISTTimestamp() {
 }
 
 /**
+ * Set up Script Properties (Run this once to configure your spreadsheet ID)
+ * This function can be used to set the spreadsheet ID programmatically
+ */
+function setupScriptProperties() {
+  const properties = PropertiesService.getScriptProperties();
+  
+  // Set your actual spreadsheet ID here
+  const spreadsheetId = "1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidEmhzgM";
+  
+  properties.setProperty('SHEET_ID', spreadsheetId);
+  
+  console.log('✅ Script Properties configured successfully');
+  console.log('📋 Spreadsheet ID:', spreadsheetId);
+  
+  return {
+    success: true,
+    message: 'Script Properties set up successfully',
+    spreadsheetId: spreadsheetId
+  };
+}
+
+/**
+ * Get current Script Properties (For debugging)
+ */
+function getScriptProperties() {
+  const properties = PropertiesService.getScriptProperties();
+  const allProperties = properties.getProperties();
+  
+  console.log('📋 Current Script Properties:', allProperties);
+  
+  return {
+    success: true,
+    properties: allProperties
+  };
+}
+
+/**
  * Generate unique entry ID based on current timestamp
  */
 function generateEntryId() {
