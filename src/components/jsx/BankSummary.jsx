@@ -222,6 +222,10 @@ function BankSummary({ fareData, expenseData }) {
               <table className="table table-striped">
                 <thead>
                   <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th>Bank Amount</th>
                     <th width="50">
                       <input 
                         type="checkbox" 
@@ -231,16 +235,21 @@ function BankSummary({ fareData, expenseData }) {
                           selectedEntries.length === currentEntries.filter(entry => entry.entryStatus === 'pending').length}
                       />
                     </th>
-                    <th>Date</th>
-                    <th>Description</th>
-                    <th>Type</th>
-                    <th>Bank Amount</th>
-                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {currentEntries.map((entry, index) => (
                     <tr key={`${entry.entryId || index}`}>
+                      <td>{new Date(entry.date).toLocaleDateString('en-IN')}</td>
+                      <td>{entry.description}</td>
+                      <td>
+                        <span className={`badge ${entry.type === 'income' ? 'bg-success' : 'bg-danger'}`}>
+                          {entry.type === 'income' ? 'Income' : 'Expense'}
+                        </span>
+                      </td>
+                      <td className={entry.type === 'income' ? 'text-success' : 'text-danger'}>
+                        ₹{(entry.bankAmount || 0).toLocaleString()}
+                      </td>
                       <td>
                         {entry.entryStatus === 'pending' ? (
                           <input 
@@ -256,25 +265,6 @@ function BankSummary({ fareData, expenseData }) {
                         ) : (
                           <span className="text-muted">-</span>
                         )}
-                      </td>
-                      <td>{new Date(entry.date).toLocaleDateString('en-IN')}</td>
-                      <td>{entry.description}</td>
-                      <td>
-                        <span className={`badge ${entry.type === 'income' ? 'bg-success' : 'bg-danger'}`}>
-                          {entry.type === 'income' ? 'Income' : 'Expense'}
-                        </span>
-                      </td>
-                      <td className={entry.type === 'income' ? 'text-success' : 'text-danger'}>
-                        ₹{(entry.bankAmount || 0).toLocaleString()}
-                      </td>
-                      <td>
-                        <span className={`badge ${
-                          entry.entryStatus === 'pending' ? 'bg-warning' :
-                          entry.entryStatus === 'waiting' ? 'bg-info' : 
-                          entry.entryStatus === 'approved' ? 'bg-success' : 'bg-secondary'
-                        }`}>
-                          {entry.entryStatus || 'pending'}
-                        </span>
                       </td>
                     </tr>
                   ))}
