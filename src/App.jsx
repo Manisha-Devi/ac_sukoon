@@ -478,8 +478,7 @@ function App() {
           )}
           {activeTab === "bank-summary" && (
             <BankSummary 
-              fareData={fareData} 
-              expenseData={expenseData}
+              bankData={window.bankData || []}
             />
           )}
         </div>
