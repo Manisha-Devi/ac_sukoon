@@ -610,9 +610,10 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       setIsLoading(true);
       console.log('📋 Loading data from Google Sheets...');
 
-      // Fetch both Fare Receipts and Off Days
-      const [fareReceiptsResult, offDaysResult] = await Promise.all([
+      // Fetch Fare Receipts, Booking Entries, and Off Days
+      const [fareReceiptsResult, bookingEntriesResult, offDaysResult] = await Promise.all([
         authService.getFareReceipts(),
+        authService.getBookingEntries(),
         authService.getOffDays()
       ]);
 
@@ -635,6 +636,26 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           rowIndex: entry.rowIndex
         }));
         allData = [...allData, ...transformedFareData];
+      }
+
+      // Transform Booking Entries data
+      if (bookingEntriesResult.success && bookingEntriesResult.data) {
+        const transformedBookingData = bookingEntriesResult.data.map(entry => ({
+          entryId: entry.entryId,
+          timestamp: entry.timestamp,
+          type: "booking",  // All booking entries are booking type
+          bookingDetails: entry.bookingDetails,
+          dateFrom: entry.dateFrom,
+          dateTo: entry.dateTo,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          totalAmount: entry.totalAmount || 0,
+          submittedBy: entry.submittedBy,
+          entryStatus: entry.entryStatus || 'pending',
+          approvedBy: entry.approvedBy || '',
+          rowIndex: entry.rowIndex
+        }));
+        allData = [...allData, ...transformedBookingData];
       }
 
       // Transform Off Days data
