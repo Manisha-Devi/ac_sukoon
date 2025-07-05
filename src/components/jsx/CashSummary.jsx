@@ -148,31 +148,72 @@ function CashSummary({ fareData, expenseData }) {
   const currentEntries = filteredData.slice(indexOfFirstEntry, indexOfLastEntry);
   const totalPages = Math.ceil(filteredData.length / entriesPerPage);
 
-  // Handle checkbox selection for individual rows
+  // Handle checkbox selection for individual rows (only for bank status)
   const handleSelectEntry = (entryId) => {
-    setSelectedEntries(prev => {
-      if (prev.includes(entryId)) {
-        return prev.filter(id => id !== entryId);
-      } else {
-        return [...prev, entryId];
-      }
-    });
-  };
-
-  // Handle select all checkbox
-  const handleSelectAll = () => {
-    const allCurrentEntryIds = currentEntries.map(entry => entry.entryId);
-
-    if (selectedEntries.length === allCurrentEntryIds.length) {
-      setSelectedEntries([]);
-    } else {
-      setSelectedEntries(allCurrentEntryIds);
+    const entry = currentEntries.find(e => e.entryId === entryId);
+    if (entry && entry.entryStatus === 'bank') {
+      setSelectedEntries(prev => {
+        if (prev.includes(entryId)) {
+          return prev.filter(id => id !== entryId);
+        } else {
+          return [...prev, entryId];
+        }
+      });
     }
   };
 
-  // Check if all visible entries are selected
-  const isAllSelected = currentEntries.length > 0 && 
-    currentEntries.every(entry => selectedEntries.includes(entry.entryId));
+  // Handle select all checkbox (only bank status entries)
+  const handleSelectAll = () => {
+    const bankEntries = currentEntries.filter(entry => entry.entryStatus === 'bank');
+    const bankEntryIds = bankEntries.map(entry => entry.entryId);
+
+    if (selectedEntries.length === bankEntryIds.length && bankEntryIds.length > 0) {
+      setSelectedEntries([]);
+    } else {
+      setSelectedEntries(bankEntryIds);
+    }
+  };
+
+  // Check if all visible bank entries are selected
+  const bankEntries = currentEntries.filter(entry => entry.entryStatus === 'bank');
+  const isAllSelected = bankEntries.length > 0 && 
+    bankEntries.every(entry => selectedEntries.includes(entry.entryId));
+
+  // Get status icon for entry
+  const getStatusIcon = (entryStatus) => {
+    switch (entryStatus) {
+      case 'pending':
+        return <i className="bi bi-dash text-muted" title="Pending"></i>; // - icon
+      case 'bank':
+        return null; // Show checkbox
+      case 'cash':
+        return <i className="bi bi-lock-fill text-warning" title="Cash Locked"></i>;
+      case 'approved':
+        return <i className="bi bi-check-circle-fill text-success" title="Approved"></i>;
+      default:
+        return null;
+    }
+  };
+
+  // Function to update entry status based on entryId (primary key)
+  const updateEntryStatus = (entryId, newStatus) => {
+    console.log(`📝 Updating entry ${entryId}: status → ${newStatus}`);
+
+    // Update in filteredData state
+    const updatedFilteredData = filteredData.map(entry => {
+      if (entry.entryId === entryId) {
+        return { ...entry, entryStatus: newStatus };
+      }
+      return entry;
+    });
+
+    setFilteredData(updatedFilteredData);
+
+    // Also trigger parent component update if needed
+    window.dispatchEvent(new CustomEvent('entryStatusUpdated', { 
+      detail: { entryId, newStatus }
+    }));
+  };
 
   // Forward selected entries for approval
   const handleForwardForApproval = async () => {
@@ -408,6 +449,8 @@ function CashSummary({ fareData, expenseData }) {
                         className="form-check-input"
                         onChange={handleSelectAll}
                         checked={isAllSelected}
+                        disabled={bankEntries.length === 0}
+                        title="Select all bank entries"
                       />
                     </th>
                   </tr>
@@ -435,12 +478,16 @@ function CashSummary({ fareData, expenseData }) {
                         ₹{(entry.cashAmount || 0).toLocaleString()}
                       </td>
                       <td>
-                        <input 
-                          type="checkbox" 
-                          className="form-check-input"
-                          checked={selectedEntries.includes(entry.entryId)}
-                          onChange={() => handleSelectEntry(entry.entryId)}
-                        />
+                        {entry.entryStatus === 'bank' ? (
+                          <input 
+                            type="checkbox" 
+                            className="form-check-input"
+                            checked={selectedEntries.includes(entry.entryId)}
+                            onChange={() => handleSelectEntry(entry.entryId)}
+                          />
+                        ) : (
+                          getStatusIcon(entry.entryStatus)
+                        )}
                       </td>
                     </tr>
                   ))}
