@@ -6,8 +6,7 @@ import Login from "./components/jsx/Login";
 import Dashboard from "./components/jsx/Dashboard";
 import FareEntry from "./components/jsx/FareRecipt";
 import BasicPayment from "./components/jsx/BasicPayment.jsx";
-import ServicePayment from "./components/jsx/ServicePayment.jsx";
-import OtherPayment from "./components/jsx/OtherPayment.jsx";
+import MiscPayment from "./components/jsx/MiscPayment";
 import BonusCalculator from "./components/jsx/BonusCalculator";
 import Analytics from "./components/jsx/Analytics";
 import CashBook from "./components/jsx/CashBook";
@@ -266,18 +265,11 @@ function App() {
               Basic Payment
             </button>
             <button
-              className={`menu-item ${activeTab === "service-entry" ? "active" : ""}`}
-              onClick={() => handleMenuClick("service-entry")}
+              className={`menu-item ${activeTab === "misc-payment" ? "active" : ""}`}
+              onClick={() => handleMenuClick("misc-payment")}
             >
               <i className="bi bi-credit-card"></i>
-              Service Payment
-            </button>
-            <button
-              className={`menu-item ${activeTab === "other-payment" ? "active" : ""}`}
-              onClick={() => handleMenuClick("other-payment")}
-            >
-              <i className="bi bi-credit-card"></i>
-              Other Payment
+              Misc Payment
             </button>
           </div>
 
@@ -355,16 +347,8 @@ function App() {
               setCashBookEntries={setCashBookEntries}
             />
           )}
-          {activeTab === "service-entry" && (
-            <ServiceEntry
-              expenseData={expenseData}
-              setExpenseData={setExpenseData}
-              setTotalExpenses={setTotalExpenses}
-              setCashBookEntries={setCashBookEntries}
-            />
-          )}
-          {activeTab === "other-payment" && (
-            <OtherPayment
+          {activeTab === "misc-payment" && (
+            <MiscPayment 
               expenseData={expenseData}
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
