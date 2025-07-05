@@ -168,7 +168,7 @@ function updateBookingEntry(data) {
       throw new Error('BookingEntries sheet not found');
     }
 
-    const entryIdColumn = 9; // Column I contains Entry ID (9th column)
+    const entryIdColumn = 10; // Column J contains Entry ID (10th column)
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
@@ -246,7 +246,7 @@ function deleteBookingEntry(data) {
       throw new Error('BookingEntries sheet not found');
     }
 
-    const entryIdColumn = 9; // Column I contains Entry ID (9th column)
+    const entryIdColumn = 10; // Column J contains Entry ID (10th column)
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
@@ -306,7 +306,7 @@ function updateBookingEntryStatus(data) {
       throw new Error('BookingEntries sheet not found');
     }
 
-    const entryIdColumn = 9; // Column I contains Entry ID (9th column)
+    const entryIdColumn = 10; // Column J contains Entry ID (10th column)
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();

@@ -350,11 +350,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           entryId: editingEntry.entryId,
           updatedData: {
             bookingDetails: bookingData.bookingDetails,
-            cashAmount: cashAmount,
-            bankAmount: bankAmount,
-            totalAmount: totalAmount,
             dateFrom: startDateStr, // Send date as string
             dateTo: endDateStr, // Send date as string
+            cashAmount: cashAmount,
+            bankAmount: bankAmount,
+            totalAmount: totalAmount
           }
         }).catch(error => {
           console.error('Background booking update sync failed:', error);
@@ -387,13 +387,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           entryId: newEntry.entryId,
           timestamp: timeOnly, // Send time as string
           bookingDetails: bookingData.bookingDetails,
+          dateFrom: startDateStr, // Send date as string
+          dateTo: endDateStr, // Send date as string
           cashAmount: cashAmount,
           bankAmount: bankAmount,
           totalAmount: totalAmount,
-          dateFrom: startDateStr, // Send date as string
-          dateTo: endDateStr, // Send date as string
-          submittedBy: submittedBy,
-          entryStatus: 'pending' // Send initial approval status
+          submittedBy: submittedBy
         }).catch(error => {
           console.error('Background booking add sync failed:', error);
         });
