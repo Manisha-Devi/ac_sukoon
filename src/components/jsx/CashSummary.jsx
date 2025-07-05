@@ -80,27 +80,31 @@ function CashSummary({ fareData, expenseData }) {
   const currentEntries = filteredData.slice(indexOfFirstEntry, indexOfLastEntry);
   const totalPages = Math.ceil(filteredData.length / entriesPerPage);
 
-  // Handle checkbox selection
+  // Handle checkbox selection for individual rows
   const handleSelectEntry = (entryId) => {
-    setSelectedEntries(prev => 
-      prev.includes(entryId) 
-        ? prev.filter(id => id !== entryId)
-        : [...prev, entryId]
-    );
+    setSelectedEntries(prev => {
+      if (prev.includes(entryId)) {
+        return prev.filter(id => id !== entryId);
+      } else {
+        return [...prev, entryId];
+      }
+    });
   };
 
-  // Handle select all
+  // Handle select all checkbox
   const handleSelectAll = () => {
-    const pendingEntries = currentEntries
-      .filter(entry => entry.entryStatus === 'pending')
-      .map(entry => entry.entryId);
+    const allCurrentEntryIds = currentEntries.map(entry => entry.entryId);
     
-    if (selectedEntries.length === pendingEntries.length) {
+    if (selectedEntries.length === allCurrentEntryIds.length) {
       setSelectedEntries([]);
     } else {
-      setSelectedEntries(pendingEntries);
+      setSelectedEntries(allCurrentEntryIds);
     }
   };
+
+  // Check if all visible entries are selected
+  const isAllSelected = currentEntries.length > 0 && 
+    currentEntries.every(entry => selectedEntries.includes(entry.entryId));
 
   // Forward selected entries for approval
   const handleForwardForApproval = () => {
@@ -231,8 +235,8 @@ function CashSummary({ fareData, expenseData }) {
                         type="checkbox" 
                         className="form-check-input"
                         onChange={handleSelectAll}
-                        checked={selectedEntries.length > 0 && 
-                          selectedEntries.length === currentEntries.filter(entry => entry.entryStatus === 'pending').length}
+                        checked={isAllSelected}
+                        indeterminate={selectedEntries.length > 0 && !isAllSelected}
                       />
                     </th>
                   </tr>
@@ -251,20 +255,12 @@ function CashSummary({ fareData, expenseData }) {
                         ₹{(entry.cashAmount || 0).toLocaleString()}
                       </td>
                       <td>
-                        {entry.entryStatus === 'pending' ? (
-                          <input 
-                            type="checkbox" 
-                            className="form-check-input"
-                            checked={selectedEntries.includes(entry.entryId)}
-                            onChange={() => handleSelectEntry(entry.entryId)}
-                          />
-                        ) : entry.entryStatus === 'waiting' ? (
-                          <i className="bi bi-lock-fill text-warning" title="Waiting for approval"></i>
-                        ) : entry.entryStatus === 'approved' ? (
-                          <i className="bi bi-check-circle-fill text-success" title="Approved"></i>
-                        ) : (
-                          <span className="text-muted">-</span>
-                        )}
+                        <input 
+                          type="checkbox" 
+                          className="form-check-input"
+                          checked={selectedEntries.includes(entry.entryId)}
+                          onChange={() => handleSelectEntry(entry.entryId)}
+                        />
                       </td>
                     </tr>
                   ))}
