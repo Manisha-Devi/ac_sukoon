@@ -179,7 +179,9 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           second: '2-digit'
         });
         const dateOnly = formData.date;
-        const submittedBy = localStorage.getItem('submittedBy') || 'driver';
+        // Get current logged-in user's full name
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const submittedBy = currentUser.fullName || currentUser.username || 'driver';
 
         console.log('📝 Creating new service entry:', { entryId, timeOnly, dateOnly });
 
