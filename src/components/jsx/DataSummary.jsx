@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import "../css/DataApproval.css";
 import authService from "../../services/authService.js";
@@ -5,11 +6,11 @@ import authService from "../../services/authService.js";
 function DataSummary({ fareData, expenseData }) {
   const [activeTab, setActiveTab] = useState('pending');
   const [pendingData, setPendingData] = useState([]);
-  const [bankData, setBankData] = useState([]);
-  const [cashData, setCashData] = useState([]);
+  const [bankApprovalData, setBankApprovalData] = useState([]);
+  const [cashApprovalData, setCashApprovalData] = useState([]);
   const [approvedData, setApprovedData] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [selectedEntries, setSelectedEntries] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
 
   // Check if user has permission to access this component
@@ -104,15 +105,11 @@ function DataSummary({ fareData, expenseData }) {
       // Sort by timestamp (newest first)
       allEntries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-      // Separate by status - New 6-step flow
+      // Separate by status with correct filtering
       setPendingData(allEntries.filter(entry => entry.entryStatus === 'pending'));
-      setBankData(allEntries.filter(entry => 
-        entry.entryStatus === 'forwardedBank' || entry.entryStatus === 'approvedBank'
-      ));
-      setCashData(allEntries.filter(entry => 
-        entry.entryStatus === 'forwardedCash' || entry.entryStatus === 'approvedCash'
-      ));
-      setApprovedData(allEntries.filter(entry => entry.entryStatus === 'approved'));
+      setBankApprovalData(allEntries.filter(entry => entry.entryStatus === 'forwardedBank'));
+      setCashApprovalData(allEntries.filter(entry => entry.entryStatus === 'forwardedCash'));
+      setApprovedData(allEntries.filter(entry => entry.entryStatus === 'approvedCash'));
 
       setLoading(false);
     } catch (error) {
@@ -121,276 +118,248 @@ function DataSummary({ fareData, expenseData }) {
     }
   };
 
-  const handleApprove = async (entry) => {
+  // Get current tab data
+  const getCurrentTabData = () => {
+    switch (activeTab) {
+      case 'pending': return pendingData;
+      case 'bankApproval': return bankApprovalData;
+      case 'cashApproval': return cashApprovalData;
+      case 'approved': return approvedData;
+      default: return [];
+    }
+  };
+
+  // Handle entry selection
+  const handleEntrySelect = (entryId) => {
+    setSelectedEntries(prev => {
+      if (prev.includes(entryId)) {
+        return prev.filter(id => id !== entryId);
+      } else {
+        return [...prev, entryId];
+      }
+    });
+  };
+
+  // Handle select all
+  const handleSelectAll = () => {
+    const currentData = getCurrentTabData();
+    const currentIds = currentData.map(entry => entry.entryId);
+    
+    if (selectedEntries.length === currentIds.length && currentIds.length > 0) {
+      setSelectedEntries([]);
+    } else {
+      setSelectedEntries(currentIds);
+    }
+  };
+
+  // Check if all entries in current tab are selected
+  const isAllSelected = () => {
+    const currentData = getCurrentTabData();
+    const currentIds = currentData.map(entry => entry.entryId);
+    return currentIds.length > 0 && currentIds.every(id => selectedEntries.includes(id));
+  };
+
+  // Handle approval action
+  const handleApproval = async () => {
+    if (selectedEntries.length === 0) {
+      alert('Please select entries to approve');
+      return;
+    }
+
     try {
       const approverName = currentUser.fullName || currentUser.username;
+      let newStatus = '';
 
-      // Call appropriate approval function based on data type
-      let result;
-      switch (entry.dataType) {
-        case 'Fare Receipt':
-          result = await authService.updateFareReceiptStatus({
-            entryId: entry.entryId,
-            newStatus: 'approved',
-            approverName: approverName
-          });
+      // Determine new status based on current tab
+      switch (activeTab) {
+        case 'pending':
+          newStatus = 'approved';
           break;
-        case 'Booking Entry':
-          result = await authService.updateBookingEntryStatus({
-            entryId: entry.entryId,
-            newStatus: 'approved',
-            approverName: approverName
-          });
+        case 'bankApproval':
+          newStatus = 'approvedBank';
           break;
-        case 'Fuel Payment':
-          result = await authService.updateFuelPaymentStatus({
-            entryId: entry.entryId,
-            newStatus: 'approved',
-            approverName: approverName
-          });
+        case 'cashApproval':
+          newStatus = 'approvedCash';
           break;
-        case 'Other Payment':
-          result = await authService.updateOtherPaymentStatus({
-            entryId: entry.entryId,
-            newStatus: 'approved',
-            approverName: approverName
-          });
-          break;
-        case 'Adda Payment':
-          result = await authService.updateAddaPaymentStatus({
-            entryId: entry.entryId,
-            newStatus: 'approved',
-            approverName: approverName
-          });
-          break;
-        case 'Service Payment':
-          result = await authService.updateServicePaymentStatus({
-            entryId: entry.entryId,
-            newStatus: 'approved',
-            approverName: approverName
-          });
-          break;
-        case 'Union Payment':
-          result = await authService.updateUnionPaymentStatus({
-            entryId: entry.entryId,
-            newStatus: 'approved',
-            approverName: approverName
-          });
+        case 'approved':
+          newStatus = 'approved';
           break;
         default:
-          throw new Error(`Unsupported data type: ${entry.dataType}`);
+          throw new Error('Invalid tab for approval');
       }
 
-      if (result.success) {
-        alert(`Entry approved successfully by ${approverName}`);
+      // Process each selected entry
+      for (const entryId of selectedEntries) {
+        const currentData = getCurrentTabData();
+        const entry = currentData.find(e => e.entryId === entryId);
+        if (!entry) continue;
+
+        // Call appropriate status update function
+        let result;
+        switch (entry.dataType) {
+          case 'Fare Receipt':
+            result = await authService.updateFareReceiptStatus({
+              entryId: entryId,
+              newStatus: newStatus,
+              approverName: approverName
+            });
+            break;
+          case 'Booking Entry':
+            result = await authService.updateBookingEntryStatus({
+              entryId: entryId,
+              newStatus: newStatus,
+              approverName: approverName
+            });
+            break;
+          case 'Fuel Payment':
+            result = await authService.updateFuelPaymentStatus({
+              entryId: entryId,
+              newStatus: newStatus,
+              approverName: approverName
+            });
+            break;
+          case 'Other Payment':
+            result = await authService.updateOtherPaymentStatus({
+              entryId: entryId,
+              newStatus: newStatus,
+              approverName: approverName
+            });
+            break;
+          case 'Adda Payment':
+            result = await authService.updateAddaPaymentStatus({
+              entryId: entryId,
+              newStatus: newStatus,
+              approverName: approverName
+            });
+            break;
+          case 'Service Payment':
+            result = await authService.updateServicePaymentStatus({
+              entryId: entryId,
+              newStatus: newStatus,
+              approverName: approverName
+            });
+            break;
+          case 'Union Payment':
+            result = await authService.updateUnionPaymentStatus({
+              entryId: entryId,
+              newStatus: newStatus,
+              approverName: approverName
+            });
+            break;
+          default:
+            throw new Error(`Unsupported data type: ${entry.dataType}`);
+        }
+
+        if (!result.success) {
+          throw new Error(result.error);
+        }
 
         // Update parent state
         if (window.updateEntryStatusInParent) {
-          window.updateEntryStatusInParent(entry.entryId, "approved", entry.type);
+          window.updateEntryStatusInParent(entryId, newStatus, entry.type);
         }
-
-        processAllData(); // Reprocess current data
-      } else {
-        alert('Error approving entry: ' + result.error);
       }
+
+      alert(`${selectedEntries.length} entries approved successfully`);
+      setSelectedEntries([]);
+      processAllData(); // Refresh data
+
     } catch (error) {
-      console.error('Error approving entry:', error);
-      alert('Error approving entry: ' + error.message);
+      console.error('Error approving entries:', error);
+      alert('Error approving entries: ' + error.message);
     }
   };
 
-  const handleResend = async (entry) => {
-    try {
-      // Call appropriate resend function based on data type
-      let result;
-      switch (entry.dataType) {
-        case 'Fare Receipt':
-          result = await authService.updateFareReceiptStatus({
-            entryId: entry.entryId,
-            newStatus: 'pending',
-            approverName: ""
-          });
-          break;
-        case 'Booking Entry':
-          result = await authService.updateBookingEntryStatus({
-            entryId: entry.entryId,
-            newStatus: 'pending',
-            approverName: ""
-          });
-          break;
-        case 'Fuel Payment':
-          result = await authService.updateFuelPaymentStatus({
-            entryId: entry.entryId,
-            newStatus: 'pending',
-            approverName: ""
-          });
-          break;
-        case 'Other Payment':
-          result = await authService.updateOtherPaymentStatus({
-            entryId: entry.entryId,
-            newStatus: 'pending',
-            approverName: ""
-          });
-          break;
-        case 'Adda Payment':
-          result = await authService.updateAddaPaymentStatus({
-            entryId: entry.entryId,
-            newStatus: 'pending',
-            approverName: ""
-          });
-          break;
-        case 'Service Payment':
-          result = await authService.updateServicePaymentStatus({
-            entryId: entry.entryId,
-            newStatus: 'pending',
-            approverName: ""
-          });
-          break;
-        case 'Union Payment':
-          result = await authService.updateUnionPaymentStatus({
-            entryId: entry.entryId,
-            newStatus: 'pending',
-            approverName: ""
-          });
-          break;
-        default:
-          throw new Error(`Unsupported data type: ${entry.dataType}`);
-      }
-
-      if (result.success) {
-        alert('Entry sent back for correction');
-
-        // Update parent state
-        if (window.updateEntryStatusInParent) {
-          window.updateEntryStatusInParent(entry.entryId, "pending", entry.type);
-        }
-
-        processAllData(); // Reprocess current data
-      } else {
-        alert('Error resending entry: ' + result.error);
-      }
-    } catch (error) {
-      console.error('Error resending entry:', error);
-      alert('Error resending entry: ' + error.message);
-    }
-  };
-
+  // Render entry card
   const renderEntryCard = (entry) => {
+    const isSelected = selectedEntries.includes(entry.entryId);
+    
     return (
-      <div key={entry.entryId} className="approval-entry-card">
-        <div className="entry-header">
-          <div className="entry-type-badge">
-            {entry.dataType}
-          </div>
-          <div className="entry-status-badge" data-status={entry.entryStatus}>
-            {entry.entryStatus === 'pending' && (
-              <>
-                <i className="bi bi-clock me-1"></i>
-                PENDING
-              </>
-            )}
-            {(entry.entryStatus === 'forwardedBank' || entry.entryStatus === 'approvedBank') && (
-              <>
-                <i className="bi bi-bank me-1"></i>
-                {entry.entryStatus === 'forwardedBank' ? 'FORWARDED TO BANK' : 'BANK APPROVED'}
-              </>
-            )}
-            {(entry.entryStatus === 'forwardedCash' || entry.entryStatus === 'approvedCash') && (
-              <>
-                <i className="bi bi-cash-stack me-1"></i>
-                {entry.entryStatus === 'forwardedCash' ? 'FORWARDED TO CASH' : 'CASH APPROVED'}
-              </>
-            )}
-            {entry.entryStatus === 'approved' && (
-              <>
-                <i className="bi bi-check-circle-fill me-1"></i>
-                APPROVED
-              </>
-            )}
-          </div>
+      <div 
+        key={entry.entryId} 
+        className={`recent-entry-card ${isSelected ? 'selected' : ''}`}
+        onClick={() => handleEntrySelect(entry.entryId)}
+      >
+        <div className="entry-checkbox">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => handleEntrySelect(entry.entryId)}
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
 
-        <div className="entry-details">
-          <div className="entry-row">
-            <span className="label">Entry ID:</span>
-            <span className="value">{entry.entryId}</span>
-          </div>
-          <div className="entry-row">
-            <span className="label">Submitted By:</span>
-            <span className="value">{entry.submittedBy}</span>
-          </div>
-          <div className="entry-row">
-            <span className="label">Date:</span>
-            <span className="value">{entry.date}</span>
-          </div>
-          <div className="entry-row">
-            <span className="label">Description:</span>
-            <span className="value">{entry.displayName}</span>
-          </div>
-          <div className="entry-row">
-            <span className="label">Total Amount:</span>
-            <span className="value">₹{(entry.totalAmount || 0).toLocaleString('en-IN')}</span>
-          </div>
-          {(entry.cashAmount || 0) > 0 && (
-            <div className="entry-row">
-              <span className="label">Cash Amount:</span>
-              <span className="value">₹{(entry.cashAmount || 0).toLocaleString('en-IN')}</span>
+        <div className="entry-content">
+          <div className="entry-header">
+            <div className="entry-type-badge">
+              {entry.dataType}
             </div>
-          )}
-          {(entry.bankAmount || 0) > 0 && (
-            <div className="entry-row">
-              <span className="label">Bank Amount:</span>
-              <span className="value">₹{(entry.bankAmount || 0).toLocaleString('en-IN')}</span>
+            <div className="entry-status-badge" data-status={entry.entryStatus}>
+              {entry.entryStatus === 'pending' && (
+                <>
+                  <i className="bi bi-clock me-1"></i>
+                  PENDING
+                </>
+              )}
+              {entry.entryStatus === 'forwardedBank' && (
+                <>
+                  <i className="bi bi-bank me-1"></i>
+                  FORWARDED TO BANK
+                </>
+              )}
+              {entry.entryStatus === 'forwardedCash' && (
+                <>
+                  <i className="bi bi-cash-stack me-1"></i>
+                  FORWARDED TO CASH
+                </>
+              )}
+              {entry.entryStatus === 'approvedCash' && (
+                <>
+                  <i className="bi bi-check-circle me-1"></i>
+                  CASH APPROVED
+                </>
+              )}
+              {entry.entryStatus === 'approvedBank' && (
+                <>
+                  <i className="bi bi-check-circle me-1"></i>
+                  BANK APPROVED
+                </>
+              )}
+              {entry.entryStatus === 'approved' && (
+                <>
+                  <i className="bi bi-check-circle-fill me-1"></i>
+                  APPROVED
+                </>
+              )}
             </div>
-          )}
-          <div className="entry-row">
-            <span className="label">Time:</span>
-            <span className="value">{entry.timestamp}</span>
           </div>
-          {entry.approvedBy && (
-            <div className="entry-row">
-              <span className="label">Approved By:</span>
-              <span className="value">{entry.approvedBy}</span>
-            </div>
-          )}
-        </div>
 
-        <div className="entry-actions">
-          {entry.entryStatus === 'approvedCash' && (
-            <>
-              <button 
-                className="btn btn-success btn-sm"
-                onClick={() => handleApprove(entry)}
-                title="Final approval"
-              >
-                <i className="bi bi-check-circle"></i> Final Approve
-              </button>
-              <button 
-                className="btn btn-warning btn-sm"
-                onClick={() => handleResend(entry)}
-                title="Send back for correction"
-              >
-                <i className="bi bi-arrow-clockwise"></i> Resend
-              </button>
-            </>
-          )}
-          {entry.entryStatus === 'approved' && (
-            <button 
-              className="btn btn-secondary btn-sm"
-              onClick={() => handleResend(entry)}
-              title="Send back for editing"
-            >
-              <i className="bi bi-arrow-clockwise"></i> Resend for Edit
-            </button>
-          )}
-          {(entry.entryStatus === 'pending' || 
-            entry.entryStatus === 'forwardedBank' || 
-            entry.entryStatus === 'approvedBank' || 
-            entry.entryStatus === 'forwardedCash') && (
-            <span className="badge bg-secondary">
-              <i className="bi bi-clock"></i> In process
-            </span>
-          )}
+          <div className="entry-details">
+            <div className="entry-row">
+              <span className="label">Entry ID:</span>
+              <span className="value">{entry.entryId}</span>
+            </div>
+            <div className="entry-row">
+              <span className="label">Submitted By:</span>
+              <span className="value">{entry.submittedBy}</span>
+            </div>
+            <div className="entry-row">
+              <span className="label">Date:</span>
+              <span className="value">{entry.date}</span>
+            </div>
+            <div className="entry-row">
+              <span className="label">Description:</span>
+              <span className="value">{entry.displayName}</span>
+            </div>
+            <div className="entry-row">
+              <span className="label">Total Amount:</span>
+              <span className="value">₹{(entry.totalAmount || 0).toLocaleString('en-IN')}</span>
+            </div>
+            <div className="entry-row">
+              <span className="label">Time:</span>
+              <span className="value">{entry.timestamp}</span>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -406,7 +375,6 @@ function DataSummary({ fareData, expenseData }) {
         <div className="loading-spinner">
           <i className="bi bi-arrow-clockwise spin"></i>
           <p>Loading user information...</p>
-          <small className="text-muted">Checking localStorage for user data...</small>
         </div>
       </div>
     );
@@ -421,30 +389,6 @@ function DataSummary({ fareData, expenseData }) {
             <h4><i className="bi bi-exclamation-triangle"></i> Access Denied</h4>
             <p>You don't have permission to access this page.</p>
             <p>Only <strong>Manager</strong> and <strong>Admin</strong> can view the Data Summary.</p>
-
-            <hr />
-            <div className="debug-info">
-              <h6>🔍 Debug Information:</h6>
-              <p><strong>Current Role:</strong> <code>{userRole || 'undefined'}</code></p>
-              <p><strong>Username:</strong> <code>{currentUser.username || 'undefined'}</code></p>
-              <p><strong>Full Name:</strong> <code>{currentUser.fullName || 'undefined'}</code></p>
-              <p><strong>User Type:</strong> <code>{currentUser.userType || 'undefined'}</code></p>
-              <p><strong>Is Authenticated:</strong> <code>{String(currentUser.isAuthenticated)}</code></p>
-              <p><strong>Raw localStorage:</strong> <code>{localStorage.getItem('user')}</code></p>
-              <p><strong>User Object:</strong> <code>{JSON.stringify(currentUser, null, 2)}</code></p>
-            </div>
-
-            <div className="mt-3">
-              <button 
-                className="btn btn-secondary btn-sm"
-                onClick={() => {
-                  console.log('🔍 Full localStorage user data:', localStorage.getItem('user'));
-                  console.log('👤 Current user object:', currentUser);
-                }}
-              >
-                <i className="bi bi-bug"></i> Log Debug Info to Console
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -462,94 +406,93 @@ function DataSummary({ fareData, expenseData }) {
     );
   }
 
+  const currentData = getCurrentTabData();
+
   return (
     <div className="data-approval-container">
       <div className="container-fluid">
         <div className="approval-header">
           <h2><i className="bi bi-clipboard-check"></i> Data Summary</h2>
           <p>Review and approve submitted entries</p>
-          <small className="text-muted">New Flow: Pending → Bank → Cash → Approved</small>
         </div>
 
-        {/* Approval Tabs - Updated with new status flow */}
+        {/* Approval Tabs - Correct Order */}
         <div className="approval-tabs">
           <button 
-            className={`tab-btn ${activeTab === 'bank' ? 'active' : ''}`}
-            onClick={() => setActiveTab('bank')}
-          >
-            <i className="bi bi-bank"></i> Bank Approval ({bankData.length})
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'cash' ? 'active' : ''}`}
-            onClick={() => setActiveTab('cash')}
-          >
-            <i className="bi bi-cash-stack"></i> Cash Approval ({cashData.length})
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'approved' ? 'active' : ''}`}
-            onClick={() => setActiveTab('approved')}
-          >
-            <i className="bi bi-check-circle"></i> Approved ({approvedData.length})
-          </button>
-          <button 
             className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
-            onClick={() => setActiveTab('pending')}
+            onClick={() => {
+              setActiveTab('pending');
+              setSelectedEntries([]);
+            }}
           >
             <i className="bi bi-clock"></i> Pending ({pendingData.length})
           </button>
+          <button 
+            className={`tab-btn ${activeTab === 'bankApproval' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('bankApproval');
+              setSelectedEntries([]);
+            }}
+          >
+            <i className="bi bi-bank"></i> Bank Approval ({bankApprovalData.length})
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'cashApproval' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('cashApproval');
+              setSelectedEntries([]);
+            }}
+          >
+            <i className="bi bi-cash-stack"></i> Cash Approval ({cashApprovalData.length})
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'approved' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('approved');
+              setSelectedEntries([]);
+            }}
+          >
+            <i className="bi bi-check-circle"></i> Approved ({approvedData.length})
+          </button>
         </div>
+
+        {/* Selection Controls */}
+        {currentData.length > 0 && (
+          <div className="selection-controls">
+            <div className="select-all-container">
+              <input
+                type="checkbox"
+                id="selectAll"
+                checked={isAllSelected()}
+                onChange={handleSelectAll}
+              />
+              <label htmlFor="selectAll">
+                Select All ({selectedEntries.length}/{currentData.length})
+              </label>
+            </div>
+            
+            {selectedEntries.length > 0 && (
+              <button 
+                className="btn btn-success approve-btn"
+                onClick={handleApproval}
+              >
+                <i className="bi bi-check-circle"></i> 
+                Approve Selected ({selectedEntries.length})
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Tab Content */}
         <div className="tab-content">
-          {activeTab === 'bank' && (
-            <div className="entries-grid">
-              {bankData.length === 0 ? (
-                <div className="no-data">
-                  <i className="bi bi-bank"></i>
-                  <p>No entries waiting for bank approval</p>
-                </div>
-              ) : (
-                bankData.map(renderEntryCard)
-              )}
+          {currentData.length === 0 ? (
+            <div className="no-data">
+              <i className="bi bi-inbox"></i>
+              <p>No entries in this category</p>
             </div>
-          )}
-
-          {activeTab === 'cash' && (
-            <div className="entries-grid">
-              {cashData.length === 0 ? (
-                <div className="no-data">
-                  <i className="bi bi-cash-stack"></i>
-                  <p>No entries waiting for cash approval</p>
-                </div>
-              ) : (
-                cashData.map(renderEntryCard)
-              )}
-            </div>
-          )}
-
-          {activeTab === 'approved' && (
-            <div className="entries-grid">
-              {approvedData.length === 0 ? (
-                <div className="no-data">
-                  <i className="bi bi-check-circle"></i>
-                  <p>No approved entries</p>
-                </div>
-              ) : (
-                approvedData.map(renderEntryCard)
-              )}
-            </div>
-          )}
-
-          {activeTab === 'pending' && (
-            <div className="entries-grid">
-              {pendingData.length === 0 ? (
-                <div className="no-data">
-                  <i className="bi bi-inbox"></i>
-                  <p>No pending entries</p>
-                </div>
-              ) : (
-                pendingData.map(renderEntryCard)
-              )}
+          ) : (
+            <div className="recent-entries-grid">
+              {currentData.map(renderEntryCard)}
             </div>
           )}
         </div>
