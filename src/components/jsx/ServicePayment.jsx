@@ -350,8 +350,21 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
     <div className="service-entry-container">
       <div className="container-fluid">
         <div className="service-header">
-          <h2><i className="bi bi-credit-card"></i> Service Payment Entry</h2>
-          <p>Record your vehicle service and maintenance expenses (Payment)</p>
+          <div className="header-content">
+            <div>
+              <h2><i className="bi bi-credit-card"></i> Service Payment Entry</h2>
+              <p>Record your vehicle service and maintenance expenses (Payment)</p>
+            </div>
+            <div className="sync-status">
+              <div className={`simple-sync-indicator ${isLoading ? 'syncing' : 'synced'}`}>
+                {isLoading ? (
+                  <i className="bi bi-arrow-clockwise"></i>
+                ) : (
+                  <i className="bi bi-check-circle"></i>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Summary Cards */}
