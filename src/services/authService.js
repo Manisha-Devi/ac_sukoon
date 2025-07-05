@@ -1026,7 +1026,7 @@ class AuthService {
     }
   }
 
-  // UpdateFuel Payment
+  // Update Fuel Payment
   async updateFuelPayment(data) {
     try {
       console.log('📝 Updating fuel payment in Google Sheets:', data);
@@ -1743,28 +1743,6 @@ class AuthService {
       return { success: false, error: error.message };
     }
   }
-
-   // Update Off Day Status
-   async updateOffDayStatus(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('updateOffDayStatus', data);
-      return response;
-    } catch (error) {
-      console.error('Error updating off day status:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-    // Approve Off Day
-    async approveOffDay(data) {
-      try {
-        const response = await this.makeApprovalAPIRequest('approveOffDay', data);
-        return response;
-      } catch (error) {
-        console.error('Error approving off day:', error);
-        return { success: false, error: error.message };
-      }
-    }
 
   // ============================================================================
   // ANALYTICS FUNCTIONS
