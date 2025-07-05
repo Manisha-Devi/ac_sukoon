@@ -1,0 +1,263 @@
+
+:root {
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --border-radius: 15px;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --card-shadow-hover: 0 8px 15px rgba(0, 0, 0, 0.15);
+  --transition: all 0.3s ease;
+}
+
+.basic-payment-container {
+  padding: 20px 0;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+}
+
+.basic-payment-container .container-fluid {
+  padding-left: 15px;
+  padding-right: 15px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.basic-payment-header {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.header-content > div:first-child {
+  text-align: center;
+  flex: 1;
+}
+
+.sync-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.simple-sync-indicator {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.simple-sync-indicator.syncing {
+  color: #dc3545;
+}
+
+.simple-sync-indicator.syncing i {
+  animation: spin 1s linear infinite;
+}
+
+.simple-sync-indicator.synced {
+  color: #28a745;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.basic-payment-header h2 {
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.basic-payment-header p {
+  color: #666;
+  margin: 0;
+}
+
+.basic-payment-header i {
+  color: #667eea;
+  margin-right: 10px;
+}
+
+/* Summary Cards */
+.summary-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  transition: var(--transition);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.summary-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.summary-card .card-body {
+  padding: 20px;
+  text-align: center;
+}
+
+.summary-card h6 {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-card h4 {
+  color: #333;
+  font-weight: 700;
+  margin: 0;
+}
+
+.cash-card {
+  border-left: 4px solid #4ade80;
+}
+
+.bank-card {
+  border-left: 4px solid #60a5fa;
+}
+
+.total-card {
+  border-left: 4px solid #fbbf24;
+}
+
+.entries-card {
+  border-left: 4px solid #f87171;
+}
+
+/* Category Cards */
+.category-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  transition: var(--transition);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.category-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.category-card .card-body {
+  padding: 20px;
+  text-align: center;
+}
+
+.category-card h6 {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.category-card h4 {
+  color: #333;
+  font-weight: 700;
+  margin: 0;
+}
+
+.fuel-category {
+  border-left: 4px solid #ff6b6b;
+}
+
+.adda-category {
+  border-left: 4px solid #4ecdc4;
+}
+
+.union-category {
+  border-left: 4px solid #45b7d1;
+}
+
+/* Tab Navigation */
+.tab-navigation .nav-tabs {
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: var(--border-radius);
+  padding: 10px;
+  box-shadow: var(--card-shadow);
+}
+
+.tab-navigation .nav-link {
+  border: none;
+  background: transparent;
+  color: #666;
+  padding: 12px 20px;
+  border-radius: 10px;
+  transition: var(--transition);
+  font-weight: 500;
+}
+
+.tab-navigation .nav-link:hover {
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+}
+
+.tab-navigation .nav-link.active {
+  background: var(--primary-gradient);
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.tab-navigation .nav-link i {
+  margin-right: 8px;
+}
+
+/* Tab Content - Hide headers of child components */
+.tab-content .fuel-header,
+.tab-content .adda-header,
+.tab-content .union-header {
+  display: none;
+}
+
+/* Hide summary cards of child components */
+.tab-content .summary-card {
+  display: none;
+}
+
+/* Adjust child component containers */
+.tab-content .fuel-entry-container,
+.tab-content .adda-entry-container,
+.tab-content .union-entry-container {
+  background: transparent;
+  padding: 0;
+  min-height: auto;
+}
+
+.tab-content .container-fluid {
+  padding: 0;
+}
+
+@media (max-width: 575.98px) {
+  .basic-payment-header {
+    padding: 1.5rem;
+  }
+
+  .summary-card h4,
+  .category-card h4 {
+    font-size: 1.2rem;
+  }
+
+  .tab-navigation .nav-link {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
+}

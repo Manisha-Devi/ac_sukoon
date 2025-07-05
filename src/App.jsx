@@ -5,11 +5,9 @@ import "./App.css";
 import Login from "./components/jsx/Login";
 import Dashboard from "./components/jsx/Dashboard";
 import FareEntry from "./components/jsx/FareRecipt";
-import FuelEntry from "./components/jsx/FuelPayment";
-import AddaPayment from "./components/jsx/AddaPayment";
-import UnionPayment from "./components/jsx/UnionPayment";
-import ServiceEntry from "./components/jsx/ServicePayment";
-import OtherPayment from "./components/jsx/OtherPayment";
+import BasicPayment from "./components/jsx/BasicPayment.jsx";
+import ServiceEntry from "./components/jsx/ServicePayment.jsx";
+import OtherPayment from "./components/jsx/OtherPayment.jsx";
 import BonusCalculator from "./components/jsx/BonusCalculator";
 import Analytics from "./components/jsx/Analytics";
 import CashBook from "./components/jsx/CashBook";
@@ -261,25 +259,11 @@ function App() {
               Fare Receipt
             </button>
             <button
-              className={`menu-item ${activeTab === "fuel-entry" ? "active" : ""}`}
-              onClick={() => handleMenuClick("fuel-entry")}
+              className={`menu-item ${activeTab === "basic-payment" ? "active" : ""}`}
+              onClick={() => handleMenuClick("basic-payment")}
             >
               <i className="bi bi-credit-card"></i>
-              Fuel Payment
-            </button>
-            <button
-              className={`menu-item ${activeTab === "adda-payment" ? "active" : ""}`}
-              onClick={() => handleMenuClick("adda-payment")}
-            >
-              <i className="bi bi-building"></i>
-              Adda Payment
-            </button>
-            <button
-              className={`menu-item ${activeTab === "union-payment" ? "active" : ""}`}
-              onClick={() => handleMenuClick("union-payment")}
-            >
-              <i className="bi bi-credit-card"></i>
-              Union Payment
+              Basic Payment
             </button>
             <button
               className={`menu-item ${activeTab === "service-entry" ? "active" : ""}`}
@@ -363,24 +347,8 @@ function App() {
               setCashBookEntries={setCashBookEntries}
             />
           )}
-          {activeTab === "fuel-entry" && (
-            <FuelEntry
-              expenseData={expenseData}
-              setExpenseData={setExpenseData}
-              setTotalExpenses={setTotalExpenses}
-              setCashBookEntries={setCashBookEntries}
-            />
-          )}
-          {activeTab === "adda-payment" && (
-            <AddaPayment
-              expenseData={expenseData}
-              setExpenseData={setExpenseData}
-              setTotalExpenses={setTotalExpenses}
-              setCashBookEntries={setCashBookEntries}
-            />
-          )}
-           {activeTab === "union-payment" && (
-            <UnionPayment
+          {activeTab === "basic-payment" && (
+            <BasicPayment
               expenseData={expenseData}
               setExpenseData={setExpenseData}
               setTotalExpenses={setTotalExpenses}
