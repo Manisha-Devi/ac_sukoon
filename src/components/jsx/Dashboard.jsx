@@ -204,7 +204,39 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         combinedCashBookEntries = [...combinedCashBookEntries, ...bookingCashEntries];
       }
 
-      // Skip Off Days - CashSummary doesn't need them (as per requirement)
+      // Process Off Days - Add them to fare data for comprehensive display
+      if (offDays.success && offDays.data) {
+        const processedOffDays = offDays.data.map(entry => ({
+          entryId: entry.entryId,
+          date: convertToDateString(entry.date),
+          cashAmount: 0, // Off days have no cash amount
+          type: 'off',
+          submittedBy: entry.submittedBy,
+          entryStatus: entry.entryStatus || 'pending',
+          approvedBy: entry.approvedBy || '',
+          // Keep full data for other components
+          timestamp: convertToTimeString(entry.timestamp),
+          reason: entry.reason,
+          bankAmount: 0,
+          totalAmount: 0
+        }));
+        combinedFareData = [...combinedFareData, ...processedOffDays];
+
+        // Generate cash book entries from off days (informational entries)
+        const offDaysCashEntries = processedOffDays.map(entry => ({
+          id: `off-${entry.entryId}`,
+          date: entry.date,
+          description: `Off Day - ${entry.reason}`,
+          cashReceived: 0,
+          bankReceived: 0,
+          cashPaid: 0,
+          bankPaid: 0,
+          source: 'off-day',
+          jfNo: `OFF-${entry.entryId}`,
+          submittedBy: entry.submittedBy
+        }));
+        combinedCashBookEntries = [...combinedCashBookEntries, ...offDaysCashEntries];
+      }
 
       // Process Fuel Payments - Only required fields for CashSummary
       if (fuelPayments.success && fuelPayments.data) {
@@ -406,6 +438,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         addaPayments: addaPayments.data || [],
         unionPayments: unionPayments.data || [],
         servicePayments: servicePayments.data || [],
+        otherPayments: otherPayments.data || [],
         totalRecords: combinedFareData.length + combinedExpenseData.length
       });
 
@@ -414,6 +447,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         fareRecords: combinedFareData.length,
         expenseRecords: combinedExpenseData.length,
         cashBookEntries: combinedCashBookEntries.length,
+        offDays: offDays.data?.length || 0,
         unionPayments: unionPayments.data?.length || 0,
         servicePayments: servicePayments.data?.length || 0,
         otherPayments: otherPayments.data?.length || 0,
@@ -421,6 +455,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
       });
       console.log('🔍 Breakdown - Fuel:', fuelPayments.data?.length || 0, 
                    'Adda:', addaPayments.data?.length || 0,
+                   'OffDays:', offDays.data?.length || 0,
                    'Union:', unionPayments.data?.length || 0, 
                    'Service:', servicePayments.data?.length || 0,
                    'Other:', otherPayments.data?.length || 0);
