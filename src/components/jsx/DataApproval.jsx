@@ -2,21 +2,14 @@
 import React, { useState, useEffect } from "react";
 import "../css/DataApproval.css";
 import authService from "../../services/authService.js";
-import CashSummary from "./CashSummary.jsx";
-import BankSummary from "./BankSummary.jsx";
 
 function DataApproval() {
   const [pendingData, setPendingData] = useState([]);
   const [waitingData, setWaitingData] = useState([]);
   const [approvedData, setApprovedData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeMainTab, setActiveMainTab] = useState('approval');
-  const [activeApprovalTab, setActiveApprovalTab] = useState('waiting');
+  const [activeTab, setActiveTab] = useState('waiting');
   const [currentUser, setCurrentUser] = useState(null);
-  
-  // State for cash/bank summaries
-  const [fareData, setFareData] = useState([]);
-  const [expenseData, setExpenseData] = useState([]);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -27,10 +20,7 @@ function DataApproval() {
   const loadAllData = async () => {
     try {
       setLoading(true);
-      await Promise.all([
-        loadApprovalData(),
-        loadFareAndExpenseData()
-      ]);
+      await loadApprovalData();
     } catch (error) {
       console.error('Error loading data:', error);
       alert('Error loading data: ' + error.message);
@@ -156,55 +146,7 @@ function DataApproval() {
     }
   };
 
-  const loadFareAndExpenseData = async () => {
-    try {
-      const [fareReceipts, bookingEntries, fuelPayments, addaPayments, 
-             servicePayments, unionPayments, otherPayments] = await Promise.all([
-        authService.getFareReceipts(),
-        authService.getBookingEntries(),
-        authService.getFuelPayments(),
-        authService.getAddaPayments(),
-        authService.getServicePayments(),
-        authService.getUnionPayments(),
-        authService.getOtherPayments()
-      ]);
-
-      let allFareData = [];
-      let allExpenseData = [];
-
-      // Process fare data
-      if (fareReceipts.success && fareReceipts.data) {
-        allFareData = [...allFareData, ...fareReceipts.data];
-      }
-      if (bookingEntries.success && bookingEntries.data) {
-        allFareData = [...allFareData, ...bookingEntries.data];
-      }
-
-      // Process expense data
-      if (fuelPayments.success && fuelPayments.data) {
-        allExpenseData = [...allExpenseData, ...fuelPayments.data];
-      }
-      if (addaPayments.success && addaPayments.data) {
-        allExpenseData = [...allExpenseData, ...addaPayments.data];
-      }
-      if (servicePayments.success && servicePayments.data) {
-        allExpenseData = [...allExpenseData, ...servicePayments.data];
-      }
-      if (unionPayments.success && unionPayments.data) {
-        allExpenseData = [...allExpenseData, ...unionPayments.data];
-      }
-      if (otherPayments.success && otherPayments.data) {
-        allExpenseData = [...allExpenseData, ...otherPayments.data];
-      }
-
-      setFareData(allFareData);
-      setExpenseData(allExpenseData);
-
-    } catch (error) {
-      console.error('Error loading fare and expense data:', error);
-      throw error;
-    }
-  };
+  
 
   const handleApprove = async (entry) => {
     try {
@@ -436,122 +378,77 @@ function DataApproval() {
     <div className="data-approval-container">
       <div className="container-fluid">
         <div className="approval-header">
-          <h2><i className="bi bi-clipboard-check"></i> Data Management</h2>
-          <p>Manage approvals, cash and bank summaries</p>
+          <h2><i className="bi bi-clipboard-check"></i> Data Approval</h2>
+          <p>Review and approve submitted entries</p>
           <button 
             className="btn btn-primary btn-sm refresh-btn"
             onClick={loadAllData}
           >
-            <i className="bi bi-arrow-clockwise"></i> Refresh All Data
+            <i className="bi bi-arrow-clockwise"></i> Refresh Data
           </button>
         </div>
 
-        {/* Main Tab Navigation */}
-        <div className="main-tabs">
+        {/* Approval Tabs */}
+        <div className="approval-tabs">
           <button 
-            className={`main-tab-btn ${activeMainTab === 'approval' ? 'active' : ''}`}
-            onClick={() => setActiveMainTab('approval')}
+            className={`tab-btn ${activeTab === 'waiting' ? 'active' : ''}`}
+            onClick={() => setActiveTab('waiting')}
           >
-            <i className="bi bi-clipboard-check"></i> Approval
+            <i className="bi bi-hourglass-split"></i> Waiting for Approval ({waitingData.length})
           </button>
           <button 
-            className={`main-tab-btn ${activeMainTab === 'cash' ? 'active' : ''}`}
-            onClick={() => setActiveMainTab('cash')}
+            className={`tab-btn ${activeTab === 'approved' ? 'active' : ''}`}
+            onClick={() => setActiveTab('approved')}
           >
-            <i className="bi bi-cash-stack"></i> Cash
+            <i className="bi bi-check-circle"></i> Approved ({approvedData.length})
           </button>
           <button 
-            className={`main-tab-btn ${activeMainTab === 'bank' ? 'active' : ''}`}
-            onClick={() => setActiveMainTab('bank')}
+            className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
+            onClick={() => setActiveTab('pending')}
           >
-            <i className="bi bi-bank"></i> Bank
+            <i className="bi bi-clock"></i> Pending ({pendingData.length})
           </button>
         </div>
 
         {/* Tab Content */}
-        <div className="main-tab-content">
-          {activeMainTab === 'approval' && (
-            <>
-              {/* Approval Sub-tabs */}
-              <div className="approval-tabs">
-                <button 
-                  className={`tab-btn ${activeApprovalTab === 'waiting' ? 'active' : ''}`}
-                  onClick={() => setActiveApprovalTab('waiting')}
-                >
-                  <i className="bi bi-hourglass-split"></i> Waiting for Approval ({waitingData.length})
-                </button>
-                <button 
-                  className={`tab-btn ${activeApprovalTab === 'approved' ? 'active' : ''}`}
-                  onClick={() => setActiveApprovalTab('approved')}
-                >
-                  <i className="bi bi-check-circle"></i> Approved ({approvedData.length})
-                </button>
-                <button 
-                  className={`tab-btn ${activeApprovalTab === 'pending' ? 'active' : ''}`}
-                  onClick={() => setActiveApprovalTab('pending')}
-                >
-                  <i className="bi bi-clock"></i> Pending ({pendingData.length})
-                </button>
-              </div>
-
-              {/* Approval Tab Content */}
-              <div className="tab-content">
-                {activeApprovalTab === 'waiting' && (
-                  <div className="entries-grid">
-                    {waitingData.length === 0 ? (
-                      <div className="no-data">
-                        <i className="bi bi-hourglass-split"></i>
-                        <p>No entries waiting for approval</p>
-                      </div>
-                    ) : (
-                      waitingData.map(renderEntryCard)
-                    )}
-                  </div>
-                )}
-
-                {activeApprovalTab === 'approved' && (
-                  <div className="entries-grid">
-                    {approvedData.length === 0 ? (
-                      <div className="no-data">
-                        <i className="bi bi-check-circle"></i>
-                        <p>No approved entries</p>
-                      </div>
-                    ) : (
-                      approvedData.map(renderEntryCard)
-                    )}
-                  </div>
-                )}
-
-                {activeApprovalTab === 'pending' && (
-                  <div className="entries-grid">
-                    {pendingData.length === 0 ? (
-                      <div className="no-data">
-                        <i className="bi bi-inbox"></i>
-                        <p>No pending entries</p>
-                      </div>
-                    ) : (
-                      pendingData.map(renderEntryCard)
-                    )}
-                  </div>
-                )}
-              </div>
-            </>
+        <div className="tab-content">
+          {activeTab === 'waiting' && (
+            <div className="entries-grid">
+              {waitingData.length === 0 ? (
+                <div className="no-data">
+                  <i className="bi bi-hourglass-split"></i>
+                  <p>No entries waiting for approval</p>
+                </div>
+              ) : (
+                waitingData.map(renderEntryCard)
+              )}
+            </div>
           )}
 
-          {activeMainTab === 'cash' && (
-            <CashSummary 
-              fareData={fareData} 
-              expenseData={expenseData}
-              onRefresh={loadAllData}
-            />
+          {activeTab === 'approved' && (
+            <div className="entries-grid">
+              {approvedData.length === 0 ? (
+                <div className="no-data">
+                  <i className="bi bi-check-circle"></i>
+                  <p>No approved entries</p>
+                </div>
+              ) : (
+                approvedData.map(renderEntryCard)
+              )}
+            </div>
           )}
 
-          {activeMainTab === 'bank' && (
-            <BankSummary 
-              fareData={fareData} 
-              expenseData={expenseData}
-              onRefresh={loadAllData}
-            />
+          {activeTab === 'pending' && (
+            <div className="entries-grid">
+              {pendingData.length === 0 ? (
+                <div className="no-data">
+                  <i className="bi bi-inbox"></i>
+                  <p>No pending entries</p>
+                </div>
+              ) : (
+                pendingData.map(renderEntryCard)
+              )}
+            </div>
           )}
         </div>
       </div>

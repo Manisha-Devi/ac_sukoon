@@ -11,6 +11,8 @@ import BonusCalculator from "./components/jsx/BonusCalculator";
 import Analytics from "./components/jsx/Analytics";
 import CashBook from "./components/jsx/CashBook";
 import DataApproval from './components/jsx/DataApproval.jsx';
+import CashSummary from './components/jsx/CashSummary.jsx';
+import BankSummary from './components/jsx/BankSummary.jsx';
 import localStorageService from "./services/localStorageService.js";
 
 
@@ -295,13 +297,27 @@ function App() {
 
           {(user.userType === "Manager" || user.userType === "Admin") && (
             <div className="menu-section">
-              <h6>APPROVAL</h6>
+              <h6>MANAGEMENT</h6>
               <button
                 className={`menu-item ${activeTab === "data-approval" ? "active" : ""}`}
                 onClick={() => handleMenuClick("data-approval")}
               >
                 <i className="bi bi-clipboard-check"></i>
                 Data
+              </button>
+              <button
+                className={`menu-item ${activeTab === "cash-summary" ? "active" : ""}`}
+                onClick={() => handleMenuClick("cash-summary")}
+              >
+                <i className="bi bi-cash-stack"></i>
+                Cash
+              </button>
+              <button
+                className={`menu-item ${activeTab === "bank-summary" ? "active" : ""}`}
+                onClick={() => handleMenuClick("bank-summary")}
+              >
+                <i className="bi bi-bank"></i>
+                Bank
               </button>
             </div>
           )}
@@ -373,6 +389,28 @@ function App() {
             />
           )}
           {activeTab === "data-approval" && <DataApproval />}
+          {activeTab === "cash-summary" && (
+            <CashSummary 
+              fareData={fareData} 
+              expenseData={expenseData}
+              onRefresh={() => {
+                // Refresh data by reloading from dashboard
+                setActiveTab("dashboard");
+                setTimeout(() => setActiveTab("cash-summary"), 100);
+              }}
+            />
+          )}
+          {activeTab === "bank-summary" && (
+            <BankSummary 
+              fareData={fareData} 
+              expenseData={expenseData}
+              onRefresh={() => {
+                // Refresh data by reloading from dashboard
+                setActiveTab("dashboard");
+                setTimeout(() => setActiveTab("bank-summary"), 100);
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

@@ -42,43 +42,6 @@
   color: white;
 }
 
-.main-tabs {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-  background: white;
-  padding: 0.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.main-tab-btn {
-  flex: 1;
-  padding: 1rem;
-  border: none;
-  background: transparent;
-  border-radius: 8px;
-  font-weight: 600;
-  color: #6c757d;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.main-tab-btn.active {
-  background: #007bff;
-  color: white;
-  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
-}
-
-.main-tab-btn:hover:not(.active) {
-  background: #f8f9fa;
-  color: #495057;
-}
-
 .approval-tabs {
   display: flex;
   gap: 0.5rem;
@@ -118,10 +81,6 @@
 
 .tab-content {
   min-height: 400px;
-}
-
-.main-tab-content {
-  min-height: 500px;
 }
 
 .entries-grid {
