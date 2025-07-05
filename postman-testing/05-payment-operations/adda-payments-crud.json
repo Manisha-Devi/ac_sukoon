@@ -1,0 +1,150 @@
+
+{
+  "info": {
+    "name": "05 - Adda Payments CRUD",
+    "description": "Complete testing for adda/terminal payment operations"
+  },
+  "item": [
+    {
+      "name": "Add Adda Payment",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Adda payment added successfully', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "    pm.expect(jsonData).to.have.property('entryId');",
+              "});",
+              "",
+              "// Store entryId for update/delete tests",
+              "const jsonData = pm.response.json();",
+              "if (jsonData.success && jsonData.entryId) {",
+              "    pm.environment.set('adda_payment_id', jsonData.entryId);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"addAddaPayment\",\n  \"date\": \"2024-01-17\",\n  \"addaName\": \"Bhaderwah Bus Stand\",\n  \"cashAmount\": 150,\n  \"bankAmount\": 0,\n  \"totalAmount\": 150,\n  \"remarks\": \"Daily parking fees\",\n  \"submittedBy\": \"testdriver\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}",
+          "host": ["{{base_url}}"]
+        }
+      }
+    },
+    {
+      "name": "Get All Adda Payments",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Adda payments retrieved successfully', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "    pm.expect(jsonData).to.have.property('data');",
+              "    pm.expect(jsonData.data).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"getAddaPayments\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}",
+          "host": ["{{base_url}}"]
+        }
+      }
+    },
+    {
+      "name": "Update Adda Payment",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Adda payment updated successfully', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"updateAddaPayment\",\n  \"entryId\": \"{{adda_payment_id}}\",\n  \"updatedData\": {\n    \"totalAmount\": 200,\n    \"remarks\": \"Updated parking fees with extra charges\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}",
+          "host": ["{{base_url}}"]
+        }
+      }
+    },
+    {
+      "name": "Delete Adda Payment",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Adda payment deleted successfully', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"deleteAddaPayment\",\n  \"entryId\": \"{{adda_payment_id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}",
+          "host": ["{{base_url}}"]
+        }
+      }
+    }
+  ]
+}
