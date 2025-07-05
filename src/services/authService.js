@@ -1664,6 +1664,76 @@ class AuthService {
   }
 
   // ============================================================================
+  // STATUS UPDATE FUNCTIONS (Missing Functions)
+  // ============================================================================
+
+  // Update Fare Receipt Status (Bank/Cash/Approved)
+  async updateFareReceiptStatus(data) {
+    try {
+      console.log('📋 Updating fare receipt status:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'updateFareReceiptStatus',
+          entryId: data.entryId,
+          newStatus: data.newStatus,
+          approverName: data.approverName || ""
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Fare receipt status updated:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating fare receipt status:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Update Booking Entry Status (Bank/Cash/Approved)
+  async updateBookingEntryStatus(data) {
+    try {
+      console.log('📋 Updating booking entry status:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'updateBookingEntryStatus',
+          entryId: data.entryId,
+          newStatus: data.newStatus,
+          approverName: data.approverName || ""
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Booking entry status updated:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating booking entry status:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ============================================================================
   // ANALYTICS FUNCTIONS
   // ============================================================================
 }
