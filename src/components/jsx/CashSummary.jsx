@@ -36,6 +36,14 @@ function CashSummary({ fareData, expenseData }) {
     let allData = [];
 
     console.log('👤 Filtering data for user:', currentUserName);
+    console.log('📊 FareData Structure Examples:');
+    
+    // Log sample objects for debugging
+    if (fareData && fareData.length > 0) {
+      console.log('🔸 Daily Entry Sample:', fareData.find(e => e.type === 'daily'));
+      console.log('🔸 Booking Entry Sample:', fareData.find(e => e.type === 'booking'));
+      console.log('🔸 Off Day Sample:', fareData.find(e => e.type === 'off'));
+    }
 
     // 📈 Filter fare data (INCOME) for current user - Only CASH entries
     if (fareData && fareData.length > 0) {
@@ -43,6 +51,7 @@ function CashSummary({ fareData, expenseData }) {
         entry.submittedBy === currentUserName && entry.cashAmount > 0
       );
       console.log('💰 Cash Income entries found:', userFareData.length);
+      console.log('📋 Sample Cash Entry:', userFareData[0]);
       
       allData = [...allData, ...userFareData.map(entry => ({
         ...entry,
