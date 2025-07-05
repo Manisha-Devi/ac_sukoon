@@ -140,50 +140,7 @@
   border-left: 4px solid #f87171;
 }
 
-/* Category Cards */
-.category-card {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: var(--border_radius);
-  box-shadow: var(--card_shadow);
-  transition: var(--transition);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
 
-.category-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--card_shadow_hover);
-}
-
-.category-card .card-body {
-  padding: 20px;
-  text-align: center;
-}
-
-.category-card h6 {
-  color: #666;
-  font-size: 0.9rem;
-  margin-bottom: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.category-card h4 {
-  color: #333;
-  font-weight: 700;
-  margin: 0;
-}
-
-.fuel-category {
-  border-left: 4px solid #ff6b6b;
-}
-
-.adda-category {
-  border-left: 4px solid #4ecdc4;
-}
-
-.union-category {
-  border-left: 4px solid #45b7d1;
-}
 
 /* Tab Navigation */
 .tab-navigation .nav-tabs {

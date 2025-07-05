@@ -665,35 +665,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           </div>
         )}
 
-        {/* Category Breakdown - Only show when user has entries */}
-        {totalEntries > 0 && (
-          <div className="row mb-4">
-            <div className="col-md-4 col-sm-6 mb-3">
-              <div className="category-card fuel-category">
-                <div className="card-body">
-                  <h6><i className="bi bi-fuel-pump"></i> Fuel</h6>
-                  <h4>₹{fuelTotal.toLocaleString('en-IN')}</h4>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-4 col-sm-6 mb-3">
-              <div className="category-card adda-category">
-                <div className="card-body">
-                  <h6><i className="bi bi-building"></i> Adda</h6>
-                  <h4>₹{addaTotal.toLocaleString('en-IN')}</h4>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-4 col-sm-6 mb-3">
-              <div className="category-card union-category">
-                <div className="card-body">
-                  <h6><i className="bi bi-people"></i> Union</h6>
-                  <h4>₹{unionTotal.toLocaleString('en-IN')}</h4>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        
 
         {/* Tab Navigation */}
         <div className="tab-navigation mb-4">
