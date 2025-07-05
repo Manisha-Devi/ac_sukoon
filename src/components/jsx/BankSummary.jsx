@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../css/BankSummary.css";
 
-function BankSummary({ fareData, expenseData }) {
+function BankSummary({ bankData }) {
   const [filteredData, setFilteredData] = useState([]);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -17,36 +17,43 @@ function BankSummary({ fareData, expenseData }) {
 
   useEffect(() => {
     filterUserData();
-  }, [fareData, expenseData, dateFrom, dateTo, currentUser]);
+  }, [bankData, dateFrom, dateTo, currentUser]);
 
   const filterUserData = () => {
-    if (!currentUser) return;
+    if (!currentUser || !bankData) return;
 
     const currentUserName = currentUser.fullName || currentUser.username;
     let allData = [];
 
-    // Filter fare data for current user
-    if (fareData && fareData.length > 0) {
-      const userFareData = fareData.filter(entry => 
-        entry.submittedBy === currentUserName && entry.bankAmount > 0
-      );
-      allData = [...allData, ...userFareData.map(entry => ({
-        ...entry,
-        type: 'income',
-        description: entry.route || entry.bookingDetails || 'Fare Collection'
-      }))];
+    console.log('👤 Filtering bank data for user:', currentUserName);
+    console.log('📊 BankData Structure Examples:');
+    
+    // Log sample objects for debugging
+    if (bankData && bankData.length > 0) {
+      console.log('🔸 Daily Entry Sample:', bankData.find(e => e.type === 'daily'));
+      console.log('🔸 Booking Entry Sample:', bankData.find(e => e.type === 'booking'));
+      console.log('🔸 Fuel Payment Sample:', bankData.find(e => e.type === 'fuel'));
     }
 
-    // Filter expense data for current user
-    if (expenseData && expenseData.length > 0) {
-      const userExpenseData = expenseData.filter(entry => 
+    // 📈 Filter bank data (INCOME & EXPENSE) for current user - Only BANK entries
+    if (bankData && bankData.length > 0) {
+      const userBankData = bankData.filter(entry => 
         entry.submittedBy === currentUserName && entry.bankAmount > 0
       );
-      allData = [...allData, ...userExpenseData.map(entry => ({
-        ...entry,
-        type: 'expense',
-        description: entry.pumpName || entry.addaName || entry.unionName || 
-                    entry.serviceType || entry.paymentDetails || 'Payment'
+      console.log('💰 Bank entries found:', userBankData.length);
+      console.log('📋 Sample Bank Entry:', userBankData[0]);
+      
+      allData = [...allData, ...userBankData.map(entry => ({
+        entryId: entry.entryId,
+        date: entry.date || entry.dateFrom, // Use dateFrom for booking entries
+        bankAmount: entry.bankAmount || 0,
+        type: entry.type,
+        submittedBy: entry.submittedBy,
+        entryStatus: entry.entryStatus || 'pending',
+        approvedBy: entry.approvedBy || '',
+        entryType: entry.entryType || entry.type,
+        // Determine if income or expense based on type
+        transactionType: ['daily', 'booking'].includes(entry.type) ? 'income' : 'expense'
       }))];
     }
 
@@ -65,6 +72,8 @@ function BankSummary({ fareData, expenseData }) {
     // Sort by date (newest first)
     allData.sort((a, b) => new Date(b.date) - new Date(a.date));
     setFilteredData(allData);
+    
+    console.log('📊 Filtered bank data:', allData.length, 'entries');
   };
 
   const clearFilter = () => {
@@ -120,11 +129,11 @@ function BankSummary({ fareData, expenseData }) {
 
   // Calculate totals
   const totalBankIncome = filteredData
-    .filter(entry => entry.type === 'income')
+    .filter(entry => entry.transactionType === 'income')
     .reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
 
   const totalBankExpense = filteredData
-    .filter(entry => entry.type === 'expense')
+    .filter(entry => entry.transactionType === 'expense')
     .reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
 
   const bankBalance = totalBankIncome - totalBankExpense;
@@ -145,7 +154,7 @@ function BankSummary({ fareData, expenseData }) {
     return () => {
       window.removeEventListener('dataRefreshed', handleDataRefresh);
     };
-  }, [fareData, expenseData, dateFrom, dateTo, currentUser]);
+  }, [bankData, dateFrom, dateTo, currentUser]);
 
   return (
     <div className="bank-summary-container">
@@ -261,22 +270,19 @@ function BankSummary({ fareData, expenseData }) {
                   {currentEntries.map((entry, index) => (
                     <tr key={`${entry.entryId || index}`}>
                       <td>
-                        {entry.entryType === 'booking' && entry.dateFrom ? 
-                          new Date(entry.dateFrom).toLocaleDateString('en-IN') : 
-                          new Date(entry.date).toLocaleDateString('en-IN')
-                        }
+                        {new Date(entry.date).toLocaleDateString('en-IN')}
                       </td>
                       <td>
                         <span className="badge bg-info">
-                          {entry.entryType || 'bank'}
+                          {entry.entryType || entry.type || 'bank'}
                         </span>
                       </td>
                       <td>
-                        <span className={`badge ${entry.type === 'income' ? 'bg-success' : 'bg-danger'}`}>
-                          {entry.type === 'income' ? 'I' : 'E'}
+                        <span className={`badge ${entry.transactionType === 'income' ? 'bg-success' : 'bg-danger'}`}>
+                          {entry.transactionType === 'income' ? 'I' : 'E'}
                         </span>
                       </td>
-                      <td className={entry.type === 'income' ? 'text-success' : 'text-danger'}>
+                      <td className={entry.transactionType === 'income' ? 'text-success' : 'text-danger'}>
                         ₹{(entry.bankAmount || 0).toLocaleString()}
                       </td>
                       <td>
