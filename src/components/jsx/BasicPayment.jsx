@@ -453,15 +453,74 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
 
   const allPaymentEntries = getCurrentUserPaymentEntries();
 
-    const handleEdit = (entry) => {
-        // Implement your edit logic here
-        console.log("Edit clicked for entry:", entry);
-    };
+  // Load data function
+  const loadData = async () => {
+    try {
+      console.log('🔄 BasicPayment: Loading payment data...');
+      
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const currentUserName = currentUser.fullName || currentUser.username;
 
-    const handleDelete = (entryId) => {
-        // Implement your delete logic here
-        console.log("Delete clicked for entryId:", entryId);
-    };
+      // Load all payment types
+      const [fuelResult, addaResult, unionResult] = await Promise.all([
+        authService.getFuelPayments(),
+        authService.getAddaPayments(), 
+        authService.getUnionPayments()
+      ]);
+
+      const allPayments = [];
+
+      // Process fuel payments
+      if (fuelResult.success && fuelResult.data) {
+        const userFuelPayments = fuelResult.data
+          .filter(entry => entry.submittedBy === currentUserName)
+          .map(entry => ({
+            ...entry,
+            type: 'fuel',
+            timestamp: convertToTimeString(entry.timestamp),
+            date: convertToDateString(entry.date)
+          }));
+        allPayments.push(...userFuelPayments);
+      }
+
+      // Process adda payments
+      if (addaResult.success && addaResult.data) {
+        const userAddaPayments = addaResult.data
+          .filter(entry => entry.submittedBy === currentUserName)
+          .map(entry => ({
+            ...entry,
+            type: 'adda',
+            timestamp: convertToTimeString(entry.timestamp),
+            date: convertToDateString(entry.date)
+          }));
+        allPayments.push(...userAddaPayments);
+      }
+
+      // Process union payments
+      if (unionResult.success && unionResult.data) {
+        const userUnionPayments = unionResult.data
+          .filter(entry => entry.submittedBy === currentUserName)
+          .map(entry => ({
+            ...entry,
+            type: 'union',
+            timestamp: convertToTimeString(entry.timestamp),
+            date: convertToDateString(entry.date)
+          }));
+        allPayments.push(...userUnionPayments);
+      }
+
+      // Update expense data with payments
+      const otherExpenses = expenseData.filter(entry => 
+        !['fuel', 'adda', 'union'].includes(entry.type)
+      );
+      setExpenseData([...otherExpenses, ...allPayments]);
+
+      console.log('✅ BasicPayment: Data loaded successfully');
+
+    } catch (error) {
+      console.error('❌ BasicPayment: Error loading data:', error);
+    }
+  };
 
   // Load data on component mount
   useEffect(() => {
