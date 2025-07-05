@@ -1,9 +1,8 @@
-
 :root {
-  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --border-radius: 15px;
-  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --card-shadow-hover: 0 8px 15px rgba(0, 0, 0, 0.15);
+  --primary_gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --border_radius: 15px;
+  --card_shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --card_shadow_hover: 0 8px 15px rgba(0, 0, 0, 0.15);
   --transition: all 0.3s ease;
 }
 
@@ -26,8 +25,8 @@
   margin-bottom: 30px;
   padding: 20px;
   background: rgba(255, 255, 255, 0.9);
-  border-radius: var(--border-radius);
-  box-shadow: var(--card-shadow);
+  border-radius: var(--border_radius);
+  box-shadow: var(--card_shadow);
 }
 
 .header-content {
@@ -96,15 +95,15 @@
 /* Summary Cards */
 .summary-card {
   background: rgba(255, 255, 255, 0.95);
-  border-radius: var(--border-radius);
-  box-shadow: var(--card-shadow);
+  border-radius: var(--border_radius);
+  box-shadow: var(--card_shadow);
   transition: var(--transition);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .summary-card:hover {
   transform: translateY(-3px);
-  box-shadow: var(--card-shadow-hover);
+  box-shadow: var(--card_shadow_hover);
 }
 
 .summary-card .card-body {
@@ -145,15 +144,15 @@
 /* Category Cards */
 .category-card {
   background: rgba(255, 255, 255, 0.95);
-  border-radius: var(--border-radius);
-  box-shadow: var(--card-shadow);
+  border-radius: var(--border_radius);
+  box-shadow: var(--card_shadow);
   transition: var(--transition);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .category-card:hover {
   transform: translateY(-3px);
-  box-shadow: var(--card-shadow-hover);
+  box-shadow: var(--card_shadow_hover);
 }
 
 .category-card .card-body {
@@ -191,9 +190,9 @@
 .tab-navigation .nav-tabs {
   border: none;
   background: rgba(255, 255, 255, 0.9);
-  border-radius: var(--border-radius);
+  border-radius: var(--border_radius);
   padding: 10px;
-  box-shadow: var(--card-shadow);
+  box-shadow: var(--card_shadow);
 }
 
 .tab-navigation .nav-link {
@@ -212,7 +211,7 @@
 }
 
 .tab-navigation .nav-link.active {
-  background: var(--primary-gradient);
+  background: var(--primary_gradient);
   color: white;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
@@ -244,6 +243,66 @@
 
 .tab-content .container-fluid {
   padding: 0;
+}
+
+/* Basic Payment Styles */
+.basic-payment-container {
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+.payment-form-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  margin-bottom: 30px;
+}
+
+.payment-form-card h4 {
+  color: #333;
+  margin-bottom: 25px;
+  font-weight: 600;
+}
+
+.payment-entry-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.payment-entry-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  color: white;
+}
+
+.payment-entry-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.entry-type.fuel {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  color: white;
+}
+
+.entry-type.adda {
+  background: linear-gradient(135deg, #4834d4, #686de0);
+  color: white;
+}
+
+.entry-type.union {
+  background: linear-gradient(135deg, #00d2d3, #54a0ff);
+  color: white;
 }
 
 @media (max-width: 575.98px) {

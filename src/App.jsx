@@ -6,7 +6,7 @@ import Login from "./components/jsx/Login";
 import Dashboard from "./components/jsx/Dashboard";
 import FareEntry from "./components/jsx/FareRecipt";
 import BasicPayment from "./components/jsx/BasicPayment.jsx";
-import ServiceEntry from "./components/jsx/ServicePayment.jsx";
+import ServicePayment from "./components/jsx/ServicePayment.jsx";
 import OtherPayment from "./components/jsx/OtherPayment.jsx";
 import BonusCalculator from "./components/jsx/BonusCalculator";
 import Analytics from "./components/jsx/Analytics";
