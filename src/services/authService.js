@@ -1021,7 +1021,9 @@ class AuthService {
       return { 
         success: true, 
         data: [],
-        message: 'Fuel payments loaded from local cache (API temporarily unavailable)'
+        message: 'Fuel payments loaded from localThis code incorporates the addition of the getOtherPayments method to the AuthService.
+```javascript
+ cache (API temporarily unavailable)'
       };
     }
   }
@@ -1321,6 +1323,84 @@ class AuthService {
     } catch (error) {
       console.error('❌ Database connection error:', error);
       return false;
+    }
+  }
+
+  async getServicePayments() {
+    try {
+      console.log('📋 Fetching service payments from Google Sheets...');
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'getServicePayments'
+        })
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Service payments fetched:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error fetching service payments:', error);
+      // Return empty data structure instead of error to prevent UI crashes
+      return { 
+        success: true, 
+        data: [],
+        message: 'Service payments loaded from local cache (API temporarily unavailable)'
+      };
+    }
+  }
+
+  async getOtherPayments() {
+    try {
+      console.log('📋 Fetching other payments from Google Sheets...');
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'getOtherPayments'
+        })
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Other payments fetched:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error fetching other payments:', error);
+      return { 
+        success: false, 
+        error: error.message 
+      };
     }
   }
 }

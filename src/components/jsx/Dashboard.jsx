@@ -63,7 +63,8 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         fuelPayments, 
         addaPayments,
         unionPayments,
-        servicePayments
+        servicePayments,
+        otherPayments
       ] = await Promise.all([
         loadWithRetry(() => authService.getFareReceipts()),
         loadWithRetry(() => authService.getBookingEntries()),
@@ -71,7 +72,8 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         loadWithRetry(() => authService.getFuelPayments()),
         loadWithRetry(() => authService.getAddaPayments()),
         loadWithRetry(() => authService.getUnionPayments()),
-        loadWithRetry(() => authService.getServicePayments())
+        loadWithRetry(() => authService.getServicePayments()),
+        loadWithRetry(() => authService.getOtherPayments())
       ]);
 
       // Process and combine all data
@@ -345,6 +347,38 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         combinedCashBookEntries = [...combinedCashBookEntries, ...serviceCashEntries];
       }
 
+      //Process Other Payments
+       if (otherPayments.success && otherPayments.data) {
+         const processedOtherPayments = otherPayments.data.map(entry => ({
+           id: entry.entryId,
+           entryId: entry.entryId,
+           timestamp: convertToTimeString(entry.timestamp),
+           date: convertToDateString(entry.date),
+           paymentType: entry.paymentType,
+           paymentDetails: entry.paymentDetails,
+           cashAmount: entry.cashAmount || 0,
+           bankAmount: entry.bankAmount || 0,
+           totalAmount: entry.totalAmount || 0,
+           submittedBy: entry.submittedBy,
+           type: 'other'
+         }));
+         combinedExpenseData = [...combinedExpenseData, ...processedOtherPayments];
+
+         // Generate cash book entries from other payments
+         const otherCashEntries = processedOtherPayments.map(entry => ({
+           id: `other-${entry.entryId}`,
+           date: entry.date,
+           particulars: "Other Payment",
+           description: `Other payment - ${entry.paymentDetails || entry.paymentType || 'Other'}`,
+           jfNo: `OTHER-${entry.entryId}`,
+           cashAmount: entry.cashAmount || 0,
+           bankAmount: entry.bankAmount || 0,
+           type: 'cr',
+           timestamp: entry.timestamp,
+           source: 'other-payment'
+         }));
+         combinedCashBookEntries = [...combinedCashBookEntries, ...otherCashEntries];
+       }
       // Sort all data by timestamp (newest first)
       combinedFareData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       combinedExpenseData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -374,8 +408,14 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         cashBookEntries: combinedCashBookEntries.length,
         unionPayments: unionPayments.data?.length || 0,
         servicePayments: servicePayments.data?.length || 0,
+        otherPayments: otherPayments.data?.length || 0,
         totalRecords: combinedFareData.length + combinedExpenseData.length
       });
+      console.log('🔍 Breakdown - Fuel:', fuelPayments.data?.length || 0, 
+                   'Adda:', addaPayments.data?.length || 0,
+                   'Union:', unionPayments.data?.length || 0, 
+                   'Service:', servicePayments.data?.length || 0,
+                   'Other:', otherPayments.data?.length || 0);
 
     } catch (error) {
       console.error('❌ Dashboard: Error loading data:', error);
