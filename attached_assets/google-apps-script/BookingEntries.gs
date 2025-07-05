@@ -1,4 +1,3 @@
-
 // ============================================================================
 // BOOKING ENTRIES OPERATIONS (BookingEntries.gs)
 // ============================================================================
@@ -14,7 +13,7 @@
 function addBookingEntry(data) {
   try {
     console.log("📝 Adding new booking entry:", data);
-    
+
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
       .getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
 
@@ -27,18 +26,21 @@ function addBookingEntry(data) {
       formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
 
     sheet.insertRowBefore(2);
-    
-    sheet.getRange(2, 1, 1, 10).setValues([[
-      timeOnly,                       // A: Time in IST
-      data.bookingDetails || "",      // B: Booking Details
-      data.dateFrom,                  // C: Date From
-      data.dateTo,                    // D: Date To
-      data.cashAmount || 0,           // E: Cash Amount
-      data.bankAmount || 0,           // F: Bank Amount
-      data.totalAmount || 0,          // G: Total Amount
-      "booking",                      // H: Entry Type
-      entryId,                        // I: Entry ID
-      data.submittedBy || "",         // J: Submitted By
+
+    // Add data to the new row
+    sheet.getRange(2, 1, 1, 12).setValues([[
+      timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
+      data.bookingDetails || "",     // B: Booking details
+      data.dateFrom,                 // C: Date from
+      data.dateTo,                   // D: Date to
+      data.cashAmount || 0,          // E: Cash amount
+      data.bankAmount || 0,          // F: Bank amount
+      data.totalAmount || 0,         // G: Total amount
+      data.submittedBy || "",        // H: Submitted by
+      "booking",                     // I: Entry type (static)
+      entryId,                       // J: Entry ID
+      "pending",                     // K: Entry Status (pending/waiting/approved)
+      "",                            // L: Approved By (empty initially)
     ]]);
 
     console.log("✅ Booking entry added successfully with ID:", entryId);
@@ -65,7 +67,7 @@ function addBookingEntry(data) {
 function getBookingEntries() {
   try {
     console.log("📋 Fetching all booking entries...");
-    
+
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
       .getSheetByName(SHEET_NAMES.BOOKING_ENTRIES);
 
@@ -83,16 +85,18 @@ function getBookingEntries() {
 
     const data = values.slice(1).map((row, index) => {
       return {
-        entryId: row[8],                      // Entry ID from column I
+        entryId: row[9],                      // Entry ID from column J
         timestamp: String(row[0] || ''),      // Convert timestamp to string
         bookingDetails: row[1],               // Booking details from column B
-        dateFrom: String(row[2] || ''),       // Convert date to string
-        dateTo: String(row[3] || ''),         // Convert date to string
+        dateFrom: String(row[2] || ''),       // Date from column C
+        dateTo: String(row[3] || ''),         // Date to column D
         cashAmount: row[4],                   // Cash amount from column E
         bankAmount: row[5],                   // Bank amount from column F
         totalAmount: row[6],                  // Total amount from column G
-        entryType: row[7],                    // Entry type from column H
-        submittedBy: row[9],                  // Submitted by from column J
+        submittedBy: row[7],                  // Submitted by from column H
+        entryType: row[8],                    // Entry type from column I
+        entryStatus: row[10] || "pending",    // Entry status from column K
+        approvedBy: row[11] || "",            // Approved by from column L
         rowIndex: index + 2,                  // Store row index for updates/deletes
       };
     });

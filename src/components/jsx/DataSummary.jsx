@@ -43,7 +43,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
     let totalCashPayments = userExpenseData.filter(entry => 
       ['fuel', 'fees', 'adda', 'service', 'union', 'other'].includes(entry.type)
     ).reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
-    
+
     let totalBankPayments = userExpenseData.filter(entry => 
       ['fuel', 'fees', 'adda', 'service', 'union', 'other'].includes(entry.type)
     ).reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
@@ -247,7 +247,9 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
     });
   };
 
-
+  const sendAllForApproval = () => {
+    alert('Sending all data for approval...');
+  };
 
   return (
     <div className="approval-container">
@@ -948,13 +950,24 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
           return hasUserEntries ? (
             <div className="text-center">
               <button 
-                className="btn btn-lg approval-btn"
+                className="btn btn-lg approval-btn me-3"
                 onClick={handleSendForApproval}
               >
-                <i className="bi bi-send"></i>
-                Send for Approval
+                <i className="bi bi-send"></i> Submit for Final Approval
               </button>
-            </div>
+              <button 
+                className="btn btn-lg btn-outline-primary"
+                onClick={sendAllForApproval}
+              >
+                <i className="bi bi-upload"></i> Send All Data for Approval
+              </button>
+        </div>
+
+        <div className="text-center mt-3">
+          <small className="text-muted">
+            Send individual entries for approval first, then submit final report
+          </small>
+        </div>
           ) : null;
         })()}
 
