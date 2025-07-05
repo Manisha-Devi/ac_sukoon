@@ -49,7 +49,7 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
     mechanic: "",
   });
 
-  // Load data on component mount
+  // Load data on component mount and periodically refresh
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
@@ -102,7 +102,19 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
       }
     };
 
+    // Initial load
     loadData();
+
+    // Set up periodic refresh every 30 seconds to get real-time updates
+    const refreshInterval = setInterval(() => {
+      console.log('🔄 Refreshing service payments data...');
+      loadData();
+    }, 30000); // 30 seconds
+
+    // Cleanup interval on component unmount
+    return () => {
+      clearInterval(refreshInterval);
+    };
   }, []); // Run once on component mount
 
   // Function to get min date for date inputs (today)
@@ -317,7 +329,7 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
     });
   };
 
-  // Filter service entries
+  // Show all service entries from all users (no user filtering)
   const serviceEntries = expenseData.filter(entry => entry.type === "service");
 
   // Calculate totals for summary
@@ -485,52 +497,68 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
         {/* Recent Entries */}
         {serviceEntries.length > 0 && (
           <div className="recent-entries mt-4">
-            <h4>Recent Entries</h4>
+            <h4>Recent Entries (All Users)</h4>
             <div className="row">
-              {serviceEntries.slice(-6).reverse().map((entry) => (
-                <div key={entry.id} className="col-md-6 col-lg-4 mb-3">
-                  <div className="entry-card">
-                    <div className="card-body">
-                      <div className="entry-header">
-                        <span className="entry-type service">Service</span>
-                        <div className="entry-actions">
-                          <button 
-                            className="btn btn-sm btn-edit" 
-                            onClick={() => handleEditEntry(entry)}
-                            title="Edit Entry"
-                          >
-                            <i className="bi bi-pencil"></i>
-                          </button>
-                          <button 
-                            className="btn btn-sm btn-delete" 
-                            onClick={() => handleDeleteEntry(entry.id)}
-                            title="Delete Entry"
-                          >
-                            <i className="bi bi-trash"></i>
-                          </button>
+              {serviceEntries.slice(-6).reverse().map((entry) => {
+                // Get current user to check if they can edit/delete
+                const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                const currentUserName = currentUser.fullName || currentUser.username;
+                const canEdit = entry.submittedBy === currentUserName || !entry.submittedBy;
+
+                return (
+                  <div key={entry.id} className="col-md-6 col-lg-4 mb-3">
+                    <div className="entry-card">
+                      <div className="card-body">
+                        <div className="entry-header">
+                          <span className="entry-type service">Service</span>
+                          <div className="entry-actions">
+                            {canEdit && (
+                              <>
+                                <button 
+                                  className="btn btn-sm btn-edit" 
+                                  onClick={() => handleEditEntry(entry)}
+                                  title="Edit Entry"
+                                >
+                                  <i className="bi bi-pencil"></i>
+                                </button>
+                                <button 
+                                  className="btn btn-sm btn-delete" 
+                                  onClick={() => handleDeleteEntry(entry.id)}
+                                  title="Delete Entry"
+                                >
+                                  <i className="bi bi-trash"></i>
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      <div className="entry-date">
-                        <small className="text-muted">{entry.date}</small>
-                      </div>
-                      <div className="entry-content">
-                        <p><strong>{entry.serviceDetails}</strong></p>
-                        <p>{entry.description?.substring(0, 60)}...</p>
-                        {entry.mechanic && <p><small>At: {entry.mechanic}</small></p>}
-                      </div>
-                      <div className="entry-amounts">
-                        <div className="amount-row">
-                          <span>Cash: ₹{entry.cashAmount}</span>
-                          <span>Bank: ₹{entry.bankAmount}</span>
+                        <div className="entry-date">
+                          <small className="text-muted">{entry.date}</small>
+                          {entry.submittedBy && (
+                            <small className="text-muted ms-2">
+                              by {entry.submittedBy}
+                            </small>
+                          )}
                         </div>
-                        <div className="total-amount">
-                          <strong>Total: ₹{entry.totalAmount}</strong>
+                        <div className="entry-content">
+                          <p><strong>{entry.serviceDetails}</strong></p>
+                          <p>{entry.description?.substring(0, 60)}...</p>
+                          {entry.mechanic && <p><small>At: {entry.mechanic}</small></p>}
+                        </div>
+                        <div className="entry-amounts">
+                          <div className="amount-row">
+                            <span>Cash: ₹{entry.cashAmount}</span>
+                            <span>Bank: ₹{entry.bankAmount}</span>
+                          </div>
+                          <div className="total-amount">
+                            <strong>Total: ₹{entry.totalAmount}</strong>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
