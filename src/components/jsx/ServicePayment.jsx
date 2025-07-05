@@ -329,8 +329,17 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
     });
   };
 
-  // Show all service entries from all users (no user filtering)
-  const serviceEntries = expenseData.filter(entry => entry.type === "service");
+  // Filter service entries for current user only - like FuelPayment
+  const getCurrentUserServiceEntries = () => {
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const currentUserName = currentUser.fullName || currentUser.username;
+
+    return expenseData.filter(entry => 
+      entry.type === "service" && entry.submittedBy === currentUserName
+    );
+  };
+
+  const serviceEntries = getCurrentUserServiceEntries();
 
   // Calculate totals for summary
   const totalCash = serviceEntries.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
@@ -494,16 +503,14 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           </form>
         </div>
 
-        {/* Recent Entries */}
+        {/* Recent Entries - Only show when user has entries */}
         {serviceEntries.length > 0 && (
           <div className="recent-entries mt-4">
-            <h4>Recent Entries (All Users)</h4>
+            <h4>Recent Entries</h4>
             <div className="row">
               {serviceEntries.slice(-6).reverse().map((entry) => {
-                // Get current user to check if they can edit/delete
-                const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                const currentUserName = currentUser.fullName || currentUser.username;
-                const canEdit = entry.submittedBy === currentUserName || !entry.submittedBy;
+                // Current user's entries - can always edit/delete
+                const canEdit = true;
 
                 return (
                   <div key={entry.id} className="col-md-6 col-lg-4 mb-3">
@@ -533,12 +540,10 @@ function ServiceEntry({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                           </div>
                         </div>
                         <div className="entry-date">
-                          <small className="text-muted">{entry.date}</small>
-                          {entry.submittedBy && (
-                            <small className="text-muted ms-2">
-                              by {entry.submittedBy}
-                            </small>
-                          )}
+                          <small className="text-muted">
+                            <div>{entry.date}</div>
+                            <div className="timestamp">{entry.timestamp || ''}</div>
+                          </small>
                         </div>
                         <div className="entry-content">
                           <p><strong>{entry.serviceDetails}</strong></p>
