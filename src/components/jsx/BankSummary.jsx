@@ -149,43 +149,99 @@ function BankSummary({ fareData, expenseData }) {
   const currentEntries = filteredData.slice(indexOfFirstEntry, indexOfLastEntry);
   const totalPages = Math.ceil(filteredData.length / entriesPerPage);
 
-  // Handle checkbox selection for individual rows
+  // Handle checkbox selection for individual rows (only pending entries)
   const handleSelectEntry = (entryId) => {
-    setSelectedEntries(prev => {
-      if (prev.includes(entryId)) {
-        return prev.filter(id => id !== entryId);
-      } else {
-        return [...prev, entryId];
-      }
-    });
-  };
-
-  // Handle select all checkbox
-  const handleSelectAll = () => {
-    const allCurrentEntryIds = currentEntries.map(entry => entry.entryId);
-
-    if (selectedEntries.length === allCurrentEntryIds.length) {
-      setSelectedEntries([]);
-    } else {
-      setSelectedEntries(allCurrentEntryIds);
+    const entry = currentEntries.find(e => e.entryId === entryId);
+    if (entry && entry.entryStatus === 'pending') {
+      setSelectedEntries(prev => {
+        if (prev.includes(entryId)) {
+          return prev.filter(id => id !== entryId);
+        } else {
+          return [...prev, entryId];
+        }
+      });
     }
   };
 
-  // Check if all visible entries are selected
-  const isAllSelected = currentEntries.length > 0 && 
-    currentEntries.every(entry => selectedEntries.includes(entry.entryId));
+  // Handle select all checkbox (only pending entries)
+  const handleSelectAll = () => {
+    const pendingEntryIds = currentEntries
+      .filter(entry => entry.entryStatus === 'pending')
+      .map(entry => entry.entryId);
+
+    if (selectedEntries.length === pendingEntryIds.length && pendingEntryIds.length > 0) {
+      setSelectedEntries([]);
+    } else {
+      setSelectedEntries(pendingEntryIds);
+    }
+  };
+
+  // Check if all visible pending entries are selected
+  const pendingEntries = currentEntries.filter(entry => entry.entryStatus === 'pending');
+  const isAllSelected = pendingEntries.length > 0 && 
+    pendingEntries.every(entry => selectedEntries.includes(entry.entryId));
+
+  // Get status icon for entry
+  const getStatusIcon = (entryStatus) => {
+    switch (entryStatus) {
+      case 'pending':
+        return null; // Show checkbox
+      case 'bank':
+        return <i className="bi bi-lock-fill text-warning" title="Bank Approval"></i>;
+      case 'cash':
+        return <i className="bi bi-check-circle-fill text-success" title="Cash Approved"></i>;
+      case 'approved':
+        return <i className="bi bi-check-circle-fill text-success" title="Approved"></i>;
+      default:
+        return null;
+    }
+  };
 
   // Forward selected entries for approval
-  const handleForwardForApproval = () => {
+  const handleForwardForApproval = async () => {
     if (selectedEntries.length === 0) {
       alert('Please select entries to forward for approval');
       return;
     }
 
-    // Here you would call your API to forward entries
-    console.log('Forwarding entries for approval:', selectedEntries);
-    alert(`${selectedEntries.length} entries forwarded for approval!`);
-    setSelectedEntries([]);
+    try {
+      console.log('Forwarding entries for bank approval:', selectedEntries);
+      
+      // Update entry status to "bank" for selected entries
+      const updatedFareData = fareData.map(entry => {
+        if (selectedEntries.includes(entry.entryId)) {
+          return { ...entry, entryStatus: "bank" };
+        }
+        return entry;
+      });
+
+      const updatedExpenseData = expenseData.map(entry => {
+        if (selectedEntries.includes(entry.entryId)) {
+          return { ...entry, entryStatus: "bank" };
+        }
+        return entry;
+      });
+
+      // Trigger data refresh with updated status
+      window.dispatchEvent(new CustomEvent('dataStatusUpdated', { 
+        detail: { 
+          updatedFareData, 
+          updatedExpenseData 
+        }
+      }));
+
+      alert(`${selectedEntries.length} entries forwarded for bank approval!`);
+      setSelectedEntries([]);
+      
+      // Reload filtered data to reflect changes
+      setTimeout(() => {
+        filterUserData();
+      }, 100);
+
+    } catch (error) {
+      console.error('Error forwarding entries:', error);
+      alert('Error forwarding entries for approval');
+    }
   };
 
   // Calculate totals
@@ -316,13 +372,19 @@ function BankSummary({ fareData, expenseData }) {
                     <th>Type</th>
                     <th>I/E</th>
                     <th>Bank</th>
+                    <th>Status</th>
                     <th>
-                      <input 
-                        type="checkbox" 
-                        className="form-check-input"
-                        onChange={handleSelectAll}
-                        checked={isAllSelected}
-                      />
+                      {pendingEntries.length > 0 ? (
+                        <input 
+                          type="checkbox" 
+                          className="form-check-input"
+                          onChange={handleSelectAll}
+                          checked={isAllSelected}
+                          title="Select all pending entries"
+                        />
+                      ) : (
+                        <span className="text-muted">Select</span>
+                      )}
                     </th>
                   </tr>
                 </thead>
@@ -349,12 +411,26 @@ function BankSummary({ fareData, expenseData }) {
                         ₹{(entry.bankAmount || 0).toLocaleString()}
                       </td>
                       <td>
-                        <input 
-                          type="checkbox" 
-                          className="form-check-input"
-                          checked={selectedEntries.includes(entry.entryId)}
-                          onChange={() => handleSelectEntry(entry.entryId)}
-                        />
+                        <span className={`badge ${
+                          entry.entryStatus === 'pending' ? 'bg-warning' :
+                          entry.entryStatus === 'bank' ? 'bg-info' :
+                          entry.entryStatus === 'cash' ? 'bg-success' :
+                          entry.entryStatus === 'approved' ? 'bg-success' : 'bg-secondary'
+                        }`}>
+                          {entry.entryStatus || 'pending'}
+                        </span>
+                      </td>
+                      <td>
+                        {entry.entryStatus === 'pending' ? (
+                          <input 
+                            type="checkbox" 
+                            className="form-check-input"
+                            checked={selectedEntries.includes(entry.entryId)}
+                            onChange={() => handleSelectEntry(entry.entryId)}
+                          />
+                        ) : (
+                          getStatusIcon(entry.entryStatus)
+                        )}
                       </td>
                     </tr>
                   ))}
