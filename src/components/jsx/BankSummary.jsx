@@ -24,24 +24,48 @@ function BankSummary({ bankData }) {
     filterUserData();
   }, [bankData, dateFrom, dateTo, currentUser]);
 
+  // Initialize state from global bankData if available
+  useEffect(() => {
+    if (window.bankData && window.bankData.length > 0) {
+      console.log('🔄 BankSummary: Loading from global bankData');
+      filterUserData(window.bankData);
+    }
+  }, [currentUser]);
+
   // Watch for bankData prop changes and refresh
   useEffect(() => {
     console.log('🔄 BankSummary: bankData props updated, refreshing...');
     if (bankData && bankData.length > 0) {
-      filterUserData();
+      filterUserData(bankData);
     }
   }, [bankData]);
 
-  const filterUserData = () => {
-    if (!currentUser || !bankData) return;
+  // Register global data update listener
+  useEffect(() => {
+    // Listen for global setBankData calls
+    window.updateBankData = (newBankData) => {
+      console.log('🔄 BankSummary: Global data update received');
+      filterUserData(newBankData);
+    };
+
+    return () => {
+      delete window.updateBankData;
+    };
+  }, [currentUser, dateFrom, dateTo]);
+
+  const filterUserData = (dataSource = bankData) => {
+    if (!currentUser || !dataSource) {
+      console.log('⚠️ BankSummary: Missing user or data source');
+      return;
+    }
 
     const currentUserName = currentUser.fullName || currentUser.username;
 
     console.log('👤 Filtering bank data for user:', currentUserName);
-    console.log('📊 Total bank entries available:', bankData.length);
+    console.log('📊 Total bank entries available:', dataSource.length);
 
     // Filter bank data for current user - Data is already filtered in Dashboard
-    const userBankData = bankData.filter(entry => 
+    const userBankData = dataSource.filter(entry => 
       entry.submittedBy === currentUserName
     );
 
@@ -214,7 +238,22 @@ function BankSummary({ bankData }) {
         }
       });
 
-      // STEP 3: Trigger global refresh in background (don't await)
+      // STEP 3: Update global bankData immediately and trigger refresh
+      if (window.bankData) {
+        window.bankData = window.bankData.map(entry => {
+          const isSelectedEntry = approvalPopup.entries.some(selectedEntry => 
+            selectedEntry.entryId === entry.entryId
+          );
+          
+          if (isSelectedEntry) {
+            return { ...entry, entryStatus: 'bank' };
+          }
+          return entry;
+        });
+        console.log('✅ Global bankData updated immediately');
+      }
+
+      // Trigger global refresh in background (don't await)
       if (window.refreshAllData) {
         setTimeout(() => {
           window.refreshAllData().catch(error => {
@@ -257,17 +296,31 @@ function BankSummary({ bankData }) {
     }
   }, [bankData]);
 
-  // Listen for centralized refresh events
+  // Listen for centralized refresh events and tab activation
   useEffect(() => {
     const handleDataRefresh = () => {
       console.log('🔄 BankSummary: Recalculating from centralized refresh');
-      filterUserData();
+      // Use global bankData if available, fallback to props
+      const dataToUse = window.bankData || bankData;
+      filterUserData(dataToUse);
     };
 
+    const handleTabActivation = () => {
+      console.log('🔄 BankSummary: Tab activated, refreshing data');
+      if (window.refreshAllData) {
+        window.refreshAllData().catch(error => {
+          console.error('Tab activation refresh failed:', error);
+        });
+      }
+    };
+
+    // Listen for all relevant events
     window.addEventListener('dataRefreshed', handleDataRefresh);
+    window.addEventListener('bankSummaryTabActivated', handleTabActivation);
 
     return () => {
       window.removeEventListener('dataRefreshed', handleDataRefresh);
+      window.removeEventListener('bankSummaryTabActivated', handleTabActivation);
     };
   }, [bankData, dateFrom, dateTo, currentUser]);
 

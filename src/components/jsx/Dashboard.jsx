@@ -466,15 +466,17 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
       // Store filtered bankData globally for BankSummary
       window.bankData = bankSummaryData;
       
-      // Trigger state update for BankSummary if callback exists
+      // Update App.jsx bankData state first
+      if (window.setBankData) {
+        window.setBankData(bankSummaryData);
+      }
+      
+      // Trigger BankSummary component update
       if (window.updateBankData) {
         window.updateBankData(bankSummaryData);
       }
       
-      // Also trigger App.jsx to update bankData state
-      if (window.setBankData) {
-        window.setBankData(bankSummaryData);
-      }
+      console.log('✅ Global bankData updated:', bankSummaryData.length, 'records');
 
       // Update local state for dashboard display
       setAllData({
@@ -528,9 +530,17 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
     window.dispatchEvent(new CustomEvent('dataRefreshed', {
       detail: {
         timestamp: new Date(),
-        source: 'centralized-refresh'
+        source: 'centralized-refresh',
+        bankDataUpdated: true
       }
     }));
+    
+    // Specifically update BankSummary if callback exists
+    if (window.updateBankData && window.bankData) {
+      setTimeout(() => {
+        window.updateBankData(window.bankData);
+      }, 100);
+    }
     
     if (onRefreshComplete) {
       onRefreshComplete();
