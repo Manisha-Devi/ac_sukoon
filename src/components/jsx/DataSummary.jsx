@@ -337,22 +337,20 @@ function DataSummary({ fareData, expenseData }) {
             <span className="label">Description:</span>
             <span className="value">{entry.displayName}</span>
           </div>
-          {entry.totalAmount > 0 && (
-            <div className="entry-row">
-              <span className="label">Total Amount:</span>
-              <span className="value">₹{entry.totalAmount?.toLocaleString()}</span>
-            </div>
-          )}
-          {entry.cashAmount > 0 && (
+          <div className="entry-row">
+            <span className="label">Total Amount:</span>
+            <span className="value">₹{(entry.totalAmount || 0).toLocaleString('en-IN')}</span>
+          </div>
+          {(entry.cashAmount || 0) > 0 && (
             <div className="entry-row">
               <span className="label">Cash Amount:</span>
-              <span className="value">₹{entry.cashAmount?.toLocaleString()}</span>
+              <span className="value">₹{(entry.cashAmount || 0).toLocaleString('en-IN')}</span>
             </div>
           )}
-          {entry.bankAmount > 0 && (
+          {(entry.bankAmount || 0) > 0 && (
             <div className="entry-row">
               <span className="label">Bank Amount:</span>
-              <span className="value">₹{entry.bankAmount?.toLocaleString()}</span>
+              <span className="value">₹{(entry.bankAmount || 0).toLocaleString('en-IN')}</span>
             </div>
           )}
           <div className="entry-row">
