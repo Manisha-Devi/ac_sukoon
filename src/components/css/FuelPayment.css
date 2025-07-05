@@ -377,6 +377,15 @@
   display: inline-block;
   text-align: center;
   line-height: 1;
+  margin-right: 8px;
+}
+
+.fuel-entry-btn i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-right: 8px;
 }
 
 /* Sync indicator icon centering */
@@ -388,7 +397,9 @@
 }
 
 .simple-sync-indicator i {
-  display: block;
-  line-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
   text-align: center;
 }
