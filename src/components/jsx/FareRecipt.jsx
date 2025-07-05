@@ -139,7 +139,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
             bankAmount: entry.bankAmount || 0,
             totalAmount: entry.totalAmount || 0,
             submittedBy: entry.submittedBy,
-            type: 'daily'
+            type: 'daily',
+            entryStatus: entry.entryStatus || 'pending', // Approval status
+            approvedBy: entry.approvedBy || null, // Approved by
           }))];
         }
 
@@ -155,7 +157,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
             bankAmount: entry.bankAmount || 0,
             totalAmount: entry.totalAmount || 0,
             submittedBy: entry.submittedBy,
-            type: 'booking'
+            type: 'booking',
+            entryStatus: entry.entryStatus || 'pending', // Approval status
+            approvedBy: entry.approvedBy || null, // Approved by
           }))];
         }
 
@@ -170,7 +174,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
             cashAmount: 0,
             bankAmount: 0,
             totalAmount: 0,
-            type: 'off'
+            type: 'off',
+            entryStatus: entry.entryStatus || 'pending', // Approval status
+            approvedBy: entry.approvedBy || null, // Approved by
           }))];
         }
 
@@ -360,7 +366,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           bankAmount: bankAmount,
           totalAmount: totalAmount,
           date: dateOnly, // Date as string (YYYY-MM-DD)
-          submittedBy: submittedBy
+          submittedBy: submittedBy,
+          entryStatus: 'pending' // Set initial approval status
         };
 
         const updatedData = [newEntry, ...fareData];
@@ -378,7 +385,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           cashAmount: cashAmount,
           bankAmount: bankAmount,
           totalAmount: totalAmount,
-          submittedBy: submittedBy
+          submittedBy: submittedBy,
+          entryStatus: 'pending' // Send initial approval status
         }).catch(error => {
           console.error('Background daily add sync failed:', error);
         });
@@ -468,7 +476,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           totalAmount: totalAmount,
           dateFrom: startDateStr, // Date as string (YYYY-MM-DD)
           dateTo: endDateStr, // Date as string (YYYY-MM-DD)
-          submittedBy: submittedBy
+          submittedBy: submittedBy,
+          entryStatus: 'pending' // Set initial approval status
         };
 
         const updatedData = [newEntry, ...fareData];
@@ -487,7 +496,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           totalAmount: totalAmount,
           dateFrom: startDateStr, // Send date as string
           dateTo: endDateStr, // Send date as string
-          submittedBy: submittedBy
+          submittedBy: submittedBy,
+          entryStatus: 'pending' // Send initial approval status
         }).catch(error => {
           console.error('Background booking add sync failed:', error);
         });
@@ -555,7 +565,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           cashAmount: 0,
           bankAmount: 0,
           totalAmount: 0,
-          submittedBy: submittedBy
+          submittedBy: submittedBy,
+          entryStatus: 'pending' // Set initial approval status
         };
 
         const updatedData = [newEntry, ...fareData];
@@ -569,7 +580,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           timestamp: timeOnly, // Send time as string
           date: dateOnly, // Send date as string
           reason: offDayData.reason,
-          submittedBy: submittedBy
+          submittedBy: submittedBy,
+          entryStatus: 'pending' // Send initial approval status
         }).catch(error => {
           console.error('Background off day add sync failed:', error);
         });

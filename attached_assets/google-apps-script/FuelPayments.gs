@@ -1,4 +1,3 @@
-
 // ============================================================================
 // FUEL PAYMENTS OPERATIONS (FuelPayments.gs)
 // ============================================================================
@@ -14,7 +13,7 @@
 function addFuelPayment(data) {
   try {
     console.log("📝 Adding new fuel payment:", data);
-    
+
     let sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
       .getSheetByName(SHEET_NAMES.FUEL_PAYMENTS);
 
@@ -23,11 +22,12 @@ function addFuelPayment(data) {
       console.log("📋 Creating FuelPayments sheet...");
       sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
         .insertSheet(SHEET_NAMES.FUEL_PAYMENTS);
-      
-      sheet.getRange(1, 1, 1, 12).setValues([[
-        "Timestamp", "Date", "PumpName", "Liters", "RatePerLiter", 
-        "CashAmount", "BankAmount", "TotalAmount", "Remarks", 
-        "SubmittedBy", "EntryType", "EntryId"
+
+      // Add headers exactly as specified
+      sheet.getRange(1, 1, 1, 14).setValues([[
+        "Timestamp", "Date", "PumpName", "Liters", "Rate", "CashAmount", 
+        "BankAmount", "TotalAmount", "Remarks", "SubmittedBy", "EntryType", "EntryId",
+        "EntryStatus", "ApprovedBy"
       ]]);
     }
 
@@ -36,20 +36,23 @@ function addFuelPayment(data) {
       formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
 
     sheet.insertRowBefore(2);
-    
-    sheet.getRange(2, 1, 1, 12).setValues([[
-      timeOnly,                    // A: Time in IST
-      data.date,                   // B: Date
-      data.pumpName || "",         // C: Pump Name
-      data.liters || "",           // D: Liters
-      data.rate || "",             // E: Rate Per Liter
-      data.cashAmount || 0,        // F: Cash Amount
-      data.bankAmount || 0,        // G: Bank Amount
-      data.totalAmount || 0,       // H: Total Amount
-      data.remarks || "",          // I: Remarks
-      data.submittedBy || "",      // J: Submitted By
-      "fuel",                      // K: Entry Type
-      entryId,                     // L: Entry ID
+
+    // Add data to the new row
+    sheet.getRange(2, 1, 1, 14).setValues([[
+      timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
+      data.date,                     // B: Date from frontend
+      data.pumpName || "",           // C: Pump Name
+      data.liters || "",             // D: Liters
+      data.rate || "",               // E: Rate
+      data.cashAmount || 0,          // F: Cash Amount
+      data.bankAmount || 0,          // G: Bank Amount
+      data.totalAmount || 0,         // H: Total Amount
+      data.remarks || "",            // I: Remarks
+      data.submittedBy || "",        // J: Submitted By
+      "fuel",                        // K: Entry Type (static)
+      entryId,                       // L: Entry ID
+      "pending",                     // M: Entry Status (pending/waiting/approved)
+      "",                            // N: Approved By (empty initially)
     ]]);
 
     console.log("✅ Fuel payment added successfully with ID:", entryId);
@@ -76,7 +79,7 @@ function addFuelPayment(data) {
 function getFuelPayments() {
   try {
     console.log("📋 Fetching all fuel payments...");
-    
+
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
       .getSheetByName(SHEET_NAMES.FUEL_PAYMENTS);
 
@@ -92,6 +95,7 @@ function getFuelPayments() {
       return { success: true, data: [] };
     }
 
+    // Process and format data
     const data = values.slice(1).map((row, index) => {
       return {
         entryId: row[11],                     // Entry ID from column L
@@ -106,6 +110,8 @@ function getFuelPayments() {
         remarks: row[8],                      // Remarks from column I
         submittedBy: row[9],                  // Submitted by from column J
         entryType: row[10],                   // Entry type from column K
+        entryStatus: row[12] || "pending",    // Entry status from column M
+        approvedBy: row[13] || "",            // Approved by from column N
         rowIndex: index + 2,                  // Store row index for updates/deletes
       };
     });

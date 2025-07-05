@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import "../css/BasicPayment.css";
 import authService from '../../services/authService.js';
@@ -62,7 +61,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
   const [activeTab, setActiveTab] = useState("fuel");
   const [editingEntry, setEditingEntry] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Form data for different payment types
   const [fuelFormData, setFuelFormData] = useState({
     cashAmount: "",
@@ -550,7 +549,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
   const handleEditEntry = (entry) => {
     setEditingEntry(entry);
     setActiveTab(entry.type);
-    
+
     if (entry.type === 'fuel') {
       setFuelFormData({
         cashAmount: entry.cashAmount.toString(),
@@ -605,6 +604,16 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
   };
 
   const allPaymentEntries = getCurrentUserPaymentEntries();
+
+    const handleEdit = (entry) => {
+        // Implement your edit logic here
+        console.log("Edit clicked for entry:", entry);
+    };
+
+    const handleDelete = (entryId) => {
+        // Implement your delete logic here
+        console.log("Delete clicked for entryId:", entryId);
+    };
 
   return (
     <div className="basic-payment-container">
@@ -665,7 +674,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           </div>
         )}
 
-        
+
 
         {/* Tab Navigation */}
         <div className="tab-navigation mb-4">

@@ -160,12 +160,43 @@ function doPost(e) {
         result = deleteOtherPayment(data);
         break;
 
+      // ==================== APPROVAL WORKFLOW OPERATIONS ====================
+      // Fare Receipts Approval
+      case 'approveFareReceipt':
+        result = approveFareReceipt(data);
+        break;
+      case 'resendFareReceipt':
+        result = resendFareReceipt(data);
+      case 'setFareReceiptWaiting':
+        result = setFareReceiptWaiting(data);
+
+      // Fuel Payments Approval
+      case 'approveFuelPayment':
+        result = approveFuelPayment(data);
+      case 'resendFuelPayment':
+        result = resendFuelPayment(data);
+      case 'setFuelPaymentWaiting':
+        result = setFuelPaymentWaiting(data);
+
+      // Other Payments Approval
+      case 'approveOtherPayment':
+        result = approveOtherPayment(data);
+      case 'resendOtherPayment':
+        result = resendOtherPayment(data);
+      case 'setOtherPaymentWaiting':
+        result = setOtherPaymentWaiting(data);
+
       // ==================== LEGACY SUPPORT ====================
       case "updateFareEntry":
         result = updateFareEntryLegacy(data);
         break;
       case "deleteFareEntry":
         result = deleteFareEntryLegacy(data);
+        break;
+
+      // ==================== TESTING OPERATIONS ====================
+      case "test":
+        result = testConnection();
         break;
 
       default:
