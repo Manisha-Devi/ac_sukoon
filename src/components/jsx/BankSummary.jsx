@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import "../css/BankSummary.css";
 
@@ -6,7 +5,7 @@ function BankSummary({ fareData, expenseData }) {
   // 📊 RECEIVED DATA EXPLANATION:
   // fareData = Daily entries (income) + Booking entries + Off days
   // expenseData = Fuel + Adda + Union + Service + Other payments
-  
+
   const [filteredData, setFilteredData] = useState([]);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -24,11 +23,11 @@ function BankSummary({ fareData, expenseData }) {
     console.log('🔄 BankSummary: Props data updated');
     console.log('📈 FareData (Income):', fareData?.length || 0, 'entries');
     console.log('📉 ExpenseData (Expense):', expenseData?.length || 0, 'entries');
-    
+
     // Debug: Log complete data structure
     console.log('💰 BANK SUMMARY - Complete FareData:', fareData);
     console.log('💸 BANK SUMMARY - Complete ExpenseData:', expenseData);
-    
+
     // Sample entries for debugging
     if (fareData && fareData.length > 0) {
       console.log('📊 BANK SUMMARY - Sample FareData Entry:', fareData[0]);
@@ -36,7 +35,7 @@ function BankSummary({ fareData, expenseData }) {
     if (expenseData && expenseData.length > 0) {
       console.log('📊 BANK SUMMARY - Sample ExpenseData Entry:', expenseData[0]);
     }
-    
+
     filterUserData();
   }, [fareData, expenseData, dateFrom, dateTo, currentUser]);
 
@@ -51,14 +50,14 @@ function BankSummary({ fareData, expenseData }) {
 
     console.log('👤 Filtering data for user:', currentUserName);
     console.log('📊 FareData Filtered Structure:');
-    
+
     // Log sample objects for debugging  
     if (fareData && fareData.length > 0) {
       console.log('🔸 Daily Entry Sample:', fareData.find(e => e.type === 'daily'));
       console.log('🔸 Booking Entry Sample:', fareData.find(e => e.type === 'booking'));
       console.log('🔸 All Entry Types in FareData:', [...new Set(fareData.map(e => e.type))]);
     }
-    
+
     // Debug expense data types  
     if (expenseData && expenseData.length > 0) {
       console.log('🔸 All Entry Types in ExpenseData:', [...new Set(expenseData.map(e => e.type))]);
@@ -75,7 +74,7 @@ function BankSummary({ fareData, expenseData }) {
       );
       console.log('💰 Bank Income entries found:', userFareData.length);
       console.log('📋 Sample Filtered Bank Entry:', userFareData[0]);
-      
+
       allData = [...allData, ...userFareData.map(entry => ({
         entryId: entry.entryId,
         date: entry.date,
@@ -97,7 +96,7 @@ function BankSummary({ fareData, expenseData }) {
       );
       console.log('💸 Bank Expense entries found:', userExpenseData.length);
       console.log('📋 Sample Filtered Expense Entry:', userExpenseData[0]);
-      
+
       allData = [...allData, ...userExpenseData.map(entry => ({
         entryId: entry.entryId,
         date: entry.date,
@@ -126,14 +125,14 @@ function BankSummary({ fareData, expenseData }) {
 
     // Sort by date (newest first)
     allData.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
+
     // Debug: Log final filtered data
     console.log('✅ BANK SUMMARY - Final filtered data:', allData);
     console.log('📊 BANK SUMMARY - Data breakdown:');
     console.log('   - Income entries:', allData.filter(e => e.type === 'income').length);
     console.log('   - Expense entries:', allData.filter(e => e.type === 'expense').length);
     console.log('   - Entry types:', [...new Set(allData.map(e => e.entryType))]);
-    
+
     setFilteredData(allData);
   };
 
@@ -197,8 +196,27 @@ function BankSummary({ fareData, expenseData }) {
     }
   };
 
-  // Forward selected entries for approval
-  const handleForwardForApproval = () => {
+  // Function to update entry status based on entryId (primary key)
+  const updateEntryStatus = (entryId, newStatus) => {
+    console.log(`📝 Updating entry ${entryId}: status → ${newStatus}`);
+
+    // Update in filteredData state
+    const updatedFilteredData = filteredData.map(entry => {
+      if (entry.entryId === entryId) {
+        return { ...entry, entryStatus: newStatus };
+      }
+      return entry;
+    });
+
+    setFilteredData(updatedFilteredData);
+
+    // Also trigger parent component update if needed
+    window.dispatchEvent(new CustomEvent('entryStatusUpdated', { 
+      detail: { entryId, newStatus }
+    }));
+  };
+
+  const handleForwardForApproval = async () => {
     if (selectedEntries.length === 0) {
       alert('Please select entries to forward for approval');
       return;
@@ -206,36 +224,16 @@ function BankSummary({ fareData, expenseData }) {
 
     try {
       console.log('🔄 BankSummary: Forwarding entries for bank approval:', selectedEntries);
-      
-      // Update entry status to "bank" for selected entries in React state only
-      const updatedFareData = fareData.map(entry => {
-        if (selectedEntries.includes(entry.entryId)) {
-          console.log(`📝 Updating fareData entry ${entry.entryId}: pending → bank`);
-          return { ...entry, entryStatus: "bank" };
-        }
-        return entry;
-      });
 
-      const updatedExpenseData = expenseData.map(entry => {
-        if (selectedEntries.includes(entry.entryId)) {
-          console.log(`📝 Updating expenseData entry ${entry.entryId}: pending → bank`);
-          return { ...entry, entryStatus: "bank" };
-        }
-        return entry;
+      // Update status for each selected entry using entryId as primary key
+      selectedEntries.forEach(entryId => {
+        updateEntryStatus(entryId, "waiting");
       });
-
-      // Trigger centralized data refresh with updated status
-      window.dispatchEvent(new CustomEvent('dataStatusUpdated', { 
-        detail: { 
-          updatedFareData, 
-          updatedExpenseData 
-        }
-      }));
 
       alert(`✅ ${selectedEntries.length} entries forwarded for bank approval!`);
       setSelectedEntries([]);
-      
-      console.log('✅ BankSummary: Status update completed (React state only)');
+
+      console.log('✅ BankSummary: Status update completed');
 
     } catch (error) {
       console.error('❌ Error forwarding entries:', error);
