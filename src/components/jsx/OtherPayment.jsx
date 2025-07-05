@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import "../css/OtherPayment.css";
-import { authService } from "../../services/authService";
+import authService from "../../services/authService";
 
 function OtherPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
   const [editingEntry, setEditingEntry] = useState(null);
