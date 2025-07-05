@@ -116,6 +116,14 @@
   color: white;
 }
 
+/* Processing button animation */
+.service-entry-btn .bi-arrow-repeat {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  text-align: center;
+  line-height: 1;
+}
+
 /* Summary Cards */
 .summary-card {
   background: rgba(255, 255, 255, 0.95);
