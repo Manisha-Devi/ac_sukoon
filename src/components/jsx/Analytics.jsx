@@ -12,6 +12,7 @@ import {
   ArcElement,
   LineElement,
   PointElement,
+  Filler,
 } from "chart.js";
 import { Bar, Doughnut, Line } from "react-chartjs-2";
 
@@ -25,6 +26,7 @@ ChartJS.register(
   ArcElement,
   LineElement,
   PointElement,
+  Filler,
 );
 
 function Analytics({ fareData, expenseData, totalEarnings, totalExpenses }) {
