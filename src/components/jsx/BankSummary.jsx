@@ -371,7 +371,6 @@ function BankSummary({ fareData, expenseData }) {
                     <th>Type</th>
                     <th>I/E</th>
                     <th>Bank</th>
-                    <th>Status</th>
                     <th>
                       {pendingEntries.length > 0 ? (
                         <input 
@@ -408,16 +407,6 @@ function BankSummary({ fareData, expenseData }) {
                       </td>
                       <td className={entry.type === 'income' ? 'text-success' : 'text-danger'}>
                         ₹{(entry.bankAmount || 0).toLocaleString()}
-                      </td>
-                      <td>
-                        <span className={`badge ${
-                          entry.entryStatus === 'pending' ? 'bg-warning' :
-                          entry.entryStatus === 'bank' ? 'bg-info' :
-                          entry.entryStatus === 'cash' ? 'bg-success' :
-                          entry.entryStatus === 'approved' ? 'bg-success' : 'bg-secondary'
-                        }`}>
-                          {entry.entryStatus || 'pending'}
-                        </span>
                       </td>
                       <td>
                         {entry.entryStatus === 'pending' ? (
