@@ -5,10 +5,11 @@ import authService from "../../services/authService.js";
 
 function DataSummary({ fareData, expenseData }) {
   const [pendingData, setPendingData] = useState([]);
-  const [waitingData, setWaitingData] = useState([]);
+  const [bankData, setBankData] = useState([]);
+  const [cashData, setCashData] = useState([]);
   const [approvedData, setApprovedData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('waiting');
+  const [activeTab, setActiveTab] = useState('bank');
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
@@ -95,9 +96,10 @@ function DataSummary({ fareData, expenseData }) {
       // Sort by timestamp (newest first)
       allEntries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-      // Separate by status
+      // Separate by status - Updated status flow
       setPendingData(allEntries.filter(entry => entry.entryStatus === 'pending'));
-      setWaitingData(allEntries.filter(entry => entry.entryStatus === 'waiting'));
+      setBankData(allEntries.filter(entry => entry.entryStatus === 'bank'));
+      setCashData(allEntries.filter(entry => entry.entryStatus === 'cash'));
       setApprovedData(allEntries.filter(entry => entry.entryStatus === 'approved'));
 
       setLoading(false);
@@ -115,44 +117,51 @@ function DataSummary({ fareData, expenseData }) {
       let result;
       switch (entry.dataType) {
         case 'Fare Receipt':
-          result = await authService.approveFareReceipt({
+          result = await authService.updateFareReceiptStatus({
             entryId: entry.entryId,
+            newStatus: 'approved',
             approverName: approverName
           });
           break;
         case 'Booking Entry':
-          result = await authService.approveBookingEntry({
+          result = await authService.updateBookingEntryStatus({
             entryId: entry.entryId,
+            newStatus: 'approved',
             approverName: approverName
           });
           break;
         case 'Fuel Payment':
-          result = await authService.approveFuelPayment({
+          result = await authService.updateFuelPaymentStatus({
             entryId: entry.entryId,
+            newStatus: 'approved',
             approverName: approverName
           });
           break;
         case 'Other Payment':
-          result = await authService.approveOtherPayment({
+          result = await authService.updateOtherPaymentStatus({
             entryId: entry.entryId,
+            newStatus: 'approved',
             approverName: approverName
           });
           break;
         case 'Adda Payment':
-          result = await authService.approveAddaPayment({
+          result = await authService.updateAddaPaymentStatus({
             entryId: entry.entryId,
+            newStatus: 'approved',
             approverName: approverName
           });
           break;
         case 'Service Payment':
-          result = await authService.approveServicePayment({
+          result = await authService.updateServicePaymentStatus({
             entryId: entry.entryId,
+            newStatus: 'approved',
             approverName: approverName
           });
           break;
         case 'Union Payment':
-          result = await authService.approveUnionPayment({
+          result = await authService.updateUnionPaymentStatus({
             entryId: entry.entryId,
+            newStatus: 'approved',
             approverName: approverName
           });
           break;
@@ -162,6 +171,12 @@ function DataSummary({ fareData, expenseData }) {
 
       if (result.success) {
         alert(`Entry approved successfully by ${approverName}`);
+        
+        // Update parent state
+        if (window.updateEntryStatusInParent) {
+          window.updateEntryStatusInParent(entry.entryId, "approved", entry.type);
+        }
+        
         processAllData(); // Reprocess current data
       } else {
         alert('Error approving entry: ' + result.error);
@@ -178,38 +193,52 @@ function DataSummary({ fareData, expenseData }) {
       let result;
       switch (entry.dataType) {
         case 'Fare Receipt':
-          result = await authService.resendFareReceipt({
-            entryId: entry.entryId
+          result = await authService.updateFareReceiptStatus({
+            entryId: entry.entryId,
+            newStatus: 'pending',
+            approverName: ""
           });
           break;
         case 'Booking Entry':
-          result = await authService.resendBookingEntry({
-            entryId: entry.entryId
+          result = await authService.updateBookingEntryStatus({
+            entryId: entry.entryId,
+            newStatus: 'pending',
+            approverName: ""
           });
           break;
         case 'Fuel Payment':
-          result = await authService.resendFuelPayment({
-            entryId: entry.entryId
+          result = await authService.updateFuelPaymentStatus({
+            entryId: entry.entryId,
+            newStatus: 'pending',
+            approverName: ""
           });
           break;
         case 'Other Payment':
-          result = await authService.resendOtherPayment({
-            entryId: entry.entryId
+          result = await authService.updateOtherPaymentStatus({
+            entryId: entry.entryId,
+            newStatus: 'pending',
+            approverName: ""
           });
           break;
         case 'Adda Payment':
-          result = await authService.resendAddaPayment({
-            entryId: entry.entryId
+          result = await authService.updateAddaPaymentStatus({
+            entryId: entry.entryId,
+            newStatus: 'pending',
+            approverName: ""
           });
           break;
         case 'Service Payment':
-          result = await authService.resendServicePayment({
-            entryId: entry.entryId
+          result = await authService.updateServicePaymentStatus({
+            entryId: entry.entryId,
+            newStatus: 'pending',
+            approverName: ""
           });
           break;
         case 'Union Payment':
-          result = await authService.resendUnionPayment({
-            entryId: entry.entryId
+          result = await authService.updateUnionPaymentStatus({
+            entryId: entry.entryId,
+            newStatus: 'pending',
+            approverName: ""
           });
           break;
         default:
@@ -218,6 +247,12 @@ function DataSummary({ fareData, expenseData }) {
 
       if (result.success) {
         alert('Entry sent back for correction');
+        
+        // Update parent state
+        if (window.updateEntryStatusInParent) {
+          window.updateEntryStatusInParent(entry.entryId, "pending", entry.type);
+        }
+        
         processAllData(); // Reprocess current data
       } else {
         alert('Error resending entry: ' + result.error);
@@ -242,10 +277,16 @@ function DataSummary({ fareData, expenseData }) {
                 PENDING
               </>
             )}
-            {entry.entryStatus === 'waiting' && (
+            {entry.entryStatus === 'bank' && (
               <>
-                <i className="bi bi-lock-fill me-1"></i>
-                WAITING FOR APPROVAL
+                <i className="bi bi-bank me-1"></i>
+                BANK APPROVAL
+              </>
+            )}
+            {entry.entryStatus === 'cash' && (
+              <>
+                <i className="bi bi-cash-stack me-1"></i>
+                CASH APPROVAL
               </>
             )}
             {entry.entryStatus === 'approved' && (
@@ -305,7 +346,7 @@ function DataSummary({ fareData, expenseData }) {
         </div>
 
         <div className="entry-actions">
-          {entry.entryStatus === 'waiting' && (
+          {entry.entryStatus === 'cash' && (
             <>
               <button 
                 className="btn btn-success btn-sm"
@@ -332,9 +373,9 @@ function DataSummary({ fareData, expenseData }) {
               <i className="bi bi-arrow-clockwise"></i> Resend for Edit
             </button>
           )}
-          {entry.entryStatus === 'pending' && (
+          {(entry.entryStatus === 'pending' || entry.entryStatus === 'bank') && (
             <span className="badge bg-secondary">
-              <i className="bi bi-clock"></i> Not sent for approval yet
+              <i className="bi bi-clock"></i> In process
             </span>
           )}
         </div>
@@ -359,16 +400,22 @@ function DataSummary({ fareData, expenseData }) {
         <div className="approval-header">
           <h2><i className="bi bi-clipboard-check"></i> Data Summary</h2>
           <p>Review and approve submitted entries</p>
-          <small className="text-muted">Data automatically synced from React state</small>
+          <small className="text-muted">New Flow: Pending → Bank → Cash → Approved</small>
         </div>
 
-        {/* Approval Tabs */}
+        {/* Approval Tabs - Updated with new status flow */}
         <div className="approval-tabs">
           <button 
-            className={`tab-btn ${activeTab === 'waiting' ? 'active' : ''}`}
-            onClick={() => setActiveTab('waiting')}
+            className={`tab-btn ${activeTab === 'bank' ? 'active' : ''}`}
+            onClick={() => setActiveTab('bank')}
           >
-            <i className="bi bi-hourglass-split"></i> Waiting for Approval ({waitingData.length})
+            <i className="bi bi-bank"></i> Bank Approval ({bankData.length})
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'cash' ? 'active' : ''}`}
+            onClick={() => setActiveTab('cash')}
+          >
+            <i className="bi bi-cash-stack"></i> Cash Approval ({cashData.length})
           </button>
           <button 
             className={`tab-btn ${activeTab === 'approved' ? 'active' : ''}`}
@@ -386,15 +433,28 @@ function DataSummary({ fareData, expenseData }) {
 
         {/* Tab Content */}
         <div className="tab-content">
-          {activeTab === 'waiting' && (
+          {activeTab === 'bank' && (
             <div className="entries-grid">
-              {waitingData.length === 0 ? (
+              {bankData.length === 0 ? (
                 <div className="no-data">
-                  <i className="bi bi-hourglass-split"></i>
-                  <p>No entries waiting for approval</p>
+                  <i className="bi bi-bank"></i>
+                  <p>No entries waiting for bank approval</p>
                 </div>
               ) : (
-                waitingData.map(renderEntryCard)
+                bankData.map(renderEntryCard)
+              )}
+            </div>
+          )}
+
+          {activeTab === 'cash' && (
+            <div className="entries-grid">
+              {cashData.length === 0 ? (
+                <div className="no-data">
+                  <i className="bi bi-cash-stack"></i>
+                  <p>No entries waiting for cash approval</p>
+                </div>
+              ) : (
+                cashData.map(renderEntryCard)
               )}
             </div>
           )}
