@@ -13,6 +13,8 @@ function BankSummary({ fareData, expenseData }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedEntries, setSelectedEntries] = useState([]);
   const [entriesPerPage] = useState(10);
+  const [showDialog, setShowDialog] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState(null);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -179,6 +181,18 @@ function BankSummary({ fareData, expenseData }) {
   const pendingEntries = currentEntries.filter(entry => entry.entryStatus === 'pending');
   const isAllSelected = pendingEntries.length > 0 && 
     pendingEntries.every(entry => selectedEntries.includes(entry.entryId));
+
+  // Handle type column click to show details
+  const handleTypeClick = (entry) => {
+    setSelectedEntry(entry);
+    setShowDialog(true);
+  };
+
+  // Close dialog
+  const closeDialog = () => {
+    setShowDialog(false);
+    setSelectedEntry(null);
+  };
 
   // Get status icon for entry
   const getStatusIcon = (entryStatus) => {
@@ -469,7 +483,12 @@ function BankSummary({ fareData, expenseData }) {
                         }
                       </td>
                       <td>
-                        <span className="badge bg-info">
+                        <span 
+                          className="badge bg-info clickable-type" 
+                          onClick={() => handleTypeClick(entry)}
+                          style={{cursor: 'pointer'}}
+                          title="Click to view details"
+                        >
                           {entry.entryType || 'bank'}
                         </span>
                       </td>
@@ -556,6 +575,95 @@ function BankSummary({ fareData, expenseData }) {
           </div>
         )}
       </div>
+
+      {/* Entry Details Dialog */}
+      {showDialog && selectedEntry && (
+        <div className="modal show d-block" tabIndex="-1" style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  <i className="bi bi-info-circle"></i> Entry Details
+                </h5>
+                <button 
+                  type="button" 
+                  className="btn-close" 
+                  onClick={closeDialog}
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="modal-body">
+                <div className="row">
+                  <div className="col-md-6">
+                    <strong>Entry Type:</strong>
+                    <span className={`badge bg-info ms-2`}>
+                      {selectedEntry.entryType || 'bank'}
+                    </span>
+                  </div>
+                  <div className="col-md-6">
+                    <strong>Date:</strong> {new Date(selectedEntry.date).toLocaleDateString('en-IN')}
+                  </div>
+                </div>
+                <hr />
+                <div className="row">
+                  <div className="col-md-4">
+                    <strong>Cash Amount:</strong>
+                    <div className="text-success">₹{(selectedEntry.cashAmount || 0).toLocaleString()}</div>
+                  </div>
+                  <div className="col-md-4">
+                    <strong>Bank Amount:</strong>
+                    <div className="text-info">₹{(selectedEntry.bankAmount || 0).toLocaleString()}</div>
+                  </div>
+                  <div className="col-md-4">
+                    <strong>Total Amount:</strong>
+                    <div className="text-primary">₹{((selectedEntry.cashAmount || 0) + (selectedEntry.bankAmount || 0)).toLocaleString()}</div>
+                  </div>
+                </div>
+                <hr />
+                <div className="row">
+                  <div className="col-md-6">
+                    <strong>Transaction Type:</strong>
+                    <span className={`badge ms-2 ${selectedEntry.type === 'income' ? 'bg-success' : 'bg-danger'}`}>
+                      {selectedEntry.type === 'income' ? 'Income' : 'Expense'}
+                    </span>
+                  </div>
+                  <div className="col-md-6">
+                    <strong>Status:</strong>
+                    <span className="badge bg-secondary ms-2">{selectedEntry.entryStatus}</span>
+                  </div>
+                </div>
+                <hr />
+                <div className="row">
+                  <div className="col-12">
+                    <strong>Description:</strong>
+                    <p className="mt-2">{selectedEntry.description || 'No description available'}</p>
+                  </div>
+                </div>
+                {selectedEntry.submittedBy && (
+                  <>
+                    <hr />
+                    <div className="row">
+                      <div className="col-md-6">
+                        <strong>Submitted By:</strong> {selectedEntry.submittedBy}
+                      </div>
+                      {selectedEntry.approvedBy && (
+                        <div className="col-md-6">
+                          <strong>Approved By:</strong> {selectedEntry.approvedBy}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={closeDialog}>
+                  <i className="bi bi-x-circle"></i> Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -137,3 +137,13 @@
   border-radius: 12px;
   margin: 2rem 0;
 }
+
+.clickable-type {
+  transition: all 0.3s ease;
+}
+
+.clickable-type:hover {
+  background-color: #0056b3 !important;
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
