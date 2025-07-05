@@ -1,7 +1,12 @@
+
 import React, { useState, useEffect } from "react";
 import "../css/BankSummary.css";
 
 function BankSummary({ fareData, expenseData }) {
+  // 📊 RECEIVED DATA EXPLANATION:
+  // fareData = Daily entries (income) + Booking entries + Off days
+  // expenseData = Fuel + Adda + Union + Service + Other payments
+  
   const [filteredData, setFilteredData] = useState([]);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -10,76 +15,105 @@ function BankSummary({ fareData, expenseData }) {
   const [selectedEntries, setSelectedEntries] = useState([]);
   const [entriesPerPage] = useState(10);
 
-  console.log('🚀 BankSummary: Component rendered with props');
-  console.log('📥 BankSummary: fareData prop:', fareData?.length || 0, 'entries');
-  console.log('📥 BankSummary: expenseData prop:', expenseData?.length || 0, 'entries');
-
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     setCurrentUser(user);
   }, []);
 
   useEffect(() => {
+    console.log('🔄 BankSummary: Props data updated');
+    console.log('📈 FareData (Income):', fareData?.length || 0, 'entries');
+    console.log('📉 ExpenseData (Expense):', expenseData?.length || 0, 'entries');
+    
+    // Debug: Log complete data structure
+    console.log('💰 BANK SUMMARY - Complete FareData:', fareData);
+    console.log('💸 BANK SUMMARY - Complete ExpenseData:', expenseData);
+    
+    // Sample entries for debugging
+    if (fareData && fareData.length > 0) {
+      console.log('📊 BANK SUMMARY - Sample FareData Entry:', fareData[0]);
+    }
+    if (expenseData && expenseData.length > 0) {
+      console.log('📊 BANK SUMMARY - Sample ExpenseData Entry:', expenseData[0]);
+    }
+    
     filterUserData();
   }, [fareData, expenseData, dateFrom, dateTo, currentUser]);
 
   const filterUserData = () => {
     if (!currentUser) {
-      console.log('🔴 BankSummary: No current user found');
+      console.log('⚠️ No current user found');
       return;
     }
 
     const currentUserName = currentUser.fullName || currentUser.username;
-    console.log('👤 BankSummary: Current user name:', currentUserName);
-    
     let allData = [];
 
-    // Filter fare data for current user
+    console.log('👤 Filtering data for user:', currentUserName);
+    console.log('📊 FareData Filtered Structure:');
+    
+    // Log sample objects for debugging  
     if (fareData && fareData.length > 0) {
-      console.log('📊 BankSummary: Raw fareData received:', fareData.length, 'entries');
-      console.log('📊 BankSummary: Sample fareData entry:', fareData[0]);
-      
-      const userFareData = fareData.filter(entry => 
-        entry.submittedBy === currentUserName && entry.bankAmount > 0
-      );
-      console.log('💰 BankSummary: Filtered fareData for user:', userFareData.length, 'entries');
-      console.log('💰 BankSummary: Sample filtered fareData:', userFareData[0]);
-      
-      allData = [...allData, ...userFareData.map(entry => ({
-        ...entry,
-        type: 'income',
-        description: entry.route || entry.bookingDetails || 'Fare Collection'
-      }))];
-    } else {
-      console.log('⚠️ BankSummary: No fareData found or empty array');
+      console.log('🔸 Daily Entry Sample:', fareData.find(e => e.type === 'daily'));
+      console.log('🔸 Booking Entry Sample:', fareData.find(e => e.type === 'booking'));
+      console.log('🔸 All Entry Types in FareData:', [...new Set(fareData.map(e => e.type))]);
+    }
+    
+    // Debug expense data types  
+    if (expenseData && expenseData.length > 0) {
+      console.log('🔸 All Entry Types in ExpenseData:', [...new Set(expenseData.map(e => e.type))]);
+      console.log('🔸 Sample Expense Entry:', expenseData[0]);
     }
 
-    // Filter expense data for current user
-    if (expenseData && expenseData.length > 0) {
-      console.log('💸 BankSummary: Raw expenseData received:', expenseData.length, 'entries');
-      console.log('💸 BankSummary: Sample expenseData entry:', expenseData[0]);
+    // 📈 Filter fare data (INCOME) for current user - Only BANK entries  
+    // Data now comes pre-filtered: entryId, date, bankAmount, type, submittedBy, entryStatus, approvedBy
+    if (fareData && fareData.length > 0) {
+      const userFareData = fareData.filter(entry => 
+        entry.submittedBy === currentUserName && 
+        entry.bankAmount > 0 &&
+        (entry.type === 'daily' || entry.type === 'booking') // No off days
+      );
+      console.log('💰 Bank Income entries found:', userFareData.length);
+      console.log('📋 Sample Filtered Bank Entry:', userFareData[0]);
       
+      allData = [...allData, ...userFareData.map(entry => ({
+        entryId: entry.entryId,
+        date: entry.date,
+        bankAmount: entry.bankAmount,
+        type: 'income',
+        entryType: entry.type, // daily or booking
+        submittedBy: entry.submittedBy,
+        entryStatus: entry.entryStatus,
+        approvedBy: entry.approvedBy,
+        description: entry.route || entry.bookingDetails || 'Fare Collection'
+      }))];
+    }
+
+    // 📉 Filter expense data (EXPENSE) for current user - Only BANK entries
+    // Data now comes pre-filtered: entryId, date, bankAmount, type, submittedBy, entryStatus, approvedBy
+    if (expenseData && expenseData.length > 0) {
       const userExpenseData = expenseData.filter(entry => 
         entry.submittedBy === currentUserName && entry.bankAmount > 0
       );
-      console.log('💸 BankSummary: Filtered expenseData for user:', userExpenseData.length, 'entries');
-      console.log('💸 BankSummary: Sample filtered expenseData:', userExpenseData[0]);
+      console.log('💸 Bank Expense entries found:', userExpenseData.length);
+      console.log('📋 Sample Filtered Expense Entry:', userExpenseData[0]);
       
       allData = [...allData, ...userExpenseData.map(entry => ({
-        ...entry,
+        entryId: entry.entryId,
+        date: entry.date,
+        bankAmount: entry.bankAmount,
         type: 'expense',
+        entryType: entry.type, // fuel, adda, union, service, other
+        submittedBy: entry.submittedBy,
+        entryStatus: entry.entryStatus,
+        approvedBy: entry.approvedBy,
         description: entry.pumpName || entry.addaName || entry.unionName || 
                     entry.serviceType || entry.paymentDetails || 'Payment'
       }))];
-    } else {
-      console.log('⚠️ BankSummary: No expenseData found or empty array');
     }
-
-    console.log('🔄 BankSummary: Combined data before date filter:', allData.length, 'entries');
 
     // Apply date filter if dates are selected
     if (dateFrom && dateTo) {
-      console.log('📅 BankSummary: Applying date filter from', dateFrom, 'to', dateTo);
       const fromDate = new Date(dateFrom);
       const toDate = new Date(dateTo);
       toDate.setHours(23, 59, 59);
@@ -88,13 +122,18 @@ function BankSummary({ fareData, expenseData }) {
         const entryDate = new Date(entry.date);
         return entryDate >= fromDate && entryDate <= toDate;
       });
-      console.log('📅 BankSummary: Data after date filter:', allData.length, 'entries');
     }
 
     // Sort by date (newest first)
     allData.sort((a, b) => new Date(b.date) - new Date(a.date));
-    console.log('✅ BankSummary: Final filtered data:', allData.length, 'entries');
-    console.log('✅ BankSummary: Final data structure:', allData);
+    
+    // Debug: Log final filtered data
+    console.log('✅ BANK SUMMARY - Final filtered data:', allData);
+    console.log('📊 BANK SUMMARY - Data breakdown:');
+    console.log('   - Income entries:', allData.filter(e => e.type === 'income').length);
+    console.log('   - Expense entries:', allData.filter(e => e.type === 'expense').length);
+    console.log('   - Entry types:', [...new Set(allData.map(e => e.entryType))]);
+    
     setFilteredData(allData);
   };
 
@@ -160,14 +199,8 @@ function BankSummary({ fareData, expenseData }) {
 
   const bankBalance = totalBankIncome - totalBankExpense;
 
-  console.log('💹 BankSummary: Calculations:');
-  console.log('💹 BankSummary: Total Income:', totalBankIncome);
-  console.log('💹 BankSummary: Total Expense:', totalBankExpense);
-  console.log('💹 BankSummary: Bank Balance:', bankBalance);
-
   useEffect(() => {
-    filterUserData();
-  }, [fareData, expenseData, dateFrom, dateTo, currentUser]);
+  }, []);
 
   // Listen for centralized refresh events
   useEffect(() => {
@@ -181,7 +214,7 @@ function BankSummary({ fareData, expenseData }) {
     return () => {
       window.removeEventListener('dataRefreshed', handleDataRefresh);
     };
-  }, [fareData, expenseData, dateFrom, dateTo, currentUser]);
+  }, []);
 
   return (
     <div className="bank-summary-container">
@@ -294,47 +327,37 @@ function BankSummary({ fareData, expenseData }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentEntries.map((entry, index) => {
-                    console.log(`🔍 BankSummary: Table row ${index}:`, {
-                      entryId: entry.entryId,
-                      entryType: entry.entryType,
-                      type: entry.type,
-                      bankAmount: entry.bankAmount,
-                      date: entry.date,
-                      dateFrom: entry.dateFrom
-                    });
-                    return (
-                      <tr key={`${entry.entryId || index}`}>
-                        <td>
-                          {entry.entryType === 'booking' && entry.dateFrom ? 
-                            new Date(entry.dateFrom).toLocaleDateString('en-IN') : 
-                            new Date(entry.date).toLocaleDateString('en-IN')
-                          }
-                        </td>
-                        <td>
-                          <span className="badge bg-info">
-                            {entry.entryType || 'bank'}
-                          </span>
-                        </td>
-                        <td>
-                          <span className={`badge ${entry.type === 'income' ? 'bg-success' : 'bg-danger'}`}>
-                            {entry.type === 'income' ? 'I' : 'E'}
-                          </span>
-                        </td>
-                        <td className={entry.type === 'income' ? 'text-success' : 'text-danger'}>
-                          ₹{(entry.bankAmount || 0).toLocaleString()}
-                        </td>
-                        <td>
-                          <input 
-                            type="checkbox" 
-                            className="form-check-input"
-                            checked={selectedEntries.includes(entry.entryId)}
-                            onChange={() => handleSelectEntry(entry.entryId)}
-                          />
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {currentEntries.map((entry, index) => (
+                    <tr key={`${entry.entryId || index}`}>
+                      <td>
+                        {entry.entryType === 'booking' && entry.dateFrom ? 
+                          new Date(entry.dateFrom).toLocaleDateString('en-IN') : 
+                          new Date(entry.date).toLocaleDateString('en-IN')
+                        }
+                      </td>
+                      <td>
+                        <span className="badge bg-info">
+                          {entry.entryType || 'bank'}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`badge ${entry.type === 'income' ? 'bg-success' : 'bg-danger'}`}>
+                          {entry.type === 'income' ? 'I' : 'E'}
+                        </span>
+                      </td>
+                      <td className={entry.type === 'income' ? 'text-success' : 'text-danger'}>
+                        ₹{(entry.bankAmount || 0).toLocaleString()}
+                      </td>
+                      <td>
+                        <input 
+                          type="checkbox" 
+                          className="form-check-input"
+                          checked={selectedEntries.includes(entry.entryId)}
+                          onChange={() => handleSelectEntry(entry.entryId)}
+                        />
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
