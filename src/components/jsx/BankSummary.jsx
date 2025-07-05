@@ -112,10 +112,90 @@ function BankSummary({ bankData }) {
       return;
     }
 
-    // Here you would call your API to forward entries
-    console.log('Forwarding entries for approval:', selectedEntries);
-    alert(`${selectedEntries.length} entries forwarded for approval!`);
-    setSelectedEntries([]);
+    // Get selected entry details
+    const selectedData = filteredData.filter(entry => 
+      selectedEntries.includes(entry.entryId)
+    );
+
+    // Calculate total amount
+    const totalAmount = selectedData.reduce((sum, entry) => 
+      sum + (entry.bankAmount || 0), 0
+    );
+
+    // Show approval popup
+    setApprovalPopup({
+      show: true,
+      entries: selectedData,
+      totalAmount: totalAmount,
+      count: selectedData.length
+    });
+  };
+
+  // State for approval popup
+  const [approvalPopup, setApprovalPopup] = useState({
+    show: false,
+    entries: [],
+    totalAmount: 0,
+    count: 0
+  });
+
+  // Handle send for approval
+  const handleSendForApproval = async () => {
+    try {
+      console.log('🔄 Sending entries for bank approval...');
+      
+      // Import authService
+      const authService = await import('../../services/authService.js');
+      
+      for (const entry of approvalPopup.entries) {
+        let result;
+        
+        // Update entry status based on type
+        if (entry.type === 'daily' || entry.type === 'fare') {
+          // Fare Receipt
+          result = await authService.default.updateFareReceiptStatus({
+            entryId: entry.entryId,
+            newStatus: 'bank',
+            approverName: ''
+          });
+        } else if (entry.type === 'booking') {
+          // Booking Entry
+          result = await authService.default.updateBookingEntryStatus({
+            entryId: entry.entryId,
+            newStatus: 'bank', 
+            approverName: ''
+          });
+        }
+        
+        if (!result.success) {
+          throw new Error(`Failed to update ${entry.entryId}: ${result.error}`);
+        }
+      }
+      
+      console.log('✅ All entries updated to bank status');
+      
+      // Close popup
+      setApprovalPopup({ show: false, entries: [], totalAmount: 0, count: 0 });
+      
+      // Clear selections
+      setSelectedEntries([]);
+      
+      // Refresh data
+      if (window.refreshAllData) {
+        await window.refreshAllData();
+      }
+      
+      alert(`${approvalPopup.count} entries successfully forwarded for bank approval!`);
+      
+    } catch (error) {
+      console.error('❌ Error sending for approval:', error);
+      alert('Error updating entries: ' + error.message);
+    }
+  };
+
+  // Handle cancel approval
+  const handleCancelApproval = () => {
+    setApprovalPopup({ show: false, entries: [], totalAmount: 0, count: 0 });
   };
 
   // Calculate totals
@@ -277,12 +357,16 @@ function BankSummary({ bankData }) {
                         ₹{(entry.bankAmount || 0).toLocaleString()}
                       </td>
                       <td>
-                        <input 
-                          type="checkbox" 
-                          className="form-check-input"
-                          checked={selectedEntries.includes(entry.entryId)}
-                          onChange={() => handleSelectEntry(entry.entryId)}
-                        />
+                        {entry.entryStatus === 'bank' ? (
+                          <i className="bi bi-lock-fill text-warning" title="Forwarded for Bank Approval"></i>
+                        ) : (
+                          <input 
+                            type="checkbox" 
+                            className="form-check-input"
+                            checked={selectedEntries.includes(entry.entryId)}
+                            onChange={() => handleSelectEntry(entry.entryId)}
+                          />
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -347,6 +431,86 @@ function BankSummary({ bankData }) {
           </div>
         )}
       </div>
+
+      {/* Approval Popup Modal */}
+      {approvalPopup.show && (
+        <div className="modal-overlay" onClick={handleCancelApproval}>
+          <div className="approval-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h5>
+                <i className="bi bi-bank me-2"></i>
+                Bank Amount Approval
+              </h5>
+              <div className="modal-stats">
+                <span className="badge bg-info me-2">
+                  {approvalPopup.count} Transactions
+                </span>
+                <span className="badge bg-success">
+                  ₹{approvalPopup.totalAmount.toLocaleString()}
+                </span>
+              </div>
+            </div>
+            
+            <div className="modal-body">
+              <div className="table-responsive">
+                <table className="table table-sm table-striped">
+                  <thead>
+                    <tr>
+                      <th>Entry ID</th>
+                      <th>Date</th>
+                      <th>Type</th>
+                      <th>Bank Amount</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {approvalPopup.entries.map((entry) => (
+                      <tr key={entry.entryId}>
+                        <td>
+                          <code className="small">{entry.entryId}</code>
+                        </td>
+                        <td>
+                          {new Date(entry.date).toLocaleDateString('en-IN')}
+                        </td>
+                        <td>
+                          <span className="badge bg-info">
+                            {entry.type}
+                          </span>
+                        </td>
+                        <td className="text-success fw-bold">
+                          ₹{(entry.bankAmount || 0).toLocaleString()}
+                        </td>
+                        <td>
+                          <span className="badge bg-warning">
+                            {entry.entryStatus}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <div className="modal-actions">
+              <button 
+                className="btn btn-secondary"
+                onClick={handleCancelApproval}
+              >
+                <i className="bi bi-x-circle me-1"></i>
+                Cancel
+              </button>
+              <button 
+                className="btn btn-primary"
+                onClick={handleSendForApproval}
+              >
+                <i className="bi bi-send me-1"></i>
+                Send for Approval
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
