@@ -61,13 +61,15 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         bookingEntries, 
         offDays, 
         fuelPayments, 
-        addaPayments
+        addaPayments,
+        unionPayments
       ] = await Promise.all([
         loadWithRetry(() => authService.getFareReceipts()),
         loadWithRetry(() => authService.getBookingEntries()),
         loadWithRetry(() => authService.getOffDays()),
         loadWithRetry(() => authService.getFuelPayments()),
-        loadWithRetry(() => authService.getAddaPayments())
+        loadWithRetry(() => authService.getAddaPayments()),
+        loadWithRetry(() => authService.getUnionPayments())
       ]);
 
       // Process and combine all data
@@ -275,6 +277,39 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         combinedCashBookEntries = [...combinedCashBookEntries, ...addaCashEntries];
       }
 
+      // Process Union Payments (same format as UnionPayment component)
+      if (unionPayments.success && unionPayments.data) {
+        const processedUnionPayments = unionPayments.data.map(entry => ({
+          id: entry.entryId,
+          entryId: entry.entryId,
+          timestamp: convertToTimeString(entry.timestamp),
+          date: convertToDateString(entry.date),
+          unionName: entry.unionName,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          totalAmount: entry.totalAmount || 0,
+          submittedBy: entry.submittedBy,
+          remarks: entry.remarks || "",
+          type: 'union'
+        }));
+        combinedExpenseData = [...combinedExpenseData, ...processedUnionPayments];
+
+        // Generate cash book entries from union payments
+        const unionCashEntries = processedUnionPayments.map(entry => ({
+          id: `union-${entry.entryId}`,
+          date: entry.date,
+          particulars: "Union Payment",
+          description: `Union payment - ${entry.unionName || 'Union'}`,
+          jfNo: `UNION-${entry.entryId}`,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          type: 'cr',
+          timestamp: entry.timestamp,
+          source: 'union-payment'
+        }));
+        combinedCashBookEntries = [...combinedCashBookEntries, ...unionCashEntries];
+      }
+
       // Sort all data by timestamp (newest first)
       combinedFareData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       combinedExpenseData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -292,6 +327,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         offDays: offDays.data || [],
         fuelPayments: fuelPayments.data || [],
         addaPayments: addaPayments.data || [],
+        unionPayments: unionPayments.data || [],
         totalRecords: combinedFareData.length + combinedExpenseData.length
       });
 
@@ -300,6 +336,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         fareRecords: combinedFareData.length,
         expenseRecords: combinedExpenseData.length,
         cashBookEntries: combinedCashBookEntries.length,
+        unionPayments: unionPayments.data?.length || 0,
         totalRecords: combinedFareData.length + combinedExpenseData.length
       });
 
