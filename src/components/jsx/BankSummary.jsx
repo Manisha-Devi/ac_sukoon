@@ -7,6 +7,9 @@ function BankSummary({ fareData, expenseData }) {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedEntries, setSelectedEntries] = useState([]);
+  const [entriesPerPage] = useState(10);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -68,6 +71,48 @@ function BankSummary({ fareData, expenseData }) {
   const clearFilter = () => {
     setDateFrom('');
     setDateTo('');
+    setCurrentPage(1);
+  };
+
+  // Pagination logic
+  const indexOfLastEntry = currentPage * entriesPerPage;
+  const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
+  const currentEntries = filteredData.slice(indexOfFirstEntry, indexOfLastEntry);
+  const totalPages = Math.ceil(filteredData.length / entriesPerPage);
+
+  // Handle checkbox selection
+  const handleSelectEntry = (entryId) => {
+    setSelectedEntries(prev => 
+      prev.includes(entryId) 
+        ? prev.filter(id => id !== entryId)
+        : [...prev, entryId]
+    );
+  };
+
+  // Handle select all
+  const handleSelectAll = () => {
+    const pendingEntries = currentEntries
+      .filter(entry => entry.entryStatus === 'pending')
+      .map(entry => entry.entryId);
+    
+    if (selectedEntries.length === pendingEntries.length) {
+      setSelectedEntries([]);
+    } else {
+      setSelectedEntries(pendingEntries);
+    }
+  };
+
+  // Forward selected entries for approval
+  const handleForwardForApproval = () => {
+    if (selectedEntries.length === 0) {
+      alert('Please select entries to forward for approval');
+      return;
+    }
+    
+    // Here you would call your API to forward entries
+    console.log('Forwarding entries for approval:', selectedEntries);
+    alert(`${selectedEntries.length} entries forwarded for approval!`);
+    setSelectedEntries([]);
   };
 
   // Calculate totals
@@ -157,38 +202,136 @@ function BankSummary({ fareData, expenseData }) {
         </div>
       </div>
 
-      {/* Transactions List */}
+      {/* Transactions List with Pagination */}
       <div className="transactions-list">
-        <h5>Bank Transactions</h5>
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h5>Bank Transactions</h5>
+          {selectedEntries.length > 0 && (
+            <button 
+              className="btn btn-primary btn-sm"
+              onClick={handleForwardForApproval}
+            >
+              <i className="bi bi-send"></i> Forward {selectedEntries.length} for Approval
+            </button>
+          )}
+        </div>
+        
         {filteredData.length > 0 ? (
-          <div className="table-responsive">
-            <table className="table table-striped">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Description</th>
-                  <th>Type</th>
-                  <th>Bank Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredData.map((entry, index) => (
-                  <tr key={`${entry.entryId || index}`}>
-                    <td>{new Date(entry.date).toLocaleDateString('en-IN')}</td>
-                    <td>{entry.description}</td>
-                    <td>
-                      <span className={`badge ${entry.type === 'income' ? 'bg-success' : 'bg-danger'}`}>
-                        {entry.type === 'income' ? 'Income' : 'Expense'}
-                      </span>
-                    </td>
-                    <td className={entry.type === 'income' ? 'text-success' : 'text-danger'}>
-                      ₹{(entry.bankAmount || 0).toLocaleString()}
-                    </td>
+          <>
+            <div className="table-responsive">
+              <table className="table table-striped">
+                <thead>
+                  <tr>
+                    <th width="50">
+                      <input 
+                        type="checkbox" 
+                        className="form-check-input"
+                        onChange={handleSelectAll}
+                        checked={selectedEntries.length > 0 && 
+                          selectedEntries.length === currentEntries.filter(entry => entry.entryStatus === 'pending').length}
+                      />
+                    </th>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th>Bank Amount</th>
+                    <th>Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {currentEntries.map((entry, index) => (
+                    <tr key={`${entry.entryId || index}`}>
+                      <td>
+                        {entry.entryStatus === 'pending' ? (
+                          <input 
+                            type="checkbox" 
+                            className="form-check-input"
+                            checked={selectedEntries.includes(entry.entryId)}
+                            onChange={() => handleSelectEntry(entry.entryId)}
+                          />
+                        ) : entry.entryStatus === 'waiting' ? (
+                          <i className="bi bi-lock-fill text-warning" title="Waiting for approval"></i>
+                        ) : entry.entryStatus === 'approved' ? (
+                          <i className="bi bi-check-circle-fill text-success" title="Approved"></i>
+                        ) : (
+                          <span className="text-muted">-</span>
+                        )}
+                      </td>
+                      <td>{new Date(entry.date).toLocaleDateString('en-IN')}</td>
+                      <td>{entry.description}</td>
+                      <td>
+                        <span className={`badge ${entry.type === 'income' ? 'bg-success' : 'bg-danger'}`}>
+                          {entry.type === 'income' ? 'Income' : 'Expense'}
+                        </span>
+                      </td>
+                      <td className={entry.type === 'income' ? 'text-success' : 'text-danger'}>
+                        ₹{(entry.bankAmount || 0).toLocaleString()}
+                      </td>
+                      <td>
+                        <span className={`badge ${
+                          entry.entryStatus === 'pending' ? 'bg-warning' :
+                          entry.entryStatus === 'waiting' ? 'bg-info' : 
+                          entry.entryStatus === 'approved' ? 'bg-success' : 'bg-secondary'
+                        }`}>
+                          {entry.entryStatus || 'pending'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <nav aria-label="Transaction pagination">
+                <ul className="pagination justify-content-center">
+                  <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                    <button 
+                      className="page-link" 
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      Previous
+                    </button>
+                  </li>
+                  
+                  {[...Array(totalPages)].map((_, index) => {
+                    const pageNumber = index + 1;
+                    return (
+                      <li key={pageNumber} className={`page-item ${currentPage === pageNumber ? 'active' : ''}`}>
+                        <button 
+                          className="page-link" 
+                          onClick={() => setCurrentPage(pageNumber)}
+                        >
+                          {pageNumber}
+                        </button>
+                      </li>
+                    );
+                  })}
+                  
+                  <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                    <button 
+                      className="page-link" 
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            )}
+
+            <div className="d-flex justify-content-between align-items-center mt-3">
+              <small className="text-muted">
+                Showing {indexOfFirstEntry + 1} to {Math.min(indexOfLastEntry, filteredData.length)} of {filteredData.length} entries
+              </small>
+              <small className="text-muted">
+                {selectedEntries.length} selected
+              </small>
+            </div>
+          </>
         ) : (
           <div className="no-data text-center py-4">
             <i className="bi bi-inbox display-4 text-muted"></i>
