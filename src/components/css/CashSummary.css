@@ -3,6 +3,29 @@
   background: #f8f9fa;
   min-height: 100vh;
   padding: 2rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Fix scroll positioning */
+.cash-summary-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cash-summary-container::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.1);
+  border-radius: 10px;
+}
+
+.cash-summary-container::-webkit-scrollbar-thumb {
+  background: rgba(40, 167, 69, 0.5);
+  border-radius: 10px;
+}
+
+.cash-summary-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(40, 167, 69, 0.8);
 }
 
 .summary-header {
