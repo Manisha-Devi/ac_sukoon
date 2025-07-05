@@ -49,8 +49,22 @@
 }
 
 .simple-sync-indicator.synced {
-  background: linear-gradient(45deg, #a8edea 0%, #fed6e3 100%);
   color: #28a745;
+}
+
+/* Processing button icon centering */
+.service-entry-btn .bi-arrow-repeat {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  text-align: center;
+  line-height: 1;
+}
+
+/* Sync indicator icon centering */
+.simple-sync-indicator i {
+  display: block;
+  line-height: 40px;
+  text-align: center;
 }
 
 @keyframes spin {

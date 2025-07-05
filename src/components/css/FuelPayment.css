@@ -1,4 +1,3 @@
-
 :root {
   --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --fuel-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
@@ -327,15 +326,15 @@
   .fuel-form-card {
     padding: 20px;
   }
-  
+
   .summary-card .card-body {
     padding: 15px;
   }
-  
+
   .button-group {
     flex-direction: column;
   }
-  
+
   .button-group .btn {
     width: 100%;
   }
@@ -357,7 +356,7 @@
   .date-input {
     padding: 0.65rem;
   }
-  
+
   .amount-row {
     flex-direction: column;
     gap: 2px;
@@ -370,4 +369,26 @@
   margin-top: 0.25rem;
   font-size: 0.875em;
   color: #dc3545;
+}
+
+/* Processing button icon centering */
+.fuel-entry-btn .bi-arrow-repeat {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  text-align: center;
+  line-height: 1;
+}
+
+/* Sync indicator icon centering */
+.simple-sync-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.simple-sync-indicator i {
+  display: block;
+  line-height: 40px;
+  text-align: center;
 }

@@ -1,4 +1,3 @@
-
 :root {
   --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --adda-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -68,6 +67,8 @@
   border-radius: 25px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   gap: 8px;
   font-weight: 500;
   transition: all 0.3s ease;
@@ -87,6 +88,9 @@
 
 .simple-sync-indicator i {
   font-size: 16px;
+  display: block;
+  line-height: 40px;
+  text-align: center;
 }
 
 .simple-sync-indicator.syncing i {
@@ -241,22 +245,21 @@
 }
 
 .adda-entry-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
   background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
   color: white;
 }
 
-.adda-entry-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
+/* Processing button icon centering */
+.adda-entry-btn .bi-arrow-repeat {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  text-align: center;
+  line-height: 1;
 }
 
-.adda-entry-btn i {
-  margin-right: 8px;
-}
-
+/* Summary Cards */
 .button-group {
   display: flex;
   align-items: center;
@@ -416,15 +419,15 @@
   .adda-form-card {
     padding: 20px;
   }
-  
+
   .summary-card .card-body {
     padding: 15px;
   }
-  
+
   .button-group {
     flex-direction: column;
   }
-  
+
   .button-group .btn {
     width: 100%;
   }
@@ -460,7 +463,7 @@
   .date-input {
     padding: 0.65rem;
   }
-  
+
   .amount-row {
     flex-direction: column;
     gap: 2px;
