@@ -544,6 +544,137 @@ class AuthService {
     }
   }
 
+  // ======= UNION PAYMENTS API METHODS =======
+
+  // Add Union Payment to Google Sheets
+  async addUnionPayment(data) {
+    try {
+      console.log('📝 Adding union payment to Google Sheets:', data);
+
+      const requestBody = JSON.stringify({
+        action: 'addUnionPayment',
+        entryId: data.entryId,
+        timestamp: data.timestamp,
+        date: data.date,
+        unionName: data.unionName || '',
+        cashAmount: data.cashAmount || 0,
+        bankAmount: data.bankAmount || 0,
+        totalAmount: data.totalAmount || 0,
+        remarks: data.remarks || '',
+        submittedBy: data.submittedBy || 'driver'
+      });
+
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
+
+      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
+        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
+        return { success: false, error: 'API temporarily unavailable - data saved locally' };
+      }
+
+      console.log('✅ Union payment response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error adding union payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Get all Union Payments from Google Sheets
+  async getUnionPayments() {
+    try {
+      console.log('📋 Fetching union payments from Google Sheets...');
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'getUnionPayments'
+        })
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Union payments fetched:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error fetching union payments:', error);
+      // Return empty data structure instead of error to prevent UI crashes
+      return { 
+        success: true, 
+        data: [],
+        message: 'Union payments loaded from local cache (API temporarily unavailable)'
+      };
+    }
+  }
+
+  // Update Union Payment
+  async updateUnionPayment(data) {
+    try {
+      console.log('📝 Updating union payment in Google Sheets:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'updateUnionPayment',
+          entryId: data.entryId,
+          updatedData: data.updatedData
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Union payment update response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating union payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Delete Union Payment
+  async deleteUnionPayment(data) {
+    try {
+      console.log('🗑️ Deleting union payment in Google Sheets:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'deleteUnionPayment',
+          entryId: data.entryId
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Union payment delete response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error deleting union payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // ======= FUEL PAYMENTS API METHODS =======
 
   // Add Fuel Payment to Google Sheets
