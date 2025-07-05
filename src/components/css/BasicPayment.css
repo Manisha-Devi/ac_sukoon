@@ -260,60 +260,6 @@
   color: white;
 }
 
-.entry-actions {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.entry-status-indicator {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.entry-status-indicator .badge {
-  font-size: 0.7rem;
-  padding: 0.25rem 0.5rem;
-}
-
-.entry-status-indicator .badge small {
-  font-size: 0.6rem;
-  margin-top: 2px;
-}
-
-.approval-btn {
-  background: linear-gradient(135deg, #28a745, #20c997);
-  color: white;
-  border: none;
-  padding: 0.25rem 0.5rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  transition: all 0.3s ease;
-}
-
-.approval-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
-  color: white;
-}
-
-.entry-item.waiting {
-  border-left: 4px solid #17a2b8;
-  background: rgba(23, 162, 184, 0.05);
-}
-
-.entry-item.approved {
-  border-left: 4px solid #28a745;
-  background: rgba(40, 167, 69, 0.05);
-}
-
-.entry-item.pending {
-  border-left: 4px solid #ffc107;
-  background: rgba(255, 193, 7, 0.05);
-}
-
 @media (max-width: 575.98px) {
   .basic-payment-header {
     padding: 1.5rem;

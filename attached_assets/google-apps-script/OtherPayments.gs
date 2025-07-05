@@ -5,7 +5,7 @@
 /**
  * Add new Other Payment
  * Sheet Columns: A=Timestamp, B=Date, C=PaymentType, D=Description, E=CashAmount, 
- *                F=BankAmount, G=TotalAmount, H=Category, I=SubmittedBy, J=EntryType, K=EntryId, L=EntryStatus, M=ApprovedBy
+ *                F=BankAmount, G=TotalAmount, H=Category, I=SubmittedBy, J=EntryType, K=EntryId
  * @param {Object} data - Other payment data
  * @returns {Object} Success/error response with entry details
  */
@@ -24,9 +24,9 @@ function addOtherPayment(data) {
         .insertSheet(SHEET_NAMES.OTHER_PAYMENTS);
 
       // Add headers exactly as specified
-      sheet.getRange(1, 1, 1, 13).setValues([[
+      sheet.getRange(1, 1, 1, 11).setValues([[
         "Timestamp", "Date", "PaymentType", "Description", "CashAmount", 
-        "BankAmount", "TotalAmount", "Category", "SubmittedBy", "EntryType", "EntryId", "EntryStatus", "ApprovedBy"
+        "BankAmount", "TotalAmount", "Category", "SubmittedBy", "EntryType", "EntryId"
       ]]);
     }
 
@@ -41,7 +41,7 @@ function addOtherPayment(data) {
     sheet.insertRowBefore(2);
 
     // Add data to the new row
-    sheet.getRange(2, 1, 1, 13).setValues([[
+    sheet.getRange(2, 1, 1, 11).setValues([[
       timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
       data.date,                     // B: Date from frontend
       data.paymentDetails || "",     // C: Payment Type
@@ -53,8 +53,6 @@ function addOtherPayment(data) {
       data.submittedBy || "",        // I: Submitted By
       "other",                       // J: Entry Type (static)
       entryId,                       // K: Entry ID
-      "pending",                     // L: Entry Status (default pending)
-      ""                             // M: Approved By (initially empty)
     ]]);
 
     console.log("✅ Other payment added successfully with ID:", entryId);
@@ -116,8 +114,6 @@ function getOtherPayments() {
         submittedBy: row[8],                  // Submitted by from column I
         entryType: row[9],                    // Entry type from column J
         rowIndex: index + 2,                  // Store row index for updates/deletes
-        entryStatus: row[11],                  // Entry status from column L
-        approvedBy: row[12]                   // Approved by from column M
       };
     });
 
@@ -198,13 +194,6 @@ function updateOtherPayment(data) {
     }
     if (updatedData.vendor !== undefined) {
       sheet.getRange(rowIndex, 8).setValue(updatedData.vendor);
-    }
-    //Added EntryStatus and ApprovedBy update
-    if (updatedData.entryStatus !== undefined) {
-      sheet.getRange(rowIndex, 12).setValue(updatedData.entryStatus);
-    }
-    if (updatedData.approvedBy !== undefined) {
-      sheet.getRange(rowIndex, 13).setValue(updatedData.approvedBy);
     }
 
     console.log(`✅ Other payment updated successfully - ID: ${entryId}, Row: ${rowIndex}`);

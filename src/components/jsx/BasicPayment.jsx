@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import "../css/BasicPayment.css";
 import authService from '../../services/authService.js';
@@ -61,8 +62,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
   const [activeTab, setActiveTab] = useState("fuel");
   const [editingEntry, setEditingEntry] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-
+  
   // Form data for different payment types
   const [fuelFormData, setFuelFormData] = useState({
     cashAmount: "",
@@ -121,9 +121,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
             totalAmount: entry.totalAmount || 0,
             submittedBy: entry.submittedBy,
             remarks: entry.remarks || "",
-            type: 'fuel',
-            entryStatus: entry.entryStatus || 'pending',
-            approvedBy: entry.approvedBy || ''
+            type: 'fuel'
           }));
           allPaymentData = [...allPaymentData, ...fuelData];
 
@@ -156,9 +154,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
             totalAmount: entry.totalAmount || 0,
             submittedBy: entry.submittedBy,
             remarks: entry.remarks || "",
-            type: 'adda',
-            entryStatus: entry.entryStatus || 'pending',
-            approvedBy: entry.approvedBy || ''
+            type: 'adda'
           }));
           allPaymentData = [...allPaymentData, ...addaData];
 
@@ -191,9 +187,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
             totalAmount: entry.totalAmount || 0,
             submittedBy: entry.submittedBy,
             remarks: entry.remarks || "",
-            type: 'union',
-            entryStatus: entry.entryStatus || 'pending',
-            approvedBy: entry.approvedBy || ''
+            type: 'union'
           }));
           allPaymentData = [...allPaymentData, ...unionData];
 
@@ -249,31 +243,6 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
 
     loadData();
   }, [setExpenseData, setTotalExpenses, setCashBookEntries]);
-
-  const formatEntry = (entry) => {
-    const date = new Date(entry.date).toLocaleDateString('en-IN');
-    const time = entry.timestamp || '';
-
-    // Get current user for permission checks
-    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const currentUserName = currentUser.fullName || currentUser.username;
-    const isAdmin = currentUser.role === 'admin' || currentUser.role === 'manager';
-
-    // Determine if entry can be edited
-    const canEdit = entry.entryStatus === 'pending' && entry.submittedBy === currentUserName;
-    const isWaiting = entry.entryStatus === 'waiting';
-    const isApproved = entry.entryStatus === 'approved';
-
-    return {
-      ...entry,
-      displayDate: date,
-      displayTime: time,
-      canEdit: canEdit,
-      isWaiting: isWaiting,
-      isApproved: isApproved,
-      showToUser: entry.entryStatus !== 'approved' || isAdmin
-    };
-  };
 
   // Calculate totals for summary - only for current user
   const calculateSummaryTotals = () => {
@@ -438,8 +407,6 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           totalAmount: totalAmount,
           date: dateOnly,
           submittedBy: submittedBy,
-          entryStatus: 'pending',
-          approvedBy: '',
           ...(activeTab === 'fuel' && {
             pumpName: fuelFormData.pumpName,
             liters: fuelFormData.liters,
@@ -491,8 +458,6 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           bankAmount: bankAmount,
           totalAmount: totalAmount,
           submittedBy: submittedBy,
-          entryStatus: 'pending',
-          approvedBy: '',
           ...(activeTab === 'fuel' && {
             pumpName: fuelFormData.pumpName,
             liters: fuelFormData.liters,
@@ -530,163 +495,62 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
     }
   };
 
-  const handleDelete = async (entryId, entryType) => {
-    if (!window.confirm('Are you sure you want to delete this entry?')) {
-      return;
-    }
-
+  const handleDeleteEntry = async (entryId) => {
     try {
-      setIsProcessing(true);
-      let result;
+      const entryToDelete = expenseData.find(entry => entry.entryId === entryId);
 
-      if (entryType === 'fuel') {
-        result = await authService.deleteFuelPayment({ entryId });
-      } else if (entryType === 'adda') {
-        result = await authService.deleteAddaPayment({ entryId });
-      } else if (entryType === 'union') {
-        result = await authService.deleteUnionPayment({ entryId });
+      if (!entryToDelete) {
+        alert('Entry not found!');
+        return;
       }
 
-      if (result.success) {
-        setExpenseData(prev => prev.filter(entry => 
-          (entry.entryId || entry.id) !== entryId
-        ));
-        alert('Entry deleted successfully!');
-      } else {
-        alert('Error deleting entry: ' + result.error);
+      console.log('🗑️ Deleting payment entry:', { entryId, type: entryToDelete.type });
+
+      // DELETE: First update React state immediately for better UX
+      const updatedData = expenseData.filter(entry => entry.entryId !== entryId);
+      setExpenseData(updatedData);
+
+      if (entryToDelete && entryToDelete.totalAmount) {
+        setTotalExpenses((prev) => prev - entryToDelete.totalAmount);
       }
+
+      // Remove corresponding cash book entry
+      setCashBookEntries(prev => prev.filter(entry => 
+        !(entry.source === `${entryToDelete.type}-payment` && entry.jfNo?.includes(entryId.toString()))
+      ));
+
+      console.log('✅ Entry removed from React state immediately');
+
+      // Then sync deletion to Google Sheets in background
+      try {
+        let deleteResult;
+        if (entryToDelete.type === 'fuel') {
+          deleteResult = await authService.deleteFuelPayment({ entryId: entryToDelete.entryId });
+        } else if (entryToDelete.type === 'adda') {
+          deleteResult = await authService.deleteAddaPayment({ entryId: entryToDelete.entryId });
+        } else if (entryToDelete.type === 'union') {
+          deleteResult = await authService.deleteUnionPayment({ entryId: entryToDelete.entryId });
+        }
+
+        if (deleteResult.success) {
+          console.log('✅ Entry successfully deleted from Google Sheets');
+        } else {
+          console.warn('⚠️ Delete from Google Sheets failed but entry removed locally:', deleteResult.error);
+        }
+      } catch (syncError) {
+        console.warn('⚠️ Background delete sync failed but entry removed locally:', syncError.message);
+      }
+
     } catch (error) {
-      console.error('Error deleting entry:', error);
-      alert('Error deleting entry: ' + error.message);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleSendForApproval = async (entry) => {
-    if (!window.confirm('Send this entry for approval? You will not be able to edit it until manager reviews.')) {
-      return;
-    }
-
-    try {
-      setIsProcessing(true);
-      let result;
-
-      if (entry.type === 'fuel') {
-        result = await authService.sendFuelPaymentForApproval({ entryId: entry.entryId });
-      } else if (entry.type === 'adda') {
-        result = await authService.sendAddaPaymentForApproval({ entryId: entry.entryId });
-      } else if (entry.type === 'union') {
-        result = await authService.sendUnionPaymentForApproval({ entryId: entry.entryId });
-      }
-
-      if (result.success) {
-        // Update local state
-        setExpenseData(prev => prev.map(item => 
-          (item.entryId || item.id) === (entry.entryId || entry.id)
-            ? { ...item, entryStatus: 'waiting' }
-            : item
-        ));
-        alert('Entry sent for approval successfully!');
-      } else {
-        alert('Error sending for approval: ' + result.error);
-      }
-    } catch (error) {
-      console.error('Error sending for approval:', error);
-      alert('Error sending for approval: ' + error.message);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleApprove = async (entry) => {
-    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const approverName = currentUser.fullName || currentUser.username;
-
-    if (!window.confirm(`Approve this entry? This action will be recorded as approved by ${approverName}.`)) {
-      return;
-    }
-
-    try {
-      setIsProcessing(true);
-      let result;
-
-      if (entry.type === 'fuel') {
-        result = await authService.approveFuelPayment({ 
-          entryId: entry.entryId, 
-          approvedBy: approverName 
-        });
-      } else if (entry.type === 'adda') {
-        result = await authService.approveAddaPayment({ 
-          entryId: entry.entryId, 
-          approvedBy: approverName 
-        });
-      } else if (entry.type === 'union') {
-        result = await authService.approveUnionPayment({ 
-          entryId: entry.entryId, 
-          approvedBy: approverName 
-        });
-      }
-
-      if (result.success) {
-        // Update local state
-        setExpenseData(prev => prev.map(item => 
-          (item.entryId || item.id) === (entry.entryId || entry.id)
-            ? { ...item, entryStatus: 'approved', approvedBy: approverName }
-            : item
-        ));
-        alert('Entry approved successfully!');
-      } else {
-        alert('Error approving entry: ' + result.error);
-      }
-    } catch (error) {
-      console.error('Error approving entry:', error);
-      alert('Error approving entry: ' + error.message);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleReject = async (entry) => {
-    if (!window.confirm('Reject and resend this entry back to user for editing?')) {
-      return;
-    }
-
-    try {
-      setIsProcessing(true);
-      let result;
-
-      if (entry.type === 'fuel') {
-        result = await authService.rejectFuelPayment({ entryId: entry.entryId });
-      }else if (entry.type === 'adda') {
-        result = await authService.rejectAddaPayment({ entryId: entry.entryId });
-      }else if (entry.type === 'union') {
-        result = await authService.rejectUnionPayment({ entryId: entry.entryId });
-      }
-
-      if (result.success) {
-        // Update local state
-        setExpenseData(prev => prev.map(item => 
-          (item.entryId || item.id) === (entry.entryId || entry.id)
-            ? { ...item, entryStatus: 'pending', approvedBy: '' }
-            : item
-        ));
-        alert('Entry rejected and sent back to user for editing!');
-      } else {
-        alert('Error rejecting entry: ' + result.error);
-      }
-    } catch (error) {
-      console.error('Error rejecting entry:', error);
-      alert('Error rejecting entry: ' + error.message);
-    } finally {
-      setIsProcessing(false);
+      console.error('❌ Error in delete process:', error);
+      alert('Error deleting entry. Please try again.');
     }
   };
 
   const handleEditEntry = (entry) => {
     setEditingEntry(entry);
     setActiveTab(entry.type);
-
+    
     if (entry.type === 'fuel') {
       setFuelFormData({
         cashAmount: entry.cashAmount.toString(),
@@ -741,13 +605,6 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
   };
 
   const allPaymentEntries = getCurrentUserPaymentEntries();
-
-  // Filter entries based on active tab and user permissions
-  const filteredEntries = expenseData
-    .filter(entry => entry.type === activeTab)
-    .map(formatEntry)
-    .filter(entry => entry.showToUser) // Hide approved entries from regular users
-    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   return (
     <div className="basic-payment-container">
@@ -808,7 +665,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           </div>
         )}
 
-
+        
 
         {/* Tab Navigation */}
         <div className="tab-navigation mb-4">
@@ -870,8 +727,8 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                   <input
                     type="text"
                     className="form-control"
-                    value={activeTab === 'fuel' ? getCurrentFormData().pumpName : ```text
-activeTab === 'adda' ? getCurrentFormData().addaName : 
+                    value={activeTab === 'fuel' ? getCurrentFormData().pumpName : 
+                           activeTab === 'adda' ? getCurrentFormData().addaName : 
                            getCurrentFormData().unionName}
                     onChange={(e) => {
                       const field = activeTab === 'fuel' ? 'pumpName' : 
@@ -986,7 +843,7 @@ activeTab === 'adda' ? getCurrentFormData().addaName :
           <div className="recent-entries mt-4">
             <h4>Recent Entries</h4>
             <div className="row">
-              {filteredEntries.slice(0, 6).map((entry) => (
+              {allPaymentEntries.slice(0, 6).map((entry) => (
                 <div key={entry.entryId} className="col-md-6 col-lg-4 mb-3">
                   <div className="entry-card">
                     <div className="card-body">
@@ -995,85 +852,23 @@ activeTab === 'adda' ? getCurrentFormData().addaName :
                           {entry.type === 'fuel' ? 'Fuel' : 
                            entry.type === 'adda' ? 'Adda' : 'Union'}
                         </span>
-                        
-                        
-<div className="entry-actions">
-                          {/* Status Display */}
-                          <div className="entry-status-indicator me-2">
-                            {entry.entryStatus === 'pending' && (
-                              <span className="badge bg-warning">
-                                <i className="bi bi-clock"></i> Pending
-                              </span>
-                            )}
-                            {entry.entryStatus === 'waiting' && (
-                              <span className="badge bg-info">
-                                <i className="bi bi-hourglass-split"></i> Waiting Approval
-                              </span>
-                            )}
-                            {entry.entryStatus === 'approved' && (
-                              <span className="badge bg-success">
-                                <i className="bi bi-check-circle"></i> Approved
-                                {entry.approvedBy && <small className="d-block">by {entry.approvedBy}</small>}
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Action Buttons */}
-                          {entry.canEdit && (
-                            <>
-                              <button
-                                className="btn btn-sm btn-outline-primary edit-btn me-1"
-                                onClick={() => handleEditEntry(entry)}
-                              >
-                                <i className="bi bi-pencil"></i>
-                              </button>
-                              <button
-                                className="btn btn-sm btn-outline-danger delete-btn me-1"
-                                onClick={() => handleDeleteEntry(entry.entryId)}
-                              >
-                                <i className="bi bi-trash"></i>
-                              </button>
-                              {entry.entryStatus === 'pending' && (
-                                <button
-                                  className="btn btn-sm btn-success approval-btn"
-                                  onClick={() => handleSendForApproval(entry)}
-                                >
-                                  <i className="bi bi-send"></i>
-                                </button>
-                              )}
-                            </>
-                          )}
-
-                          {entry.isWaiting && (
-                            <span className="badge bg-secondary">
-                              <i className="bi bi-lock"></i> Locked
-                            </span>
-                          )}
-
-                          {/* Admin Controls */}
-                          {(() => {
-                            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                            const isAdmin = currentUser.role === 'admin' || currentUser.role === 'manager';
-
-                            return isAdmin && entry.entryStatus === 'waiting' && (
-                              <>
-                                <button
-                                  className="btn btn-sm btn-success me-1"
-                                  onClick={() => handleApprove(entry)}
-                                >
-                                  <i className="bi bi-check-lg"></i> Approve
-                                </button>
-                                <button
-                                  className="btn btn-sm btn-outline-warning"
-                                  onClick={() => handleReject(entry)}
-                                >
-                                  <i className="bi bi-arrow-counterclockwise"></i> Resend
-                                </button>
-                              </>
-                            );
-                          })()}
+                        <div className="entry-actions">
+                          <button 
+                            className="btn btn-sm btn-edit" 
+                            onClick={() => handleEditEntry(entry)}
+                            title="Edit Entry"
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                          <button 
+                            className="btn btn-sm btn-delete" 
+                            onClick={() => handleDeleteEntry(entry.entryId)}
+                            title="Delete Entry"
+                          >
+                            <i className="bi bi-trash"></i>
+                          </button>
                         </div>
-</div>
+                      </div>
                       <div className="entry-date">
                         <small className="text-muted">
                           <div>{entry.date}</div>
