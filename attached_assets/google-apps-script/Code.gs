@@ -78,6 +78,9 @@ function doPost(e) {
       case "deleteBookingEntry":
         result = deleteBookingEntry(data);
         break;
+      case "updateBookingEntryStatus":
+        result = updateBookingEntryStatus(data);
+        break;
 
       // ==================== OFF DAYS ====================
       case "addOffDay":
