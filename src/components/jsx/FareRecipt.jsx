@@ -574,13 +574,13 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     setOffDayData({ date: "", reason: "" });
   };
 
-  // Calculate totals for summary - only for current user
+  // Calculate totals for summary - only for current user and exclude approved entries
   const calculateSummaryTotals = () => {
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     const currentUserName = currentUser.fullName || currentUser.username;
 
     const userFareData = fareData.filter(entry => 
-      entry.submittedBy === currentUserName
+      entry.submittedBy === currentUserName && entry.entryStatus !== 'approved'
     );
 
     const totalCash = userFareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
@@ -621,12 +621,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           </div>
         </div>
 
-        {/* Summary Cards - Only show when user has entries */}
+        {/* Summary Cards - Only show when user has non-approved entries */}
         {(() => {
           const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
           const currentUserName = currentUser.fullName || currentUser.username;
           const userEntries = fareData.filter(entry => 
-            entry.submittedBy === currentUserName
+            entry.submittedBy === currentUserName && entry.entryStatus !== 'approved'
           );
 
           return userEntries.length > 0 ? (
@@ -990,7 +990,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
                           {(entry.entryStatus === 'cash' || entry.entryStatus === 'bank') && (
                             <span className={`status-badge status-locked`}>
-                              <i className="bi bi-lock-fill"></i> {entry.entryStatus?.toUpperCase()}
+                              <i className="bi bi-lock-fill"></i>
                             </span>
                           )}
 
