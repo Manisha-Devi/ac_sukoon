@@ -86,7 +86,7 @@ function App() {
         // Handle different expense types properly
         let description = '';
         let particulars = '';
-        
+
         switch(expenseEntry.type) {
           case 'fuel':
             description = `Fuel Payment - ${expenseEntry.pumpName || 'Fuel Station'}`;
@@ -404,7 +404,14 @@ function App() {
             />
           )}
           {activeTab === "bonus-calc" && <BonusCalculator />}
-          {activeTab === "analytics" && <Analytics />}
+          {activeTab === "analytics" && (
+            <Analytics 
+              fareData={fareData} 
+              expenseData={expenseData} 
+              totalEarnings={totalEarnings} 
+              totalExpenses={totalExpenses} 
+            />
+          )}
           {activeTab === "cash-book" && (
             <CashBook
               cashBookEntries={cashBookEntries}
