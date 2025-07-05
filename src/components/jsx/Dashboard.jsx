@@ -468,7 +468,12 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
       
       // Trigger state update for BankSummary if callback exists
       if (window.updateBankData) {
-        window.updateBankData(combinedBankData);
+        window.updateBankData(bankSummaryData);
+      }
+      
+      // Also trigger App.jsx to update bankData state
+      if (window.setBankData) {
+        window.setBankData(bankSummaryData);
       }
 
       // Update local state for dashboard display

@@ -24,11 +24,19 @@ function BankSummary({ bankData }) {
     filterUserData();
   }, [bankData, dateFrom, dateTo, currentUser]);
 
+  // Watch for bankData prop changes and refresh
+  useEffect(() => {
+    console.log('🔄 BankSummary: bankData props updated, refreshing...');
+    if (bankData && bankData.length > 0) {
+      filterUserData();
+    }
+  }, [bankData]);
+
   const filterUserData = () => {
     if (!currentUser || !bankData) return;
 
     const currentUserName = currentUser.fullName || currentUser.username;
-    
+
     console.log('👤 Filtering bank data for user:', currentUserName);
     console.log('📊 Total bank entries available:', bankData.length);
 
@@ -148,37 +156,37 @@ function BankSummary({ bankData }) {
   const handleSendForApproval = async () => {
     try {
       console.log('🔄 Sending entries for bank approval...');
-      
+
       // STEP 1: Update local filteredData first for immediate UI update
       const updatedLocalData = filteredData.map(entry => {
         const isSelectedEntry = approvalPopup.entries.some(selectedEntry => 
           selectedEntry.entryId === entry.entryId
         );
-        
+
         if (isSelectedEntry) {
           return { ...entry, entryStatus: 'bank' };
         }
         return entry;
       });
-      
+
       // Update local state immediately
       setFilteredData(updatedLocalData);
-      
+
       console.log('✅ Local filteredData updated immediately');
-      
+
       // Close popup and clear selections immediately
       setApprovalPopup({ show: false, entries: [], totalAmount: 0, count: 0 });
       setSelectedEntries([]);
-      
+
       alert(`${approvalPopup.count} entries successfully forwarded for bank approval!`);
-      
+
       // STEP 2: Update Google Sheets in background (don't await)
       approvalPopup.entries.forEach(async (entry) => {
         try {
           console.log(`🔧 Background sync for entry: ${entry.entryId}, type: ${entry.type}`);
-          
+
           let result;
-          
+
           if (entry.type === 'daily' || entry.type === 'fare') {
             // Fare Receipt background sync
             result = await authService.updateFareReceiptStatus({
@@ -194,18 +202,18 @@ function BankSummary({ bankData }) {
               approverName: ''
             });
           }
-          
+
           if (result && result.success) {
             console.log(`✅ Background sync successful for ${entry.entryId}`);
           } else {
             console.warn(`⚠️ Background sync failed for ${entry.entryId}:`, result?.error);
           }
-          
+
         } catch (syncError) {
           console.error(`❌ Background sync error for ${entry.entryId}:`, syncError);
         }
       });
-      
+
       // STEP 3: Trigger global refresh in background (don't await)
       if (window.refreshAllData) {
         setTimeout(() => {
@@ -214,7 +222,7 @@ function BankSummary({ bankData }) {
           });
         }, 2000); // Refresh after 2 seconds
       }
-      
+
     } catch (error) {
       console.error('❌ Error in approval process:', error);
       alert('Error processing entries: ' + error.message);
@@ -240,6 +248,14 @@ function BankSummary({ bankData }) {
   useEffect(() => {
     filterUserData();
   }, [bankData, dateFrom, dateTo, currentUser]);
+
+  // Watch for bankData prop changes and refresh
+  useEffect(() => {
+    console.log('🔄 BankSummary: bankData props updated, refreshing...');
+    if (bankData && bankData.length > 0) {
+      filterUserData();
+    }
+  }, [bankData]);
 
   // Listen for centralized refresh events
   useEffect(() => {
@@ -478,7 +494,7 @@ function BankSummary({ bankData }) {
                 </span>
               </div>
             </div>
-            
+
             <div className="modal-body">
               <div className="table-responsive">
                 <table className="table table-sm table-striped">
@@ -519,7 +535,7 @@ function BankSummary({ bankData }) {
                 </table>
               </div>
             </div>
-            
+
             <div className="modal-actions">
               <button 
                 className="btn btn-secondary"

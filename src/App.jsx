@@ -33,6 +33,7 @@ function App() {
     expenseRecords: 0,
     lastSync: null
   });
+  const [bankData, setBankData] = useState([]);
 
   const handleLogin = (userData) => {
     setUser(userData);
@@ -102,6 +103,14 @@ function App() {
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Expose setBankData globally for Dashboard component
+  useEffect(() => {
+    window.setBankData = setBankData;
+    return () => {
+      delete window.setBankData;
+    };
   }, []);
 
   // Generate cash book entries whenever fareData or expenseData changes
@@ -495,7 +504,7 @@ function App() {
           )}
           {activeTab === "bank-summary" && (
             <BankSummary 
-              bankData={window.bankData || []}
+              bankData={bankData}
             />
           )}
         </div>
