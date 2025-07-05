@@ -391,8 +391,21 @@ function DataSummary({ fareData, expenseData }) {
 
   const userRole = currentUser?.role;
 
-  // Only allow Manager and Admin access
-  if (currentUser && (!userRole || (userRole !== 'Manager' && userRole !== 'Admin'))) {
+  // Show loading while checking user data
+  if (!currentUser) {
+    return (
+      <div className="data-approval-container">
+        <div className="loading-spinner">
+          <i className="bi bi-arrow-clockwise spin"></i>
+          <p>Loading user information...</p>
+          <small className="text-muted">Checking localStorage for user data...</small>
+        </div>
+      </div>
+    );
+  }
+
+  // Check user permission after all hooks are executed
+  if (userRole !== 'Manager' && userRole !== 'Admin') {
     return (
       <div className="data-approval-container">
         <div className="container-fluid">
@@ -400,6 +413,29 @@ function DataSummary({ fareData, expenseData }) {
             <h4><i className="bi bi-exclamation-triangle"></i> Access Denied</h4>
             <p>You don't have permission to access this page.</p>
             <p>Only <strong>Manager</strong> and <strong>Admin</strong> can view the Data Summary.</p>
+
+            <hr />
+            <div className="debug-info">
+              <h6>🔍 Debug Information:</h6>
+              <p><strong>Current Role:</strong> <code>{userRole || 'undefined'}</code></p>
+              <p><strong>Username:</strong> <code>{currentUser.username || 'undefined'}</code></p>
+              <p><strong>Full Name:</strong> <code>{currentUser.fullName || 'undefined'}</code></p>
+              <p><strong>User Type:</strong> <code>{currentUser.userType || 'undefined'}</code></p>
+              <p><strong>Is Authenticated:</strong> <code>{String(currentUser.isAuthenticated)}</code></p>
+              <p><strong>User Object:</strong> <code>{JSON.stringify(currentUser, null, 2)}</code></p>
+            </div>
+
+            <div className="mt-3">
+              <button 
+                className="btn btn-secondary btn-sm"
+                onClick={() => {
+                  console.log('🔍 Full localStorage user data:', localStorage.getItem('user'));
+                  console.log('👤 Current user object:', currentUser);
+                }}
+              >
+                <i className="bi bi-bug"></i> Log Debug Info to Console
+              </button>
+            </div>
           </div>
         </div>
       </div>
