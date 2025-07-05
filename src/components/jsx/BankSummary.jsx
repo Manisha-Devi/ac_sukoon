@@ -264,6 +264,8 @@ function BankSummary({ fareData, expenseData }) {
                     </tr>
                   ))}
                 </tbody>
+              </table>
+            </div>
 </old_str>
               </table>
             </div>
