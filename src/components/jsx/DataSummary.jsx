@@ -421,7 +421,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
                         const currentUserName = currentUser.fullName || currentUser.username;
                         return expenseData.filter(entry => 
-                          entry.type === 'fees' && (
+                          (entry.type === 'fees' || entry.type === 'adda') && (
                             entry.submittedBy === currentUserName || 
                             (!entry.submittedBy && entry.type)
                           )
@@ -451,7 +451,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
                         const currentUserName = currentUser.fullName || currentUser.username;
                         return expenseData.filter(entry => 
-                          entry.type === 'fees' && (
+                          (entry.type === 'fees' || entry.type === 'adda') && (
                             entry.submittedBy === currentUserName || 
                             (!entry.submittedBy && entry.type)
                           )
@@ -475,34 +475,34 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                     </div>
                   </div>
                 </div>
-                {expenseData.filter(entry => entry.type === 'fees').length > 0 && (
-                  <div className="recent-entries-preview">
-                    <h6>Recent Entries:</h6>
-                    {(() => {
-                      // Get current user info for filtering
-                      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                      const currentUserName = currentUser.fullName || currentUser.username;
+                {(() => {
+                  // Get current user info for filtering
+                  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                  const currentUserName = currentUser.fullName || currentUser.username;
 
-                      // Filter fees/adda entries by current user and show last 3
-                      const userFeesEntries = expenseData.filter(entry => 
-                        (entry.type === 'fees' || entry.type === 'adda') && (
-                          entry.submittedBy === currentUserName || 
-                          !entry.submittedBy // Handle entries without submittedBy field
-                        )
-                      );
+                  // Filter adda entries by current user
+                  const userAddaEntries = expenseData.filter(entry => 
+                    (entry.type === 'fees' || entry.type === 'adda') && (
+                      entry.submittedBy === currentUserName || 
+                      !entry.submittedBy // Handle entries without submittedBy field
+                    )
+                  );
 
-                      return userFeesEntries.slice(-3).map((entry) => (
+                  return userAddaEntries.length > 0 ? (
+                    <div className="recent-entries-preview">
+                      <h6>Recent Entries:</h6>
+                      {userAddaEntries.slice(-3).map((entry) => (
                         <div key={entry.entryId || entry.id} className="entry-preview">
                           <span className="entry-type">Adda</span>
                           <span className="entry-detail">
-                            {entry.description} - {entry.date}
+                            {entry.addaName || entry.description || 'Adda Payment'} - {entry.date}
                           </span>
                           <span className="entry-amount">₹{entry.totalAmount}</span>
                         </div>
-                      ));
-                    })()}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  ) : null;
+                })()}
               </div>
 
               {/* Service Payment Summary */}
