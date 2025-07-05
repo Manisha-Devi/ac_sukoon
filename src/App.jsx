@@ -46,27 +46,27 @@ function App() {
   // Centralized refresh function with proper icon management
   const handleCentralizedRefresh = async () => {
     if (isRefreshing) return; // Prevent multiple simultaneous refreshes
-    
+
     setIsRefreshing(true);
     setLastRefreshTime(null); // Reset tick mark
-    
+
     try {
       console.log('🔄 Starting centralized data refresh...');
-      
+
       // Load data from Dashboard component method
       if (window.refreshAllData) {
         await window.refreshAllData();
       }
-      
+
       // Set completion time to show tick mark
       setLastRefreshTime(new Date());
       console.log('✅ Centralized refresh completed');
-      
+
       // Auto hide tick mark after 3 seconds and show refresh icon again
       setTimeout(() => {
         setLastRefreshTime(null);
       }, 3000);
-      
+
     } catch (error) {
       console.error('❌ Centralized refresh failed:', error);
       alert('Unable to refresh data. Please check your internet connection.');
@@ -78,7 +78,7 @@ function App() {
   // Function to update entry status in parent state
   const updateEntryStatusInParent = (entryId, newStatus, entryType) => {
     console.log(`🔄 App.jsx: Updating entry ${entryId} status to ${newStatus}`);
-    
+
     if (entryType === 'daily' || entryType === 'booking') {
       // Update fareData
       setFareData(prevData => 
@@ -98,14 +98,14 @@ function App() {
         )
       );
     }
-    
+
     console.log(`✅ App.jsx: Entry ${entryId} status updated to ${newStatus}`);
   };
 
   // Expose status update function globally
   useEffect(() => {
     window.updateEntryStatusInParent = updateEntryStatusInParent;
-    
+
     return () => {
       delete window.updateEntryStatusInParent;
     };
@@ -500,7 +500,7 @@ function App() {
               setCashBookEntries={setCashBookEntries}
             />
           )}
-          {activeTab === "data-summary" && (
+          {activeTab === "data-summary" && (user?.userType === 'Manager' || user?.userType === 'Admin') && (
             <DataSummary 
               fareData={fareData}
               expenseData={expenseData}
