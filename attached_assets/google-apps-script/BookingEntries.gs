@@ -30,7 +30,7 @@ function addBookingEntry(data) {
       sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
         .insertSheet(SHEET_NAMES.BOOKING_ENTRIES);
 
-      // Add headers exactly as specified
+      // Add headers exactly as specified (12 columns)
       sheet.getRange(1, 1, 1, 12).setValues([[
         "Timestamp", "BookingDetails", "DateFrom", "DateTo", "CashAmount", 
         "BankAmount", "TotalAmount", "SubmittedBy", "EntryType", "EntryId",
@@ -48,7 +48,7 @@ function addBookingEntry(data) {
     // Insert new row at position 2 (keeps newest entries at top)
     sheet.insertRowBefore(2);
 
-    // Add data to the new row
+    // Add data to the new row (12 columns to match header)
     sheet.getRange(2, 1, 1, 12).setValues([[
       timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
       data.bookingDetails || "",     // B: Booking details
@@ -60,7 +60,7 @@ function addBookingEntry(data) {
       data.submittedBy || "",        // H: Submitted by
       "booking",                     // I: Entry type (static)
       entryId,                       // J: Entry ID
-      "pending",                     // K: Entry Status (pending/waiting/approved)
+      "pending",                     // K: Entry Status (pending/cash/bank/approved)
       "",                            // L: Approved By (empty initially)
     ]]);
 
