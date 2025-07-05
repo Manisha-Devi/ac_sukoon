@@ -90,14 +90,15 @@ function generateEntryId() {
   return Date.now().toString();
 }
 
-// Sheet names configuration
+// Sheet names configuration - centralized configuration
 const SHEET_NAMES = {
-  FARE_RECEIPTS: 'FareReceipts',
-  BOOKING_ENTRIES: 'BookingEntries', 
-  OFF_DAYS: 'OffDays',
-  FUEL_PAYMENTS: 'FuelPayments',
-  ADDA_PAYMENTS: 'AddaPayments',
-  UNION_PAYMENTS: 'UnionPayments',
-  SERVICE_PAYMENTS: 'ServicePayments',
-  OTHER_PAYMENTS: 'OtherPayments'
+  USERS: "Users",
+  FARE_RECEIPTS: "FareReceipts",
+  BOOKING_ENTRIES: "BookingEntries", 
+  OFF_DAYS: "OffDays",
+  ADDA_PAYMENTS: "AddaPayments",
+  FUEL_PAYMENTS: "FuelPayments",
+  UNION_PAYMENTS: "UnionPayments",
+  SERVICE_PAYMENTS: "ServicePayments",
+  OTHER_PAYMENTS: "OtherPayments"
 };

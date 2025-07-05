@@ -11,18 +11,6 @@
 let spreadsheetId = PropertiesService.getScriptProperties().getProperty('SHEET_ID');
 const SPREADSHEET_ID = spreadsheetId || "1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidEmhzgM"; // Fallback
 
-// Sheet names configuration - must match exactly with your Google Sheets
-const SHEET_NAMES = {
-  USERS: "Users",
-  FARE_RECEIPTS: "FareReceipts",
-  BOOKING_ENTRIES: "BookingEntries", 
-  OFF_DAYS: "OffDays",
-  ADDA_PAYMENTS: "AddaPayments",
-  FUEL_PAYMENTS: "FuelPayments",
-  UNION_PAYMENTS: "UnionPayments",
-  SERVICE_PAYMENTS: "ServicePayments"
-};
-
 // ============================================================================
 // MAIN REQUEST HANDLERS
 // ============================================================================
@@ -244,6 +232,9 @@ function doGet(e) {
         break;
       case "getServicePayments":
         result = getServicePayments();
+        break;
+      case "getOtherPayments":
+        result = getOtherPayments();
         break;
       default:
         result = { 
