@@ -23,39 +23,30 @@ function BankSummary({ bankData }) {
     if (!currentUser || !bankData) return;
 
     const currentUserName = currentUser.fullName || currentUser.username;
-    let allData = [];
-
+    
     console.log('👤 Filtering bank data for user:', currentUserName);
-    console.log('📊 BankData Structure Examples:');
+    console.log('📊 Total bank entries available:', bankData.length);
 
-    // Log sample objects for debugging
-    if (bankData && bankData.length > 0) {
-      console.log('🔸 Daily Entry Sample:', bankData.find(e => e.type === 'daily'));
-      console.log('🔸 Booking Entry Sample:', bankData.find(e => e.type === 'booking'));
-      console.log('🔸 Fuel Payment Sample:', bankData.find(e => e.type === 'fuel'));
-    }
+    // Filter bank data for current user - Data is already filtered in Dashboard
+    const userBankData = bankData.filter(entry => 
+      entry.submittedBy === currentUserName
+    );
 
-    // 📈 Filter bank data (INCOME & EXPENSE) for current user - Only BANK entries
-    if (bankData && bankData.length > 0) {
-      const userBankData = bankData.filter(entry => 
-        entry.submittedBy === currentUserName && entry.bankAmount > 0
-      );
-      console.log('💰 Bank entries found:', userBankData.length);
-      console.log('📋 Sample Bank Entry:', userBankData[0]);
+    console.log('💰 User bank entries found:', userBankData.length);
 
-      allData = [...allData, ...userBankData.map(entry => ({
-        entryId: entry.entryId,
-        date: entry.date || entry.dateFrom, // Use dateFrom for booking entries
-        bankAmount: entry.bankAmount || 0,
-        type: entry.type,
-        submittedBy: entry.submittedBy,
-        entryStatus: entry.entryStatus || 'pending',
-        approvedBy: entry.approvedBy || '',
-        entryType: entry.entryType || entry.type,
-        // Determine if income or expense based on type
-        transactionType: ['daily', 'booking'].includes(entry.type) ? 'income' : 'expense'
-      }))];
-    }
+    // Map to display format
+    const allData = userBankData.map(entry => ({
+      entryId: entry.entryId,
+      date: entry.date,
+      bankAmount: entry.bankAmount || 0,
+      type: entry.type,
+      submittedBy: entry.submittedBy,
+      entryStatus: entry.entryStatus || 'pending',
+      approvedBy: entry.approvedBy || '',
+      entryType: entry.type,
+      // Determine if income or expense based on type
+      transactionType: ['daily', 'booking'].includes(entry.type) ? 'income' : 'expense'
+    }));
 
     // Apply date filter if dates are selected
     if (dateFrom && dateTo) {

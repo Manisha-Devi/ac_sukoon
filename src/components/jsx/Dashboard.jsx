@@ -395,16 +395,76 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
       combinedExpenseData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       combinedCashBookEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-      // Create combined data for BankSummary (both income and expense)
-      const combinedBankData = [...combinedFareData, ...combinedExpenseData];
+      // Create filtered data for BankSummary - Only required fields
+      const bankSummaryData = [];
+
+      // From Daily Entries (FareData) - Only if bankAmount > 0
+      if (fareReceipts.success && fareReceipts.data) {
+        const dailyBankEntries = fareReceipts.data
+          .filter(entry => entry.bankAmount > 0)
+          .map(entry => ({
+            entryId: entry.entryId,
+            date: convertToDateString(entry.date),
+            bankAmount: entry.bankAmount,
+            type: 'daily',
+            submittedBy: entry.submittedBy,
+            entryStatus: entry.entryStatus || 'pending',
+            approvedBy: entry.approvedBy || ''
+          }));
+        bankSummaryData.push(...dailyBankEntries);
+      }
+
+      // From Booking Entries - Only if bankAmount > 0
+      if (bookingEntries.success && bookingEntries.data) {
+        const bookingBankEntries = bookingEntries.data
+          .filter(entry => entry.bankAmount > 0)
+          .map(entry => ({
+            entryId: entry.entryId,
+            date: convertToDateString(entry.dateFrom), // Use dateFrom as date
+            bankAmount: entry.bankAmount,
+            type: 'booking',
+            submittedBy: entry.submittedBy,
+            entryStatus: entry.entryStatus || 'pending',
+            approvedBy: entry.approvedBy || ''
+          }));
+        bankSummaryData.push(...bookingBankEntries);
+      }
+
+      // Skip Off Days - BankSummary doesn't need them
+
+      // From Expense Data - Only if bankAmount > 0
+      const expenseTypes = [
+        { data: fuelPayments, type: 'fuel' },
+        { data: addaPayments, type: 'adda' },
+        { data: unionPayments, type: 'union' },
+        { data: servicePayments, type: 'service' },
+        { data: otherPayments, type: 'other' }
+      ];
+
+      expenseTypes.forEach(({ data, type }) => {
+        if (data.success && data.data) {
+          const bankEntries = data.data
+            .filter(entry => entry.bankAmount > 0)
+            .map(entry => ({
+              entryId: entry.entryId,
+              date: convertToDateString(entry.date),
+              bankAmount: entry.bankAmount,
+              type: type,
+              submittedBy: entry.submittedBy,
+              entryStatus: entry.entryStatus || 'pending',
+              approvedBy: entry.approvedBy || ''
+            }));
+          bankSummaryData.push(...bankEntries);
+        }
+      });
 
       // Update state in parent components
       if (setFareData) setFareData(combinedFareData);
       if (setExpenseData) setExpenseData(combinedExpenseData);
       if (setCashBookEntries) setCashBookEntries(combinedCashBookEntries);
       
-      // Store bankData globally for BankSummary
-      window.bankData = combinedBankData;
+      // Store filtered bankData globally for BankSummary
+      window.bankData = bankSummaryData;
       
       // Trigger state update for BankSummary if callback exists
       if (window.updateBankData) {
@@ -428,6 +488,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         fareRecords: combinedFareData.length,
         expenseRecords: combinedExpenseData.length,
         cashBookEntries: combinedCashBookEntries.length,
+        bankSummaryRecords: bankSummaryData.length,
         unionPayments: unionPayments.data?.length || 0,
         servicePayments: servicePayments.data?.length || 0,
         otherPayments: otherPayments.data?.length || 0,
