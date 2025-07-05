@@ -589,6 +589,16 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     return { totalCash, totalBank, grandTotal };
   };
 
+  // Filter function to get non-approved entries for current user
+  const getCurrentUserNonApprovedEntries = () => {
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const currentUserName = currentUser.fullName || currentUser.username;
+    
+    return fareData.filter(entry => 
+      entry.submittedBy === currentUserName && entry.entryStatus !== 'approved'
+    );
+  };
+
   const { totalCash, totalBank, grandTotal } = calculateSummaryTotals();
 
   // Load data on component mount and listen for refresh events
@@ -622,11 +632,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
         {/* Summary Cards - Only show when user has non-approved entries */}
         {(() => {
-          const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-          const currentUserName = currentUser.fullName || currentUser.username;
-          const userEntries = fareData.filter(entry => 
-            entry.submittedBy === currentUserName && entry.entryStatus !== 'approved'
-          );
+          const userEntries = getCurrentUserNonApprovedEntries();
 
           return userEntries.length > 0 ? (
             <div className="row mb-4">
@@ -946,11 +952,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
         {/* Recent Entries */}
         {(() => {
-          const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-          const currentUserName = currentUser.fullName || currentUser.username;
-          const userEntries = fareData.filter(entry => 
-            entry.submittedBy === currentUserName && entry.entryStatus !== 'approved'
-          );
+          const userEntries = getCurrentUserNonApprovedEntries();
 
           return userEntries.length > 0 ? (
             <div className="recent-entries mt-4">
