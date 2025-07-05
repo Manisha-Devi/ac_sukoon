@@ -28,6 +28,8 @@ function updateFareEntryLegacy(data) {
       return updateFuelPayment(data);
     } else if (entryType === 'union') {
       return updateUnionPayment(data);
+    } else if (entryType === 'service') {
+      return updateServicePayment(data);
     } else {
       throw new Error(`Invalid entry type: ${entryType}`);
     }
@@ -64,6 +66,8 @@ function deleteFareEntryLegacy(data) {
       return deleteFuelPayment(data);
     } else if (entryType === 'union') {
       return deleteUnionPayment(data);
+    } else if (entryType === 'service') {
+      return deleteServicePayment(data);
     } else {
       throw new Error(`Invalid entry type: ${entryType}`);
     }
