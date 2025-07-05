@@ -27,10 +27,15 @@ class HybridDataService {
       console.log('🔄 Starting background sync...');
       this.syncInProgress = true;
 
-      const [fareReceipts, bookingEntries, offDays] = await Promise.all([
+      const [fareReceipts, bookingEntries, offDays, fuelPayments, addaPayments, unionPayments, servicePayments, otherPayments] = await Promise.all([
         authService.getFareReceipts(),
         authService.getBookingEntries(),
-        authService.getOffDays()
+        authService.getOffDays(),
+        authService.getFuelPayments(),
+        authService.getAddaPayments(),
+        authService.getUnionPayments(),
+        authService.getServicePayments(),
+        authService.getOtherPayments()
       ]);
 
       let allData = [];
@@ -38,21 +43,65 @@ class HybridDataService {
       if (fareReceipts.success && fareReceipts.data) {
         allData = [...allData, ...fareReceipts.data.map(entry => ({
           ...entry,
-          type: 'daily'
+          type: 'daily',
+          entryType: 'daily'
         }))];
       }
 
       if (bookingEntries.success && bookingEntries.data) {
         allData = [...allData, ...bookingEntries.data.map(entry => ({
           ...entry,
-          type: 'booking'
+          type: 'booking',
+          entryType: 'booking'
         }))];
       }
 
       if (offDays.success && offDays.data) {
         allData = [...allData, ...offDays.data.map(entry => ({
           ...entry,
-          type: 'off'
+          type: 'off',
+          entryType: 'off'
+        }))];
+      }
+
+      // Add expense data
+      if (fuelPayments.success && fuelPayments.data) {
+        allData = [...allData, ...fuelPayments.data.map(entry => ({
+          ...entry,
+          type: 'fuel',
+          entryType: 'fuel'
+        }))];
+      }
+
+      if (addaPayments.success && addaPayments.data) {
+        allData = [...allData, ...addaPayments.data.map(entry => ({
+          ...entry,
+          type: 'adda',
+          entryType: 'adda'
+        }))];
+      }
+
+      if (unionPayments.success && unionPayments.data) {
+        allData = [...allData, ...unionPayments.data.map(entry => ({
+          ...entry,
+          type: 'union',
+          entryType: 'union'
+        }))];
+      }
+
+      if (servicePayments.success && servicePayments.data) {
+        allData = [...allData, ...servicePayments.data.map(entry => ({
+          ...entry,
+          type: 'service',
+          entryType: 'service'
+        }))];
+      }
+
+      if (otherPayments.success && otherPayments.data) {
+        allData = [...allData, ...otherPayments.data.map(entry => ({
+          ...entry,
+          type: 'other',
+          entryType: 'other'
         }))];
       }
 
@@ -105,10 +154,15 @@ class HybridDataService {
         return [];
       }
 
-      const [fareReceipts, bookingEntries, offDays] = await Promise.all([
+      const [fareReceipts, bookingEntries, offDays, fuelPayments, addaPayments, unionPayments, servicePayments, otherPayments] = await Promise.all([
         authService.getFareReceipts(),
         authService.getBookingEntries(),
-        authService.getOffDays()
+        authService.getOffDays(),
+        authService.getFuelPayments(),
+        authService.getAddaPayments(),
+        authService.getUnionPayments(),
+        authService.getServicePayments(),
+        authService.getOtherPayments()
       ]);
 
       let allData = [];
@@ -116,21 +170,65 @@ class HybridDataService {
       if (fareReceipts.success && fareReceipts.data) {
         allData = [...allData, ...fareReceipts.data.map(entry => ({
           ...entry,
-          type: 'daily'
+          type: 'daily',
+          entryType: 'daily'
         }))];
       }
 
       if (bookingEntries.success && bookingEntries.data) {
         allData = [...allData, ...bookingEntries.data.map(entry => ({
           ...entry,
-          type: 'booking'
+          type: 'booking',
+          entryType: 'booking'
         }))];
       }
 
       if (offDays.success && offDays.data) {
         allData = [...allData, ...offDays.data.map(entry => ({
           ...entry,
-          type: 'off'
+          type: 'off',
+          entryType: 'off'
+        }))];
+      }
+
+      // Add expense data
+      if (fuelPayments.success && fuelPayments.data) {
+        allData = [...allData, ...fuelPayments.data.map(entry => ({
+          ...entry,
+          type: 'fuel',
+          entryType: 'fuel'
+        }))];
+      }
+
+      if (addaPayments.success && addaPayments.data) {
+        allData = [...allData, ...addaPayments.data.map(entry => ({
+          ...entry,
+          type: 'adda',
+          entryType: 'adda'
+        }))];
+      }
+
+      if (unionPayments.success && unionPayments.data) {
+        allData = [...allData, ...unionPayments.data.map(entry => ({
+          ...entry,
+          type: 'union',
+          entryType: 'union'
+        }))];
+      }
+
+      if (servicePayments.success && servicePayments.data) {
+        allData = [...allData, ...servicePayments.data.map(entry => ({
+          ...entry,
+          type: 'service',
+          entryType: 'service'
+        }))];
+      }
+
+      if (otherPayments.success && otherPayments.data) {
+        allData = [...allData, ...otherPayments.data.map(entry => ({
+          ...entry,
+          type: 'other',
+          entryType: 'other'
         }))];
       }
 
