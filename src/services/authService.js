@@ -1403,6 +1403,108 @@ class AuthService {
       };
     }
   }
+
+  // ============================================================================
+  // APPROVAL WORKFLOW FUNCTIONS
+  // ============================================================================
+
+  // Approve Other Payment
+  async approveOtherPayment(data) {
+    try {
+      const response = await this.makeAPIRequest('approveOtherPayment', data);
+      return response;
+    } catch (error) {
+      console.error('Error approving other payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Resend Other Payment
+  async resendOtherPayment(data) {
+    try {
+      const response = await this.makeAPIRequest('resendOtherPayment', data);
+      return response;
+    } catch (error) {
+      console.error('Error resending other payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Set Other Payment to Waiting
+  async setOtherPaymentWaiting(data) {
+    try {
+      const response = await this.makeAPIRequest('setOtherPaymentWaiting', data);
+      return response;
+    } catch (error) {
+      console.error('Error setting other payment to waiting:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Generic approval functions for other data types (to be implemented similarly)
+  async approveFareReceipt(data) {
+    try {
+      const response = await this.makeAPIRequest('approveFareReceipt', data);
+      return response;
+    } catch (error) {
+      console.error('Error approving fare receipt:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async resendFareReceipt(data) {
+    try {
+      const response = await this.makeAPIRequest('resendFareReceipt', data);
+      return response;
+    } catch (error) {
+      console.error('Error resending fare receipt:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async approveBookingEntry(data) {
+    try {
+      const response = await this.makeAPIRequest('approveBookingEntry', data);
+      return response;
+    } catch (error) {
+      console.error('Error approving booking entry:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async resendBookingEntry(data) {
+    try {
+      const response = await this.makeAPIRequest('resendBookingEntry', data);
+      return response;
+    } catch (error) {
+      console.error('Error resending booking entry:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async approveFuelPayment(data) {
+    try {
+      const response = await this.makeAPIRequest('approveFuelPayment', data);
+      return response;
+    } catch (error) {
+      console.error('Error approving fuel payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async resendFuelPayment(data) {
+    try {
+      const response = await this.makeAPIRequest('resendFuelPayment', data);
+      return response;
+    } catch (error) {
+      console.error('Error resending fuel payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ============================================================================
+  // ANALYTICS FUNCTIONS
+  // ============================================================================
 }
 
 export default new AuthService();

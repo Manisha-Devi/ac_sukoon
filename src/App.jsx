@@ -10,7 +10,8 @@ import MiscPayment from "./components/jsx/MiscPayment";
 import BonusCalculator from "./components/jsx/BonusCalculator";
 import Analytics from "./components/jsx/Analytics";
 import CashBook from "./components/jsx/CashBook";
-import DataSummary from "./components/jsx/DataSummary";
+import DataSummary from './components/jsx/DataSummary.jsx';
+import DataApproval from './components/jsx/DataApproval.jsx';
 import localStorageService from "./services/localStorageService.js";
 
 

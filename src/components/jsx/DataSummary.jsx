@@ -89,12 +89,61 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
     setShowApprovalModal(true);
   };
 
-  const handleApprovalSubmit = (e) => {
+  const handleApprovalSubmit = async (e) => {
     e.preventDefault();
 
     // Validation
     if (!settlementData.settlementWith.trim()) {
       alert("Please enter manager name");
+      return;
+    }
+
+    try {
+      // Get current user info for filtering
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const currentUserName = currentUser.fullName || currentUser.username;
+
+      // Get all user entries that need to be sent for approval
+      const userFareData = fareData.filter(entry => 
+        entry.submittedBy === currentUserName || 
+        (!entry.submittedBy && entry.type)
+      );
+
+      const userExpenseData = expenseData.filter(entry => 
+        entry.submittedBy === currentUserName || 
+        (!entry.submittedBy && entry.type)
+      );
+
+      // Set all entries to "waiting" status
+      const updatePromises = [];
+
+      // Update fare receipts
+      userFareData.forEach(entry => {
+        if (entry.type === 'daily') {
+          updatePromises.push(authService.setFareReceiptWaiting({ entryId: entry.entryId }));
+        } else if (entry.type === 'booking') {
+          updatePromises.push(authService.setBookingEntryWaiting({ entryId: entry.entryId }));
+        }
+      });
+
+      // Update expense entries
+      userExpenseData.forEach(entry => {
+        switch (entry.type) {
+          case 'fuel':
+            updatePromises.push(authService.setFuelPaymentWaiting({ entryId: entry.entryId }));
+            break;
+          case 'other':
+            updatePromises.push(authService.setOtherPaymentWaiting({ entryId: entry.entryId }));
+            break;
+          // Add other payment types as needed
+        }
+      });
+
+      // Wait for all updates to complete
+      await Promise.all(updatePromises);
+    } catch (error) {
+      console.error('Error updating entry statuses:', error);
+      alert('Error sending for approval: ' + error.message);
       return;
     }
 
