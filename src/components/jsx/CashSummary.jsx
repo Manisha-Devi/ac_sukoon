@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import "../css/CashSummary.css";
 
 function CashSummary({ fareData, expenseData }) {
+  // 📊 RECEIVED DATA EXPLANATION:
+  // fareData = Daily entries (income) + Booking entries + Off days
+  // expenseData = Fuel + Adda + Union + Service + Other payments
+  
   const [filteredData, setFilteredData] = useState([]);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -16,20 +20,30 @@ function CashSummary({ fareData, expenseData }) {
   }, []);
 
   useEffect(() => {
+    console.log('🔄 CashSummary: Props data updated');
+    console.log('📈 FareData (Income):', fareData?.length || 0, 'entries');
+    console.log('📉 ExpenseData (Expense):', expenseData?.length || 0, 'entries');
     filterUserData();
   }, [fareData, expenseData, dateFrom, dateTo, currentUser]);
 
   const filterUserData = () => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      console.log('⚠️ No current user found');
+      return;
+    }
 
     const currentUserName = currentUser.fullName || currentUser.username;
     let allData = [];
 
-    // Filter fare data for current user
+    console.log('👤 Filtering data for user:', currentUserName);
+
+    // 📈 Filter fare data (INCOME) for current user - Only CASH entries
     if (fareData && fareData.length > 0) {
       const userFareData = fareData.filter(entry => 
         entry.submittedBy === currentUserName && entry.cashAmount > 0
       );
+      console.log('💰 Cash Income entries found:', userFareData.length);
+      
       allData = [...allData, ...userFareData.map(entry => ({
         ...entry,
         type: 'income',
@@ -37,11 +51,13 @@ function CashSummary({ fareData, expenseData }) {
       }))];
     }
 
-    // Filter expense data for current user
+    // 📉 Filter expense data (EXPENSE) for current user - Only CASH entries
     if (expenseData && expenseData.length > 0) {
       const userExpenseData = expenseData.filter(entry => 
         entry.submittedBy === currentUserName && entry.cashAmount > 0
       );
+      console.log('💸 Cash Expense entries found:', userExpenseData.length);
+      
       allData = [...allData, ...userExpenseData.map(entry => ({
         ...entry,
         type: 'expense',
