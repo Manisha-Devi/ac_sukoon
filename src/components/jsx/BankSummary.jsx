@@ -266,8 +266,6 @@ function BankSummary({ fareData, expenseData }) {
                 </tbody>
               </table>
             </div>
-              </table>
-            </div>
 
             {/* Pagination */}
             {totalPages > 1 && (
