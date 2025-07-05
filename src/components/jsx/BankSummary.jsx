@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../css/BankSummary.css";
-import authService from "../../services/authService.js";
 
-// Debug: Log authService on component load
-console.log('🔍 BankSummary: authService loaded:', authService);
-console.log('🔍 Available methods:', Object.getOwnPropertyNames(authService));
-
-function BankSummary({ bankData }) {
+function BankSummary({ fareData, expenseData }) {
   const [filteredData, setFilteredData] = useState([]);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -22,36 +17,38 @@ function BankSummary({ bankData }) {
 
   useEffect(() => {
     filterUserData();
-  }, [bankData, dateFrom, dateTo, currentUser]);
+  }, [fareData, expenseData, dateFrom, dateTo, currentUser]);
 
   const filterUserData = () => {
-    if (!currentUser || !bankData) return;
+    if (!currentUser) return;
 
     const currentUserName = currentUser.fullName || currentUser.username;
-    
-    console.log('👤 Filtering bank data for user:', currentUserName);
-    console.log('📊 Total bank entries available:', bankData.length);
+    let allData = [];
 
-    // Filter bank data for current user - Data is already filtered in Dashboard
-    const userBankData = bankData.filter(entry => 
-      entry.submittedBy === currentUserName
-    );
+    // Filter fare data for current user
+    if (fareData && fareData.length > 0) {
+      const userFareData = fareData.filter(entry => 
+        entry.submittedBy === currentUserName && entry.bankAmount > 0
+      );
+      allData = [...allData, ...userFareData.map(entry => ({
+        ...entry,
+        type: 'income',
+        description: entry.route || entry.bookingDetails || 'Fare Collection'
+      }))];
+    }
 
-    console.log('💰 User bank entries found:', userBankData.length);
-
-    // Map to display format
-    let allData = userBankData.map(entry => ({
-      entryId: entry.entryId,
-      date: entry.date,
-      bankAmount: entry.bankAmount || 0,
-      type: entry.type,
-      submittedBy: entry.submittedBy,
-      entryStatus: entry.entryStatus || 'pending',
-      approvedBy: entry.approvedBy || '',
-      entryType: entry.type,
-      // Determine if income or expense based on type
-      transactionType: ['daily', 'booking'].includes(entry.type) ? 'income' : 'expense'
-    }));
+    // Filter expense data for current user
+    if (expenseData && expenseData.length > 0) {
+      const userExpenseData = expenseData.filter(entry => 
+        entry.submittedBy === currentUserName && entry.bankAmount > 0
+      );
+      allData = [...allData, ...userExpenseData.map(entry => ({
+        ...entry,
+        type: 'expense',
+        description: entry.pumpName || entry.addaName || entry.unionName || 
+                    entry.serviceType || entry.paymentDetails || 'Payment'
+      }))];
+    }
 
     // Apply date filter if dates are selected
     if (dateFrom && dateTo) {
@@ -68,8 +65,6 @@ function BankSummary({ bankData }) {
     // Sort by date (newest first)
     allData.sort((a, b) => new Date(b.date) - new Date(a.date));
     setFilteredData(allData);
-
-    console.log('📊 Filtered bank data:', allData.length, 'entries');
   };
 
   const clearFilter = () => {
@@ -117,129 +112,26 @@ function BankSummary({ bankData }) {
       return;
     }
 
-    // Get selected entry details
-    const selectedData = filteredData.filter(entry => 
-      selectedEntries.includes(entry.entryId)
-    );
-
-    // Calculate total amount
-    const totalAmount = selectedData.reduce((sum, entry) => 
-      sum + (entry.bankAmount || 0), 0
-    );
-
-    // Show approval popup
-    setApprovalPopup({
-      show: true,
-      entries: selectedData,
-      totalAmount: totalAmount,
-      count: selectedData.length
-    });
-  };
-
-  // State for approval popup
-  const [approvalPopup, setApprovalPopup] = useState({
-    show: false,
-    entries: [],
-    totalAmount: 0,
-    count: 0
-  });
-
-  // Handle send for approval
-  const handleSendForApproval = async () => {
-    try {
-      console.log('🔄 Sending entries for bank approval...');
-      
-      // STEP 1: Update local filteredData first for immediate UI update
-      const updatedLocalData = filteredData.map(entry => {
-        const isSelectedEntry = approvalPopup.entries.some(selectedEntry => 
-          selectedEntry.entryId === entry.entryId
-        );
-        
-        if (isSelectedEntry) {
-          return { ...entry, entryStatus: 'bank' };
-        }
-        return entry;
-      });
-      
-      // Update local state immediately
-      setFilteredData(updatedLocalData);
-      
-      console.log('✅ Local filteredData updated immediately');
-      
-      // Close popup and clear selections immediately
-      setApprovalPopup({ show: false, entries: [], totalAmount: 0, count: 0 });
-      setSelectedEntries([]);
-      
-      alert(`${approvalPopup.count} entries successfully forwarded for bank approval!`);
-      
-      // STEP 2: Update Google Sheets in background (don't await)
-      approvalPopup.entries.forEach(async (entry) => {
-        try {
-          console.log(`🔧 Background sync for entry: ${entry.entryId}, type: ${entry.type}`);
-          
-          let result;
-          
-          if (entry.type === 'daily' || entry.type === 'fare') {
-            // Fare Receipt background sync
-            result = await authService.updateFareReceiptStatus({
-              entryId: entry.entryId,
-              newStatus: 'bank',
-              approverName: ''
-            });
-          } else if (entry.type === 'booking') {
-            // Booking Entry background sync
-            result = await authService.updateBookingEntryStatus({
-              entryId: entry.entryId,
-              newStatus: 'bank', 
-              approverName: ''
-            });
-          }
-          
-          if (result && result.success) {
-            console.log(`✅ Background sync successful for ${entry.entryId}`);
-          } else {
-            console.warn(`⚠️ Background sync failed for ${entry.entryId}:`, result?.error);
-          }
-          
-        } catch (syncError) {
-          console.error(`❌ Background sync error for ${entry.entryId}:`, syncError);
-        }
-      });
-      
-      // STEP 3: Trigger global refresh in background (don't await)
-      if (window.refreshAllData) {
-        setTimeout(() => {
-          window.refreshAllData().catch(error => {
-            console.error('Background refresh failed:', error);
-          });
-        }, 2000); // Refresh after 2 seconds
-      }
-      
-    } catch (error) {
-      console.error('❌ Error in approval process:', error);
-      alert('Error processing entries: ' + error.message);
-    }
-  };
-
-  // Handle cancel approval
-  const handleCancelApproval = () => {
-    setApprovalPopup({ show: false, entries: [], totalAmount: 0, count: 0 });
+    // Here you would call your API to forward entries
+    console.log('Forwarding entries for approval:', selectedEntries);
+    alert(`${selectedEntries.length} entries forwarded for approval!`);
+    setSelectedEntries([]);
   };
 
   // Calculate totals
   const totalBankIncome = filteredData
-    .filter(entry => entry.transactionType === 'income')
+    .filter(entry => entry.type === 'income')
     .reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
 
   const totalBankExpense = filteredData
-    .filter(entry => entry.transactionType === 'expense')
+    .filter(entry => entry.type === 'expense')
     .reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
 
   const bankBalance = totalBankIncome - totalBankExpense;
 
   useEffect(() => {
     filterUserData();
-  }, [bankData, dateFrom, dateTo, currentUser]);
+  }, [fareData, expenseData, dateFrom, dateTo, currentUser]);
 
   // Listen for centralized refresh events
   useEffect(() => {
@@ -253,7 +145,7 @@ function BankSummary({ bankData }) {
     return () => {
       window.removeEventListener('dataRefreshed', handleDataRefresh);
     };
-  }, [bankData, dateFrom, dateTo, currentUser]);
+  }, [fareData, expenseData, dateFrom, dateTo, currentUser]);
 
   return (
     <div className="bank-summary-container">
@@ -369,32 +261,31 @@ function BankSummary({ bankData }) {
                   {currentEntries.map((entry, index) => (
                     <tr key={`${entry.entryId || index}`}>
                       <td>
-                        {new Date(entry.date).toLocaleDateString('en-IN')}
+                        {entry.entryType === 'booking' && entry.dateFrom ? 
+                          new Date(entry.dateFrom).toLocaleDateString('en-IN') : 
+                          new Date(entry.date).toLocaleDateString('en-IN')
+                        }
                       </td>
                       <td>
                         <span className="badge bg-info">
-                          {entry.entryType || entry.type || 'bank'}
+                          {entry.entryType || 'bank'}
                         </span>
                       </td>
                       <td>
-                        <span className={`badge ${entry.transactionType === 'income' ? 'bg-success' : 'bg-danger'}`}>
-                          {entry.transactionType === 'income' ? 'I' : 'E'}
+                        <span className={`badge ${entry.type === 'income' ? 'bg-success' : 'bg-danger'}`}>
+                          {entry.type === 'income' ? 'I' : 'E'}
                         </span>
                       </td>
-                      <td className={entry.transactionType === 'income' ? 'text-success' : 'text-danger'}>
+                      <td className={entry.type === 'income' ? 'text-success' : 'text-danger'}>
                         ₹{(entry.bankAmount || 0).toLocaleString()}
                       </td>
                       <td>
-                        {entry.entryStatus === 'bank' ? (
-                          <i className="bi bi-lock-fill text-warning" title="Forwarded for Bank Approval"></i>
-                        ) : (
-                          <input 
-                            type="checkbox" 
-                            className="form-check-input"
-                            checked={selectedEntries.includes(entry.entryId)}
-                            onChange={() => handleSelectEntry(entry.entryId)}
-                          />
-                        )}
+                        <input 
+                          type="checkbox" 
+                          className="form-check-input"
+                          checked={selectedEntries.includes(entry.entryId)}
+                          onChange={() => handleSelectEntry(entry.entryId)}
+                        />
                       </td>
                     </tr>
                   ))}
@@ -459,86 +350,6 @@ function BankSummary({ bankData }) {
           </div>
         )}
       </div>
-
-      {/* Approval Popup Modal */}
-      {approvalPopup.show && (
-        <div className="modal-overlay" onClick={handleCancelApproval}>
-          <div className="approval-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h5>
-                <i className="bi bi-bank me-2"></i>
-                Bank Amount Approval
-              </h5>
-              <div className="modal-stats">
-                <span className="badge bg-info me-2">
-                  {approvalPopup.count} Transactions
-                </span>
-                <span className="badge bg-success">
-                  ₹{approvalPopup.totalAmount.toLocaleString()}
-                </span>
-              </div>
-            </div>
-            
-            <div className="modal-body">
-              <div className="table-responsive">
-                <table className="table table-sm table-striped">
-                  <thead>
-                    <tr>
-                      <th>Entry ID</th>
-                      <th>Date</th>
-                      <th>Type</th>
-                      <th>Bank Amount</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {approvalPopup.entries.map((entry) => (
-                      <tr key={entry.entryId}>
-                        <td>
-                          <code className="small">{entry.entryId}</code>
-                        </td>
-                        <td>
-                          {new Date(entry.date).toLocaleDateString('en-IN')}
-                        </td>
-                        <td>
-                          <span className="badge bg-info">
-                            {entry.type}
-                          </span>
-                        </td>
-                        <td className="text-success fw-bold">
-                          ₹{(entry.bankAmount || 0).toLocaleString()}
-                        </td>
-                        <td>
-                          <span className="badge bg-warning">
-                            {entry.entryStatus}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            
-            <div className="modal-actions">
-              <button 
-                className="btn btn-secondary"
-                onClick={handleCancelApproval}
-              >
-                <i className="bi bi-x-circle me-1"></i>
-                Cancel
-              </button>
-              <button 
-                className="btn btn-primary"
-                onClick={handleSendForApproval}
-              >
-                <i className="bi bi-send me-1"></i>
-                Send for Approval
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
