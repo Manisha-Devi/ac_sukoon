@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../css/BankSummary.css";
+import authService from "../../services/authService.js";
 
 function BankSummary({ bankData }) {
   const [filteredData, setFilteredData] = useState([]);
@@ -144,23 +145,20 @@ function BankSummary({ bankData }) {
     try {
       console.log('🔄 Sending entries for bank approval...');
       
-      // Import authService
-      const authService = await import('../../services/authService.js');
-      
       for (const entry of approvalPopup.entries) {
         let result;
         
         // Update entry status based on type
         if (entry.type === 'daily' || entry.type === 'fare') {
           // Fare Receipt
-          result = await authService.default.updateFareReceiptStatus({
+          result = await authService.updateFareReceiptStatus({
             entryId: entry.entryId,
             newStatus: 'bank',
             approverName: ''
           });
         } else if (entry.type === 'booking') {
           // Booking Entry
-          result = await authService.default.updateBookingEntryStatus({
+          result = await authService.updateBookingEntryStatus({
             entryId: entry.entryId,
             newStatus: 'bank', 
             approverName: ''
