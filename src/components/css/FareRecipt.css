@@ -71,6 +71,11 @@
   color: #28a745;
 }
 
+/* Processing button animation */
+.fare-entry-btn .bi-arrow-repeat {
+  animation: spin 1s linear infinite;
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }

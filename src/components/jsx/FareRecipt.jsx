@@ -860,8 +860,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                 </div>
                 <div className="button-group">
                   <button type="submit" className="btn fare-entry-btn" disabled={isLoading}>
-                    <i className={isLoading ? "bi bi-hourglass-split" : editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
-                    {isLoading ? "Saving..." : editingEntry ? "Update Entry" : "Add Daily Entry"}
+                    <i className={isLoading ? "bi bi-arrow-repeat" : editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
+                    {isLoading ? "Processing..." : editingEntry ? "Update Entry" : "Add Daily Entry"}
                   </button>
                   {editingEntry && (
                     <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
@@ -966,8 +966,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                 </div>
                 <div className="button-group">
                   <button type="submit" className="btn fare-entry-btn" disabled={isLoading}>
-                    <i className={isLoading ? "bi bi-hourglass-split" : editingEntry ? "bi bi-check-circle" : "bi bi-journal-plus"}></i> 
-                    {isLoading ? "Saving..." : editingEntry ? "Update Entry" : "Add Booking Entry"}
+                    <i className={isLoading ? "bi bi-arrow-repeat" : editingEntry ? "bi bi-check-circle" : "bi bi-journal-plus"}></i> 
+                    {isLoading ? "Processing..." : editingEntry ? "Update Entry" : "Add Booking Entry"}
                   </button>
                   {editingEntry && (
                     <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
@@ -1016,8 +1016,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                 </div>
                 <div className="button-group">
                   <button type="submit" className="btn fare-entry-btn" disabled={isLoading}>
-                    <i className={isLoading ? "bi bi-hourglass-split" : editingEntry ? "bi bi-check-circle" : "bi bi-check-circle"}></i> 
-                    {isLoading ? "Saving..." : editingEntry ? "Update Entry" : "Mark Day as Off"}
+                    <i className={isLoading ? "bi bi-arrow-repeat" : editingEntry ? "bi bi-check-circle" : "bi bi-check-circle"}></i> 
+                    {isLoading ? "Processing..." : editingEntry ? "Update Entry" : "Mark Day as Off"}
                   </button>
                   {editingEntry && (
                     <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
