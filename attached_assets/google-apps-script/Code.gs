@@ -61,6 +61,9 @@ function doPost(e) {
       case "deleteFareReceipt":
         result = deleteFareReceipt(data);
         break;
+      case "updateFareReceiptStatus":
+        result = updateFareReceiptStatus(data);
+        break;
 
       // ==================== BOOKING ENTRIES ====================
       case "addBookingEntry":
