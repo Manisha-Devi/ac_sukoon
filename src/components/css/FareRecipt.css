@@ -459,14 +459,15 @@
 .entry-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 10px;
 }
 
 .entry-actions {
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 8px;
+  margin-left: auto;
 }
 
 .edit-btn, .delete-btn {
