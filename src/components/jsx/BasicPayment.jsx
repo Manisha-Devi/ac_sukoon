@@ -671,7 +671,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
             <div className="col-md-4 col-sm-6 mb-3">
               <div className="category-card fuel-category">
                 <div className="card-body">
-                  <h6><i className="bi bi-fuel-pump"></i> Fuel Expenses</h6>
+                  <h6><i className="bi bi-fuel-pump"></i> Fuel</h6>
                   <h4>₹{fuelTotal.toLocaleString('en-IN')}</h4>
                 </div>
               </div>
@@ -679,7 +679,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
             <div className="col-md-4 col-sm-6 mb-3">
               <div className="category-card adda-category">
                 <div className="card-body">
-                  <h6><i className="bi bi-building"></i> Adda Expenses</h6>
+                  <h6><i className="bi bi-building"></i> Adda</h6>
                   <h4>₹{addaTotal.toLocaleString('en-IN')}</h4>
                 </div>
               </div>
@@ -687,7 +687,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
             <div className="col-md-4 col-sm-6 mb-3">
               <div className="category-card union-category">
                 <div className="card-body">
-                  <h6><i className="bi bi-people"></i> Union Expenses</h6>
+                  <h6><i className="bi bi-people"></i> Union</h6>
                   <h4>₹{unionTotal.toLocaleString('en-IN')}</h4>
                 </div>
               </div>
@@ -703,7 +703,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                 className={`nav-link ${activeTab === 'fuel' ? 'active' : ''}`}
                 onClick={() => setActiveTab('fuel')}
               >
-                <i className="bi bi-fuel-pump"></i> Fuel Payment
+                <i className="bi bi-fuel-pump"></i> Fuel
               </button>
             </li>
             <li className="nav-item">
@@ -711,7 +711,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                 className={`nav-link ${activeTab === 'adda' ? 'active' : ''}`}
                 onClick={() => setActiveTab('adda')}
               >
-                <i className="bi bi-building"></i> Adda Payment
+                <i className="bi bi-building"></i> Adda
               </button>
             </li>
             <li className="nav-item">
@@ -719,7 +719,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                 className={`nav-link ${activeTab === 'union' ? 'active' : ''}`}
                 onClick={() => setActiveTab('union')}
               >
-                <i className="bi bi-people"></i> Union Payment
+                <i className="bi bi-people"></i> Union
               </button>
             </li>
           </ul>
@@ -730,7 +730,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           <div className="payment-form-card">
             <h4>
               <i className={`bi ${activeTab === 'fuel' ? 'bi-fuel-pump' : activeTab === 'adda' ? 'bi-building' : 'bi-people'}`}></i> 
-              {editingEntry ? `Edit ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Payment` : `Add ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Payment`}
+              {editingEntry ? `Edit ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}` : `Add ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`}
             </h4>
             <form onSubmit={handleSubmit}>
               <div className="row">
@@ -877,8 +877,8 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                     <div className="card-body">
                       <div className="entry-header">
                         <span className={`entry-type ${entry.type}`}>
-                          {entry.type === 'fuel' ? 'Fuel Payment' : 
-                           entry.type === 'adda' ? 'Adda Payment' : 'Union Payment'}
+                          {entry.type === 'fuel' ? 'Fuel' : 
+                           entry.type === 'adda' ? 'Adda' : 'Union'}
                         </span>
                         <div className="entry-actions">
                           <button 
