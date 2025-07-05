@@ -591,21 +591,39 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
   const { totalCash, totalBank, grandTotal } = calculateSummaryTotals();
 
-  // Load data on component mount and listen for refresh events
+  // Listen for centralized refresh events and tab activation
   useEffect(() => {
-    
+    console.log('🔄 FareRecipt: Component mounted/updated with fresh data');
 
     // Listen for centralized refresh events
     const handleDataRefresh = () => {
       console.log('🔄 FareRecipt: Refreshing data from centralized refresh');
     };
 
+    // Listen for tab activation events
+    const handleTabActivation = () => {
+      console.log('🔄 FareRecipt: Tab activated, triggering data refresh');
+      if (window.refreshAllData) {
+        window.refreshAllData().catch(error => {
+          console.error('Tab activation refresh failed:', error);
+        });
+      }
+    };
+
     window.addEventListener('dataRefreshed', handleDataRefresh);
+    window.addEventListener('fareTabActivated', handleTabActivation);
 
     return () => {
       window.removeEventListener('dataRefreshed', handleDataRefresh);
+      window.removeEventListener('fareTabActivated', handleTabActivation);
     };
   }, []);
+
+  // Refresh data when component receives new props
+  useEffect(() => {
+    console.log('🔄 FareRecipt: Props updated, recalculating with fresh data');
+    // Data is already passed via props, no additional action needed
+  }, [fareData]);
 
   return (
     <div className="fare-entry-container">
