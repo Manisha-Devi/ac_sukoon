@@ -148,73 +148,76 @@ function BankSummary({ bankData }) {
   const handleSendForApproval = async () => {
     try {
       console.log('🔄 Sending entries for bank approval...');
-      console.log('📋 authService available methods:', Object.getOwnPropertyNames(authService));
       
-      for (const entry of approvalPopup.entries) {
-        let result;
+      // STEP 1: Update local filteredData first for immediate UI update
+      const updatedLocalData = filteredData.map(entry => {
+        const isSelectedEntry = approvalPopup.entries.some(selectedEntry => 
+          selectedEntry.entryId === entry.entryId
+        );
         
-        console.log(`🔧 Processing entry: ${entry.entryId}, type: ${entry.type}`);
-        
-        // Update entry status based on type
-        if (entry.type === 'daily' || entry.type === 'fare') {
-          // Fare Receipt
-          console.log('📝 Calling updateFareReceiptStatus for:', entry.entryId);
-          
-          // Check if function exists
-          if (typeof authService.updateFareReceiptStatus !== 'function') {
-            throw new Error('updateFareReceiptStatus is not available in authService');
-          }
-          
-          result = await authService.updateFareReceiptStatus({
-            entryId: entry.entryId,
-            newStatus: 'bank',
-            approverName: ''
-          });
-        } else if (entry.type === 'booking') {
-          // Booking Entry
-          console.log('📝 Calling updateBookingEntryStatus for:', entry.entryId);
-          
-          // Check if function exists
-          if (typeof authService.updateBookingEntryStatus !== 'function') {
-            throw new Error('updateBookingEntryStatus is not available in authService');
-          }
-          
-          result = await authService.updateBookingEntryStatus({
-            entryId: entry.entryId,
-            newStatus: 'bank', 
-            approverName: ''
-          });
-        } else {
-          console.warn(`⚠️ Unknown entry type: ${entry.type} for entry: ${entry.entryId}`);
-          continue;
+        if (isSelectedEntry) {
+          return { ...entry, entryStatus: 'bank' };
         }
-        
-        console.log(`✅ Update result for ${entry.entryId}:`, result);
-        
-        if (!result || !result.success) {
-          throw new Error(`Failed to update ${entry.entryId}: ${result?.error || 'Unknown error'}`);
-        }
-      }
+        return entry;
+      });
       
-      console.log('✅ All entries updated to bank status');
+      // Update local state immediately
+      setFilteredData(updatedLocalData);
       
-      // Close popup
+      console.log('✅ Local filteredData updated immediately');
+      
+      // Close popup and clear selections immediately
       setApprovalPopup({ show: false, entries: [], totalAmount: 0, count: 0 });
-      
-      // Clear selections
       setSelectedEntries([]);
-      
-      // Refresh data
-      if (window.refreshAllData) {
-        await window.refreshAllData();
-      }
       
       alert(`${approvalPopup.count} entries successfully forwarded for bank approval!`);
       
+      // STEP 2: Update Google Sheets in background (don't await)
+      approvalPopup.entries.forEach(async (entry) => {
+        try {
+          console.log(`🔧 Background sync for entry: ${entry.entryId}, type: ${entry.type}`);
+          
+          let result;
+          
+          if (entry.type === 'daily' || entry.type === 'fare') {
+            // Fare Receipt background sync
+            result = await authService.updateFareReceiptStatus({
+              entryId: entry.entryId,
+              newStatus: 'bank',
+              approverName: ''
+            });
+          } else if (entry.type === 'booking') {
+            // Booking Entry background sync
+            result = await authService.updateBookingEntryStatus({
+              entryId: entry.entryId,
+              newStatus: 'bank', 
+              approverName: ''
+            });
+          }
+          
+          if (result && result.success) {
+            console.log(`✅ Background sync successful for ${entry.entryId}`);
+          } else {
+            console.warn(`⚠️ Background sync failed for ${entry.entryId}:`, result?.error);
+          }
+          
+        } catch (syncError) {
+          console.error(`❌ Background sync error for ${entry.entryId}:`, syncError);
+        }
+      });
+      
+      // STEP 3: Trigger global refresh in background (don't await)
+      if (window.refreshAllData) {
+        setTimeout(() => {
+          window.refreshAllData().catch(error => {
+            console.error('Background refresh failed:', error);
+          });
+        }, 2000); // Refresh after 2 seconds
+      }
+      
     } catch (error) {
-      console.error('❌ Error sending for approval:', error);
-      console.error('❌ Full error object:', error);
-      alert('Error updating entries: ' + error.message);
+      console.error('❌ Error in approval process:', error);
+      alert('Error processing entries: ' + error.message);
     }
   };
 
