@@ -251,7 +251,14 @@ function BankSummary({ fareData, expenseData }) {
                       </td>
                       <td>
                         <span className="badge bg-info">
-                          {entry.entryType || 'Bank'}
+                          {entry.entryType === 'booking' ? 'booking' :
+                           entry.entryType === 'daily' ? 'daily' :
+                           entry.entryType === 'fuel' ? 'fuel' :
+                           entry.entryType === 'adda' ? 'adda' :
+                           entry.entryType === 'union' ? 'union' :
+                           entry.entryType === 'service' ? 'service' :
+                           entry.entryType === 'other' ? 'other' :
+                           entry.entryType || 'bank'}
                         </span>
                       </td>
                       <td>
