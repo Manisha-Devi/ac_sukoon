@@ -23,6 +23,7 @@ function App() {
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [cashBookEntries, setCashBookEntries] = useState([]);
+  const [bankData, setBankData] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -46,27 +47,33 @@ function App() {
   // Centralized refresh function with proper icon management
   const handleCentralizedRefresh = async () => {
     if (isRefreshing) return; // Prevent multiple simultaneous refreshes
-    
+
     setIsRefreshing(true);
     setLastRefreshTime(null); // Reset tick mark
-    
+
     try {
       console.log('🔄 Starting centralized data refresh...');
-      
+
       // Load data from Dashboard component method
       if (window.refreshAllData) {
         await window.refreshAllData();
       }
-      
+
+      // Access the global bankData and update the state
+      if (window.bankData) {
+        setBankData(window.bankData);
+      }
+
+
       // Set completion time to show tick mark
       setLastRefreshTime(new Date());
       console.log('✅ Centralized refresh completed');
-      
+
       // Auto hide tick mark after 3 seconds and show refresh icon again
       setTimeout(() => {
         setLastRefreshTime(null);
       }, 3000);
-      
+
     } catch (error) {
       console.error('❌ Centralized refresh failed:', error);
       alert('Unable to refresh data. Please check your internet connection.');
@@ -478,7 +485,7 @@ function App() {
           )}
           {activeTab === "bank-summary" && (
             <BankSummary 
-              bankData={window.bankData || []}
+              bankData={bankData}
             />
           )}
         </div>
