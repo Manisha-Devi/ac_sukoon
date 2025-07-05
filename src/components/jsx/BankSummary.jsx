@@ -444,17 +444,14 @@ function BankSummary({ fareData, expenseData }) {
                     <th>I/E</th>
                     <th>Bank</th>
                     <th>
-                      {pendingEntries.length > 0 ? (
-                        <input 
-                          type="checkbox" 
-                          className="form-check-input"
-                          onChange={handleSelectAll}
-                          checked={isAllSelected}
-                          title="Select all pending entries"
-                        />
-                      ) : (
-                        <span className="text-muted">Select</span>
-                      )}
+                      <input 
+                        type="checkbox" 
+                        className="form-check-input"
+                        onChange={handleSelectAll}
+                        checked={isAllSelected}
+                        disabled={pendingEntries.length === 0}
+                        title="Select all pending entries"
+                      />
                     </th>
                   </tr>
                 </thead>
