@@ -1,0 +1,56 @@
+Error sending for approval: TypeError: authService.updateFareReceiptStatus is not a function
+    at handleSendForApproval (BankSummary.jsx:154:38)
+    at executeDispatch (react-dom_client.js?v=270ab2c0:11736:11)
+    at runWithFiberInDEV (react-dom_client.js?v=270ab2c0:1485:72)
+    at processDispatchQueue (react-dom_client.js?v=270ab2c0:11772:37)
+    at react-dom_client.js?v=270ab2c0:12182:11
+    at batchedUpdates$1 (react-dom_client.js?v=270ab2c0:2628:42)
+    at dispatchEventForPluginEventSystem (react-dom_client.js?v=270ab2c0:11877:9)
+    at dispatchEvent (react-dom_client.js?v=270ab2c0:14792:13)
+    at dispatchDiscreteEvent (react-dom_client.js?v=270ab2c0:14773:62)
+handleSendForApproval @ BankSummary.jsx:189
+executeDispatch @ react-dom_client.js?v=270ab2c0:11736
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+processDispatchQueue @ react-dom_client.js?v=270ab2c0:11772
+(anonymous) @ react-dom_client.js?v=270ab2c0:12182
+batchedUpdates$1 @ react-dom_client.js?v=270ab2c0:2628
+dispatchEventForPluginEventSystem @ react-dom_client.js?v=270ab2c0:11877
+dispatchEvent @ react-dom_client.js?v=270ab2c0:14792
+dispatchDiscreteEvent @ react-dom_client.js?v=270ab2c0:14773
+<button>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=270ab2c0:250
+BankSummary @ BankSummary.jsx:501
+react-stack-bottom-frame @ react-dom_client.js?v=270ab2c0:17424
+renderWithHooksAgain @ react-dom_client.js?v=270ab2c0:4281
+renderWithHooks @ react-dom_client.js?v=270ab2c0:4217
+updateFunctionComponent @ react-dom_client.js?v=270ab2c0:6619
+beginWork @ react-dom_client.js?v=270ab2c0:7654
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+performUnitOfWork @ react-dom_client.js?v=270ab2c0:10868
+workLoopSync @ react-dom_client.js?v=270ab2c0:10728
+renderRootSync @ react-dom_client.js?v=270ab2c0:10711
+performWorkOnRoot @ react-dom_client.js?v=270ab2c0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=270ab2c0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=270ab2c0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=270ab2c0:11558
+(anonymous) @ react-dom_client.js?v=270ab2c0:11649
+<BankSummary>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=270ab2c0:250
+App @ App.jsx:480
+react-stack-bottom-frame @ react-dom_client.js?v=270ab2c0:17424
+renderWithHooksAgain @ react-dom_client.js?v=270ab2c0:4281
+renderWithHooks @ react-dom_client.js?v=270ab2c0:4217
+updateFunctionComponent @ react-dom_client.js?v=270ab2c0:6619
+beginWork @ react-dom_client.js?v=270ab2c0:7654
+runWithFiberInDEV @ react-dom_client.js?v=270ab2c0:1485
+performUnitOfWork @ react-dom_client.js?v=270ab2c0:10868
+workLoopSync @ react-dom_client.js?v=270ab2c0:10728
+renderRootSync @ react-dom_client.js?v=270ab2c0:10711
+performWorkOnRoot @ react-dom_client.js?v=270ab2c0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=270ab2c0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=270ab2c0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=270ab2c0:11558
+(anonymous) @ react-dom_client.js?v=270ab2c0:11649
+<App>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=270ab2c0:250
+(anonymous) @ main.jsx:11
