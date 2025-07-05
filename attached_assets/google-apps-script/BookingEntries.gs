@@ -1,17 +1,18 @@
+
 // ============================================================================
 // BOOKING ENTRIES OPERATIONS (BookingEntries.gs)
 // ============================================================================
 // Complete CRUD operations for Booking Entries
 // Sheet Columns: A=Timestamp, B=BookingDetails, C=DateFrom, D=DateTo, 
-//                E=CashAmount, F=BankAmount, G=TotalAmount, H=SubmittedBy, 
-//                I=EntryType, J=EntryId, K=EntryStatus, L=ApprovedBy
+//                E=CashAmount, F=BankAmount, G=TotalAmount, H=EntryType,
+//                I=EntryId, J=SubmittedBy, K=EntryStatus, L=ApprovedBy
 // ============================================================================
 
 /**
  * Add new Booking Entry
  * Sheet Columns: A=Timestamp, B=BookingDetails, C=DateFrom, D=DateTo, 
- *                E=CashAmount, F=BankAmount, G=TotalAmount, H=SubmittedBy,
- *                I=EntryType, J=EntryId, K=EntryStatus, L=ApprovedBy
+ *                E=CashAmount, F=BankAmount, G=TotalAmount, H=EntryType,
+ *                I=EntryId, J=SubmittedBy, K=EntryStatus, L=ApprovedBy
  * @param {Object} data - Booking entry data
  * @returns {Object} Success/error response with entry details
  */
@@ -32,7 +33,7 @@ function addBookingEntry(data) {
       // Add headers exactly as specified (12 columns)
       sheet.getRange(1, 1, 1, 12).setValues([[
         "Timestamp", "BookingDetails", "DateFrom", "DateTo", "CashAmount", 
-        "BankAmount", "TotalAmount", "SubmittedBy", "EntryType", "EntryId",
+        "BankAmount", "TotalAmount", "EntryType", "EntryId", "SubmittedBy",
         "EntryStatus", "ApprovedBy"
       ]]);
     }
@@ -56,9 +57,9 @@ function addBookingEntry(data) {
       data.cashAmount || 0,          // E: Cash amount
       data.bankAmount || 0,          // F: Bank amount
       data.totalAmount || 0,         // G: Total amount
-      data.submittedBy || "",        // H: Submitted by
-      "booking",                     // I: Entry type (static)
-      entryId,                       // J: Entry ID
+      "booking",                     // H: Entry type (static)
+      entryId,                       // I: Entry ID
+      data.submittedBy || "",        // J: Submitted by
       "pending",                     // K: Entry Status (pending/cash/bank/approved)
       "",                            // L: Approved By (empty initially)
     ]]);
@@ -116,7 +117,7 @@ function getBookingEntries() {
     // Process and format data with CORRECT column mapping
     const data = values.slice(1).map((row, index) => {
       return {
-        entryId: row[9],                      // Entry ID from column J (10th column)
+        entryId: row[8],                      // Entry ID from column I (9th column)
         timestamp: String(row[0] || ''),      // Timestamp from column A
         bookingDetails: row[1],               // Booking details from column B
         dateFrom: String(row[2] || ''),       // Date from column C
@@ -124,8 +125,8 @@ function getBookingEntries() {
         cashAmount: row[4],                   // Cash amount from column E
         bankAmount: row[5],                   // Bank amount from column F
         totalAmount: row[6],                  // Total amount from column G
-        submittedBy: row[7],                  // Submitted by from column H
-        entryType: row[8],                    // Entry type from column I
+        entryType: row[7],                    // Entry type from column H
+        submittedBy: row[9],                  // Submitted by from column J (10th column)
         entryStatus: row[10] || "pending",    // Entry status from column K
         approvedBy: row[11] || "",            // Approved by from column L
         rowIndex: index + 2,                  // Store row index for updates/deletes
@@ -168,7 +169,7 @@ function updateBookingEntry(data) {
       throw new Error('BookingEntries sheet not found');
     }
 
-    const entryIdColumn = 10; // Column J contains Entry ID (10th column)
+    const entryIdColumn = 9; // Column I contains Entry ID (9th column)
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
@@ -246,7 +247,7 @@ function deleteBookingEntry(data) {
       throw new Error('BookingEntries sheet not found');
     }
 
-    const entryIdColumn = 10; // Column J contains Entry ID (10th column)
+    const entryIdColumn = 9; // Column I contains Entry ID (9th column)
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
@@ -306,7 +307,7 @@ function updateBookingEntryStatus(data) {
       throw new Error('BookingEntries sheet not found');
     }
 
-    const entryIdColumn = 10; // Column J contains Entry ID (10th column)
+    const entryIdColumn = 9; // Column I contains Entry ID (9th column)
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
