@@ -785,7 +785,7 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
                     <div className="mini-card">
                       <h6>Bank Expense</h6>
                       <h5>₹{(() => {
-                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                        const currentUser= JSON.parse(localStorage.getItem('user') || '{}');
                         const currentUserName = currentUser.fullName || currentUser.username;
                         return expenseData.filter(entry => 
                           entry.type === 'other' && (
@@ -948,26 +948,28 @@ function DataSummary({ fareData, expenseData, cashBookEntries }) {
           const hasUserEntries = userFareEntries.length > 0 || userExpenseEntries.length > 0;
 
           return hasUserEntries ? (
-            <div className="text-center">
-              <button 
-                className="btn btn-lg approval-btn me-3"
-                onClick={handleSendForApproval}
-              >
-                <i className="bi bi-send"></i> Submit for Final Approval
-              </button>
-              <button 
-                className="btn btn-lg btn-outline-primary"
-                onClick={sendAllForApproval}
-              >
-                <i className="bi bi-upload"></i> Send All Data for Approval
-              </button>
-        </div>
+            <>
+              <div className="text-center">
+                <button 
+                  className="btn btn-lg approval-btn me-3"
+                  onClick={handleSendForApproval}
+                >
+                  <i className="bi bi-send"></i> Submit for Final Approval
+                </button>
+                <button 
+                  className="btn btn-lg btn-outline-primary"
+                  onClick={sendAllForApproval}
+                >
+                  <i className="bi bi-upload"></i> Send All Data for Approval
+                </button>
+              </div>
 
-        <div className="text-center mt-3">
-          <small className="text-muted">
-            Send individual entries for approval first, then submit final report
-          </small>
-        </div>
+              <div className="text-center mt-3">
+                <small className="text-muted">
+                  Send individual entries for approval first, then submit final report
+                </small>
+              </div>
+            </>
           ) : null;
         })()}
 
