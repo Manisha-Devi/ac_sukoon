@@ -134,20 +134,21 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         return String(date);
       };
 
-      // Process Fare Receipts (same format as FareRecipt component)
+      // Process Fare Receipts (Daily Entries) - Only required fields for CashSummary
       if (fareReceipts.success && fareReceipts.data) {
         const processedFareReceipts = fareReceipts.data.map(entry => ({
           entryId: entry.entryId,
-          timestamp: convertToTimeString(entry.timestamp),
           date: convertToDateString(entry.date),
-          route: entry.route,
           cashAmount: entry.cashAmount || 0,
-          bankAmount: entry.bankAmount || 0,
-          totalAmount: entry.totalAmount || 0,
+          type: 'daily',
           submittedBy: entry.submittedBy,
           entryStatus: entry.entryStatus || 'pending',
           approvedBy: entry.approvedBy || '',
-          type: 'daily'
+          // Keep full data for other components
+          timestamp: convertToTimeString(entry.timestamp),
+          route: entry.route,
+          bankAmount: entry.bankAmount || 0,
+          totalAmount: entry.totalAmount || 0
         }));
         combinedFareData = [...combinedFareData, ...processedFareReceipts];
 
@@ -167,21 +168,23 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         combinedCashBookEntries = [...combinedCashBookEntries, ...fareCashEntries];
       }
 
-      // Process Booking Entries (same format as FareRecipt component)
+      // Process Booking Entries - Only required fields for CashSummary  
       if (bookingEntries.success && bookingEntries.data) {
         const processedBookingEntries = bookingEntries.data.map(entry => ({
           entryId: entry.entryId,
+          date: convertToDateString(entry.dateFrom), // Use dateFrom as main date
+          cashAmount: entry.cashAmount || 0,
+          type: 'booking',
+          submittedBy: entry.submittedBy,
+          entryStatus: entry.entryStatus || 'pending',
+          approvedBy: entry.approvedBy || '',
+          // Keep full data for other components
           timestamp: convertToTimeString(entry.timestamp),
           bookingDetails: entry.bookingDetails,
           dateFrom: convertToDateString(entry.dateFrom),
           dateTo: convertToDateString(entry.dateTo),
-          cashAmount: entry.cashAmount || 0,
           bankAmount: entry.bankAmount || 0,
-          totalAmount: entry.totalAmount || 0,
-          submittedBy: entry.submittedBy,
-          entryStatus: entry.entryStatus || 'pending',
-          approvedBy: entry.approvedBy || '',
-          type: 'booking'
+          totalAmount: entry.totalAmount || 0
         }));
         combinedFareData = [...combinedFareData, ...processedBookingEntries];
 
@@ -201,40 +204,27 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         combinedCashBookEntries = [...combinedCashBookEntries, ...bookingCashEntries];
       }
 
-      // Process Off Days (same format as FareRecipt component)
-      if (offDays.success && offDays.data) {
-        const processedOffDays = offDays.data.map(entry => ({
+      // Skip Off Days - CashSummary doesn't need them (as per requirement)
+
+      // Process Fuel Payments - Only required fields for CashSummary
+      if (fuelPayments.success && fuelPayments.data) {
+        const processedFuelPayments = fuelPayments.data.map(entry => ({
           entryId: entry.entryId,
-          timestamp: convertToTimeString(entry.timestamp),
           date: convertToDateString(entry.date),
-          reason: entry.reason,
+          cashAmount: entry.cashAmount || 0,
+          type: 'fuel',
           submittedBy: entry.submittedBy,
           entryStatus: entry.entryStatus || 'pending',
           approvedBy: entry.approvedBy || '',
-          cashAmount: 0,
-          bankAmount: 0,
-          totalAmount: 0,
-          type: 'off'
-        }));
-        combinedFareData = [...combinedFareData, ...processedOffDays];
-      }
-
-      // Process Fuel Payments (same format as FuelPayment component)
-      if (fuelPayments.success && fuelPayments.data) {
-        const processedFuelPayments = fuelPayments.data.map(entry => ({
+          // Keep full data for other components
           id: entry.entryId,
-          entryId: entry.entryId,
           timestamp: convertToTimeString(entry.timestamp),
-          date: convertToDateString(entry.date),
           pumpName: entry.pumpName,
           liters: entry.liters,
           rate: entry.rate,
-          cashAmount: entry.cashAmount || 0,
           bankAmount: entry.bankAmount || 0,
           totalAmount: entry.totalAmount || 0,
-          submittedBy: entry.submittedBy,
-          remarks: entry.remarks || "",
-          type: 'fuel'
+          remarks: entry.remarks || ""
         }));
         combinedExpenseData = [...combinedExpenseData, ...processedFuelPayments];
 
@@ -254,20 +244,23 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         combinedCashBookEntries = [...combinedCashBookEntries, ...fuelCashEntries];
       }
 
-      // Process Adda Payments (same format as AddaPayment component)
+      // Process Adda Payments - Only required fields for CashSummary
       if (addaPayments.success && addaPayments.data) {
         const processedAddaPayments = addaPayments.data.map(entry => ({
-          id: entry.entryId,
           entryId: entry.entryId,
-          timestamp: convertToTimeString(entry.timestamp),
           date: convertToDateString(entry.date),
-          addaName: entry.addaName,
           cashAmount: entry.cashAmount || 0,
+          type: 'adda',
+          submittedBy: entry.submittedBy,
+          entryStatus: entry.entryStatus || 'pending',
+          approvedBy: entry.approvedBy || '',
+          // Keep full data for other components
+          id: entry.entryId,
+          timestamp: convertToTimeString(entry.timestamp),
+          addaName: entry.addaName,
           bankAmount: entry.bankAmount || 0,
           totalAmount: entry.totalAmount || 0,
-          submittedBy: entry.submittedBy,
-          remarks: entry.remarks || "",
-          type: 'adda'
+          remarks: entry.remarks || ""
         }));
         combinedExpenseData = [...combinedExpenseData, ...processedAddaPayments];
 
@@ -287,20 +280,23 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         combinedCashBookEntries = [...combinedCashBookEntries, ...addaCashEntries];
       }
 
-      // Process Union Payments (same format as UnionPayment component)
+      // Process Union Payments - Only required fields for CashSummary
       if (unionPayments.success && unionPayments.data) {
         const processedUnionPayments = unionPayments.data.map(entry => ({
-          id: entry.entryId,
           entryId: entry.entryId,
-          timestamp: convertToTimeString(entry.timestamp),
           date: convertToDateString(entry.date),
-          unionName: entry.unionName,
           cashAmount: entry.cashAmount || 0,
+          type: 'union',
+          submittedBy: entry.submittedBy,
+          entryStatus: entry.entryStatus || 'pending',
+          approvedBy: entry.approvedBy || '',
+          // Keep full data for other components
+          id: entry.entryId,
+          timestamp: convertToTimeString(entry.timestamp),
+          unionName: entry.unionName,
           bankAmount: entry.bankAmount || 0,
           totalAmount: entry.totalAmount || 0,
-          submittedBy: entry.submittedBy,
-          remarks: entry.remarks || "",
-          type: 'union'
+          remarks: entry.remarks || ""
         }));
         combinedExpenseData = [...combinedExpenseData, ...processedUnionPayments];
 
@@ -320,20 +316,23 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         combinedCashBookEntries = [...combinedCashBookEntries, ...unionCashEntries];
       }
 
-      // Process Service Payments (same format as ServicePayment component)
+      // Process Service Payments - Only required fields for CashSummary
       if (servicePayments.success && servicePayments.data) {
         const processedServicePayments = servicePayments.data.map(entry => ({
-          id: entry.entryId,
           entryId: entry.entryId,
-          timestamp: convertToTimeString(entry.timestamp),
           date: convertToDateString(entry.date),
+          cashAmount: entry.cashAmount || 0,
+          type: 'service',
+          submittedBy: entry.submittedBy,
+          entryStatus: entry.entryStatus || 'pending',
+          approvedBy: entry.approvedBy || '',
+          // Keep full data for other components
+          id: entry.entryId,
+          timestamp: convertToTimeString(entry.timestamp),
           serviceType: entry.serviceType || entry.serviceDetails,
           serviceDetails: entry.serviceDetails || entry.serviceType,
-          cashAmount: entry.cashAmount || 0,
           bankAmount: entry.bankAmount || 0,
-          totalAmount: entry.totalAmount || 0,
-          submittedBy: entry.submittedBy,
-          type: 'service'
+          totalAmount: entry.totalAmount || 0
         }));
         combinedExpenseData = [...combinedExpenseData, ...processedServicePayments];
 
@@ -353,20 +352,23 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         combinedCashBookEntries = [...combinedCashBookEntries, ...serviceCashEntries];
       }
 
-      //Process Other Payments
+      // Process Other Payments - Only required fields for CashSummary
        if (otherPayments.success && otherPayments.data) {
          const processedOtherPayments = otherPayments.data.map(entry => ({
-           id: entry.entryId,
            entryId: entry.entryId,
-           timestamp: convertToTimeString(entry.timestamp),
            date: convertToDateString(entry.date),
+           cashAmount: entry.cashAmount || 0,
+           type: 'other',
+           submittedBy: entry.submittedBy,
+           entryStatus: entry.entryStatus || 'pending',
+           approvedBy: entry.approvedBy || '',
+           // Keep full data for other components
+           id: entry.entryId,
+           timestamp: convertToTimeString(entry.timestamp),
            paymentType: entry.paymentType,
            paymentDetails: entry.paymentDetails,
-           cashAmount: entry.cashAmount || 0,
            bankAmount: entry.bankAmount || 0,
-           totalAmount: entry.totalAmount || 0,
-           submittedBy: entry.submittedBy,
-           type: 'other'
+           totalAmount: entry.totalAmount || 0
          }));
          combinedExpenseData = [...combinedExpenseData, ...processedOtherPayments];
 

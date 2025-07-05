@@ -36,40 +36,56 @@ function CashSummary({ fareData, expenseData }) {
     let allData = [];
 
     console.log('👤 Filtering data for user:', currentUserName);
-    console.log('📊 FareData Structure Examples:');
+    console.log('📊 FareData Filtered Structure:');
     
-    // Log sample objects for debugging
+    // Log sample objects for debugging  
     if (fareData && fareData.length > 0) {
       console.log('🔸 Daily Entry Sample:', fareData.find(e => e.type === 'daily'));
       console.log('🔸 Booking Entry Sample:', fareData.find(e => e.type === 'booking'));
-      console.log('🔸 Off Day Sample:', fareData.find(e => e.type === 'off'));
     }
 
-    // 📈 Filter fare data (INCOME) for current user - Only CASH entries
+    // 📈 Filter fare data (INCOME) for current user - Only CASH entries  
+    // Data now comes pre-filtered: entryId, date, cashAmount, type, submittedBy, entryStatus, approvedBy
     if (fareData && fareData.length > 0) {
       const userFareData = fareData.filter(entry => 
-        entry.submittedBy === currentUserName && entry.cashAmount > 0
+        entry.submittedBy === currentUserName && 
+        entry.cashAmount > 0 &&
+        (entry.type === 'daily' || entry.type === 'booking') // No off days
       );
       console.log('💰 Cash Income entries found:', userFareData.length);
-      console.log('📋 Sample Cash Entry:', userFareData[0]);
+      console.log('📋 Sample Filtered Cash Entry:', userFareData[0]);
       
       allData = [...allData, ...userFareData.map(entry => ({
-        ...entry,
+        entryId: entry.entryId,
+        date: entry.date,
+        cashAmount: entry.cashAmount,
         type: 'income',
+        entryType: entry.type, // daily or booking
+        submittedBy: entry.submittedBy,
+        entryStatus: entry.entryStatus,
+        approvedBy: entry.approvedBy,
         description: entry.route || entry.bookingDetails || 'Fare Collection'
       }))];
     }
 
     // 📉 Filter expense data (EXPENSE) for current user - Only CASH entries
+    // Data now comes pre-filtered: entryId, date, cashAmount, type, submittedBy, entryStatus, approvedBy
     if (expenseData && expenseData.length > 0) {
       const userExpenseData = expenseData.filter(entry => 
         entry.submittedBy === currentUserName && entry.cashAmount > 0
       );
       console.log('💸 Cash Expense entries found:', userExpenseData.length);
+      console.log('📋 Sample Filtered Expense Entry:', userExpenseData[0]);
       
       allData = [...allData, ...userExpenseData.map(entry => ({
-        ...entry,
+        entryId: entry.entryId,
+        date: entry.date,
+        cashAmount: entry.cashAmount,
         type: 'expense',
+        entryType: entry.type, // fuel, adda, union, service, other
+        submittedBy: entry.submittedBy,
+        entryStatus: entry.entryStatus,
+        approvedBy: entry.approvedBy,
         description: entry.pumpName || entry.addaName || entry.unionName || 
                     entry.serviceType || entry.paymentDetails || 'Payment'
       }))];
