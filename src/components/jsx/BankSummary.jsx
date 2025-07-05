@@ -35,7 +35,7 @@ function BankSummary({ bankData }) {
     console.log('💰 User bank entries found:', userBankData.length);
 
     // Map to display format
-    const allData = userBankData.map(entry => ({
+    let allData = userBankData.map(entry => ({
       entryId: entry.entryId,
       date: entry.date,
       bankAmount: entry.bankAmount || 0,
