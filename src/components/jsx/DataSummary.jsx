@@ -316,7 +316,7 @@ function DataSummary({ fareData, expenseData }) {
     return (
       <div 
         key={entry.entryId} 
-        className={`recent-entry-card compact ${isSelected ? 'selected' : ''}`}
+        className={`recent-entry-card ${isSelected ? 'selected' : ''}`}
         onClick={() => handleEntrySelect(entry.entryId)}
       >
         <div className="entry-checkbox">
@@ -331,78 +331,72 @@ function DataSummary({ fareData, expenseData }) {
         <div className="entry-content">
           <div className="entry-header">
             <div className="entry-type-badge">
-              {entry.type || entry.entryType}
+              {entry.dataType}
             </div>
-            <div className="entry-id">#{entry.entryId}</div>
+            <div className="entry-status-badge" data-status={entry.entryStatus}>
+              {entry.entryStatus === 'pending' && (
+                <>
+                  <i className="bi bi-clock me-1"></i>
+                  PENDING
+                </>
+              )}
+              {entry.entryStatus === 'forwardedBank' && (
+                <>
+                  <i className="bi bi-bank me-1"></i>
+                  FORWARDED TO BANK
+                </>
+              )}
+              {entry.entryStatus === 'forwardedCash' && (
+                <>
+                  <i className="bi bi-cash-stack me-1"></i>
+                  FORWARDED TO CASH
+                </>
+              )}
+              {entry.entryStatus === 'approvedCash' && (
+                <>
+                  <i className="bi bi-check-circle me-1"></i>
+                  CASH APPROVED
+                </>
+              )}
+              {entry.entryStatus === 'approvedBank' && (
+                <>
+                  <i className="bi bi-check-circle me-1"></i>
+                  BANK APPROVED
+                </>
+              )}
+              {entry.entryStatus === 'approved' && (
+                <>
+                  <i className="bi bi-check-circle-fill me-1"></i>
+                  APPROVED
+                </>
+              )}
+            </div>
           </div>
 
-          <div className="entry-details compact">
+          <div className="entry-details">
             <div className="entry-row">
-              <span className="label">By:</span>
+              <span className="label">Entry ID:</span>
+              <span className="value">{entry.entryId}</span>
+            </div>
+            <div className="entry-row">
+              <span className="label">Submitted By:</span>
               <span className="value">{entry.submittedBy}</span>
             </div>
             <div className="entry-row">
               <span className="label">Date:</span>
-              <span className="value">{new Date(entry.date).toLocaleDateString('en-IN')}</span>
+              <span className="value">{entry.date}</span>
             </div>
             <div className="entry-row">
               <span className="label">Description:</span>
-              <span className="value">{entry.description || entry.displayName}</span>
+              <span className="value">{entry.displayName}</span>
             </div>
-            
-            {/* Amount Display - Bold for Bank Approval, Normal for Cash */}
-            {activeTab === 'bankApproval' && (
-              <div className="entry-row amount-row">
-                <span className="label">Bank:</span>
-                <span className="value bank-amount">₹{(entry.bankAmount || 0).toLocaleString('en-IN')}</span>
-              </div>
-            )}
-            
-            {activeTab === 'cashApproval' && (
-              <div className="entry-row amount-row">
-                <span className="label">Cash:</span>
-                <span className="value cash-amount">₹{(entry.cashAmount || 0).toLocaleString('en-IN')}</span>
-              </div>
-            )}
-            
-            {(activeTab === 'pending' || activeTab === 'approved') && (
-              <div className="entry-row amount-row">
-                <span className="label">Total:</span>
-                <span className="value total-amount">₹{(entry.totalAmount || 0).toLocaleString('en-IN')}</span>
-              </div>
-            )}
-
-            <div className="entry-status" data-status={entry.entryStatus}>
-              {entry.entryStatus === 'pending' && (
-                <span className="status-pending">
-                  <i className="bi bi-clock me-1"></i>PENDING
-                </span>
-              )}
-              {entry.entryStatus === 'forwardedBank' && (
-                <span className="status-forwarded-bank">
-                  <i className="bi bi-bank me-1"></i>BANK APPROVAL
-                </span>
-              )}
-              {entry.entryStatus === 'forwardedCash' && (
-                <span className="status-forwarded-cash">
-                  <i className="bi bi-cash-stack me-1"></i>CASH APPROVAL
-                </span>
-              )}
-              {entry.entryStatus === 'approvedCash' && (
-                <span className="status-approved">
-                  <i className="bi bi-check-circle me-1"></i>APPROVED
-                </span>
-              )}
-              {entry.entryStatus === 'approvedBank' && (
-                <span className="status-approved">
-                  <i className="bi bi-check-circle me-1"></i>BANK APPROVED
-                </span>
-              )}
-              {entry.entryStatus === 'approved' && (
-                <span className="status-final-approved">
-                  <i className="bi bi-check-circle-fill me-1"></i>FINAL APPROVED
-                </span>
-              )}
+            <div className="entry-row">
+              <span className="label">Total Amount:</span>
+              <span className="value">₹{(entry.totalAmount || 0).toLocaleString('en-IN')}</span>
+            </div>
+            <div className="entry-row">
+              <span className="label">Time:</span>
+              <span className="value">{entry.timestamp}</span>
             </div>
           </div>
         </div>
