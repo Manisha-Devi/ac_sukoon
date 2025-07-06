@@ -216,27 +216,115 @@
 }
 
 .recent-entry-card {
-  display: flex;
-  align-items: flex-start;
   background: white;
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
 }
 
-.recent-entry-card:hover {
-  border-color: #007bff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+.recent-entry-card.compact {
+  padding: 12px;
+  margin-bottom: 8px;
 }
 
-.recent-entry-card.selected {
-  border-color: #007bff;
-  background: #f8f9ff;
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+.recent-entry-card.compact .entry-content {
+  width: 100%;
+}
+
+.recent-entry-card.compact .entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.recent-entry-card.compact .entry-id {
+  font-size: 0.75rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.recent-entry-card.compact .entry-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.recent-entry-card.compact .entry-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 0;
+}
+
+.recent-entry-card.compact .entry-row.amount-row {
+  grid-column: 1 / -1;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 6px;
+  margin-top: 4px;
+}
+
+.recent-entry-card.compact .entry-status {
+  grid-column: 1 / -1;
+  text-align: center;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.recent-entry-card.compact .bank-amount {
+  font-weight: bold;
+  color: #0066cc;
+  font-size: 1rem;
+}
+
+.recent-entry-card.compact .cash-amount {
+  font-weight: 600;
+  color: #28a745;
+  font-size: 1rem;
+}
+
+.recent-entry-card.compact .total-amount {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+}
+
+.recent-entry-card.compact .status-pending {
+  color: #ffc107;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.recent-entry-card.compact .status-forwarded-bank {
+  color: #0066cc;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.recent-entry-card.compact .status-forwarded-cash {
+  color: #28a745;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.recent-entry-card.compact .status-approved {
+  color: #28a745;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.recent-entry-card.compact .status-final-approved {
+  color: #198754;
+  font-size: 0.8rem;
+  font-weight: bold;
 }
 
 .entry-checkbox {
