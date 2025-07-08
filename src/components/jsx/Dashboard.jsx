@@ -686,7 +686,11 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
                     {dataStatistics.lastFetchDate ? 
                       (new Date(dataStatistics.lastFetchDate).toDateString() === new Date().toDateString() ? 
                         'Today' : 
-                        dataStatistics.lastFetchDate
+                        new Date(dataStatistics.lastFetchDate).toLocaleDateString('en-IN', { 
+                          year: 'numeric', 
+                          month: 'short', 
+                          day: '2-digit' 
+                        })
                       ) : 
                       'Today'
                     }
