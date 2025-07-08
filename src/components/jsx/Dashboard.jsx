@@ -494,13 +494,13 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
     console.log('✅ Dashboard: All components data refreshed');
   };
 
-  // Expose refresh function globally for centralized access
+  // Expose refresh function globally for centralized access from Navbar
   useEffect(() => {
     window.refreshAllData = refreshAllData;
     return () => {
       delete window.refreshAllData;
     };
-  }, []);
+  }, [refreshAllData]);
   const lineData = {
     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
     datasets: [
