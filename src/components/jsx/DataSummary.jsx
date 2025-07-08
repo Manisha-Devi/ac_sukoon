@@ -373,28 +373,32 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
           
           const updatedFareData = fareData.map(entry => {
             if (updatedEntryIds.includes(entry.entryId)) {
-              return {
+              const updatedEntry = {
                 ...entry,
                 entryStatus: newStatus,
                 approvedBy: approverName
               };
+              console.log(`📝 DataSummary: Updating fareData entry ${entry.entryId} with status: ${newStatus}, approver: ${approverName}`);
+              return updatedEntry;
             }
             return entry;
           });
 
           const updatedExpenseData = expenseData.map(entry => {
             if (updatedEntryIds.includes(entry.entryId)) {
-              return {
+              const updatedEntry = {
                 ...entry,
                 entryStatus: newStatus,
                 approvedBy: approverName
               };
+              console.log(`📝 DataSummary: Updating expenseData entry ${entry.entryId} with status: ${newStatus}, approver: ${approverName}`);
+              return updatedEntry;
             }
             return entry;
           });
           
-          console.log('📊 DataSummary: Sending updated fareData to parent:', updatedFareData);
-          console.log('📊 DataSummary: Sending updated expenseData to parent:', updatedExpenseData);
+          console.log('📊 DataSummary: Sending updated fareData to parent:', updatedFareData.filter(entry => updatedEntryIds.includes(entry.entryId)));
+          console.log('📊 DataSummary: Sending updated expenseData to parent:', updatedExpenseData.filter(entry => updatedEntryIds.includes(entry.entryId)));
           
           onDataUpdate(updatedFareData, updatedExpenseData);
         }

@@ -85,15 +85,55 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
     console.log('📈 Dashboard: Received updated fareData:', updatedFareData);
     console.log('📉 Dashboard: Received updated expenseData:', updatedExpenseData);
     
-    // Update state immediately without triggering refresh
-    setFareData(updatedFareData);
-    setExpenseData(updatedExpenseData);
-    
-    console.log('✅ Dashboard: Parent state updated successfully');
+    // Properly merge updated data with existing data
+    setFareData(prevFareData => {
+      const updatedData = prevFareData.map(existingEntry => {
+        const updatedEntry = updatedFareData.find(updated => updated.entryId === existingEntry.entryId);
+        if (updatedEntry) {
+          // Merge all fields from updated entry, ensuring entryStatus and approvedBy are preserved
+          console.log(`🔄 Dashboard: Updating entry ${existingEntry.entryId} with new status: ${updatedEntry.entryStatus}, approver: ${updatedEntry.approvedBy}`);
+          return {
+            ...existingEntry,
+            ...updatedEntry,
+            entryStatus: updatedEntry.entryStatus,
+            approvedBy: updatedEntry.approvedBy
+          };
+        }
+        return existingEntry;
+      });
+      
+      console.log('📊 Dashboard: Updated fareData with proper status updates:', updatedData);
+      return updatedData;
+    });
 
-    // Regenerate cash book entries with updated data
-    const updatedCashBookEntries = generateCashBookEntries(updatedFareData, updatedExpenseData);
-    setCashBookEntries(updatedCashBookEntries);
+    setExpenseData(prevExpenseData => {
+      const updatedData = prevExpenseData.map(existingEntry => {
+        const updatedEntry = updatedExpenseData.find(updated => updated.entryId === existingEntry.entryId);
+        if (updatedEntry) {
+          // Merge all fields from updated entry, ensuring entryStatus and approvedBy are preserved
+          console.log(`🔄 Dashboard: Updating expense entry ${existingEntry.entryId} with new status: ${updatedEntry.entryStatus}, approver: ${updatedEntry.approvedBy}`);
+          return {
+            ...existingEntry,
+            ...updatedEntry,
+            entryStatus: updatedEntry.entryStatus,
+            approvedBy: updatedEntry.approvedBy
+          };
+        }
+        return existingEntry;
+      });
+      
+      console.log('📊 Dashboard: Updated expenseData with proper status updates:', updatedData);
+      return updatedData;
+    });
+    
+    console.log('✅ Dashboard: Parent state updated successfully with proper entry status and approver info');
+
+    // Regenerate cash book entries with updated data - use setTimeout to ensure state is updated
+    setTimeout(() => {
+      console.log('📖 Dashboard: Regenerating cash book entries with updated status...');
+      const updatedCashBookEntries = generateCashBookEntries(updatedFareData, updatedExpenseData);
+      setCashBookEntries(updatedCashBookEntries);
+    }, 100);
 
     // Prevent any background refresh for 5 seconds to allow UI to stabilize
     window.dataUpdateInProgress = true;
