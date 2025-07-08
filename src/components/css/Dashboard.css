@@ -612,6 +612,8 @@
 .data-breakdown-section {
   padding: 0 2rem 2rem 2rem;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
+  width: 100%;
+  overflow-x: visible;
 }
 
 .breakdown-title-container {
@@ -652,6 +654,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
+  width: 100%;
 }
 
 .breakdown-column {
@@ -725,7 +728,7 @@
   }
   
   .breakdown-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1rem;
   }
 }
@@ -785,25 +788,33 @@
 
   .breakdown-grid {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .breakdown-column {
+    gap: 0.5rem;
   }
 
   .breakdown-item {
-    padding: 0.5rem 0.75rem;
+    padding: 0.75rem;
+    flex-wrap: wrap;
   }
 
   .breakdown-icon {
-    font-size: 1rem;
-    width: 28px;
-    height: 28px;
+    font-size: 1.1rem;
+    width: 30px;
+    height: 30px;
   }
 
   .breakdown-label {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+    min-width: 120px;
   }
 
   .breakdown-value {
-    font-size: 0.9rem;
-    padding: 0.2rem 0.5rem;
+    font-size: 0.95rem;
+    padding: 0.25rem 0.75rem;
+    min-width: 50px;
   }
 }
 

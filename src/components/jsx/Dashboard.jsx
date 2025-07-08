@@ -27,7 +27,7 @@ ChartJS.register(
 
 function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, setFareData, setExpenseData, setCashBookEntries, isRefreshing, dataStats, dataStatistics, onRefreshComplete }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [showDataBreakdown, setShowDataBreakdown] = useState(true);
+  const [showDataBreakdown, setShowDataBreakdown] = useState(false);
   const [allData, setAllData] = useState({
     fareReceipts: [],
     bookingEntries: [],
