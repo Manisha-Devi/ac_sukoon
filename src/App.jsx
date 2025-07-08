@@ -48,12 +48,128 @@ function App() {
   const handleDataRefresh = async () => {
     console.log('🔄 App.jsx: Starting data refresh from Navbar...');
 
-    // Load data from Dashboard component method
-    if (window.refreshAllData) {
-      await window.refreshAllData();
-    }
+    try {
+      // Direct data loading in App.jsx instead of Dashboard
+      const authService = (await import('./services/authService.js')).default;
+      
+      console.log('🚀 App.jsx: Loading all data from Google Sheets...');
 
-    console.log('✅ App.jsx: Data refresh completed from Navbar');
+      // Load all data types in parallel
+      const [
+        fareReceipts, 
+        bookingEntries, 
+        offDays, 
+        fuelPayments, 
+        addaPayments,
+        unionPayments,
+        servicePayments,
+        otherPayments
+      ] = await Promise.all([
+        authService.getFareReceipts(),
+        authService.getBookingEntries(),
+        authService.getOffDays(),
+        authService.getFuelPayments(),
+        authService.getAddaPayments(),
+        authService.getUnionPayments(),
+        authService.getServicePayments(),
+        authService.getOtherPayments()
+      ]);
+
+      // Process fare data (fare receipts + booking entries)
+      let combinedFareData = [];
+      
+      // Add fare receipts
+      if (fareReceipts?.data && Array.isArray(fareReceipts.data)) {
+        combinedFareData.push(...fareReceipts.data.map(receipt => ({
+          ...receipt,
+          type: 'daily'
+        })));
+      }
+      
+      // Add booking entries
+      if (bookingEntries?.data && Array.isArray(bookingEntries.data)) {
+        combinedFareData.push(...bookingEntries.data.map(booking => ({
+          ...booking,
+          type: 'booking'
+        })));
+      }
+      
+      // Add off days
+      if (offDays?.data && Array.isArray(offDays.data)) {
+        combinedFareData.push(...offDays.data.map(offDay => ({
+          ...offDay,
+          type: 'off'
+        })));
+      }
+
+      // Process expense data
+      let combinedExpenseData = [];
+      
+      if (fuelPayments?.data && Array.isArray(fuelPayments.data)) {
+        combinedExpenseData.push(...fuelPayments.data.map(payment => ({
+          ...payment,
+          type: 'fuel'
+        })));
+      }
+      
+      if (addaPayments?.data && Array.isArray(addaPayments.data)) {
+        combinedExpenseData.push(...addaPayments.data.map(payment => ({
+          ...payment,
+          type: 'adda'
+        })));
+      }
+      
+      if (unionPayments?.data && Array.isArray(unionPayments.data)) {
+        combinedExpenseData.push(...unionPayments.data.map(payment => ({
+          ...payment,
+          type: 'union'
+        })));
+      }
+      
+      if (servicePayments?.data && Array.isArray(servicePayments.data)) {
+        combinedExpenseData.push(...servicePayments.data.map(payment => ({
+          ...payment,
+          type: 'service'
+        })));
+      }
+      
+      if (otherPayments?.data && Array.isArray(otherPayments.data)) {
+        combinedExpenseData.push(...otherPayments.data.map(payment => ({
+          ...payment,
+          type: 'other'
+        })));
+      }
+
+      // Update parent state
+      setFareData(combinedFareData);
+      setExpenseData(combinedExpenseData);
+
+      // Calculate and update totals
+      const totalEarningsAmount = combinedFareData
+        .filter(entry => entry.type !== 'off')
+        .reduce((sum, entry) => sum + (parseFloat(entry.totalAmount) || 0), 0);
+      
+      const totalExpensesAmount = combinedExpenseData
+        .reduce((sum, entry) => sum + (parseFloat(entry.totalAmount) || 0), 0);
+
+      setTotalEarnings(totalEarningsAmount);
+      setTotalExpenses(totalExpensesAmount);
+
+      // Trigger refresh event for other components
+      window.dispatchEvent(new CustomEvent('dataRefreshed', {
+        detail: {
+          timestamp: new Date(),
+          source: 'centralized-refresh'
+        }
+      }));
+
+      console.log('✅ App.jsx: Data refresh completed from Navbar');
+      console.log(`📊 Loaded ${combinedFareData.length} fare entries and ${combinedExpenseData.length} expense entries`);
+
+    } catch (error) {
+      console.error('❌ App.jsx: Error in data refresh:', error);
+      throw error; // Re-throw to be handled by Navbar
+    }
   };
 
   // Function to update entry status in parent state

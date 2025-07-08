@@ -474,33 +474,22 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
   //   loadAllDataFromSheets();
   // }, []);
 
-  // Comprehensive refresh function for all components
-  const refreshAllData = async () => {
-    console.log('🔄 Dashboard: Starting comprehensive data refresh...');
-    await loadAllDataFromSheets();
-    
-    // Trigger refresh for other components that might need it
-    window.dispatchEvent(new CustomEvent('dataRefreshed', {
-      detail: {
-        timestamp: new Date(),
-        source: 'centralized-refresh'
-      }
-    }));
-    
-    if (onRefreshComplete) {
-      onRefreshComplete();
-    }
-    
-    console.log('✅ Dashboard: All components data refreshed');
-  };
-
-  // Expose refresh function globally for centralized access from Navbar
+  // Listen for data refresh events instead of exposing global function
   useEffect(() => {
-    window.refreshAllData = refreshAllData;
-    return () => {
-      delete window.refreshAllData;
+    const handleDataRefresh = () => {
+      console.log('🔄 Dashboard: Received data refresh event');
+      // Dashboard will get updated data via props automatically
+      if (onRefreshComplete) {
+        onRefreshComplete();
+      }
     };
-  }, [refreshAllData]);
+
+    window.addEventListener('dataRefreshed', handleDataRefresh);
+
+    return () => {
+      window.removeEventListener('dataRefreshed', handleDataRefresh);
+    };
+  }, [onRefreshComplete]);
   const lineData = {
     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
     datasets: [
