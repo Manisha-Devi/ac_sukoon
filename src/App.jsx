@@ -71,7 +71,7 @@ function App() {
     try {
       // Direct data loading in App.jsx instead of Dashboard
       const authService = (await import('./services/authService.js')).default;
-      
+
       console.log('🚀 App.jsx: Loading all data from Google Sheets...');
 
       // Load all data types in parallel
@@ -97,7 +97,7 @@ function App() {
 
       // Process fare data (fare receipts + booking entries)
       let combinedFareData = [];
-      
+
       // Add fare receipts
       if (fareReceipts?.data && Array.isArray(fareReceipts.data)) {
         combinedFareData.push(...fareReceipts.data.map(receipt => ({
@@ -105,7 +105,7 @@ function App() {
           type: 'daily'
         })));
       }
-      
+
       // Add booking entries
       if (bookingEntries?.data && Array.isArray(bookingEntries.data)) {
         combinedFareData.push(...bookingEntries.data.map(booking => ({
@@ -113,7 +113,7 @@ function App() {
           type: 'booking'
         })));
       }
-      
+
       // Add off days
       if (offDays?.data && Array.isArray(offDays.data)) {
         combinedFareData.push(...offDays.data.map(offDay => ({
@@ -124,35 +124,35 @@ function App() {
 
       // Process expense data
       let combinedExpenseData = [];
-      
+
       if (fuelPayments?.data && Array.isArray(fuelPayments.data)) {
         combinedExpenseData.push(...fuelPayments.data.map(payment => ({
           ...payment,
           type: 'fuel'
         })));
       }
-      
+
       if (addaPayments?.data && Array.isArray(addaPayments.data)) {
         combinedExpenseData.push(...addaPayments.data.map(payment => ({
           ...payment,
           type: 'adda'
         })));
       }
-      
+
       if (unionPayments?.data && Array.isArray(unionPayments.data)) {
         combinedExpenseData.push(...unionPayments.data.map(payment => ({
           ...payment,
           type: 'union'
         })));
       }
-      
+
       if (servicePayments?.data && Array.isArray(servicePayments.data)) {
         combinedExpenseData.push(...servicePayments.data.map(payment => ({
           ...payment,
           type: 'service'
         })));
       }
-      
+
       if (otherPayments?.data && Array.isArray(otherPayments.data)) {
         combinedExpenseData.push(...otherPayments.data.map(payment => ({
           ...payment,
@@ -168,7 +168,7 @@ function App() {
       const totalEarningsAmount = combinedFareData
         .filter(entry => entry.type !== 'off')
         .reduce((sum, entry) => sum + (parseFloat(entry.totalAmount) || 0), 0);
-      
+
       const totalExpensesAmount = combinedExpenseData
         .reduce((sum, entry) => sum + (parseFloat(entry.totalAmount) || 0), 0);
 
@@ -383,16 +383,15 @@ function App() {
     <div className="app">
       {/* Navbar Component */}
       <Navbar 
-        user={user}
-        onLogout={handleLogout}
-        isRefreshing={isRefreshing}
-        setIsRefreshing={setIsRefreshing}
-        lastRefreshTime={lastRefreshTime}
-        setLastRefreshTime={setLastRefreshTime}
-        onDataRefresh={handleDataRefresh}
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-      />
+          user={user} 
+          onLogout={handleLogout}
+          isRefreshing={isRefreshing}
+          setIsRefreshing={setIsRefreshing}
+          lastRefreshTime={lastRefreshTime}
+          setLastRefreshTime={setLastRefreshTime}
+          onDataRefresh={handleDataRefresh}
+          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        />
 
       {/* Sidebar Overlay - Only for mobile */}
       <div

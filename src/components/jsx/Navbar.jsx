@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import "../css/Navbar.css";
 
-function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime, setLastRefreshTime, onDataRefresh }) {
+function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime, setLastRefreshTime, onDataRefresh, onToggleSidebar }) {
   // Centralized refresh function - Navbar में हो रहा है
   const handleCentralizedRefresh = async () => {
     if (isRefreshing) return; // Prevent multiple simultaneous refreshes
@@ -44,7 +44,7 @@ function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            // This will be handled by parent component
+            onToggleSidebar && onToggleSidebar();
           }}
           aria-label="Toggle sidebar"
           type="button"
@@ -101,7 +101,7 @@ function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                // This will be handled by parent component
+                onToggleSidebar && onToggleSidebar();
               }}
               title="Toggle Sidebar"
               type="button"
