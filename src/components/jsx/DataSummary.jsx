@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import "../css/DataApproval.css";
 import authService from "../../services/authService.js";
 
-function DataSummary({ fareData, expenseData }) {
+function DataSummary({ fareData, expenseData, onDataUpdate }) {
   const [activeTab, setActiveTab] = useState('pending');
   const [pendingData, setPendingData] = useState([]);
   const [bankApprovalData, setBankApprovalData] = useState([]);
@@ -316,10 +316,66 @@ function DataSummary({ fareData, expenseData }) {
       // Wait for all syncs to complete in background
       Promise.all(syncPromises).then(() => {
         console.log('✅ All entries synced to Google Sheets');
+        
+        // Update parent component's state
+        if (onDataUpdate) {
+          const updatedFareData = fareData.map(entry => {
+            if (updatedEntryIds.includes(entry.entryId)) {
+              return {
+                ...entry,
+                entryStatus: newStatus,
+                approvedBy: approverName
+              };
+            }
+            return entry;
+          });
+
+          const updatedExpenseData = expenseData.map(entry => {
+            if (updatedEntryIds.includes(entry.entryId)) {
+              return {
+                ...entry,
+                entryStatus: newStatus,
+                approvedBy: approverName
+              };
+            }
+            return entry;
+          });
+          
+          onDataUpdate(updatedFareData, updatedExpenseData);
+        }
+        
         // Refresh local data after sync
         processAllData();
       }).catch((error) => {
         console.error('❌ Some entries failed to sync to Google Sheets:', error);
+        
+        // Still update parent component even if sync partially failed
+        if (onDataUpdate) {
+          const updatedFareData = fareData.map(entry => {
+            if (updatedEntryIds.includes(entry.entryId)) {
+              return {
+                ...entry,
+                entryStatus: newStatus,
+                approvedBy: approverName
+              };
+            }
+            return entry;
+          });
+
+          const updatedExpenseData = expenseData.map(entry => {
+            if (updatedEntryIds.includes(entry.entryId)) {
+              return {
+                ...entry,
+                entryStatus: newStatus,
+                approvedBy: approverName
+              };
+            }
+            return entry;
+          });
+          
+          onDataUpdate(updatedFareData, updatedExpenseData);
+        }
+        
         // Still refresh local data to show any partial updates
         processAllData();
       });

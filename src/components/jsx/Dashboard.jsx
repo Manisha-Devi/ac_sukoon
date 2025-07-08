@@ -36,6 +36,60 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
     totalRecords: 0
   });
 
+  // Helper function to generate cash book entries from data
+  const generateCashBookEntries = (fareData, expenseData) => {
+    let cashBookEntries = [];
+
+    // Generate entries from fare data
+    if (fareData && fareData.length > 0) {
+      const fareCashEntries = fareData.map(entry => ({
+        id: `fare-${entry.entryId}`,
+        date: entry.date,
+        description: entry.type === 'daily' ? `Daily Collection - ${entry.route}` : 
+                     entry.type === 'booking' ? `Booking - ${entry.bookingDetails}` :
+                     `Off Day - ${entry.reason}`,
+        cashReceived: entry.cashAmount || 0,
+        bankReceived: entry.bankAmount || 0,
+        cashPaid: 0,
+        bankPaid: 0,
+        source: 'fare-entry',
+        jfNo: `JF-${entry.entryId}`,
+        submittedBy: entry.submittedBy
+      }));
+      cashBookEntries = [...cashBookEntries, ...fareCashEntries];
+    }
+
+    // Generate entries from expense data
+    if (expenseData && expenseData.length > 0) {
+      const expenseCashEntries = expenseData.map(entry => ({
+        id: `expense-${entry.entryId}`,
+        date: entry.date,
+        description: `${entry.type} Payment - ${entry.description || 'Payment'}`,
+        cashReceived: 0,
+        bankReceived: 0,
+        cashPaid: entry.cashAmount || 0,
+        bankPaid: entry.bankAmount || 0,
+        source: 'expense-entry',
+        jfNo: `JF-${entry.entryId}`,
+        submittedBy: entry.submittedBy
+      }));
+      cashBookEntries = [...cashBookEntries, ...expenseCashEntries];
+    }
+
+    return cashBookEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
+  };
+
+  // Handle updates from DataSummary component
+  const handleDataSummaryUpdate = (updatedFareData, updatedExpenseData) => {
+    console.log('📊 Dashboard: Receiving data update from DataSummary');
+    setFareData(updatedFareData);
+    setExpenseData(updatedExpenseData);
+
+    // Regenerate cash book entries with updated data
+    const updatedCashBookEntries = generateCashBookEntries(updatedFareData, updatedExpenseData);
+    setCashBookEntries(updatedCashBookEntries);
+  };
+
   // Comprehensive data loading function
   const loadAllDataFromSheets = async () => {
     setIsLoading(true);
@@ -478,7 +532,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
   const refreshAllData = async () => {
     console.log('🔄 Dashboard: Starting comprehensive data refresh...');
     await loadAllDataFromSheets();
-    
+
     // Trigger refresh for other components that might need it
     window.dispatchEvent(new CustomEvent('dataRefreshed', {
       detail: {
@@ -486,11 +540,11 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         source: 'centralized-refresh'
       }
     }));
-    
+
     if (onRefreshComplete) {
       onRefreshComplete();
     }
-    
+
     console.log('✅ Dashboard: All components data refreshed');
   };
 
