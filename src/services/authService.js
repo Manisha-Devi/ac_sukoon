@@ -1192,6 +1192,43 @@ class AuthService {
     }
   }
 
+  // Update Off Day Status
+  async updateOffDayStatus(data) {
+    try {
+      console.log('📋 Updating off day status in Google Sheets:', data);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'updateOffDayStatus',
+          data: data
+        })
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Off day status updated:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating off day status:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // Get Off Days from Google Sheets
   async getOffDays() {
     try {

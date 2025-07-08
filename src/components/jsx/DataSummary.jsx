@@ -39,17 +39,31 @@ function DataSummary({ fareData, expenseData }) {
       // Process Fare Data
       if (fareData && fareData.length > 0) {
         fareData.forEach(entry => {
-          if (entry.type !== 'off') { // Exclude off days from approval
-            allEntries.push({
-              ...entry,
-              dataType: entry.type === 'daily' ? 'Fare Receipt' : 'Booking Entry',
-              entryStatus: entry.entryStatus || 'pending',
-              displayName: entry.type === 'daily' ? 
-                `Fare: ${entry.route || 'Daily Collection'}` : 
-                `Booking: ${entry.bookingDetails || 'Booking Entry'}`,
-              description: entry.type === 'daily' ? entry.route : entry.bookingDetails
-            });
+          let dataType = '';
+          let displayName = '';
+          let description = '';
+
+          if (entry.type === 'daily') {
+            dataType = 'Fare Receipt';
+            displayName = `Fare: ${entry.route || 'Daily Collection'}`;
+            description = entry.route;
+          } else if (entry.type === 'booking') {
+            dataType = 'Booking Entry';
+            displayName = `Booking: ${entry.bookingDetails || 'Booking Entry'}`;
+            description = entry.bookingDetails;
+          } else if (entry.type === 'off') {
+            dataType = 'Off Day';
+            displayName = `Off Day: ${entry.reason || 'Off Day'}`;
+            description = entry.reason || 'Off day entry';
           }
+
+          allEntries.push({
+            ...entry,
+            dataType: dataType,
+            entryStatus: entry.entryStatus || 'pending',
+            displayName: displayName,
+            description: description
+          });
         });
       }
 
@@ -235,6 +249,13 @@ function DataSummary({ fareData, expenseData }) {
             break;
           case 'Booking Entry':
             result = await authService.updateBookingEntryStatus({
+              entryId: entryId,
+              newStatus: newStatus,
+              approverName: approverName
+            });
+            break;
+          case 'Off Day':
+            result = await authService.updateOffDayStatus({
               entryId: entryId,
               newStatus: newStatus,
               approverName: approverName
