@@ -25,7 +25,7 @@ ChartJS.register(
   ArcElement,
 );
 
-function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, setFareData, setExpenseData, setCashBookEntries, isRefreshing, dataStats, onRefreshComplete }) {
+function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, setFareData, setExpenseData, setCashBookEntries, isRefreshing, dataStats, dataStatistics, onRefreshComplete }) {
   const [isLoading, setIsLoading] = useState(false);
   const [allData, setAllData] = useState({
     fareReceipts: [],
@@ -615,31 +615,84 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
                 day: 'numeric' 
               })}
             </div>
-            {dataStats && (
-              <div className="data-stats-card bg-white p-3 rounded shadow-sm">
-                <h6 className="mb-2 text-primary">
-                  <i className="bi bi-database me-2"></i>
+            {dataStatistics && dataStatistics.totalRecords > 0 && (
+              <div className="data-statistics-card bg-white p-4 rounded shadow-sm border">
+                <h6 className="mb-3 text-primary fw-bold">
+                  <i className="bi bi-database-fill me-2"></i>
                   Data Statistics
                 </h6>
-                <div className="row text-center">
-                  <div className="col-4">
-                    <div className="fw-bold text-success">{dataStats.fareRecords}</div>
+                
+                {/* Summary Stats */}
+                <div className="row text-center mb-3">
+                  <div className="col-3">
+                    <div className="fw-bold text-success fs-5">{dataStatistics.totalRecords}</div>
+                    <small className="text-muted">Total Records</small>
+                  </div>
+                  <div className="col-3">
+                    <div className="fw-bold text-primary fs-5">{dataStatistics.incomeRecords}</div>
                     <small className="text-muted">Income</small>
                   </div>
-                  <div className="col-4">
-                    <div className="fw-bold text-danger">{dataStats.expenseRecords}</div>
+                  <div className="col-3">
+                    <div className="fw-bold text-danger fs-5">{dataStatistics.expenseRecords}</div>
                     <small className="text-muted">Expenses</small>
                   </div>
-                  <div className="col-4">
-                    <div className="fw-bold text-info">{dataStats.totalRecords}</div>
-                    <small className="text-muted">Total</small>
+                  <div className="col-3">
+                    <div className="fw-bold text-info fs-5">{dataStatistics.refreshCount}</div>
+                    <small className="text-muted">Refreshes</small>
                   </div>
                 </div>
-                {dataStats.lastSync && (
-                  <small className="text-muted d-block mt-2">
-                    <i className="bi bi-clock me-1"></i>
-                    Last sync: {new Date(dataStats.lastSync).toLocaleTimeString()}
-                  </small>
+
+                {/* Detailed Breakdown */}
+                <div className="data-breakdown mb-3">
+                  <small className="text-muted fw-bold d-block mb-2">Data Breakdown:</small>
+                  <div className="row">
+                    <div className="col-6">
+                      <div className="breakdown-item">
+                        <span className="text-success">📋 Fare Receipts: </span>
+                        <strong>{dataStatistics.dataBreakdown.fareReceipts}</strong>
+                      </div>
+                      <div className="breakdown-item">
+                        <span className="text-info">🎫 Booking Entries: </span>
+                        <strong>{dataStatistics.dataBreakdown.bookingEntries}</strong>
+                      </div>
+                      <div className="breakdown-item">
+                        <span className="text-warning">🔒 Off Days: </span>
+                        <strong>{dataStatistics.dataBreakdown.offDays}</strong>
+                      </div>
+                      <div className="breakdown-item">
+                        <span className="text-danger">⛽ Fuel Payments: </span>
+                        <strong>{dataStatistics.dataBreakdown.fuelPayments}</strong>
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <div className="breakdown-item">
+                        <span className="text-secondary">🏪 Adda Payments: </span>
+                        <strong>{dataStatistics.dataBreakdown.addaPayments}</strong>
+                      </div>
+                      <div className="breakdown-item">
+                        <span className="text-primary">🤝 Union Payments: </span>
+                        <strong>{dataStatistics.dataBreakdown.unionPayments}</strong>
+                      </div>
+                      <div className="breakdown-item">
+                        <span className="text-success">🔧 Service Payments: </span>
+                        <strong>{dataStatistics.dataBreakdown.servicePayments}</strong>
+                      </div>
+                      <div className="breakdown-item">
+                        <span className="text-muted">💸 Other Payments: </span>
+                        <strong>{dataStatistics.dataBreakdown.otherPayments}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Last Fetch Details */}
+                {dataStatistics.lastFetchTime && (
+                  <div className="fetch-details border-top pt-2">
+                    <small className="text-muted d-block">
+                      <i className="bi bi-clock me-1"></i>
+                      <strong>Last Fetch:</strong> {dataStatistics.lastFetchDate} at {dataStatistics.lastFetchTime}
+                    </small>
+                  </div>
                 )}
               </div>
             )}

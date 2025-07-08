@@ -35,6 +35,26 @@ function App() {
     lastSync: null
   });
 
+  // New detailed statistics state
+  const [dataStatistics, setDataStatistics] = useState({
+    totalRecords: 0,
+    incomeRecords: 0,
+    expenseRecords: 0,
+    lastFetchTime: null,
+    lastFetchDate: null,
+    refreshCount: 0,
+    dataBreakdown: {
+      fareReceipts: 0,
+      bookingEntries: 0,
+      offDays: 0,
+      fuelPayments: 0,
+      addaPayments: 0,
+      unionPayments: 0,
+      servicePayments: 0,
+      otherPayments: 0
+    }
+  });
+
   const handleLogin = (userData) => {
     setUser(userData);
   };
@@ -154,6 +174,27 @@ function App() {
 
       setTotalEarnings(totalEarningsAmount);
       setTotalExpenses(totalExpensesAmount);
+
+      // Update detailed statistics
+      const now = new Date();
+      setDataStatistics(prev => ({
+        totalRecords: combinedFareData.length + combinedExpenseData.length,
+        incomeRecords: combinedFareData.filter(entry => entry.type !== 'off').length,
+        expenseRecords: combinedExpenseData.length,
+        lastFetchTime: now.toLocaleTimeString('en-IN'),
+        lastFetchDate: now.toLocaleDateString('en-IN'),
+        refreshCount: prev.refreshCount + 1,
+        dataBreakdown: {
+          fareReceipts: fareReceipts?.data?.length || 0,
+          bookingEntries: bookingEntries?.data?.length || 0,
+          offDays: offDays?.data?.length || 0,
+          fuelPayments: fuelPayments?.data?.length || 0,
+          addaPayments: addaPayments?.data?.length || 0,
+          unionPayments: unionPayments?.data?.length || 0,
+          servicePayments: servicePayments?.data?.length || 0,
+          otherPayments: otherPayments?.data?.length || 0
+        }
+      }));
 
       // Trigger refresh event for other components
       window.dispatchEvent(new CustomEvent('dataRefreshed', {
@@ -472,6 +513,7 @@ function App() {
               setCashBookEntries={setCashBookEntries}
               isRefreshing={isRefreshing}
               dataStats={dataStats}
+              dataStatistics={dataStatistics}
               onRefreshComplete={() => setLastRefreshTime(new Date())}
             />
           )}
