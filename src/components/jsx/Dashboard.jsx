@@ -635,17 +635,17 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
               </div>
             </div>
 
-            {/* Single Full Width All Entries Card */}
+            {/* Single Full Width Total Records Card */}
             <div className="data-stats-single-grid">
-              <div className="data-stat-item-full all-entries">
+              <div className="data-stat-item-full total-records">
                 <div className="stat-content-full">
                   <div className="stat-icon-large">
-                    <i className="bi bi-collection"></i>
+                    <i className="bi bi-database-fill"></i>
                   </div>
                   <div className="stat-details-full">
                     <div className="stat-number-large">{dataStatistics.totalRecords}</div>
-                    <div className="stat-title-large">All Entries</div>
-                    <div className="stat-description">Total records in database</div>
+                    <div className="stat-title-large">Total Records in Database</div>
+                    <div className="stat-description">Complete database entries count</div>
                   </div>
                 </div>
               </div>
@@ -695,7 +695,16 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
                 </div>
               </div>
 
-              
+              <div className="data-stat-item-small all-entries">
+                <div className="stat-icon-small">
+                  <i className="bi bi-collection"></i>
+                </div>
+                <div className="stat-number-small">{dataStatistics.totalRecords}</div>
+                <div className="stat-trend-small">
+                  <i className="bi bi-list-check"></i>
+                  All Entries
+                </div>
+              </div>
             </div>
 
             {/* Detailed Breakdown */}

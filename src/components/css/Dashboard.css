@@ -715,6 +715,10 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #4338ca 100%);
 }
 
+.data-stat-item-small.all-entries::before {
+  background: linear-gradient(135deg, #26de81 0%, #20bf6b 50%, #15803d 100%);
+}
+
 
 
 .stat-icon-small {
@@ -745,6 +749,14 @@
 
 .data-stat-item-small.time-records .stat-icon-small {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #4338ca 100%);
+}
+
+.data-stat-item-small.all-entries .stat-icon-small {
+  background: linear-gradient(135deg, #26de81 0%, #20bf6b 50%, #15803d 100%);
+}
+
+.data-stat-item-full.total-records::before {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
 }
 
 
