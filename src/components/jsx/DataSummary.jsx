@@ -157,15 +157,32 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
     }
   };
 
+  // Store current tab data in state for proper reference during approval
+  const [currentTabData, setCurrentTabData] = useState([]);
+  
+  // Update current tab data when tab changes or data updates
+  useEffect(() => {
+    switch (activeTab) {
+      case 'pending': 
+        setCurrentTabData(pendingData);
+        break;
+      case 'bankApproval': 
+        setCurrentTabData(bankApprovalData);
+        break;
+      case 'cashApproval': 
+        setCurrentTabData(cashApprovalData);
+        break;
+      case 'approved': 
+        setCurrentTabData(approvedData);
+        break;
+      default: 
+        setCurrentTabData([]);
+    }
+  }, [activeTab, pendingData, bankApprovalData, cashApprovalData, approvedData]);
+
   // Get current tab data
   const getCurrentTabData = () => {
-    switch (activeTab) {
-      case 'pending': return pendingData;
-      case 'bankApproval': return bankApprovalData;
-      case 'cashApproval': return cashApprovalData;
-      case 'approved': return approvedData;
-      default: return [];
-    }
+    return currentTabData;
   };
 
   // Handle entry selection
@@ -249,29 +266,43 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
         });
       };
 
-      // Update all local data states immediately
+      // Update all local data states immediately and remove approved entries from current tab
       console.log('⚡ DataSummary: Updating local state immediately...');
       console.log('📝 New status:', newStatus);
       console.log('✍️ Approver:', approverName);
       
+      // Remove approved entries from current tab and update their status
       setPendingData(prev => {
-        const updated = updateLocalData(prev);
-        console.log('⏳ Updated pending data:', updated.length, 'entries');
-        return updated;
+        const filtered = prev.filter(entry => !updatedEntryIds.includes(entry.entryId));
+        console.log('⏳ Updated pending data - removed approved entries:', filtered.length, 'entries remaining');
+        return filtered;
       });
+      
       setBankApprovalData(prev => {
-        const updated = updateLocalData(prev);
-        console.log('🏦 Updated bank approval data:', updated.length, 'entries');
-        return updated;
+        const filtered = prev.filter(entry => !updatedEntryIds.includes(entry.entryId));
+        console.log('🏦 Updated bank approval data - removed approved entries:', filtered.length, 'entries remaining');
+        return filtered;
       });
+      
       setCashApprovalData(prev => {
-        const updated = updateLocalData(prev);
-        console.log('💰 Updated cash approval data:', updated.length, 'entries');
-        return updated;
+        const filtered = prev.filter(entry => !updatedEntryIds.includes(entry.entryId));
+        console.log('💰 Updated cash approval data - removed approved entries:', filtered.length, 'entries remaining');
+        return filtered;
       });
+      
+      // Add approved entries to approved list with updated status
       setApprovedData(prev => {
-        const updated = updateLocalData(prev);
-        console.log('✅ Updated approved data:', updated.length, 'entries');
+        const currentData = getCurrentTabData();
+        const approvedEntries = currentData
+          .filter(entry => updatedEntryIds.includes(entry.entryId))
+          .map(entry => ({
+            ...entry,
+            entryStatus: newStatus,
+            approvedBy: approverName
+          }));
+        
+        const updated = [...prev, ...approvedEntries];
+        console.log('✅ Updated approved data - added new approved entries:', updated.length, 'total entries');
         return updated;
       });
 
@@ -281,10 +312,12 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
       // Show immediate success feedback
       alert(`${updatedEntryIds.length} entries approved successfully`);
 
+      // Store current data before state update for Google Sheets sync
+      const currentDataForSync = [...getCurrentTabData()];
+      
       // Then sync to Google Sheets in background
       const syncPromises = updatedEntryIds.map(async (entryId) => {
-        const currentData = getCurrentTabData();
-        const entry = currentData.find(e => e.entryId === entryId);
+        const entry = currentDataForSync.find(e => e.entryId === entryId);
         if (!entry) return;
 
         // Call appropriate status update function
