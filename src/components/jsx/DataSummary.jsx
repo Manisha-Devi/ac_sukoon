@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import "../css/DataApproval.css";
 import authService from "../../services/authService.js";
 
-function DataSummary({ fareData, expenseData, onDataUpdate }) {
+function DataSummary({ fareData, expenseData }) {
   const [activeTab, setActiveTab] = useState('pending');
   const [pendingData, setPendingData] = useState([]);
   const [bankApprovalData, setBankApprovalData] = useState([]);
@@ -27,57 +27,29 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
   }, []);
 
   // Process data whenever fareData or expenseData changes
-  // But skip if we're in the middle of updating data
-  const [isUpdating, setIsUpdating] = useState(false);
-  
   useEffect(() => {
-    console.log('🔄 DataSummary: Props changed, processing data...');
-    console.log('📊 PARENT fareData received:', fareData);
-    console.log('📊 PARENT expenseData received:', expenseData);
-    console.log('⚙️ isUpdating flag:', isUpdating);
-    
-    if (!isUpdating) {
-      processAllData();
-    }
-  }, [fareData, expenseData, isUpdating]);
+    processAllData();
+  }, [fareData, expenseData]);
 
   const processAllData = () => {
     try {
-      console.log('🔧 DataSummary: Processing all data...');
-      console.log('📈 Processing fareData entries:', fareData?.length || 0);
-      console.log('📉 Processing expenseData entries:', expenseData?.length || 0);
-      
       setLoading(true);
       let allEntries = [];
 
       // Process Fare Data
       if (fareData && fareData.length > 0) {
         fareData.forEach(entry => {
-          let dataType = '';
-          let displayName = '';
-          let description = '';
-
-          if (entry.type === 'daily') {
-            dataType = 'Fare Receipt';
-            displayName = `Fare: ${entry.route || 'Daily Collection'}`;
-            description = entry.route;
-          } else if (entry.type === 'booking') {
-            dataType = 'Booking Entry';
-            displayName = `Booking: ${entry.bookingDetails || 'Booking Entry'}`;
-            description = entry.bookingDetails;
-          } else if (entry.type === 'off') {
-            dataType = 'Off Day';
-            displayName = `Off Day: ${entry.reason || 'Off Day'}`;
-            description = entry.reason || 'Off day entry';
+          if (entry.type !== 'off') { // Exclude off days from approval
+            allEntries.push({
+              ...entry,
+              dataType: entry.type === 'daily' ? 'Fare Receipt' : 'Booking Entry',
+              entryStatus: entry.entryStatus || 'pending',
+              displayName: entry.type === 'daily' ? 
+                `Fare: ${entry.route || 'Daily Collection'}` : 
+                `Booking: ${entry.bookingDetails || 'Booking Entry'}`,
+              description: entry.type === 'daily' ? entry.route : entry.bookingDetails
+            });
           }
-
-          allEntries.push({
-            ...entry,
-            dataType: dataType,
-            entryStatus: entry.entryStatus || 'pending',
-            displayName: displayName,
-            description: description
-          });
         });
       }
 
@@ -134,21 +106,10 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
       allEntries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
       // Separate by status with correct filtering
-      const pending = allEntries.filter(entry => entry.entryStatus === 'pending');
-      const bankApproval = allEntries.filter(entry => entry.entryStatus === 'forwardedBank');
-      const cashApproval = allEntries.filter(entry => entry.entryStatus === 'forwardedCash');
-      const approved = allEntries.filter(entry => entry.entryStatus === 'approvedCash');
-      
-      console.log('📋 DataSummary: Processed entries by status:');
-      console.log('⏳ Pending:', pending.length, 'entries');
-      console.log('🏦 Bank Approval:', bankApproval.length, 'entries');
-      console.log('💰 Cash Approval:', cashApproval.length, 'entries');
-      console.log('✅ Approved:', approved.length, 'entries');
-      
-      setPendingData(pending);
-      setBankApprovalData(bankApproval);
-      setCashApprovalData(cashApproval);
-      setApprovedData(approved);
+      setPendingData(allEntries.filter(entry => entry.entryStatus === 'pending'));
+      setBankApprovalData(allEntries.filter(entry => entry.entryStatus === 'forwardedBank'));
+      setCashApprovalData(allEntries.filter(entry => entry.entryStatus === 'forwardedCash'));
+      setApprovedData(allEntries.filter(entry => entry.entryStatus === 'approvedCash'));
 
       setLoading(false);
     } catch (error) {
@@ -157,32 +118,15 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
     }
   };
 
-  // Store current tab data in state for proper reference during approval
-  const [currentTabData, setCurrentTabData] = useState([]);
-  
-  // Update current tab data when tab changes or data updates
-  useEffect(() => {
-    switch (activeTab) {
-      case 'pending': 
-        setCurrentTabData(pendingData);
-        break;
-      case 'bankApproval': 
-        setCurrentTabData(bankApprovalData);
-        break;
-      case 'cashApproval': 
-        setCurrentTabData(cashApprovalData);
-        break;
-      case 'approved': 
-        setCurrentTabData(approvedData);
-        break;
-      default: 
-        setCurrentTabData([]);
-    }
-  }, [activeTab, pendingData, bankApprovalData, cashApprovalData, approvedData]);
-
   // Get current tab data
   const getCurrentTabData = () => {
-    return currentTabData;
+    switch (activeTab) {
+      case 'pending': return pendingData;
+      case 'bankApproval': return bankApprovalData;
+      case 'cashApproval': return cashApprovalData;
+      case 'approved': return approvedData;
+      default: return [];
+    }
   };
 
   // Handle entry selection
@@ -222,12 +166,7 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
       return;
     }
 
-    console.log('🚀 DataSummary: Starting approval process...');
-    console.log('📋 Selected entries for approval:', selectedEntries);
-    console.log('📊 Current tab:', activeTab);
-
     try {
-      setIsUpdating(true);
       const approverName = currentUser.fullName || currentUser.username;
       let newStatus = '';
 
@@ -266,45 +205,11 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
         });
       };
 
-      // Update all local data states immediately and remove approved entries from current tab
-      console.log('⚡ DataSummary: Updating local state immediately...');
-      console.log('📝 New status:', newStatus);
-      console.log('✍️ Approver:', approverName);
-      
-      // Remove approved entries from current tab and update their status
-      setPendingData(prev => {
-        const filtered = prev.filter(entry => !updatedEntryIds.includes(entry.entryId));
-        console.log('⏳ Updated pending data - removed approved entries:', filtered.length, 'entries remaining');
-        return filtered;
-      });
-      
-      setBankApprovalData(prev => {
-        const filtered = prev.filter(entry => !updatedEntryIds.includes(entry.entryId));
-        console.log('🏦 Updated bank approval data - removed approved entries:', filtered.length, 'entries remaining');
-        return filtered;
-      });
-      
-      setCashApprovalData(prev => {
-        const filtered = prev.filter(entry => !updatedEntryIds.includes(entry.entryId));
-        console.log('💰 Updated cash approval data - removed approved entries:', filtered.length, 'entries remaining');
-        return filtered;
-      });
-      
-      // Add approved entries to approved list with updated status
-      setApprovedData(prev => {
-        const currentData = getCurrentTabData();
-        const approvedEntries = currentData
-          .filter(entry => updatedEntryIds.includes(entry.entryId))
-          .map(entry => ({
-            ...entry,
-            entryStatus: newStatus,
-            approvedBy: approverName
-          }));
-        
-        const updated = [...prev, ...approvedEntries];
-        console.log('✅ Updated approved data - added new approved entries:', updated.length, 'total entries');
-        return updated;
-      });
+      // Update all local data states immediately
+      setPendingData(prev => updateLocalData(prev));
+      setBankApprovalData(prev => updateLocalData(prev));
+      setCashApprovalData(prev => updateLocalData(prev));
+      setApprovedData(prev => updateLocalData(prev));
 
       // Clear selection immediately
       setSelectedEntries([]);
@@ -312,12 +217,10 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
       // Show immediate success feedback
       alert(`${updatedEntryIds.length} entries approved successfully`);
 
-      // Store current data before state update for Google Sheets sync
-      const currentDataForSync = [...getCurrentTabData()];
-      
       // Then sync to Google Sheets in background
       const syncPromises = updatedEntryIds.map(async (entryId) => {
-        const entry = currentDataForSync.find(e => e.entryId === entryId);
+        const currentData = getCurrentTabData();
+        const entry = currentData.find(e => e.entryId === entryId);
         if (!entry) return;
 
         // Call appropriate status update function
@@ -332,13 +235,6 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
             break;
           case 'Booking Entry':
             result = await authService.updateBookingEntryStatus({
-              entryId: entryId,
-              newStatus: newStatus,
-              approverName: approverName
-            });
-            break;
-          case 'Off Day':
-            result = await authService.updateOffDayStatus({
               entryId: entryId,
               newStatus: newStatus,
               approverName: approverName
@@ -399,85 +295,17 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
       // Wait for all syncs to complete in background
       Promise.all(syncPromises).then(() => {
         console.log('✅ All entries synced to Google Sheets');
-        
-        // Update parent component's state
-        if (onDataUpdate) {
-          console.log('📤 DataSummary: Updating parent component state...');
-          
-          const updatedFareData = fareData.map(entry => {
-            if (updatedEntryIds.includes(entry.entryId)) {
-              const updatedEntry = {
-                ...entry,
-                entryStatus: newStatus,
-                approvedBy: approverName
-              };
-              console.log(`📝 DataSummary: Updating fareData entry ${entry.entryId} with status: ${newStatus}, approver: ${approverName}`);
-              return updatedEntry;
-            }
-            return entry;
-          });
-
-          const updatedExpenseData = expenseData.map(entry => {
-            if (updatedEntryIds.includes(entry.entryId)) {
-              const updatedEntry = {
-                ...entry,
-                entryStatus: newStatus,
-                approvedBy: approverName
-              };
-              console.log(`📝 DataSummary: Updating expenseData entry ${entry.entryId} with status: ${newStatus}, approver: ${approverName}`);
-              return updatedEntry;
-            }
-            return entry;
-          });
-          
-          console.log('📊 DataSummary: Sending updated fareData to parent:', updatedFareData.filter(entry => updatedEntryIds.includes(entry.entryId)));
-          console.log('📊 DataSummary: Sending updated expenseData to parent:', updatedExpenseData.filter(entry => updatedEntryIds.includes(entry.entryId)));
-          
-          onDataUpdate(updatedFareData, updatedExpenseData);
-        }
-        
-        // Clear updating flag and refresh local data after sync
-        setIsUpdating(false);
+        // Refresh local data after sync
         processAllData();
       }).catch((error) => {
         console.error('❌ Some entries failed to sync to Google Sheets:', error);
-        
-        // Still update parent component even if sync partially failed
-        if (onDataUpdate) {
-          const updatedFareData = fareData.map(entry => {
-            if (updatedEntryIds.includes(entry.entryId)) {
-              return {
-                ...entry,
-                entryStatus: newStatus,
-                approvedBy: approverName
-              };
-            }
-            return entry;
-          });
-
-          const updatedExpenseData = expenseData.map(entry => {
-            if (updatedEntryIds.includes(entry.entryId)) {
-              return {
-                ...entry,
-                entryStatus: newStatus,
-                approvedBy: approverName
-              };
-            }
-            return entry;
-          });
-          
-          onDataUpdate(updatedFareData, updatedExpenseData);
-        }
-        
-        // Clear updating flag and refresh local data to show any partial updates
-        setIsUpdating(false);
+        // Still refresh local data to show any partial updates
         processAllData();
       });
 
     } catch (error) {
       console.error('Error approving entries:', error);
       alert('Error approving entries: ' + error.message);
-      setIsUpdating(false); // Clear flag on error
     }
   };
 

@@ -248,32 +248,6 @@ class AuthService {
     }
   }
 
-  // Update Off Day Entry
-  async updateOffDay(data) {
-    try {
-      console.log('📝 Updating off day entry in Google Sheets:', data);
-
-      const requestBody = JSON.stringify({
-        action: 'updateOffDay',
-        entryId: data.entryId,
-        updatedData: data.updatedData
-      });
-
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
-
-      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
-        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
-        return { success: false, error: 'API temporarily unavailable - data saved locally' };
-      }
-
-      console.log('✅ Off day update response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error updating off day:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
   // Update Fare Receipt
   async updateFareReceipt(data) {
     try {
@@ -1215,45 +1189,6 @@ class AuthService {
         data: [],
         message: 'Booking entries loaded from local cache (API temporarily unavailable)'
       };
-    }
-  }
-
-  // Update Off Day Status
-  async updateOffDayStatus(data) {
-    try {
-      console.log('📋 Updating off day status in Google Sheets:', data);
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'updateOffDayStatus',
-          entryId: data.entryId,
-          newStatus: data.newStatus,
-          approverName: data.approverName
-        })
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Off day status updated:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error updating off day status:', error);
-      return { success: false, error: error.message };
     }
   }
 

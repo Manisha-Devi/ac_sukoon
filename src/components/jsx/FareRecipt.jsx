@@ -418,20 +418,21 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
       const now = new Date();
-      const timeOnly = formatISTTime(); // IST time in H:MM:SS AM/PM format
+      const timeOnly = now.toLocaleTimeString('en-US', { 
+        hour12: true, 
+        hour: 'numeric', 
+        minute: '2-digit', 
+        second: '2-digit' 
+      }); // Returns H:MM:SS AM/PM format
       const dateOnly = offDayData.date; // Keep date as string (YYYY-MM-DD)
 
       if (editingEntry) {
         // UPDATE: First update React state immediately
         const updatedData = fareData.map(entry => 
           entry.entryId === editingEntry.entryId 
-            ? { ...entry, 
-                date: dateOnly, // Use string date
-                reason: offDayData.reason,
-              }
+            ? { ...entry, date: dateOnly, reason: offDayData.reason } // Use string date
             : entry
         );
-
         setFareData(updatedData);
         setEditingEntry(null);
         setOffDayData({ date: "", reason: "" });
@@ -539,7 +540,6 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
   const handleEditEntry = (entry) => {
     setEditingEntry(entry);
-
     if (entry.type === "daily") {
       setActiveTab("daily");
       setDailyFareData({
@@ -593,7 +593,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
   const getCurrentUserNonApprovedEntries = () => {
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     const currentUserName = currentUser.fullName || currentUser.username;
-
+    
     return fareData.filter(entry => 
       entry.submittedBy === currentUserName && entry.entryStatus !== 'approved'
     );
@@ -603,7 +603,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
   // Load data on component mount and listen for refresh events
   useEffect(() => {
-
+    
 
     // Listen for centralized refresh events
     const handleDataRefresh = () => {
@@ -878,7 +878,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       <span>Cash: ₹{parseInt(bookingData.cashAmount) || 0}</span>
                     </div>
                     <div className="col-4">
-                      <span>Bank: ₹{parseInt(bookingData.cashAmount) || 0}</span>
+                      <span>Bank: ₹{parseInt(bookingData.bankAmount) || 0}</span>
                     </div>
                     <div className="col-4">
                       <strong>Total: ₹{(parseInt(bookingData.cashAmount) || 0) + (parseInt(bookingData.bankAmount) || 0)}</strong>

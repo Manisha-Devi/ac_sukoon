@@ -36,112 +36,6 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
     totalRecords: 0
   });
 
-  // Helper function to generate cash book entries from data
-  const generateCashBookEntries = (fareData, expenseData) => {
-    let cashBookEntries = [];
-
-    // Generate entries from fare data
-    if (fareData && fareData.length > 0) {
-      const fareCashEntries = fareData.map(entry => ({
-        id: `fare-${entry.entryId}`,
-        date: entry.date,
-        description: entry.type === 'daily' ? `Daily Collection - ${entry.route}` : 
-                     entry.type === 'booking' ? `Booking - ${entry.bookingDetails}` :
-                     `Off Day - ${entry.reason}`,
-        cashReceived: entry.cashAmount || 0,
-        bankReceived: entry.bankAmount || 0,
-        cashPaid: 0,
-        bankPaid: 0,
-        source: 'fare-entry',
-        jfNo: `JF-${entry.entryId}`,
-        submittedBy: entry.submittedBy
-      }));
-      cashBookEntries = [...cashBookEntries, ...fareCashEntries];
-    }
-
-    // Generate entries from expense data
-    if (expenseData && expenseData.length > 0) {
-      const expenseCashEntries = expenseData.map(entry => ({
-        id: `expense-${entry.entryId}`,
-        date: entry.date,
-        description: `${entry.type} Payment - ${entry.description || 'Payment'}`,
-        cashReceived: 0,
-        bankReceived: 0,
-        cashPaid: entry.cashAmount || 0,
-        bankPaid: entry.bankAmount || 0,
-        source: 'expense-entry',
-        jfNo: `JF-${entry.entryId}`,
-        submittedBy: entry.submittedBy
-      }));
-      cashBookEntries = [...cashBookEntries, ...expenseCashEntries];
-    }
-
-    return cashBookEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
-  };
-
-  // Handle updates from DataSummary component
-  const handleDataSummaryUpdate = (updatedFareData, updatedExpenseData) => {
-    console.log('📊 Dashboard: Receiving data update from DataSummary');
-    console.log('📈 Dashboard: Received updated fareData:', updatedFareData);
-    console.log('📉 Dashboard: Received updated expenseData:', updatedExpenseData);
-    
-    // Properly merge updated data with existing data
-    setFareData(prevFareData => {
-      const updatedData = prevFareData.map(existingEntry => {
-        const updatedEntry = updatedFareData.find(updated => updated.entryId === existingEntry.entryId);
-        if (updatedEntry) {
-          // Merge all fields from updated entry, ensuring entryStatus and approvedBy are preserved
-          console.log(`🔄 Dashboard: Updating entry ${existingEntry.entryId} with new status: ${updatedEntry.entryStatus}, approver: ${updatedEntry.approvedBy}`);
-          return {
-            ...existingEntry,
-            ...updatedEntry,
-            entryStatus: updatedEntry.entryStatus,
-            approvedBy: updatedEntry.approvedBy
-          };
-        }
-        return existingEntry;
-      });
-      
-      console.log('📊 Dashboard: Updated fareData with proper status updates:', updatedData);
-      return updatedData;
-    });
-
-    setExpenseData(prevExpenseData => {
-      const updatedData = prevExpenseData.map(existingEntry => {
-        const updatedEntry = updatedExpenseData.find(updated => updated.entryId === existingEntry.entryId);
-        if (updatedEntry) {
-          // Merge all fields from updated entry, ensuring entryStatus and approvedBy are preserved
-          console.log(`🔄 Dashboard: Updating expense entry ${existingEntry.entryId} with new status: ${updatedEntry.entryStatus}, approver: ${updatedEntry.approvedBy}`);
-          return {
-            ...existingEntry,
-            ...updatedEntry,
-            entryStatus: updatedEntry.entryStatus,
-            approvedBy: updatedEntry.approvedBy
-          };
-        }
-        return existingEntry;
-      });
-      
-      console.log('📊 Dashboard: Updated expenseData with proper status updates:', updatedData);
-      return updatedData;
-    });
-    
-    console.log('✅ Dashboard: Parent state updated successfully with proper entry status and approver info');
-
-    // Regenerate cash book entries with updated data - use setTimeout to ensure state is updated
-    setTimeout(() => {
-      console.log('📖 Dashboard: Regenerating cash book entries with updated status...');
-      const updatedCashBookEntries = generateCashBookEntries(updatedFareData, updatedExpenseData);
-      setCashBookEntries(updatedCashBookEntries);
-    }, 100);
-
-    // Prevent any background refresh for 5 seconds to allow UI to stabilize
-    window.dataUpdateInProgress = true;
-    setTimeout(() => {
-      window.dataUpdateInProgress = false;
-    }, 5000);
-  };
-
   // Comprehensive data loading function
   const loadAllDataFromSheets = async () => {
     setIsLoading(true);
@@ -582,15 +476,9 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
 
   // Comprehensive refresh function for all components
   const refreshAllData = async () => {
-    // Skip refresh if data update is in progress
-    if (window.dataUpdateInProgress) {
-      console.log('⏸️ Dashboard: Skipping refresh - data update in progress');
-      return;
-    }
-    
     console.log('🔄 Dashboard: Starting comprehensive data refresh...');
     await loadAllDataFromSheets();
-
+    
     // Trigger refresh for other components that might need it
     window.dispatchEvent(new CustomEvent('dataRefreshed', {
       detail: {
@@ -598,11 +486,11 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         source: 'centralized-refresh'
       }
     }));
-
+    
     if (onRefreshComplete) {
       onRefreshComplete();
     }
-
+    
     console.log('✅ Dashboard: All components data refreshed');
   };
 
