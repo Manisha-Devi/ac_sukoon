@@ -82,12 +82,20 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
   // Handle updates from DataSummary component
   const handleDataSummaryUpdate = (updatedFareData, updatedExpenseData) => {
     console.log('📊 Dashboard: Receiving data update from DataSummary');
+    
+    // Update state immediately without triggering refresh
     setFareData(updatedFareData);
     setExpenseData(updatedExpenseData);
 
     // Regenerate cash book entries with updated data
     const updatedCashBookEntries = generateCashBookEntries(updatedFareData, updatedExpenseData);
     setCashBookEntries(updatedCashBookEntries);
+
+    // Prevent any background refresh for 5 seconds to allow UI to stabilize
+    window.dataUpdateInProgress = true;
+    setTimeout(() => {
+      window.dataUpdateInProgress = false;
+    }, 5000);
   };
 
   // Comprehensive data loading function
@@ -530,6 +538,12 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
 
   // Comprehensive refresh function for all components
   const refreshAllData = async () => {
+    // Skip refresh if data update is in progress
+    if (window.dataUpdateInProgress) {
+      console.log('⏸️ Dashboard: Skipping refresh - data update in progress');
+      return;
+    }
+    
     console.log('🔄 Dashboard: Starting comprehensive data refresh...');
     await loadAllDataFromSheets();
 

@@ -27,9 +27,14 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
   }, []);
 
   // Process data whenever fareData or expenseData changes
+  // But skip if we're in the middle of updating data
+  const [isUpdating, setIsUpdating] = useState(false);
+  
   useEffect(() => {
-    processAllData();
-  }, [fareData, expenseData]);
+    if (!isUpdating) {
+      processAllData();
+    }
+  }, [fareData, expenseData, isUpdating]);
 
   const processAllData = () => {
     try {
@@ -181,6 +186,7 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
     }
 
     try {
+      setIsUpdating(true);
       const approverName = currentUser.fullName || currentUser.username;
       let newStatus = '';
 
@@ -344,7 +350,8 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
           onDataUpdate(updatedFareData, updatedExpenseData);
         }
         
-        // Refresh local data after sync
+        // Clear updating flag and refresh local data after sync
+        setIsUpdating(false);
         processAllData();
       }).catch((error) => {
         console.error('❌ Some entries failed to sync to Google Sheets:', error);
@@ -376,13 +383,15 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
           onDataUpdate(updatedFareData, updatedExpenseData);
         }
         
-        // Still refresh local data to show any partial updates
+        // Clear updating flag and refresh local data to show any partial updates
+        setIsUpdating(false);
         processAllData();
       });
 
     } catch (error) {
       console.error('Error approving entries:', error);
       alert('Error approving entries: ' + error.message);
+      setIsUpdating(false); // Clear flag on error
     }
   };
 
