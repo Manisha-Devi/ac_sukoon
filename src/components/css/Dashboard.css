@@ -614,13 +614,38 @@
   border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
+.breakdown-title-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1.5rem 0 1rem 0;
+}
+
 .breakdown-title {
   font-size: 1.1rem;
   font-weight: 600;
   color: #2d3748;
-  margin: 1.5rem 0 1rem 0;
+  margin: 0;
   display: flex;
   align-items: center;
+}
+
+.breakdown-toggle-btn {
+  border-radius: 8px;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+}
+
+.breakdown-toggle-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e0;
+  color: #475569;
+  transform: translateY(-1px);
 }
 
 .breakdown-grid {
@@ -720,6 +745,18 @@
   .refresh-indicator {
     font-size: 0.75rem;
     padding: 0.375rem 0.75rem;
+  }
+
+  .breakdown-title-container {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+    text-align: center;
+  }
+
+  .breakdown-toggle-btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
   }
 
   .data-stats-grid {

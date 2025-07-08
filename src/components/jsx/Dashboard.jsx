@@ -27,6 +27,7 @@ ChartJS.register(
 
 function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, setFareData, setExpenseData, setCashBookEntries, isRefreshing, dataStats, dataStatistics, onRefreshComplete }) {
   const [isLoading, setIsLoading] = useState(false);
+  const [showDataBreakdown, setShowDataBreakdown] = useState(true);
   const [allData, setAllData] = useState({
     fareReceipts: [],
     bookingEntries: [],
@@ -687,7 +688,16 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
                   <div className="stat-label">Last Updated</div>
                   <div className="stat-trend">
                     <i className="bi bi-calendar3"></i>
-                    {dataStatistics.lastFetchDate || 'Today'}
+                    <span className="d-none d-md-inline">{dataStatistics.lastFetchDate || 'Today'}</span>
+                    <span className="d-md-none">
+                      {dataStatistics.lastFetchDate ? 
+                        new Date(dataStatistics.lastFetchDate).toLocaleDateString('en-IN', { 
+                          day: '2-digit', 
+                          month: 'short' 
+                        }) : 
+                        'Today'
+                      }
+                    </span>
                   </div>
                 </div>
               </div>
@@ -695,56 +705,67 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
 
             {/* Detailed Breakdown */}
             <div className="data-breakdown-section">
-              <h6 className="breakdown-title">
-                <i className="bi bi-pie-chart me-2"></i>
-                Data Breakdown
-              </h6>
-              <div className="breakdown-grid">
-                <div className="breakdown-column">
-                  <div className="breakdown-item income-type">
-                    <span className="breakdown-icon">📋</span>
-                    <span className="breakdown-label">Fare Receipts</span>
-                    <span className="breakdown-value">{dataStatistics.dataBreakdown.fareReceipts}</span>
-                  </div>
-                  <div className="breakdown-item income-type">
-                    <span className="breakdown-icon">🎫</span>
-                    <span className="breakdown-label">Booking Entries</span>
-                    <span className="breakdown-value">{dataStatistics.dataBreakdown.bookingEntries}</span>
-                  </div>
-                  <div className="breakdown-item neutral-type">
-                    <span className="breakdown-icon">🔒</span>
-                    <span className="breakdown-label">Off Days</span>
-                    <span className="breakdown-value">{dataStatistics.dataBreakdown.offDays}</span>
-                  </div>
-                  <div className="breakdown-item expense-type">
-                    <span className="breakdown-icon">⛽</span>
-                    <span className="breakdown-label">Fuel Payments</span>
-                    <span className="breakdown-value">{dataStatistics.dataBreakdown.fuelPayments}</span>
-                  </div>
-                </div>
-                <div className="breakdown-column">
-                  <div className="breakdown-item expense-type">
-                    <span className="breakdown-icon">🏪</span>
-                    <span className="breakdown-label">Adda Payments</span>
-                    <span className="breakdown-value">{dataStatistics.dataBreakdown.addaPayments}</span>
-                  </div>
-                  <div className="breakdown-item expense-type">
-                    <span className="breakdown-icon">🤝</span>
-                    <span className="breakdown-label">Union Payments</span>
-                    <span className="breakdown-value">{dataStatistics.dataBreakdown.unionPayments}</span>
-                  </div>
-                  <div className="breakdown-item expense-type">
-                    <span className="breakdown-icon">🔧</span>
-                    <span className="breakdown-label">Service Payments</span>
-                    <span className="breakdown-value">{dataStatistics.dataBreakdown.servicePayments}</span>
-                  </div>
-                  <div className="breakdown-item expense-type">
-                    <span className="breakdown-icon">💸</span>
-                    <span className="breakdown-label">Other Payments</span>
-                    <span className="breakdown-value">{dataStatistics.dataBreakdown.otherPayments}</span>
-                  </div>
-                </div>
+              <div className="breakdown-title-container">
+                <h6 className="breakdown-title">
+                  <i className="bi bi-pie-chart me-2"></i>
+                  Data Breakdown
+                </h6>
+                <button 
+                  className="btn btn-sm btn-outline-secondary breakdown-toggle-btn"
+                  onClick={() => setShowDataBreakdown(!showDataBreakdown)}
+                >
+                  <i className={`bi bi-chevron-${showDataBreakdown ? 'up' : 'down'}`}></i>
+                  {showDataBreakdown ? 'Hide' : 'Show'}
+                </button>
               </div>
+              {showDataBreakdown && (
+                <div className="breakdown-grid">
+                  <div className="breakdown-column">
+                    <div className="breakdown-item income-type">
+                      <span className="breakdown-icon">📋</span>
+                      <span className="breakdown-label">Fare Receipts</span>
+                      <span className="breakdown-value">{dataStatistics.dataBreakdown.fareReceipts}</span>
+                    </div>
+                    <div className="breakdown-item income-type">
+                      <span className="breakdown-icon">🎫</span>
+                      <span className="breakdown-label">Booking Entries</span>
+                      <span className="breakdown-value">{dataStatistics.dataBreakdown.bookingEntries}</span>
+                    </div>
+                    <div className="breakdown-item neutral-type">
+                      <span className="breakdown-icon">🔒</span>
+                      <span className="breakdown-label">Off Days</span>
+                      <span className="breakdown-value">{dataStatistics.dataBreakdown.offDays}</span>
+                    </div>
+                    <div className="breakdown-item expense-type">
+                      <span className="breakdown-icon">⛽</span>
+                      <span className="breakdown-label">Fuel Payments</span>
+                      <span className="breakdown-value">{dataStatistics.dataBreakdown.fuelPayments}</span>
+                    </div>
+                  </div>
+                  <div className="breakdown-column">
+                    <div className="breakdown-item expense-type">
+                      <span className="breakdown-icon">🏪</span>
+                      <span className="breakdown-label">Adda Payments</span>
+                      <span className="breakdown-value">{dataStatistics.dataBreakdown.addaPayments}</span>
+                    </div>
+                    <div className="breakdown-item expense-type">
+                      <span className="breakdown-icon">🤝</span>
+                      <span className="breakdown-label">Union Payments</span>
+                      <span className="breakdown-value">{dataStatistics.dataBreakdown.unionPayments}</span>
+                    </div>
+                    <div className="breakdown-item expense-type">
+                      <span className="breakdown-icon">🔧</span>
+                      <span className="breakdown-label">Service Payments</span>
+                      <span className="breakdown-value">{dataStatistics.dataBreakdown.servicePayments}</span>
+                    </div>
+                    <div className="breakdown-item expense-type">
+                      <span className="breakdown-icon">💸</span>
+                      <span className="breakdown-label">Other Payments</span>
+                      <span className="breakdown-value">{dataStatistics.dataBreakdown.otherPayments}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
