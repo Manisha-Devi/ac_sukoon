@@ -1236,7 +1236,9 @@ class AuthService {
         signal: controller.signal,
         body: JSON.stringify({
           action: 'updateOffDayStatus',
-          data: data
+          entryId: data.entryId,
+          newStatus: data.newStatus,
+          approverName: data.approverName
         })
       });
 
