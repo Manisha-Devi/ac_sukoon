@@ -638,12 +638,18 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
             {/* Main Statistics Grid */}
             <div className="data-stats-grid">
               <div className="data-stat-item total-records">
-                <div className="stat-icon">
-                  <i className="bi bi-collection"></i>
-                </div>
                 <div className="stat-content">
-                  <div className="stat-number">{dataStatistics.totalRecords}</div>
-                  <div className="stat-label">Total Records</div>
+                  <div className="stat-main-row">
+                    <div className="stat-icon">
+                      <i className="bi bi-collection"></i>
+                    </div>
+                    <div className="stat-number-section">
+                      <div className="stat-number">{dataStatistics.totalRecords}</div>
+                    </div>
+                  </div>
+                  <div className="stat-label-row">
+                    <div className="stat-label">Total Records</div>
+                  </div>
                   <div className="stat-trend">
                     <i className="bi bi-graph-up"></i>
                     All Entries
@@ -652,12 +658,18 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
               </div>
 
               <div className="data-stat-item income-records">
-                <div className="stat-icon">
-                  <i className="bi bi-arrow-up-circle-fill"></i>
-                </div>
                 <div className="stat-content">
-                  <div className="stat-number">{dataStatistics.incomeRecords}</div>
-                  <div className="stat-label">Income Records</div>
+                  <div className="stat-main-row">
+                    <div className="stat-icon">
+                      <i className="bi bi-arrow-up-circle-fill"></i>
+                    </div>
+                    <div className="stat-number-section">
+                      <div className="stat-number">{dataStatistics.incomeRecords}</div>
+                    </div>
+                  </div>
+                  <div className="stat-label-row">
+                    <div className="stat-label">Income Records</div>
+                  </div>
                   <div className="stat-trend">
                     <i className="bi bi-currency-rupee"></i>
                     Earnings
@@ -666,12 +678,18 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
               </div>
 
               <div className="data-stat-item expense-records">
-                <div className="stat-icon">
-                  <i className="bi bi-arrow-down-circle-fill"></i>
-                </div>
                 <div className="stat-content">
-                  <div className="stat-number">{dataStatistics.expenseRecords}</div>
-                  <div className="stat-label">Expense Records</div>
+                  <div className="stat-main-row">
+                    <div className="stat-icon">
+                      <i className="bi bi-arrow-down-circle-fill"></i>
+                    </div>
+                    <div className="stat-number-section">
+                      <div className="stat-number">{dataStatistics.expenseRecords}</div>
+                    </div>
+                  </div>
+                  <div className="stat-label-row">
+                    <div className="stat-label">Expense Records</div>
+                  </div>
                   <div className="stat-trend">
                     <i className="bi bi-cash-stack"></i>
                     Payments
@@ -680,12 +698,18 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
               </div>
 
               <div className="data-stat-item last-updated">
-                <div className="stat-icon">
-                  <i className="bi bi-clock-history"></i>
-                </div>
                 <div className="stat-content">
-                  <div className="stat-number">{dataStatistics.lastFetchTime || '--:--'}</div>
-                  <div className="stat-label">Last Updated</div>
+                  <div className="stat-main-row">
+                    <div className="stat-icon">
+                      <i className="bi bi-clock-history"></i>
+                    </div>
+                    <div className="stat-number-section">
+                      <div className="stat-number">{dataStatistics.lastFetchTime || '--:--'}</div>
+                    </div>
+                  </div>
+                  <div className="stat-label-row">
+                    <div className="stat-label">Last Updated</div>
+                  </div>
                   <div className="stat-trend">
                     <i className="bi bi-calendar3"></i>
                     <span className="d-none d-md-inline">{dataStatistics.lastFetchDate || 'Today'}</span>
