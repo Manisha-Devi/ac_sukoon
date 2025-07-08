@@ -682,13 +682,24 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
                 <div className="stat-number-small">{dataStatistics.lastFetchTime || '--:--'}</div>
                 <div className="stat-trend-small">
                   <i className="bi bi-calendar3"></i>
-                  <span className="d-none d-md-inline">{dataStatistics.lastFetchDate || 'Today'}</span>
+                  <span className="d-none d-md-inline">
+                    {dataStatistics.lastFetchDate ? 
+                      (new Date(dataStatistics.lastFetchDate).toDateString() === new Date().toDateString() ? 
+                        'Today' : 
+                        dataStatistics.lastFetchDate
+                      ) : 
+                      'Today'
+                    }
+                  </span>
                   <span className="d-md-none">
                     {dataStatistics.lastFetchDate ? 
-                      new Date(dataStatistics.lastFetchDate).toLocaleDateString('en-IN', { 
-                        day: '2-digit', 
-                        month: 'short' 
-                      }) : 
+                      (new Date(dataStatistics.lastFetchDate).toDateString() === new Date().toDateString() ? 
+                        'Today' : 
+                        new Date(dataStatistics.lastFetchDate).toLocaleDateString('en-IN', { 
+                          day: '2-digit', 
+                          month: 'short' 
+                        })
+                      ) : 
                       'Today'
                     }
                   </span>
