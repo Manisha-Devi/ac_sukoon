@@ -82,10 +82,14 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
   // Handle updates from DataSummary component
   const handleDataSummaryUpdate = (updatedFareData, updatedExpenseData) => {
     console.log('📊 Dashboard: Receiving data update from DataSummary');
+    console.log('📈 Dashboard: Received updated fareData:', updatedFareData);
+    console.log('📉 Dashboard: Received updated expenseData:', updatedExpenseData);
     
     // Update state immediately without triggering refresh
     setFareData(updatedFareData);
     setExpenseData(updatedExpenseData);
+    
+    console.log('✅ Dashboard: Parent state updated successfully');
 
     // Regenerate cash book entries with updated data
     const updatedCashBookEntries = generateCashBookEntries(updatedFareData, updatedExpenseData);

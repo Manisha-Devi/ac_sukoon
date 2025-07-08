@@ -31,6 +31,11 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
   const [isUpdating, setIsUpdating] = useState(false);
   
   useEffect(() => {
+    console.log('🔄 DataSummary: Props changed, processing data...');
+    console.log('📊 PARENT fareData received:', fareData);
+    console.log('📊 PARENT expenseData received:', expenseData);
+    console.log('⚙️ isUpdating flag:', isUpdating);
+    
     if (!isUpdating) {
       processAllData();
     }
@@ -38,6 +43,10 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
 
   const processAllData = () => {
     try {
+      console.log('🔧 DataSummary: Processing all data...');
+      console.log('📈 Processing fareData entries:', fareData?.length || 0);
+      console.log('📉 Processing expenseData entries:', expenseData?.length || 0);
+      
       setLoading(true);
       let allEntries = [];
 
@@ -125,10 +134,21 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
       allEntries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
       // Separate by status with correct filtering
-      setPendingData(allEntries.filter(entry => entry.entryStatus === 'pending'));
-      setBankApprovalData(allEntries.filter(entry => entry.entryStatus === 'forwardedBank'));
-      setCashApprovalData(allEntries.filter(entry => entry.entryStatus === 'forwardedCash'));
-      setApprovedData(allEntries.filter(entry => entry.entryStatus === 'approvedCash'));
+      const pending = allEntries.filter(entry => entry.entryStatus === 'pending');
+      const bankApproval = allEntries.filter(entry => entry.entryStatus === 'forwardedBank');
+      const cashApproval = allEntries.filter(entry => entry.entryStatus === 'forwardedCash');
+      const approved = allEntries.filter(entry => entry.entryStatus === 'approvedCash');
+      
+      console.log('📋 DataSummary: Processed entries by status:');
+      console.log('⏳ Pending:', pending.length, 'entries');
+      console.log('🏦 Bank Approval:', bankApproval.length, 'entries');
+      console.log('💰 Cash Approval:', cashApproval.length, 'entries');
+      console.log('✅ Approved:', approved.length, 'entries');
+      
+      setPendingData(pending);
+      setBankApprovalData(bankApproval);
+      setCashApprovalData(cashApproval);
+      setApprovedData(approved);
 
       setLoading(false);
     } catch (error) {
@@ -185,6 +205,10 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
       return;
     }
 
+    console.log('🚀 DataSummary: Starting approval process...');
+    console.log('📋 Selected entries for approval:', selectedEntries);
+    console.log('📊 Current tab:', activeTab);
+
     try {
       setIsUpdating(true);
       const approverName = currentUser.fullName || currentUser.username;
@@ -226,10 +250,30 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
       };
 
       // Update all local data states immediately
-      setPendingData(prev => updateLocalData(prev));
-      setBankApprovalData(prev => updateLocalData(prev));
-      setCashApprovalData(prev => updateLocalData(prev));
-      setApprovedData(prev => updateLocalData(prev));
+      console.log('⚡ DataSummary: Updating local state immediately...');
+      console.log('📝 New status:', newStatus);
+      console.log('✍️ Approver:', approverName);
+      
+      setPendingData(prev => {
+        const updated = updateLocalData(prev);
+        console.log('⏳ Updated pending data:', updated.length, 'entries');
+        return updated;
+      });
+      setBankApprovalData(prev => {
+        const updated = updateLocalData(prev);
+        console.log('🏦 Updated bank approval data:', updated.length, 'entries');
+        return updated;
+      });
+      setCashApprovalData(prev => {
+        const updated = updateLocalData(prev);
+        console.log('💰 Updated cash approval data:', updated.length, 'entries');
+        return updated;
+      });
+      setApprovedData(prev => {
+        const updated = updateLocalData(prev);
+        console.log('✅ Updated approved data:', updated.length, 'entries');
+        return updated;
+      });
 
       // Clear selection immediately
       setSelectedEntries([]);
@@ -325,6 +369,8 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
         
         // Update parent component's state
         if (onDataUpdate) {
+          console.log('📤 DataSummary: Updating parent component state...');
+          
           const updatedFareData = fareData.map(entry => {
             if (updatedEntryIds.includes(entry.entryId)) {
               return {
@@ -346,6 +392,9 @@ function DataSummary({ fareData, expenseData, onDataUpdate }) {
             }
             return entry;
           });
+          
+          console.log('📊 DataSummary: Sending updated fareData to parent:', updatedFareData);
+          console.log('📊 DataSummary: Sending updated expenseData to parent:', updatedExpenseData);
           
           onDataUpdate(updatedFareData, updatedExpenseData);
         }
