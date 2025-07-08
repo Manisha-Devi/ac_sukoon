@@ -1101,44 +1101,44 @@
   .data-stats-single-grid {
     padding: 1.75rem 2rem 0.75rem 2rem;
   }
-  
+
   .data-stat-item-full {
     padding: 2.25rem;
   }
-  
+
   .stat-content-full {
     gap: 2rem;
   }
-  
+
   .stat-icon-large {
     width: 100px;
     height: 100px;
     font-size: 2.5rem;
   }
-  
+
   .stat-number-large {
     font-size: 3.5rem;
   }
-  
+
   .stat-title-large {
     font-size: 1.5rem;
   }
-  
+
   .data-stats-grid-four {
     gap: 1.25rem;
     padding: 0.75rem 2rem 1.75rem 2rem;
   }
-  
+
   .data-stat-item-small {
     padding: 1.5rem 1.25rem;
   }
-  
+
   .stat-icon-small {
     width: 55px;
     height: 55px;
     font-size: 1.6rem;
   }
-  
+
   .stat-number-small {
     font-size: 1.6rem;
   }
@@ -1150,21 +1150,21 @@
     gap: 1.75rem;
     padding: 2.25rem 1.75rem;
   }
-  
+
   .data-stat-item {
     padding: 2.25rem 1.75rem;
   }
-  
+
   .data-stat-item .stat-number {
     font-size: 2.25rem;
   }
-  
+
   .data-stat-item .stat-icon {
     width: 75px;
     height: 75px;
     font-size: 1.85rem;
   }
-  
+
   .breakdown-grid {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.25rem;
@@ -1362,8 +1362,8 @@
   }
 
   .data-statistics-main-card {
-    border-radius: 20px;
     margin: 0 0.25rem;
+    border-radius: 20px;
   }
 
   .data-stats-header {

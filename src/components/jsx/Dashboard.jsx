@@ -706,17 +706,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
                 </div>
               </div>
 
-              <div className="data-stat-item-small all-entries">
-                <div className="stat-icon-small">
-                  <i className="bi bi-collection"></i>
-                </div>
-                <div className="stat-number-small">{dataStatistics.totalRecords}</div>
-                <div className="stat-trend-small">
-                  <i className="bi bi-list-check"></i>
-                  All Entries
-                </div>
               </div>
-            </div>
 
             {/* Detailed Breakdown */}
             <div className="data-breakdown-section">
