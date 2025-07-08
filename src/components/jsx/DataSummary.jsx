@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import "../css/DataApproval.css";
+import "../css/DataSummary.css";
 import authService from "../../services/authService.js";
 
 function DataSummary({ fareData, expenseData }) {
