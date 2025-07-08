@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import "../css/DataSummary.css";
+import "../css/DataApproval.css";
 import authService from "../../services/authService.js";
 
 function DataSummary({ fareData, expenseData }) {
@@ -316,7 +316,7 @@ function DataSummary({ fareData, expenseData }) {
     return (
       <div 
         key={entry.entryId} 
-        className={`data-summary-entry-card ${isSelected ? 'selected' : ''}`}
+        className={`recent-entry-card ${isSelected ? 'selected' : ''}`}
         onClick={() => handleEntrySelect(entry.entryId)}
       >
         <div className="entry-checkbox">
@@ -410,7 +410,7 @@ function DataSummary({ fareData, expenseData }) {
   // Show loading while checking user data
   if (!currentUser || Object.keys(currentUser).length === 0) {
     return (
-      <div className="data-summary-container">
+      <div className="data-approval-container">
         <div className="loading-spinner">
           <i className="bi bi-arrow-clockwise spin"></i>
           <p>Loading user information...</p>
@@ -422,7 +422,7 @@ function DataSummary({ fareData, expenseData }) {
   // Check user permission after all hooks are executed
   if (userRole !== 'Manager' && userRole !== 'Admin') {
     return (
-      <div className="data-summary-container">
+      <div className="data-approval-container">
         <div className="container-fluid">
           <div className="alert alert-warning text-center" role="alert">
             <h4><i className="bi bi-exclamation-triangle"></i> Access Denied</h4>
@@ -436,7 +436,7 @@ function DataSummary({ fareData, expenseData }) {
 
   if (loading) {
     return (
-      <div className="data-summary-container">
+      <div className="data-approval-container">
         <div className="loading-spinner">
           <i className="bi bi-arrow-clockwise spin"></i>
           <p>Processing data...</p>
@@ -448,15 +448,15 @@ function DataSummary({ fareData, expenseData }) {
   const currentData = getCurrentTabData();
 
   return (
-    <div className="data-summary-container">
+    <div className="data-approval-container">
       <div className="container-fluid">
-        <div className="data-summary-header">
+        <div className="approval-header">
           <h2><i className="bi bi-clipboard-check"></i> Data Summary</h2>
           <p>Review and approve submitted entries</p>
         </div>
 
-        {/* Summary Tabs */}
-        <div className="data-summary-tabs">
+        {/* Approval Tabs - Correct Order */}
+        <div className="approval-tabs">
           <button 
             className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
             onClick={() => {
@@ -530,7 +530,7 @@ function DataSummary({ fareData, expenseData }) {
               <p>No entries in this category</p>
             </div>
           ) : (
-            <div className="data-summary-entries-grid">
+            <div className="recent-entries-grid">
               {currentData.map(renderEntryCard)}
             </div>
           )}
