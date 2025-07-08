@@ -695,16 +695,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
                 </div>
               </div>
 
-              <div className="data-stat-item-small refresh-records">
-                <div className="stat-icon-small">
-                  <i className="bi bi-arrow-clockwise"></i>
-                </div>
-                <div className="stat-number-small">#{dataStatistics.refreshCount}</div>
-                <div className="stat-trend-small">
-                  <i className="bi bi-arrow-repeat"></i>
-                  Refreshes
-                </div>
-              </div>
+              
             </div>
 
             {/* Detailed Breakdown */}

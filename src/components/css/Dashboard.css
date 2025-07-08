@@ -657,10 +657,10 @@
   margin: 0;
 }
 
-/* 4 Cards Grid Layout */
+/* 3 Cards Grid Layout */
 .data-stats-grid-four {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   padding: 1rem 2.5rem 2rem 2.5rem;
 }
@@ -715,9 +715,7 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #4338ca 100%);
 }
 
-.data-stat-item-small.refresh-records::before {
-  background: linear-gradient(135deg, #26de81 0%, #20bf6b 50%, #15803d 100%);
-}
+
 
 .stat-icon-small {
   width: 60px;
@@ -749,9 +747,7 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #4338ca 100%);
 }
 
-.data-stat-item-small.refresh-records .stat-icon-small {
-  background: linear-gradient(135deg, #26de81 0%, #20bf6b 50%, #15803d 100%);
-}
+
 
 .stat-number-small {
   font-size: 1.75rem;
