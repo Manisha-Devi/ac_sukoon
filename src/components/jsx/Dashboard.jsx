@@ -605,7 +605,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
               )}
             </p>
           </div>
-          <div className="mt-3 mt-md-0 d-flex flex-column align-items-end gap-2">
+          <div className="mt-3 mt-md-0">
             <div className="dashboard-date">
               <i className="bi bi-calendar3 me-2"></i>
               {new Date().toLocaleDateString('en-IN', { 
@@ -615,90 +615,140 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
                 day: 'numeric' 
               })}
             </div>
-            {dataStatistics && dataStatistics.totalRecords > 0 && (
-              <div className="data-statistics-card bg-white p-4 rounded shadow-sm border">
-                <h6 className="mb-3 text-primary fw-bold">
-                  <i className="bi bi-database-fill me-2"></i>
-                  Data Statistics
-                </h6>
-                
-                {/* Summary Stats */}
-                <div className="row text-center mb-3">
-                  <div className="col-3">
-                    <div className="fw-bold text-success fs-5">{dataStatistics.totalRecords}</div>
-                    <small className="text-muted">Total Records</small>
-                  </div>
-                  <div className="col-3">
-                    <div className="fw-bold text-primary fs-5">{dataStatistics.incomeRecords}</div>
-                    <small className="text-muted">Income</small>
-                  </div>
-                  <div className="col-3">
-                    <div className="fw-bold text-danger fs-5">{dataStatistics.expenseRecords}</div>
-                    <small className="text-muted">Expenses</small>
-                  </div>
-                  <div className="col-3">
-                    <div className="fw-bold text-info fs-5">{dataStatistics.refreshCount}</div>
-                    <small className="text-muted">Refreshes</small>
-                  </div>
-                </div>
-
-                {/* Detailed Breakdown */}
-                <div className="data-breakdown mb-3">
-                  <small className="text-muted fw-bold d-block mb-2">Data Breakdown:</small>
-                  <div className="row">
-                    <div className="col-6">
-                      <div className="breakdown-item">
-                        <span className="text-success">📋 Fare Receipts: </span>
-                        <strong>{dataStatistics.dataBreakdown.fareReceipts}</strong>
-                      </div>
-                      <div className="breakdown-item">
-                        <span className="text-info">🎫 Booking Entries: </span>
-                        <strong>{dataStatistics.dataBreakdown.bookingEntries}</strong>
-                      </div>
-                      <div className="breakdown-item">
-                        <span className="text-warning">🔒 Off Days: </span>
-                        <strong>{dataStatistics.dataBreakdown.offDays}</strong>
-                      </div>
-                      <div className="breakdown-item">
-                        <span className="text-danger">⛽ Fuel Payments: </span>
-                        <strong>{dataStatistics.dataBreakdown.fuelPayments}</strong>
-                      </div>
-                    </div>
-                    <div className="col-6">
-                      <div className="breakdown-item">
-                        <span className="text-secondary">🏪 Adda Payments: </span>
-                        <strong>{dataStatistics.dataBreakdown.addaPayments}</strong>
-                      </div>
-                      <div className="breakdown-item">
-                        <span className="text-primary">🤝 Union Payments: </span>
-                        <strong>{dataStatistics.dataBreakdown.unionPayments}</strong>
-                      </div>
-                      <div className="breakdown-item">
-                        <span className="text-success">🔧 Service Payments: </span>
-                        <strong>{dataStatistics.dataBreakdown.servicePayments}</strong>
-                      </div>
-                      <div className="breakdown-item">
-                        <span className="text-muted">💸 Other Payments: </span>
-                        <strong>{dataStatistics.dataBreakdown.otherPayments}</strong>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Last Fetch Details */}
-                {dataStatistics.lastFetchTime && (
-                  <div className="fetch-details border-top pt-2">
-                    <small className="text-muted d-block">
-                      <i className="bi bi-clock me-1"></i>
-                      <strong>Last Fetch:</strong> {dataStatistics.lastFetchDate} at {dataStatistics.lastFetchTime}
-                    </small>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </div>
+
+      {/* Data Statistics Section */}
+      {dataStatistics && dataStatistics.totalRecords > 0 && (
+        <div className="data-statistics-section mb-5">
+          <div className="data-statistics-main-card">
+            <div className="data-stats-header">
+              <h4 className="data-stats-title">
+                <i className="bi bi-database-fill me-3"></i>
+                Data Statistics
+              </h4>
+              <div className="refresh-indicator">
+                <i className="bi bi-arrow-clockwise me-1"></i>
+                <span>Refresh #{dataStatistics.refreshCount}</span>
+              </div>
+            </div>
+
+            {/* Main Statistics Grid */}
+            <div className="data-stats-grid">
+              <div className="data-stat-item total-records">
+                <div className="stat-icon">
+                  <i className="bi bi-collection"></i>
+                </div>
+                <div className="stat-content">
+                  <div className="stat-number">{dataStatistics.totalRecords}</div>
+                  <div className="stat-label">Total Records</div>
+                  <div className="stat-trend">
+                    <i className="bi bi-graph-up"></i>
+                    All Entries
+                  </div>
+                </div>
+              </div>
+
+              <div className="data-stat-item income-records">
+                <div className="stat-icon">
+                  <i className="bi bi-arrow-up-circle-fill"></i>
+                </div>
+                <div className="stat-content">
+                  <div className="stat-number">{dataStatistics.incomeRecords}</div>
+                  <div className="stat-label">Income Records</div>
+                  <div className="stat-trend">
+                    <i className="bi bi-currency-rupee"></i>
+                    Earnings
+                  </div>
+                </div>
+              </div>
+
+              <div className="data-stat-item expense-records">
+                <div className="stat-icon">
+                  <i className="bi bi-arrow-down-circle-fill"></i>
+                </div>
+                <div className="stat-content">
+                  <div className="stat-number">{dataStatistics.expenseRecords}</div>
+                  <div className="stat-label">Expense Records</div>
+                  <div className="stat-trend">
+                    <i className="bi bi-cash-stack"></i>
+                    Payments
+                  </div>
+                </div>
+              </div>
+
+              <div className="data-stat-item last-updated">
+                <div className="stat-icon">
+                  <i className="bi bi-clock-history"></i>
+                </div>
+                <div className="stat-content">
+                  <div className="stat-number">{dataStatistics.lastFetchTime || '--:--'}</div>
+                  <div className="stat-label">Last Updated</div>
+                  <div className="stat-trend">
+                    <i className="bi bi-calendar3"></i>
+                    {dataStatistics.lastFetchDate || 'Today'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Detailed Breakdown */}
+            <div className="data-breakdown-section">
+              <h6 className="breakdown-title">
+                <i className="bi bi-pie-chart me-2"></i>
+                Data Breakdown
+              </h6>
+              <div className="breakdown-grid">
+                <div className="breakdown-column">
+                  <div className="breakdown-item income-type">
+                    <span className="breakdown-icon">📋</span>
+                    <span className="breakdown-label">Fare Receipts</span>
+                    <span className="breakdown-value">{dataStatistics.dataBreakdown.fareReceipts}</span>
+                  </div>
+                  <div className="breakdown-item income-type">
+                    <span className="breakdown-icon">🎫</span>
+                    <span className="breakdown-label">Booking Entries</span>
+                    <span className="breakdown-value">{dataStatistics.dataBreakdown.bookingEntries}</span>
+                  </div>
+                  <div className="breakdown-item neutral-type">
+                    <span className="breakdown-icon">🔒</span>
+                    <span className="breakdown-label">Off Days</span>
+                    <span className="breakdown-value">{dataStatistics.dataBreakdown.offDays}</span>
+                  </div>
+                  <div className="breakdown-item expense-type">
+                    <span className="breakdown-icon">⛽</span>
+                    <span className="breakdown-label">Fuel Payments</span>
+                    <span className="breakdown-value">{dataStatistics.dataBreakdown.fuelPayments}</span>
+                  </div>
+                </div>
+                <div className="breakdown-column">
+                  <div className="breakdown-item expense-type">
+                    <span className="breakdown-icon">🏪</span>
+                    <span className="breakdown-label">Adda Payments</span>
+                    <span className="breakdown-value">{dataStatistics.dataBreakdown.addaPayments}</span>
+                  </div>
+                  <div className="breakdown-item expense-type">
+                    <span className="breakdown-icon">🤝</span>
+                    <span className="breakdown-label">Union Payments</span>
+                    <span className="breakdown-value">{dataStatistics.dataBreakdown.unionPayments}</span>
+                  </div>
+                  <div className="breakdown-item expense-type">
+                    <span className="breakdown-icon">🔧</span>
+                    <span className="breakdown-label">Service Payments</span>
+                    <span className="breakdown-value">{dataStatistics.dataBreakdown.servicePayments}</span>
+                  </div>
+                  <div className="breakdown-item expense-type">
+                    <span className="breakdown-icon">💸</span>
+                    <span className="breakdown-label">Other Payments</span>
+                    <span className="breakdown-value">{dataStatistics.dataBreakdown.otherPayments}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Quick Stats Overview */}
       <div className="quick-stats-grid mb-5">
