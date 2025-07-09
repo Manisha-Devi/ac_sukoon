@@ -68,6 +68,27 @@ function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime
     }
   };
 
+  const refreshData = () => {
+    console.log('🔄 Navbar: Refresh button clicked - triggering all components');
+
+    // Trigger parent's refresh function (App.jsx)
+    if (onDataRefresh) {
+      onDataRefresh();
+    }
+
+    // Dispatch centralized refresh event for all components
+    window.dispatchEvent(new CustomEvent('dataRefreshed'));
+
+    // Show user feedback
+    const refreshIcon = document.querySelector('.bi-arrow-clockwise');
+    if (refreshIcon) {
+      refreshIcon.classList.add('spin');
+      setTimeout(() => {
+        refreshIcon.classList.remove('spin');
+      }, 1000);
+    }
+  };
+
   return (
     <nav className="navbar navbar-expand-lg custom-navbar">
       <div className="container-fluid">
@@ -344,6 +365,13 @@ function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime
               )}
             </div>
           </div>
+          <button 
+            className="btn btn-outline-light me-2" 
+            onClick={refreshData}
+            title="Refresh all data"
+          >
+            <i className="bi bi-arrow-clockwise"></i>
+          </button>
         </div>
       </div>
     </nav>

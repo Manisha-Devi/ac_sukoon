@@ -349,10 +349,19 @@ function CashSummary({ fareData, expenseData, currentUser }) {
       filterUserData();
     };
 
+    // Listen for entry status updates from DataSummary
+    const handleEntryStatusUpdate = (event) => {
+      console.log('📝 CashSummary: Entry status updated:', event.detail);
+      const { entryId, newStatus } = event.detail;
+      updateEntryStatus(entryId, newStatus);
+    };
+
     window.addEventListener('dataRefreshed', handleDataRefresh);
+    window.addEventListener('entryStatusUpdated', handleEntryStatusUpdate);
 
     return () => {
       window.removeEventListener('dataRefreshed', handleDataRefresh);
+      window.removeEventListener('entryStatusUpdated', handleEntryStatusUpdate);
     };
   }, []);
 
