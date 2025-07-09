@@ -23,9 +23,10 @@ function addUnionPayment(data) {
       sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
         .insertSheet(SHEET_NAMES.UNION_PAYMENTS);
       
-      sheet.getRange(1, 1, 1, 10).setValues([[
+      sheet.getRange(1, 1, 1, 12).setValues([[
         "Timestamp", "Date", "UnionName", "CashAmount", "BankAmount", 
-        "TotalAmount", "Remarks", "SubmittedBy", "EntryType", "EntryId"
+        "TotalAmount", "Remarks", "SubmittedBy", "EntryType", "EntryId",
+        "EntryStatus", "ApprovedBy"
       ]]);
     }
 
@@ -35,7 +36,7 @@ function addUnionPayment(data) {
 
     sheet.insertRowBefore(2);
     
-    sheet.getRange(2, 1, 1, 10).setValues([[
+    sheet.getRange(2, 1, 1, 12).setValues([[
       timeOnly,                    // A: Time in IST
       data.date,                   // B: Date
       data.unionName || "",        // C: Union Name
@@ -46,6 +47,8 @@ function addUnionPayment(data) {
       data.submittedBy || "",      // H: Submitted By
       "union",                     // I: Entry Type
       entryId,                     // J: Entry ID
+      "pending",                   // K: Entry Status
+      "",                          // L: Approved By
     ]]);
 
     console.log("✅ Union payment added successfully with ID:", entryId);
@@ -100,6 +103,8 @@ function getUnionPayments() {
         remarks: row[6],                      // Remarks from column G
         submittedBy: row[7],                  // Submitted by from column H
         entryType: row[8],                    // Entry type from column I
+        entryStatus: row[10] || "pending",    // Entry status from column K
+        approvedBy: row[11] || "",            // Approved by from column L
         rowIndex: index + 2,                  // Store row index for updates/deletes
       };
     });
@@ -238,6 +243,71 @@ function deleteUnionPayment(data) {
     return {
       success: false,
       error: 'Delete union payment error: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Update Union Payment Status
+ */
+function updateUnionPaymentStatus(data) {
+  try {
+    const entryId = data.entryId;
+    const newStatus = data.newStatus;
+    const approverName = data.approverName;
+
+    console.log(`📝 Updating union payment status - ID: ${entryId}, Status: ${newStatus}, Approver: ${approverName}`);
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.UNION_PAYMENTS);
+
+    if (!sheet) {
+      throw new Error('UnionPayments sheet not found');
+    }
+
+    // Need to add status columns to existing sheets
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    if (headers.length < 12) {
+      // Add EntryStatus and ApprovedBy columns
+      sheet.getRange(1, 11, 1, 2).setValues([["EntryStatus", "ApprovedBy"]]);
+    }
+
+    const entryIdColumn = 10; // Column J contains Entry ID
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error(`Union payment not found with ID: ${entryId}`);
+    }
+
+    // Update status in column K and approver in column L
+    sheet.getRange(rowIndex, 11).setValue(newStatus);
+    if (approverName) {
+      sheet.getRange(rowIndex, 12).setValue(approverName);
+    }
+
+    console.log(`✅ Union payment status updated successfully - ID: ${entryId}, Status: ${newStatus}`);
+
+    return {
+      success: true,
+      message: 'Union payment status updated successfully',
+      entryId: entryId,
+      newStatus: newStatus,
+      approverName: approverName
+    };
+
+  } catch (error) {
+    console.error('❌ Error updating union payment status:', error);
+    return {
+      success: false,
+      error: 'Update union payment status error: ' + error.toString()
     };
   }
 }

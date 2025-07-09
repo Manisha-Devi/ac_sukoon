@@ -259,3 +259,61 @@ function deleteFuelPayment(data) {
     };
   }
 }
+
+/**
+ * Update Fuel Payment Status
+ */
+function updateFuelPaymentStatus(data) {
+  try {
+    const entryId = data.entryId;
+    const newStatus = data.newStatus;
+    const approverName = data.approverName;
+
+    console.log(`📝 Updating fuel payment status - ID: ${entryId}, Status: ${newStatus}, Approver: ${approverName}`);
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.FUEL_PAYMENTS);
+
+    if (!sheet) {
+      throw new Error('FuelPayments sheet not found');
+    }
+
+    const entryIdColumn = 12; // Column L contains Entry ID
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error(`Fuel payment not found with ID: ${entryId}`);
+    }
+
+    // Update status in column M and approver in column N
+    sheet.getRange(rowIndex, 13).setValue(newStatus);
+    if (approverName) {
+      sheet.getRange(rowIndex, 14).setValue(approverName);
+    }
+
+    console.log(`✅ Fuel payment status updated successfully - ID: ${entryId}, Status: ${newStatus}`);
+
+    return {
+      success: true,
+      message: 'Fuel payment status updated successfully',
+      entryId: entryId,
+      newStatus: newStatus,
+      approverName: approverName
+    };
+
+  } catch (error) {
+    console.error('❌ Error updating fuel payment status:', error);
+    return {
+      success: false,
+      error: 'Update fuel payment status error: ' + error.toString()
+    };
+  }
+}

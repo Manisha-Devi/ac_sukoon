@@ -112,6 +112,9 @@ function doPost(e) {
       case "deleteAddaPayment":
         result = deleteAddaPayment(data);
         break;
+      case "updateAddaPaymentStatus":
+        result = updateAddaPaymentStatus(data);
+        break;
 
       // ==================== FUEL PAYMENTS ====================
       case "addFuelPayment":
@@ -126,6 +129,9 @@ function doPost(e) {
       case "deleteFuelPayment":
         result = deleteFuelPayment(data);
         break;
+      case "updateFuelPaymentStatus":
+        result = updateFuelPaymentStatus(data);
+        break;
 
       // ==================== UNION PAYMENTS ====================
       case "addUnionPayment":
@@ -139,6 +145,9 @@ function doPost(e) {
         break;
       case "deleteUnionPayment":
         result = deleteUnionPayment(data);
+        break;
+      case "updateUnionPaymentStatus":
+        result = updateUnionPaymentStatus(data);
         break;
 
       // ==================== SERVICE PAYMENTS ====================

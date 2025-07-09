@@ -251,6 +251,8 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           totalAmount: totalAmount,
           date: dateOnly,
           submittedBy: submittedBy,
+          entryStatus: 'pending',
+          approvedBy: '',
           ...(activeTab === 'fuel' && {
             pumpName: fuelFormData.pumpName,
             liters: fuelFormData.liters,
@@ -302,6 +304,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           bankAmount: bankAmount,
           totalAmount: totalAmount,
           submittedBy: submittedBy,
+          entryStatus: 'pending',
           ...(activeTab === 'fuel' && {
             pumpName: fuelFormData.pumpName,
             liters: fuelFormData.liters,
