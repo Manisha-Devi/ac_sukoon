@@ -2,6 +2,64 @@
 // LEGACY FUNCTIONS (LegacyFunctions.gs)
 // ============================================================================
 
+// This file maintains compatibility with older API calls
+// All functions here route to their respective modern implementations
+
+// Legacy Fuel Payment functions
+function updateFuelPayment(data) {
+  console.log('🔄 Legacy updateFuelPayment called, routing to modern implementation');
+  return FuelPayments.updateFuelPayment(data);
+}
+
+function deleteFuelPayment(data) {
+  console.log('🔄 Legacy deleteFuelPayment called, routing to modern implementation');
+  return FuelPayments.deleteFuelPayment(data);
+}
+
+// Legacy Adda Payment functions
+function updateAddaPayment(data) {
+  console.log('🔄 Legacy updateAddaPayment called, routing to modern implementation');
+  return AddaPayments.updateAddaPayment(data);
+}
+
+function deleteAddaPayment(data) {
+  console.log('🔄 Legacy deleteAddaPayment called, routing to modern implementation');
+  return AddaPayments.deleteAddaPayment(data);
+}
+
+// Legacy Union Payment functions
+function updateUnionPayment(data) {
+  console.log('🔄 Legacy updateUnionPayment called, routing to modern implementation');
+  return UnionPayments.updateUnionPayment(data);
+}
+
+function deleteUnionPayment(data) {
+  console.log('🔄 Legacy deleteUnionPayment called, routing to modern implementation');
+  return UnionPayments.deleteUnionPayment(data);
+}
+
+// Legacy Service Payment functions
+function updateServicePayment(data) {
+  console.log('🔄 Legacy updateServicePayment called, routing to modern implementation');
+  return ServicePayments.updateServicePayment(data);
+}
+
+function deleteServicePayment(data) {
+  console.log('🔄 Legacy deleteServicePayment called, routing to modern implementation');
+  return ServicePayments.deleteServicePayment(data);
+}
+
+// Legacy Other Payment functions
+function updateOtherPayment(data) {
+  console.log('🔄 Legacy updateOtherPayment called, routing to modern implementation');
+  return OtherPayments.updateOtherPayment(data);
+}
+
+function deleteOtherPayment(data) {
+  console.log('🔄 Legacy deleteOtherPayment called, routing to modern implementation');
+  return OtherPayments.deleteOtherPayment(data);
+}
+
 /**
  * Legacy function routing for Service Payment operations
  */
