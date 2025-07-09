@@ -194,8 +194,8 @@ function MiscPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBoo
               serviceDetails: serviceFormData.description
             }),
             ...(activeTab === 'other' && {
-              paymentDetails: otherFormData.paymentDetails,
-              description: otherFormData.description,
+              paymentType: otherFormData.paymentDetails,
+              paymentDetails: otherFormData.description,
               vendor: otherFormData.vendor || "General"
             })
           }
@@ -273,8 +273,8 @@ function MiscPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBoo
             serviceDetails: serviceFormData.description
           }),
           ...(activeTab === 'other' && {
-            paymentDetails: otherFormData.paymentDetails,
-            description: otherFormData.description,
+            paymentType: otherFormData.paymentDetails,
+            paymentDetails: otherFormData.description,
             vendor: otherFormData.vendor || "General"
           })
         };

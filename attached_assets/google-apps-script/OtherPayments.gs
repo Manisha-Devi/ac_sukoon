@@ -25,9 +25,9 @@ function addOtherPayment(data) {
         .insertSheet(SHEET_NAMES.OTHER_PAYMENTS);
 
       // Add headers exactly as specified
-      sheet.getRange(1, 1, 1, 13).setValues([[
-        "Timestamp", "Date", "PaymentType", "Description", "CashAmount", 
-        "BankAmount", "TotalAmount", "Category", "SubmittedBy", "EntryType", "EntryId",
+      sheet.getRange(1, 1, 1, 12).setValues([[
+        "Timestamp", "Date", "PaymentType", "CashAmount", "BankAmount", 
+        "TotalAmount", "PaymentDetails", "SubmittedBy", "EntryType", "EntryId",
         "EntryStatus", "ApprovedBy"
       ]]);
     }
@@ -43,20 +43,19 @@ function addOtherPayment(data) {
     sheet.insertRowBefore(2);
 
     // Add data to the new row
-    sheet.getRange(2, 1, 1, 13).setValues([[
+    sheet.getRange(2, 1, 1, 12).setValues([[
       timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
       data.date,                     // B: Date from frontend
-      data.paymentDetails || "",     // C: Payment Type
-      data.description || "",        // D: Description
+      data.paymentType || "",        // C: Payment Type
       data.cashAmount || 0,          // E: Cash Amount
       data.bankAmount || 0,          // F: Bank Amount
       data.totalAmount || 0,         // G: Total Amount
-      data.vendor || "General",      // H: Category (using vendor as category)
-      data.submittedBy || "",        // I: Submitted By
-      "other",                       // J: Entry Type (static)
-      entryId,                       // K: Entry ID
-      "pending",                     // L: Entry Status (pending/waiting/approved)
-      "",                            // M: Approved By (empty initially)
+      data.paymentDetails || "",     // C: Payment Type
+      data.submittedBy || "",        // H: Submitted By
+      "other",                       // I: Entry Type (static)
+      entryId,                       // J: Entry ID
+      "pending",                     // K: Entry Status (pending/waiting/approved)
+      "",                            // L: Approved By (empty initially)
     ]]);
 
     console.log("✅ Other payment added successfully with ID:", entryId);
@@ -106,19 +105,18 @@ function getOtherPayments() {
     // Process and format data
     const data = values.slice(1).map((row, index) => {
       return {
-        entryId: row[10],                     // Entry ID from column K
+        entryId: row[9],                     // Entry ID from column K
         timestamp: String(row[0] || ''),      // Convert timestamp to string
         date: String(row[1] || ''),           // Convert date to string
-        paymentDetails: row[2],               // Payment type from column C
-        description: row[3],                  // Description from column D
-        cashAmount: row[4],                   // Cash amount from column E
-        bankAmount: row[5],                   // Bank amount from column F
-        totalAmount: row[6],                  // Total amount from column G
-        vendor: row[7],                       // Category from column H
-        submittedBy: row[8],                  // Submitted by from column I
-        entryType: row[9],                    // Entry type from column J
-        entryStatus: row[11] || "pending",    // Entry status from column L
-        approvedBy: row[12] || "",            // Approved by from column M
+        paymentType: row[2],               // Payment type from column C
+        cashAmount: row[3],                   // Cash amount from column E
+        bankAmount: row[4],                   // Bank amount from column F
+        totalAmount: row[5],                  // Total amount from column G
+        paymentDetails: row[6],               // Payment details from column G
+        submittedBy: row[7],                  // Submitted by from column H
+        entryType: row[8],                    // Entry type from column I
+        entryStatus: row[10] || "pending",    // Entry status from column K
+        approvedBy: row[11] || "",            // Approved by from column L
         rowIndex: index + 2,                  // Store row index for updates/deletes
       };
     });
@@ -161,7 +159,7 @@ function updateOtherPayment(data) {
       throw new Error('OtherPayments sheet not found');
     }
 
-    const entryIdColumn = 11; // Column K contains Entry ID
+    const entryIdColumn = 10; // Column J contains Entry ID
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
@@ -183,23 +181,23 @@ function updateOtherPayment(data) {
     if (updatedData.date !== undefined) {
       sheet.getRange(rowIndex, 2).setValue(updatedData.date);
     }
-    if (updatedData.paymentDetails !== undefined) {
-      sheet.getRange(rowIndex, 3).setValue(updatedData.paymentDetails);
-    }
-    if (updatedData.description !== undefined) {
-      sheet.getRange(rowIndex, 4).setValue(updatedData.description);
+    if (updatedData.paymentType !== undefined) {
+      sheet.getRange(rowIndex, 3).setValue(updatedData.paymentType);
     }
     if (updatedData.cashAmount !== undefined) {
-      sheet.getRange(rowIndex, 5).setValue(updatedData.cashAmount);
+      sheet.getRange(rowIndex, 4).setValue(updatedData.cashAmount);
     }
     if (updatedData.bankAmount !== undefined) {
-      sheet.getRange(rowIndex, 6).setValue(updatedData.bankAmount);
+      sheet.getRange(rowIndex, 5).setValue(updatedData.bankAmount);
     }
     if (updatedData.totalAmount !== undefined) {
-      sheet.getRange(rowIndex, 7).setValue(updatedData.totalAmount);
+      sheet.getRange(rowIndex, 6).setValue(updatedData.totalAmount);
     }
-    if (updatedData.vendor !== undefined) {
-      sheet.getRange(rowIndex, 8).setValue(updatedData.vendor);
+    if (updatedData.paymentDetails !== undefined) {
+      sheet.getRange(rowIndex, 7).setValue(updatedData.paymentDetails);
+    }
+    if (updatedData.submittedBy !== undefined) {
+      sheet.getRange(rowIndex, 8).setValue(updatedData.submittedBy);
     }
 
     console.log(`✅ Other payment updated successfully - ID: ${entryId}, Row: ${rowIndex}`);
@@ -239,7 +237,7 @@ function deleteOtherPayment(data) {
       throw new Error('OtherPayments sheet not found');
     }
 
-    const entryIdColumn = 11; // Column K contains Entry ID
+    const entryIdColumn = 10; // Column J contains Entry ID
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
@@ -298,7 +296,7 @@ function updateOtherPaymentStatus(data) {
       throw new Error('OtherPayments sheet not found');
     }
 
-    const entryIdColumn = 11; // Column K contains Entry ID
+    const entryIdColumn = 10; // Column J contains Entry ID
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
@@ -316,10 +314,10 @@ function updateOtherPaymentStatus(data) {
       throw new Error(`Other payment not found with ID: ${entryId}`);
     }
 
-    // Update status and approver (columns L and M)
-    sheet.getRange(rowIndex, 12).setValue(newStatus); // Column L: EntryStatus
+    // Update status and approver (columns K and L)
+    sheet.getRange(rowIndex, 11).setValue(newStatus); // Column K: EntryStatus
     if (approverName) {
-      sheet.getRange(rowIndex, 13).setValue(approverName); // Column M: ApprovedBy
+      sheet.getRange(rowIndex, 12).setValue(approverName); // Column L: ApprovedBy
     }
 
     console.log(`✅ Other payment status updated - ID: ${entryId}, Status: ${newStatus}, Row: ${rowIndex}`);
@@ -361,7 +359,7 @@ function approveOtherPayment(data) {
       throw new Error('OtherPayments sheet not found');
     }
 
-    const entryIdColumn = 11; // Column K contains Entry ID
+    const entryIdColumn = 10; // Column J contains Entry ID
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
@@ -380,8 +378,8 @@ function approveOtherPayment(data) {
     }
 
     // Update status to approved and set approver name
-    sheet.getRange(rowIndex, 12).setValue("approved"); // Column L: EntryStatus
-    sheet.getRange(rowIndex, 13).setValue(approverName); // Column M: ApprovedBy
+    sheet.getRange(rowIndex, 11).setValue("approved"); // Column K: EntryStatus
+    sheet.getRange(rowIndex, 12).setValue(approverName); // Column L: ApprovedBy
 
     console.log(`✅ Other payment approved successfully - ID: ${entryId}, Row: ${rowIndex}`);
 
@@ -420,7 +418,7 @@ function resendOtherPayment(data) {
       throw new Error('OtherPayments sheet not found');
     }
 
-    const entryIdColumn = 11; // Column K contains Entry ID
+    const entryIdColumn = 10; // Column J contains Entry ID
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
@@ -439,8 +437,8 @@ function resendOtherPayment(data) {
     }
 
     // Update status back to pending and clear approver
-    sheet.getRange(rowIndex, 12).setValue("pending"); // Column L: EntryStatus
-    sheet.getRange(rowIndex, 13).setValue(""); // Column M: ApprovedBy
+    sheet.getRange(rowIndex, 11).setValue("pending"); // Column K: EntryStatus
+    sheet.getRange(rowIndex, 12).setValue(""); // Column L: ApprovedBy
 
     console.log(`🔄 Other payment resent successfully - ID: ${entryId}, Row: ${rowIndex}`);
 
@@ -478,7 +476,7 @@ function setOtherPaymentWaiting(data) {
       throw new Error('OtherPayments sheet not found');
     }
 
-    const entryIdColumn = 11; // Column K contains Entry ID
+    const entryIdColumn = 10; // Column J contains Entry ID
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
@@ -497,7 +495,7 @@ function setOtherPaymentWaiting(data) {
     }
 
     // Update status to waiting
-    sheet.getRange(rowIndex, 12).setValue("waiting"); // Column L: EntryStatus
+    sheet.getRange(rowIndex, 11).setValue("waiting"); // Column K: EntryStatus
 
     console.log(`⏳ Other payment set to waiting - ID: ${entryId}, Row: ${rowIndex}`);
 

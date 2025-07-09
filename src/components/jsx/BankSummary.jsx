@@ -103,7 +103,8 @@ function BankSummary({ fareData, expenseData, currentUser }) {
         entryStatus: entry.entryStatus,
         approvedBy: entry.approvedBy,
         description: entry.pumpName || entry.addaName || entry.unionName || 
-                    entry.serviceType || entry.paymentDetails || 'Payment'
+                    entry.serviceType || entry.serviceDetails || 
+                    entry.paymentType || entry.paymentDetails || 'Payment'
       }))];
     }
 
