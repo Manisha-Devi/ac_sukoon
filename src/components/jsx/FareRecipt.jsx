@@ -10,8 +10,12 @@ import authService from '../../services/authService.js';
       const date = new Date(dateStr);
       if (isNaN(date.getTime())) return dateStr;
 
-      // Always show in DD-MM-YYYY format for consistency
-      return date.toLocaleDateString('en-GB'); // This gives DD-MM-YYYY format
+      // Always show in "07 Sept 2025" format for consistency
+      return date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
     } catch (error) {
       return dateStr;
     }
