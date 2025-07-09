@@ -66,6 +66,7 @@ class AuthService {
             userType: result.user.userType,
             fullName: result.user.fullName,
             status: result.user.status,
+            fixedCash: result.user.fixedCash || 0,
             isAuthenticated: true
           }
         };
