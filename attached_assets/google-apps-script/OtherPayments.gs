@@ -340,7 +340,7 @@ function updateOtherPaymentStatus(data) {
 }
 
 /**
- * Approve Other Payment Entry
+ * Approve Other Payment
  * @param {Object} data - Approval data containing entryId and approverName
  * @returns {Object} Success/error response
  */
@@ -351,44 +351,11 @@ function approveOtherPayment(data) {
 
     console.log(`✅ Approving other payment ID: ${entryId} by ${approverName}`);
 
-    // Get OtherPayments sheet
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
-      .getSheetByName("OtherPayments");
-
-    if (!sheet) {
-      throw new Error('OtherPayments sheet not found');
-    }
-
-    const entryIdColumn = 10; // Column J contains Entry ID
-
-    // Find the row with matching entryId
-    const values = sheet.getDataRange().getValues();
-    let rowIndex = -1;
-
-    for (let i = 1; i < values.length; i++) {
-      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
-        rowIndex = i + 1; // +1 because sheet rows are 1-indexed
-        break;
-      }
-    }
-
-    // Check if entry was found
-    if (rowIndex === -1) {
-      throw new Error(`Other payment not found with ID: ${entryId}`);
-    }
-
-    // Update status to approved and set approver name
-    sheet.getRange(rowIndex, 11).setValue("approved"); // Column K: EntryStatus
-    sheet.getRange(rowIndex, 12).setValue(approverName); // Column L: ApprovedBy
-
-    console.log(`✅ Other payment approved successfully - ID: ${entryId}, Row: ${rowIndex}`);
-
-    return {
-      success: true,
-      message: 'Other payment approved successfully',
+    return updateOtherPaymentStatus({
       entryId: entryId,
-      approvedBy: approverName
-    };
+      newStatus: 'approved',
+      approverName: approverName
+    });
 
   } catch (error) {
     console.error('❌ Error approving other payment:', error);
