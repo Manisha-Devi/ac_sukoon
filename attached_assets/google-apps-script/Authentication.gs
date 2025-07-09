@@ -57,7 +57,7 @@ function handleLogin(data) {
             userType: values[i][2],
             fullName: values[i][3],
             status: values[i][4],
-            fixedCash: values[i][5] || 0,
+            fixedCash: values[i][7] || 0,
             lastLogin: istTimestamp
           },
           timestamp: istTimestamp
