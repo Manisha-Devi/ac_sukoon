@@ -365,14 +365,7 @@ function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime
               )}
             </div>
           </div>
-          <button 
-            className="btn btn-outline-light me-2" 
-            onClick={refreshData}
-            title="Refresh all data"
-          >
-            <i className="bi bi-arrow-clockwise"></i>
-          </button>
-        </div>
+          </div>
       </div>
     </nav>
   );

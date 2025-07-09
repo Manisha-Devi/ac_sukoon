@@ -166,7 +166,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       // Determine new status based on current tab
       switch (activeTab) {
         case 'pending':
-          newStatus = 'approved';
+          newStatus = 'forwardedCash'; // First forward to cash approval
           break;
         case 'bankApproval':
           newStatus = 'approvedBank';
@@ -212,69 +212,57 @@ function DataSummary({ fareData, expenseData, currentUser }) {
 
       // Then sync to Google Sheets in background
       const syncPromises = updatedEntryIds.map(async (entryId) => {
-        const currentData = getCurrentTabData();
-        const entry = currentData.find(e => e.entryId === entryId);
-        if (!entry) return;
+        // Find entry from all data sources, not just current tab
+        let entry = null;
+        
+        // Search in all data arrays
+        const allData = [...pendingData, ...bankApprovalData, ...cashApprovalData, ...approvedData];
+        entry = allData.find(e => e.entryId === entryId);
+        
+        if (!entry) {
+          console.error(`Entry ${entryId} not found in any data source`);
+          return;
+        }
+        
+        console.log(`🔄 Syncing entry ${entryId} to Google Sheets:`, entry);
 
         // Call appropriate status update function
         let result;
-        switch (entry.dataType) {
-          case 'Fare Receipt':
-            result = await authService.updateFareReceiptStatus({
-              entryId: entryId,
-              newStatus: newStatus,
-              approverName: approverName
-            });
-            break;
-          case 'Booking Entry':
-            result = await authService.updateBookingEntryStatus({
-              entryId: entryId,
-              newStatus: newStatus,
-              approverName: approverName
-            });
-            break;
-          case 'Fuel Payment':
-            result = await authService.updateFuelPaymentStatus({
-              entryId: entryId,
-              newStatus: newStatus,
-              approverName: approverName
-            });
-            break;
-          case 'Adda Payment':
-            result = await authService.updateAddaPaymentStatus({
-              entryId: entryId,
-              newStatus: newStatus,
-              approverName: approverName
-            });
-            break;
-          case 'Union Payment':
-            result = await authService.updateUnionPaymentStatus({
-              entryId: entryId,
-              newStatus: newStatus,
-              approverName: approverName
-            });
-            break;
-          case 'Service Payment':
-            result = await authService.updateServicePaymentStatus({
-              entryId: entryId,
-              newStatus: newStatus,
-              approverName: approverName
-            });
-            break;
-          case 'Other Payment':
-            result = await authService.updateOtherPaymentStatus({
-              entryId: entryId,
-              newStatus: newStatus,
-              approverName: approverName
-            });
-            break;
-          default:
-            console.error(`Unsupported data type: ${entry.dataType}`);
-            return;
+        try {
+          switch (entry.dataType) {
+            case 'Fare Receipt':
+              result = await authService.updateFareReceiptStatus(entryId, newStatus, approverName);
+              break;
+            case 'Booking Entry':
+              result = await authService.updateBookingEntryStatus(entryId, newStatus, approverName);
+              break;
+            case 'Fuel Payment':
+              result = await authService.updateFuelPaymentStatus(entryId, newStatus, approverName);
+              break;
+            case 'Adda Payment':
+              result = await authService.updateAddaPaymentStatus(entryId, newStatus, approverName);
+              break;
+            case 'Union Payment':
+              result = await authService.updateUnionPaymentStatus(entryId, newStatus, approverName);
+              break;
+            case 'Service Payment':
+              result = await authService.updateServicePaymentStatus(entryId, newStatus, approverName);
+              break;
+            case 'Other Payment':
+              result = await authService.updateOtherPaymentStatus(entryId, newStatus, approverName);
+              break;
+            default:
+              console.error(`Unsupported data type: ${entry.dataType}`);
+              return { success: false, error: 'Unsupported data type' };
+          }
+        } catch (error) {
+          console.error(`Error updating ${entry.dataType} status:`, error);
+          result = { success: false, error: error.message };
         }
 
-        if (!result.success) {
-          console.error(`Failed to sync entry ${entryId} to Google Sheets:`, result.error);
+        if (!result || !result.success) {
+          console.error(`❌ Failed to sync entry ${entryId} to Google Sheets:`, result?.error || 'Unknown error');
+          return { success: false, error: result?.error || 'Unknown error' };
         } else {
           console.log(`✅ Entry ${entryId} synced to Google Sheets successfully`);
         }
