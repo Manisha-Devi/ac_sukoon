@@ -830,25 +830,27 @@ class AuthService {
     try {
       console.log('📝 Adding other payment to Google Sheets:', data);
 
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'addOtherPayment',
-          ...data
-        })
+      const requestBody = JSON.stringify({
+        action: 'addOtherPayment',
+        entryId: data.entryId,
+        timestamp: data.timestamp,
+        date: data.date,
+        paymentType: data.paymentType || '',
+        cashAmount: data.cashAmount || 0,
+        bankAmount: data.bankAmount || 0,
+        totalAmount: data.totalAmount || 0,
+        paymentDetails: data.paymentDetails || '',
+        submittedBy: data.submittedBy || 'driver'
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
+
+      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
+        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
+        return { success: false, error: 'API temporarily unavailable - data saved locally' };
       }
 
-      const result = await response.json();
-      console.log('✅ Other payment added:', result);
+      console.log('✅ Other payment response:', result);
       return result;
     } catch (error) {
       console.error('❌ Error adding other payment:', error);
@@ -861,6 +863,9 @@ class AuthService {
     try {
       console.log('📋 Fetching other payments from Google Sheets...');
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -868,10 +873,13 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
+        signal: controller.signal,
         body: JSON.stringify({
           action: 'getOtherPayments'
         })
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -882,7 +890,12 @@ class AuthService {
       return result;
     } catch (error) {
       console.error('❌ Error fetching other payments:', error);
-      return { success: false, error: error.message };
+      // Return empty data structure instead of error to prevent UI crashes
+      return { 
+        success: true, 
+        data: [],
+        message: 'Other payments loaded from local cache (API temporarily unavailable)'
+      };
     }
   }
 

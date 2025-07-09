@@ -190,24 +190,29 @@ function MiscPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBoo
             bankAmount: bankAmount,
             totalAmount: totalAmount,
             ...(activeTab === 'service' && {
-              serviceType: serviceFormData.serviceDetails,
-              serviceDetails: serviceFormData.description
+              serviceType: serviceFormData.serviceDetails || 'General Service',
+              serviceDetails: serviceFormData.description || 'Service payment'
             }),
             ...(activeTab === 'other' && {
-              paymentType: otherFormData.paymentDetails,
-              paymentDetails: otherFormData.description,
-              vendor: otherFormData.vendor || "General"
+              paymentType: otherFormData.paymentDetails || 'General Payment',
+              paymentDetails: otherFormData.description || 'Other payment'
             })
           }
         };
 
+        console.log('📝 Updating Google Sheets with data:', updateData);
+
         if (activeTab === 'service') {
-          authService.updateServicePayment(updateData).catch(error => {
-            console.error('Background service update sync failed:', error);
+          authService.updateServicePayment(updateData).then(result => {
+            console.log('✅ Service payment updated:', result);
+          }).catch(error => {
+            console.error('❌ Background service update sync failed:', error);
           });
         } else if (activeTab === 'other') {
-          authService.updateOtherPayment(updateData).catch(error => {
-            console.error('Background other update sync failed:', error);
+          authService.updateOtherPayment(updateData).then(result => {
+            console.log('✅ Other payment updated:', result);
+          }).catch(error => {
+            console.error('❌ Background other update sync failed:', error);
           });
         }
 
@@ -269,23 +274,28 @@ function MiscPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBoo
           totalAmount: totalAmount,
           submittedBy: submittedBy,
           ...(activeTab === 'service' && {
-            serviceType: serviceFormData.serviceDetails,
-            serviceDetails: serviceFormData.description
+            serviceType: serviceFormData.serviceDetails || 'General Service',
+            serviceDetails: serviceFormData.description || 'Service payment'
           }),
           ...(activeTab === 'other' && {
-            paymentType: otherFormData.paymentDetails,
-            paymentDetails: otherFormData.description,
-            vendor: otherFormData.vendor || "General"
+            paymentType: otherFormData.paymentDetails || 'General Payment',
+            paymentDetails: otherFormData.description || 'Other payment'
           })
         };
 
+        console.log('📝 Syncing to Google Sheets with data:', addData);
+
         if (activeTab === 'service') {
-          authService.addServicePayment(addData).catch(error => {
-            console.error('Background service add sync failed:', error);
+          authService.addServicePayment(addData).then(result => {
+            console.log('✅ Service payment synced:', result);
+          }).catch(error => {
+            console.error('❌ Background service add sync failed:', error);
           });
         } else if (activeTab === 'other') {
-          authService.addOtherPayment(addData).catch(error => {
-            console.error('Background other add sync failed:', error);
+          authService.addOtherPayment(addData).then(result => {
+            console.log('✅ Other payment synced:', result);
+          }).catch(error => {
+            console.error('❌ Background other add sync failed:', error);
           });
         }
       }

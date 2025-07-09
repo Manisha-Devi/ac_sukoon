@@ -47,10 +47,10 @@ function addOtherPayment(data) {
       timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
       data.date,                     // B: Date from frontend
       data.paymentType || "",        // C: Payment Type
-      data.cashAmount || 0,          // E: Cash Amount
-      data.bankAmount || 0,          // F: Bank Amount
-      data.totalAmount || 0,         // G: Total Amount
-      data.paymentDetails || "",     // C: Payment Type
+      data.cashAmount || 0,          // D: Cash Amount
+      data.bankAmount || 0,          // E: Bank Amount
+      data.totalAmount || 0,         // F: Total Amount
+      data.paymentDetails || "",     // G: Payment Details
       data.submittedBy || "",        // H: Submitted By
       "other",                       // I: Entry Type (static)
       entryId,                       // J: Entry ID
@@ -105,19 +105,19 @@ function getOtherPayments() {
     // Process and format data
     const data = values.slice(1).map((row, index) => {
       return {
-        entryId: row[9],                     // Entry ID from column K
+        entryId: row[9],                     // Entry ID from column J
         timestamp: String(row[0] || ''),      // Convert timestamp to string
         date: String(row[1] || ''),           // Convert date to string
-        paymentType: row[2],               // Payment type from column C
-        cashAmount: row[3],                   // Cash amount from column E
-        bankAmount: row[4],                   // Bank amount from column F
-        totalAmount: row[5],                  // Total amount from column G
-        paymentDetails: row[6],               // Payment details from column G
-        submittedBy: row[7],                  // Submitted by from column H
-        entryType: row[8],                    // Entry type from column I
-        entryStatus: row[10] || "pending",    // Entry status from column K
-        approvedBy: row[11] || "",            // Approved by from column L
-        rowIndex: index + 2,                  // Store row index for updates/deletes
+        paymentType: row[2],                 // Payment type from column C
+        cashAmount: row[3],                  // Cash amount from column D
+        bankAmount: row[4],                  // Bank amount from column E
+        totalAmount: row[5],                 // Total amount from column F
+        paymentDetails: row[6],              // Payment details from column G
+        submittedBy: row[7],                 // Submitted by from column H
+        entryType: row[8],                   // Entry type from column I
+        entryStatus: row[10] || "pending",   // Entry status from column K
+        approvedBy: row[11] || "",           // Approved by from column L
+        rowIndex: index + 2,                 // Store row index for updates/deletes
       };
     });
 

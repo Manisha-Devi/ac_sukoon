@@ -67,7 +67,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
             case 'service':
               dataType = 'Service Payment';
               displayName = `Service: ${entry.serviceType || entry.serviceDetails || 'Service'}`;
-              description = entry.serviceType || entry.serviceDetails || 'Service payment';
+              description = entry.serviceDetails || entry.serviceType || 'Service payment';
               break;
             case 'union':
               dataType = 'Union Payment';
@@ -77,7 +77,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
             case 'other':
               dataType = 'Other Payment';
               displayName = `Other: ${entry.paymentType || entry.paymentDetails || 'Other Payment'}`;
-              description = entry.paymentType || entry.paymentDetails || 'Other payment';
+              description = entry.paymentDetails || entry.paymentType || 'Other payment';
               break;
             default:
               dataType = 'Payment';
