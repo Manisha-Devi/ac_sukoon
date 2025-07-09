@@ -1,5 +1,3 @@
-
-
 # 🚀 **AC SUKOON TRANSPORT MANAGEMENT - Google Apps Script Backend**
 
 ## 📖 **Complete System Documentation**
@@ -9,6 +7,52 @@ This Google Apps Script backend provides a complete CRUD (Create, Read, Update, 
 ---
 
 ## 📁 **File Structure & Detailed Working Analysis**
+
+### **0. Authentication.gs** ✅ **COMPLETE - User Authentication & Login Management**
+
+**Purpose**: User login aur authentication handle karna Google Sheets database ke saath
+
+**Working Details**:
+
+#### **1. handleLogin(data) Function**
+- **Purpose**: User credentials validate karna aur login process handle karna
+- **Working**:
+  - Users sheet se username aur password match karta hai
+  - Case-sensitive validation (trim() use karta hai)
+  - Successful login par last login timestamp update karta hai (Column G)
+  - User details return karta hai including userType, fullName, status, fixedCash
+  - IST timestamp format use karta hai
+- **Sheet Structure**: Users sheet - A=Username, B=Password, C=UserType, D=FullName, E=Status, F=CreatedDate, G=LastLogin, H=FixedCash
+- **Response Format**:
+  ```json
+  {
+    "success": true,
+    "message": "Login successful",
+    "user": {
+      "username": "testdriver",
+      "userType": "driver", 
+      "fullName": "Test Driver",
+      "status": "active",
+      "fixedCash": 5000,
+      "lastLogin": "09/07/2025, 06:18:13 pm"
+    },
+    "timestamp": "09/07/2025, 06:18:13 pm"
+  }
+  ```
+
+#### **Error Handling**:
+- Users sheet not found case handle karta hai
+- Invalid credentials ke liye proper error message
+- Empty Users sheet validation
+- Try-catch blocks with detailed console logging
+
+#### **Security Features**:
+- Password validation without storing in logs
+- Timestamp-based session tracking
+- User status checking (active/inactive users)
+- Input sanitization with trim() functions
+
+---
 
 ### **1. FareReceipts.gs** ✅ **COMPLETE - 6/6 Functions**
 
@@ -869,4 +913,3 @@ Frontend (React) → Code.gs (Router) → Specific Module → Google Sheet → R
 **Last Updated**: January 9, 2025
 **Version**: 2.0.0
 **Status**: Production Ready 🚀
-
