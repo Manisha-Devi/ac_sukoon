@@ -2,6 +2,40 @@ import React, { useState, useEffect } from "react";
 import "../css/FareRecipt.css";
 import authService from '../../services/authService.js';
 
+// Helper function to format date for display - consistent format
+  const formatDisplayDate = (dateStr) => {
+    if (!dateStr) return '';
+
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return dateStr;
+
+      // Always show in YYYY-MM-DD format for consistency
+      return date.toLocaleDateString('en-CA'); // This gives YYYY-MM-DD format
+    } catch (error) {
+      return dateStr;
+    }
+  };
+
+  // Helper function to format time for display - simple format
+  const formatDisplayTime = (timestampStr) => {
+    if (!timestampStr) return '';
+
+    try {
+      const date = new Date(timestampStr);
+      if (isNaN(date.getTime())) return timestampStr;
+
+      // Simple time format - HH:MM AM/PM
+      return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (error) {
+      return timestampStr;
+    }
+  };
+
 // Helper functions to convert ISO strings to proper format
 const convertToTimeString = (timestamp) => {
   if (!timestamp) return '';
@@ -850,7 +884,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       type="number"
                       className="form-control"
                       value={bookingData.cashAmount}
-                      onChange={(e) => setBookingData({ ...bookingData, cashAmount: e.target.value })}
+                      onChange={(e) => set```text
+BookingData({ ...bookingData, cashAmount: e.target.value })}
                       placeholder="Enter cash amount"
                       min="0"
                     />
@@ -1004,20 +1039,20 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                           <small className="text-muted">
                             {entry.type === "daily" && (
                               <>
-                                <div>{entry.date}</div>
-                                <div className="timestamp">{entry.timestamp || ''}</div>
+                                <div>{formatDisplayDate(entry.date)}</div>
+                                <div className="timestamp">{formatDisplayTime(entry.timestamp)}</div>
                               </>
                             )}
                             {entry.type === "booking" && (
                               <>
-                                <div>{entry.dateFrom} - {entry.dateTo}</div>
-                                <div className="timestamp">{entry.timestamp || ''}</div>
+                                <div>{formatDisplayDate(entry.dateFrom)} - {formatDisplayDate(entry.dateTo)}</div>
+                                <div className="timestamp">{formatDisplayTime(entry.timestamp)}</div>
                               </>
                             )}
                             {entry.type === "off" && (
                               <>
-                                <div>{entry.date}</div>
-                                <div className="timestamp">{entry.timestamp || ''}</div>
+                                <div>{formatDisplayDate(entry.date)}</div>
+                                <div className="timestamp">{formatDisplayTime(entry.timestamp)}</div>
                               </>
                             )}
                           </small>

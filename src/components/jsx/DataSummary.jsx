@@ -302,6 +302,40 @@ function DataSummary({ fareData, expenseData, currentUser }) {
     }
   };
 
+  // Helper function to format date for display - consistent format
+  const formatDisplayDate = (dateStr) => {
+    if (!dateStr) return '';
+    
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return dateStr;
+      
+      // Always show in YYYY-MM-DD format for consistency
+      return date.toLocaleDateString('en-CA'); // This gives YYYY-MM-DD format
+    } catch (error) {
+      return dateStr;
+    }
+  };
+
+  // Helper function to format time for display - simple format
+  const formatDisplayTime = (timestampStr) => {
+    if (!timestampStr) return '';
+    
+    try {
+      const date = new Date(timestampStr);
+      if (isNaN(date.getTime())) return timestampStr;
+      
+      // Simple time format - HH:MM AM/PM
+      return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (error) {
+      return timestampStr;
+    }
+  };
+
   // Render entry card
   const renderEntryCard = (entry) => {
     const isSelected = selectedEntries.includes(entry.entryId);
@@ -377,7 +411,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
             </div>
             <div className="entry-row">
               <span className="label">Date:</span>
-              <span className="value">{entry.date}</span>
+              <span className="value">{formatDisplayDate(entry.date)}</span>
             </div>
             <div className="entry-row">
               <span className="label">Description:</span>
@@ -389,7 +423,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
             </div>
             <div className="entry-row">
               <span className="label">Time:</span>
-              <span className="value">{entry.timestamp}</span>
+              <span className="value">{formatDisplayTime(entry.timestamp)}</span>
             </div>
           </div>
         </div>
