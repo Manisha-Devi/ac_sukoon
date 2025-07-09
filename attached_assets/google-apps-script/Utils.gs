@@ -29,21 +29,20 @@ function testConnection() {
 
 /**
  * Format current timestamp in IST (Indian Standard Time)
+ * Returns format: DD-MM-YYYY HH:MM:SS
  */
 function formatISTTimestamp() {
   const now = new Date();
   const istDate = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
 
-  return istDate.toLocaleString('en-IN', { 
-    timeZone: 'Asia/Kolkata',
-    hour12: true,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  });
+  const day = String(istDate.getDate()).padStart(2, '0');
+  const month = String(istDate.getMonth() + 1).padStart(2, '0');
+  const year = istDate.getFullYear();
+  const hours = String(istDate.getHours()).padStart(2, '0');
+  const minutes = String(istDate.getMinutes()).padStart(2, '0');
+  const seconds = String(istDate.getSeconds()).padStart(2, '0');
+
+  return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
 }
 
 /**
