@@ -1,4 +1,3 @@
-
 // ============================================================================
 // ADDA PAYMENTS OPERATIONS (AddaPayments.gs)
 // ============================================================================
@@ -13,7 +12,7 @@
 function addAddaPayment(data) {
   try {
     console.log("📝 Adding new adda payment:", data);
-    
+
     let sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
       .getSheetByName(SHEET_NAMES.ADDA_PAYMENTS);
 
@@ -22,7 +21,7 @@ function addAddaPayment(data) {
       console.log("📋 Creating AddaPayments sheet...");
       sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
         .insertSheet(SHEET_NAMES.ADDA_PAYMENTS);
-      
+
       sheet.getRange(1, 1, 1, 12).setValues([[
         "Timestamp", "Date", "AddaName", "CashAmount", "BankAmount", 
         "TotalAmount", "Remarks", "SubmittedBy", "EntryType", "EntryId",
@@ -35,7 +34,7 @@ function addAddaPayment(data) {
       formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
 
     sheet.insertRowBefore(2);
-    
+
     sheet.getRange(2, 1, 1, 12).setValues([[
       timeOnly,                    // A: Time in IST
       data.date,                   // B: Date
@@ -75,7 +74,7 @@ function addAddaPayment(data) {
 function getAddaPayments() {
   try {
     console.log("📋 Fetching all adda payments...");
-    
+
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
       .getSheetByName(SHEET_NAMES.ADDA_PAYMENTS);
 
@@ -308,6 +307,33 @@ function updateAddaPaymentStatus(data) {
     return {
       success: false,
       error: 'Update adda payment status error: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Approve Adda Payment
+ * @param {Object} data - Approval data containing entryId and approverName
+ * @returns {Object} Success/error response
+ */
+function approveAddaPayment(data) {
+  try {
+    const entryId = data.entryId;
+    const approverName = data.approverName;
+
+    console.log(`✅ Approving adda payment ID: ${entryId} by ${approverName}`);
+
+    return updateAddaPaymentStatus({
+      entryId: entryId,
+      newStatus: 'approved',
+      approverName: approverName
+    });
+
+  } catch (error) {
+    console.error('❌ Error approving adda payment:', error);
+    return {
+      success: false,
+      error: 'Approve adda payment error: ' + error.toString()
     };
   }
 }
