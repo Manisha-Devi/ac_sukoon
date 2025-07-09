@@ -1745,6 +1745,61 @@ class AuthService {
     }
   }
 
+  // Update Off Day Status (if needed)
+  async updateOffDayStatus(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('updateOffDayStatus', data);
+      return response;
+    } catch (error) {
+      console.error('Error updating off day status:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ============================================================================
+  // BATCH OPERATIONS FOR MULTIPLE ENTRIES
+  // ============================================================================
+
+  // Batch update multiple entries at once
+  async batchUpdateStatus(entries) {
+    try {
+      const results = [];
+      for (const entry of entries) {
+        let result;
+        switch (entry.dataType) {
+          case 'Fare Receipt':
+            result = await this.updateFareReceiptStatus(entry);
+            break;
+          case 'Booking Entry':
+            result = await this.updateBookingEntryStatus(entry);
+            break;
+          case 'Fuel Payment':
+            result = await this.updateFuelPaymentStatus(entry);
+            break;
+          case 'Adda Payment':
+            result = await this.updateAddaPaymentStatus(entry);
+            break;
+          case 'Union Payment':
+            result = await this.updateUnionPaymentStatus(entry);
+            break;
+          case 'Service Payment':
+            result = await this.updateServicePaymentStatus(entry);
+            break;
+          case 'Other Payment':
+            result = await this.updateOtherPaymentStatus(entry);
+            break;
+          default:
+            result = { success: false, error: `Unsupported data type: ${entry.dataType}` };
+        }
+        results.push({ entryId: entry.entryId, result });
+      }
+      return { success: true, results };
+    } catch (error) {
+      console.error('Error in batch update:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // ============================================================================
   // ANALYTICS FUNCTIONS
   // ============================================================================

@@ -240,15 +240,15 @@ function DataSummary({ fareData, expenseData, currentUser }) {
               approverName: approverName
             });
             break;
-          case 'Other Payment':
-            result = await authService.updateOtherPaymentStatus({
+          case 'Adda Payment':
+            result = await authService.updateAddaPaymentStatus({
               entryId: entryId,
               newStatus: newStatus,
               approverName: approverName
             });
             break;
-          case 'Adda Payment':
-            result = await authService.updateAddaPaymentStatus({
+          case 'Union Payment':
+            result = await authService.updateUnionPaymentStatus({
               entryId: entryId,
               newStatus: newStatus,
               approverName: approverName
@@ -261,8 +261,8 @@ function DataSummary({ fareData, expenseData, currentUser }) {
               approverName: approverName
             });
             break;
-          case 'Union Payment':
-            result = await authService.updateUnionPaymentStatus({
+          case 'Other Payment':
+            result = await authService.updateOtherPaymentStatus({
               entryId: entryId,
               newStatus: newStatus,
               approverName: approverName
