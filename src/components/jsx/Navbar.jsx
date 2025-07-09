@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import "../css/Navbar.css";
 
@@ -10,18 +9,18 @@ function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime
   const toggleUserDropdown = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!showUserDropdown) {
       // Calculate position based on button position
       const rect = e.currentTarget.getBoundingClientRect();
       const isMobile = window.innerWidth < 992;
-      
+
       setDropdownPosition({
         top: rect.bottom + 8,
         right: isMobile ? 10 : window.innerWidth - rect.right
       });
     }
-    
+
     setShowUserDropdown(!showUserDropdown);
   };
 
@@ -142,7 +141,7 @@ function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime
             >
               <i className="bi bi-layout-sidebar-inset fs-5"></i>
             </button>
-            
+
             {/* User Dropdown */}
             <div className="user-dropdown-container position-relative">
               <button
@@ -176,29 +175,35 @@ function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime
                       <div className="user-role">{user?.userType}</div>
                     </div>
                   </div>
-                  
+
                   <hr className="dropdown-divider" />
-                  
+
                   <div className="dropdown-body">
                     <div className="user-detail">
-                      <i className="bi bi-person"></i>
-                      <div>
+                      <div className="user-detail-icon">
+                        <i className="bi bi-person"></i>
+                      </div>
+                      <div className="user-detail-content">
                         <span className="detail-label">Username</span>
                         <span className="detail-value">{user?.username}</span>
                       </div>
                     </div>
-                    
+
                     <div className="user-detail">
-                      <i className="bi bi-shield-check"></i>
-                      <div>
+                      <div className="user-detail-icon">
+                        <i className="bi bi-shield-check"></i>
+                      </div>
+                      <div className="user-detail-content">
                         <span className="detail-label">Role</span>
                         <span className="detail-value">{user?.userType}</span>
                       </div>
                     </div>
-                    
+
                     <div className="user-detail">
-                      <i className="bi bi-calendar-check"></i>
-                      <div>
+                      <div className="user-detail-icon">
+                        <i className="bi bi-activity"></i>
+                      </div>
+                      <div className="user-detail-content">
                         <span className="detail-label">Status</span>
                         <span className="detail-value">{user?.status || 'Active'}</span>
                       </div>
@@ -206,17 +211,19 @@ function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime
 
                     {user?.fixedCash && (
                       <div className="user-detail">
-                        <i className="bi bi-cash-stack"></i>
-                        <div>
+                        <div className="user-detail-icon">
+                          <i className="bi bi-wallet2"></i>
+                        </div>
+                        <div className="user-detail-content">
                           <span className="detail-label">Fixed Cash</span>
                           <span className="detail-value">₹{user?.fixedCash?.toLocaleString('en-IN')}</span>
                         </div>
                       </div>
                     )}
                   </div>
-                  
+
                   <hr className="dropdown-divider" />
-                  
+
                   <div className="dropdown-footer">
                     <button
                       className="logout-btn"
@@ -269,29 +276,35 @@ function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime
                       <div className="user-role">{user?.userType}</div>
                     </div>
                   </div>
-                  
+
                   <hr className="dropdown-divider" />
-                  
+
                   <div className="dropdown-body">
                     <div className="user-detail">
-                      <i className="bi bi-person"></i>
-                      <div>
+                      <div className="user-detail-icon">
+                        <i className="bi bi-person"></i>
+                      </div>
+                      <div className="user-detail-content">
                         <span className="detail-label">Username</span>
                         <span className="detail-value">{user?.username}</span>
                       </div>
                     </div>
-                    
+
                     <div className="user-detail">
-                      <i className="bi bi-shield-check"></i>
-                      <div>
+                      <div className="user-detail-icon">
+                        <i className="bi bi-shield-check"></i>
+                      </div>
+                      <div className="user-detail-content">
                         <span className="detail-label">Role</span>
                         <span className="detail-value">{user?.userType}</span>
                       </div>
                     </div>
-                    
+
                     <div className="user-detail">
-                      <i className="bi bi-calendar-check"></i>
-                      <div>
+                      <div className="user-detail-icon">
+                        <i className="bi bi-activity"></i>
+                      </div>
+                      <div className="user-detail-content">
                         <span className="detail-label">Status</span>
                         <span className="detail-value">{user?.status || 'Active'}</span>
                       </div>
@@ -299,17 +312,19 @@ function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime
 
                     {user?.fixedCash && (
                       <div className="user-detail">
-                        <i className="bi bi-cash-stack"></i>
-                        <div>
+                        <div className="user-detail-icon">
+                          <i className="bi bi-wallet2"></i>
+                        </div>
+                        <div className="user-detail-content">
                           <span className="detail-label">Fixed Cash</span>
                           <span className="detail-value">₹{user?.fixedCash?.toLocaleString('en-IN')}</span>
                         </div>
                       </div>
                     )}
                   </div>
-                  
+
                   <hr className="dropdown-divider" />
-                  
+
                   <div className="dropdown-footer">
                     <button
                       className="logout-btn"
