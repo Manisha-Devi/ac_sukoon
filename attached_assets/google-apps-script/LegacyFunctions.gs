@@ -60,77 +60,7 @@ function deleteOtherPayment(data) {
   return OtherPayments.deleteOtherPayment(data);
 }
 
-/**
- * Legacy function routing for Service Payment operations
- */
-function updateServicePayment(data) {
-  try {
-    console.log('🔄 Legacy: Routing updateServicePayment');
-    return updateServicePaymentInternal(data);
-  } catch (error) {
-    console.error('❌ Legacy updateServicePayment error:', error);
-    return { success: false, error: error.toString() };
-  }
-}
 
-function deleteServicePayment(data) {
-  try {
-    console.log('🔄 Legacy: Routing deleteServicePayment');
-    return deleteServicePaymentInternal(data);
-  } catch (error) {
-    console.error('❌ Legacy deleteServicePayment error:', error);
-    return { success: false, error: error.toString() };
-  }
-}
-
-/**
- * Legacy function routing for Other Payment operations
- */
-function updateOtherPayment(data) {
-  try {
-    console.log('🔄 Legacy: Routing updateOtherPayment');
-    return updateOtherPaymentInternal(data);
-  } catch (error) {
-    console.error('❌ Legacy updateOtherPayment error:', error);
-    return { success: false, error: error.toString() };
-  }
-}
-
-function deleteOtherPayment(data) {
-  try {
-    console.log('🔄 Legacy: Routing deleteOtherPayment');
-    return deleteOtherPaymentInternal(data);
-  } catch (error) {
-    console.error('❌ Legacy deleteOtherPayment error:', error);
-    return { success: false, error: error.toString() };
-  }
-}
-
-/**
- * Legacy function routing for Service Payment Status Updates
- */
-function updateServicePaymentStatus(data) {
-  try {
-    console.log('🔄 Legacy: Routing updateServicePaymentStatus');
-    return updateServicePaymentStatusInternal(data);
-  } catch (error) {
-    console.error('❌ Legacy updateServicePaymentStatus error:', error);
-    return { success: false, error: error.toString() };
-  }
-}
-
-/**
- * Legacy function routing for Other Payment Status Updates
- */
-function updateOtherPaymentStatus(data) {
-  try {
-    console.log('🔄 Legacy: Routing updateOtherPaymentStatus');
-    return updateOtherPaymentStatusInternal(data);
-  } catch (error) {
-    console.error('❌ Legacy updateOtherPaymentStatus error:', error);
-    return { success: false, error: error.toString() };
-  }
-}
 // Legacy functions for backward compatibility with existing API calls
 // ============================================================================
 
