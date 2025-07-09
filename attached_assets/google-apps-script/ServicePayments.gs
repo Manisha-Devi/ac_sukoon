@@ -336,3 +336,30 @@ function updateServicePaymentStatus(data) {
     };
   }
 }
+
+/**
+ * Approve Service Payment
+ * @param {Object} data - Approval data containing entryId and approverName
+ * @returns {Object} Success/error response
+ */
+function approveServicePayment(data) {
+  try {
+    const entryId = data.entryId;
+    const approverName = data.approverName;
+
+    console.log(`✅ Approving service payment ID: ${entryId} by ${approverName}`);
+
+    return updateServicePaymentStatus({
+      entryId: entryId,
+      newStatus: 'approved',
+      approverName: approverName
+    });
+
+  } catch (error) {
+    console.error('❌ Error approving service payment:', error);
+    return {
+      success: false,
+      error: 'Approve service payment error: ' + error.toString()
+    };
+  }
+}
