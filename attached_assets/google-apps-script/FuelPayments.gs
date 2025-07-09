@@ -317,3 +317,30 @@ function updateFuelPaymentStatus(data) {
     };
   }
 }
+
+/**
+ * Approve Fuel Payment
+ * @param {Object} data - Approval data containing entryId and approverName
+ * @returns {Object} Success/error response
+ */
+function approveFuelPayment(data) {
+  try {
+    const entryId = data.entryId;
+    const approverName = data.approverName;
+
+    console.log(`✅ Approving fuel payment ID: ${entryId} by ${approverName}`);
+
+    return updateFuelPaymentStatus({
+      entryId: entryId,
+      newStatus: 'approved',
+      approverName: approverName
+    });
+
+  } catch (error) {
+    console.error('❌ Error approving fuel payment:', error);
+    return {
+      success: false,
+      error: 'Approve fuel payment error: ' + error.toString()
+    };
+  }
+}
