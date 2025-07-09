@@ -61,6 +61,61 @@ function deleteOtherPayment(data) {
 }
 
 
+// Legacy FareReceipts functions
+function updateFareReceipt(data) {
+  console.log('🔄 Legacy updateFareReceipt called, routing to modern implementation');
+  return FareReceipts.updateFareReceipt(data);
+}
+
+function deleteFareReceipt(data) {
+  console.log('🔄 Legacy deleteFareReceipt called, routing to modern implementation');
+  return FareReceipts.deleteFareReceipt(data);
+}
+
+// Legacy BookingEntries functions
+function updateBookingEntry(data) {
+  console.log('🔄 Legacy updateBookingEntry called, routing to modern implementation');
+  return BookingEntries.updateBookingEntry(data);
+}
+
+function deleteBookingEntry(data) {
+  console.log('🔄 Legacy deleteBookingEntry called, routing to modern implementation');
+  return BookingEntries.deleteBookingEntry(data);
+}
+
+// Legacy OffDays functions
+function updateOffDay(data) {
+  console.log('🔄 Legacy updateOffDay called, routing to modern implementation');
+  return OffDays.updateOffDay(data);
+}
+
+function deleteOffDay(data) {
+  console.log('🔄 Legacy deleteOffDay called, routing to modern implementation');
+  return OffDays.deleteOffDay(data);
+}
+
+// Legacy Service Payment functions
+function updateServicePayment(data) {
+  console.log('🔄 Legacy updateServicePayment called, routing to modern implementation');
+  return ServicePayments.updateServicePayment(data);
+}
+
+function deleteServicePayment(data) {
+  console.log('🔄 Legacy deleteServicePayment called, routing to modern implementation');
+  return ServicePayments.deleteServicePayment(data);
+}
+
+// Legacy Other Payment functions
+function updateOtherPayment(data) {
+  console.log('🔄 Legacy updateOtherPayment called, routing to modern implementation');
+  return OtherPayments.updateOtherPayment(data);
+}
+
+function deleteOtherPayment(data) {
+  console.log('🔄 Legacy deleteOtherPayment called, routing to modern implementation');
+  return OtherPayments.deleteOtherPayment(data);
+}
+
 // Legacy functions for backward compatibility with existing API calls
 // ============================================================================
 
