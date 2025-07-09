@@ -788,7 +788,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
               <i className="bi bi-currency-rupee"></i>
             </div>
             <div className="stat-details">
-              <h3 className="stat-number">₹{totalEarnings.toLocaleString()}</h3>
+              <h3 className="stat-number">₹{(totalEarnings || 0).toLocaleString()}</h3>
               <p className="stat-title">Total Earnings</p>
               <div className="stat-trend positive">
                 <i className="bi bi-trending-up"></i>
@@ -807,7 +807,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
               <i className="bi bi-graph-down-arrow"></i>
             </div>
             <div className="stat-details">
-              <h3 className="stat-number">₹{totalExpenses.toLocaleString()}</h3>
+              <h3 className="stat-number">₹{(totalExpenses || 0).toLocaleString()}</h3>
               <p className="stat-title">Total Expenses</p>
               <div className="stat-trend negative">
                 <i className="bi bi-trending-up"></i>
@@ -826,11 +826,11 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
               <i className="bi bi-graph-up-arrow"></i>
             </div>
             <div className="stat-details">
-              <h3 className="stat-number">₹{profit.toLocaleString()}</h3>
+              <h3 className="stat-number">₹{(profit || 0).toLocaleString()}</h3>
               <p className="stat-title">Net Profit</p>
               <div className="stat-trend positive">
                 <i className="bi bi-trending-up"></i>
-                <span>+{profitPercentage}% margin</span>
+                <span>+{profitPercentage || 0}% margin</span>
               </div>
             </div>
           </div>
