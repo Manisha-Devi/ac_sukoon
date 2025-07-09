@@ -3,6 +3,27 @@ import React, { useState } from "react";
 import "../css/Navbar.css";
 
 function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime, setLastRefreshTime, onDataRefresh, onToggleSidebar }) {
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+
+  // Toggle user dropdown
+  const toggleUserDropdown = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowUserDropdown(!showUserDropdown);
+  };
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.user-dropdown-container')) {
+        setShowUserDropdown(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
   // Centralized refresh function - Navbar में हो रहा है
   const handleCentralizedRefresh = async () => {
     if (isRefreshing) return; // Prevent multiple simultaneous refreshes
@@ -108,24 +129,176 @@ function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime
             >
               <i className="bi bi-layout-sidebar-inset fs-5"></i>
             </button>
-            <span className="text-white">
-              <i className="bi bi-person-circle me-2"></i>
-               {user?.username} ({user?.userType})
-            </span>
-            <button
-                className="btn btn-outline-danger btn-sm ms-2"
-                onClick={onLogout}
-                title="Logout"
+            
+            {/* User Dropdown */}
+            <div className="user-dropdown-container position-relative">
+              <button
+                className="btn btn-link text-white p-2 d-flex align-items-center"
+                onClick={toggleUserDropdown}
+                title="User Menu"
+                type="button"
               >
-                <i className="bi bi-box-arrow-right"></i>
+                <i className="bi bi-person-circle me-2 fs-5"></i>
+                <span className="me-1">{user?.username}</span>
+                <i className={`bi ${showUserDropdown ? 'bi-chevron-up' : 'bi-chevron-down'} small`}></i>
               </button>
+
+              {/* Dropdown Menu */}
+              {showUserDropdown && (
+                <div className="user-dropdown-menu">
+                  <div className="dropdown-header">
+                    <div className="user-avatar">
+                      <i className="bi bi-person-circle"></i>
+                    </div>
+                    <div className="user-info">
+                      <div className="user-name">{user?.fullName || user?.username}</div>
+                      <div className="user-role">{user?.userType}</div>
+                    </div>
+                  </div>
+                  
+                  <hr className="dropdown-divider" />
+                  
+                  <div className="dropdown-body">
+                    <div className="user-detail">
+                      <i className="bi bi-person"></i>
+                      <div>
+                        <span className="detail-label">Username</span>
+                        <span className="detail-value">{user?.username}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="user-detail">
+                      <i className="bi bi-shield-check"></i>
+                      <div>
+                        <span className="detail-label">Role</span>
+                        <span className="detail-value">{user?.userType}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="user-detail">
+                      <i className="bi bi-calendar-check"></i>
+                      <div>
+                        <span className="detail-label">Status</span>
+                        <span className="detail-value">{user?.status || 'Active'}</span>
+                      </div>
+                    </div>
+
+                    {user?.fixedCash && (
+                      <div className="user-detail">
+                        <i className="bi bi-cash-stack"></i>
+                        <div>
+                          <span className="detail-label">Fixed Cash</span>
+                          <span className="detail-value">₹{user?.fixedCash?.toLocaleString('en-IN')}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <hr className="dropdown-divider" />
+                  
+                  <div className="dropdown-footer">
+                    <button
+                      className="logout-btn"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setShowUserDropdown(false);
+                        onLogout();
+                      }}
+                      type="button"
+                    >
+                      <i className="bi bi-box-arrow-right me-2"></i>
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Mobile User Icon */}
           <div className="d-lg-none">
-            <span className="text-white">
-              <i className="bi bi-person-circle fs-5"></i>
-            </span>
+            <div className="user-dropdown-container position-relative">
+              <button
+                className="btn btn-link text-white p-2"
+                onClick={toggleUserDropdown}
+                title="User Menu"
+                type="button"
+              >
+                <i className="bi bi-person-circle fs-5"></i>
+              </button>
+
+              {/* Mobile Dropdown Menu */}
+              {showUserDropdown && (
+                <div className="user-dropdown-menu mobile-dropdown">
+                  <div className="dropdown-header">
+                    <div className="user-avatar">
+                      <i className="bi bi-person-circle"></i>
+                    </div>
+                    <div className="user-info">
+                      <div className="user-name">{user?.fullName || user?.username}</div>
+                      <div className="user-role">{user?.userType}</div>
+                    </div>
+                  </div>
+                  
+                  <hr className="dropdown-divider" />
+                  
+                  <div className="dropdown-body">
+                    <div className="user-detail">
+                      <i className="bi bi-person"></i>
+                      <div>
+                        <span className="detail-label">Username</span>
+                        <span className="detail-value">{user?.username}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="user-detail">
+                      <i className="bi bi-shield-check"></i>
+                      <div>
+                        <span className="detail-label">Role</span>
+                        <span className="detail-value">{user?.userType}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="user-detail">
+                      <i className="bi bi-calendar-check"></i>
+                      <div>
+                        <span className="detail-label">Status</span>
+                        <span className="detail-value">{user?.status || 'Active'}</span>
+                      </div>
+                    </div>
+
+                    {user?.fixedCash && (
+                      <div className="user-detail">
+                        <i className="bi bi-cash-stack"></i>
+                        <div>
+                          <span className="detail-label">Fixed Cash</span>
+                          <span className="detail-value">₹{user?.fixedCash?.toLocaleString('en-IN')}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <hr className="dropdown-divider" />
+                  
+                  <div className="dropdown-footer">
+                    <button
+                      className="logout-btn"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setShowUserDropdown(false);
+                        onLogout();
+                      }}
+                      type="button"
+                    >
+                      <i className="bi bi-box-arrow-right me-2"></i>
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
