@@ -267,3 +267,78 @@ function deleteServicePayment(data) {
     };
   }
 }
+
+/**
+ * Update Service Payment Status (for approval workflow)
+ * @param {Object} data - Status update data containing entryId, newStatus, and approverName
+ * @returns {Object} Success/error response
+ */
+function updateServicePaymentStatus(data) {
+  try {
+    const entryId = data.entryId;
+    const newStatus = data.newStatus;
+    const approverName = data.approverName || "";
+
+    console.log(`🔄 Updating service payment status - ID: ${entryId}, Status: ${newStatus}, Approver: ${approverName}`);
+
+    // Get ServicePayments sheet
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.SERVICE_PAYMENTS);
+
+    if (!sheet) {
+      throw new Error('ServicePayments sheet not found');
+    }
+
+    // Add status columns if they don't exist
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    if (!headers.includes('EntryStatus')) {
+      const lastCol = sheet.getLastColumn();
+      sheet.getRange(1, lastCol + 1).setValue('EntryStatus');
+      sheet.getRange(1, lastCol + 2).setValue('ApprovedBy');
+    }
+
+    const entryIdColumn = 10; // Column J contains Entry ID
+
+    // Find the row with matching entryId
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1; // +1 because sheet rows are 1-indexed
+        break;
+      }
+    }
+
+    // Check if entry was found
+    if (rowIndex === -1) {
+      throw new Error(`Service payment not found with ID: ${entryId}`);
+    }
+
+    // Update status and approver (columns K and L if they exist)
+    const totalCols = sheet.getLastColumn();
+    if (totalCols >= 11) {
+      sheet.getRange(rowIndex, 11).setValue(newStatus); // Column K: EntryStatus
+    }
+    if (totalCols >= 12 && approverName) {
+      sheet.getRange(rowIndex, 12).setValue(approverName); // Column L: ApprovedBy
+    }
+
+    console.log(`✅ Service payment status updated - ID: ${entryId}, Status: ${newStatus}, Row: ${rowIndex}`);
+
+    return {
+      success: true,
+      message: 'Service payment status updated successfully',
+      entryId: entryId,
+      newStatus: newStatus,
+      approverName: approverName
+    };
+
+  } catch (error) {
+    console.error('❌ Error updating service payment status:', error);
+    return {
+      success: false,
+      error: 'Update service payment status error: ' + error.toString()
+    };
+  }
+}

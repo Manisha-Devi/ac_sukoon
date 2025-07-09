@@ -278,6 +278,70 @@ function deleteOtherPayment(data) {
   }
 }
 /**
+ * Update Other Payment Status (for approval workflow)
+ * @param {Object} data - Status update data containing entryId, newStatus, and approverName
+ * @returns {Object} Success/error response
+ */
+function updateOtherPaymentStatus(data) {
+  try {
+    const entryId = data.entryId;
+    const newStatus = data.newStatus;
+    const approverName = data.approverName || "";
+
+    console.log(`🔄 Updating other payment status - ID: ${entryId}, Status: ${newStatus}, Approver: ${approverName}`);
+
+    // Get OtherPayments sheet
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.OTHER_PAYMENTS);
+
+    if (!sheet) {
+      throw new Error('OtherPayments sheet not found');
+    }
+
+    const entryIdColumn = 11; // Column K contains Entry ID
+
+    // Find the row with matching entryId
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1; // +1 because sheet rows are 1-indexed
+        break;
+      }
+    }
+
+    // Check if entry was found
+    if (rowIndex === -1) {
+      throw new Error(`Other payment not found with ID: ${entryId}`);
+    }
+
+    // Update status and approver (columns L and M)
+    sheet.getRange(rowIndex, 12).setValue(newStatus); // Column L: EntryStatus
+    if (approverName) {
+      sheet.getRange(rowIndex, 13).setValue(approverName); // Column M: ApprovedBy
+    }
+
+    console.log(`✅ Other payment status updated - ID: ${entryId}, Status: ${newStatus}, Row: ${rowIndex}`);
+
+    return {
+      success: true,
+      message: 'Other payment status updated successfully',
+      entryId: entryId,
+      newStatus: newStatus,
+      approverName: approverName
+    };
+
+  } catch (error) {
+    console.error('❌ Error updating other payment status:', error);
+    return {
+      success: false,
+      error: 'Update other payment status error: ' + error.toString()
+    };
+  }
+}
+
+/**
  * Approve Other Payment Entry
  * @param {Object} data - Approval data containing entryId and approverName
  * @returns {Object} Success/error response
