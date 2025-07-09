@@ -163,6 +163,9 @@ function doPost(e) {
       case "deleteServicePayment":
         result = deleteServicePayment(data);
         break;
+      case "updateServicePaymentStatus":
+        result = updateServicePaymentStatus(data);
+        break;
 
       // ==================== OTHER PAYMENTS ====================
       case "addOtherPayment":
@@ -176,6 +179,9 @@ function doPost(e) {
         break;
       case "deleteOtherPayment":
         result = deleteOtherPayment(data);
+        break;
+      case "updateOtherPaymentStatus":
+        result = updateOtherPaymentStatus(data);
         break;
 
       // ==================== APPROVAL WORKFLOW OPERATIONS ====================

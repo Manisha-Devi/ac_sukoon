@@ -1682,8 +1682,13 @@ class AuthService {
   // ============================================================================
 
   // Update Fare Receipt Status
-  async updateFareReceiptStatus(data) {
+  async updateFareReceiptStatus(entryId, newStatus, approverName) {
     try {
+      const data = {
+        entryId: entryId,
+        newStatus: newStatus,
+        approverName: approverName
+      };
       const response = await this.makeApprovalAPIRequest('updateFareReceiptStatus', data);
       return response;
     } catch (error) {
@@ -1693,8 +1698,13 @@ class AuthService {
   }
 
   // Update Booking Entry Status
-  async updateBookingEntryStatus(data) {
+  async updateBookingEntryStatus(entryId, newStatus, approverName) {
     try {
+      const data = {
+        entryId: entryId,
+        newStatus: newStatus,
+        approverName: approverName
+      };
       const response = await this.makeApprovalAPIRequest('updateBookingEntryStatus', data);
       return response;
     } catch (error) {
@@ -1704,8 +1714,13 @@ class AuthService {
   }
 
   // Update Fuel Payment Status
-  async updateFuelPaymentStatus(data) {
+  async updateFuelPaymentStatus(entryId, newStatus, approverName) {
     try {
+      const data = {
+        entryId: entryId,
+        newStatus: newStatus,
+        approverName: approverName
+      };
       const response = await this.makeApprovalAPIRequest('updateFuelPaymentStatus', data);
       return response;
     } catch (error) {
@@ -1715,8 +1730,13 @@ class AuthService {
   }
 
   // Update Adda Payment Status
-  async updateAddaPaymentStatus(data) {
+  async updateAddaPaymentStatus(entryId, newStatus, approverName) {
     try {
+      const data = {
+        entryId: entryId,
+        newStatus: newStatus,
+        approverName: approverName
+      };
       const response = await this.makeApprovalAPIRequest('updateAddaPaymentStatus', data);
       return response;
     } catch (error) {
@@ -1726,8 +1746,13 @@ class AuthService {
   }
 
   // Update Union Payment Status
-  async updateUnionPaymentStatus(data) {
+  async updateUnionPaymentStatus(entryId, newStatus, approverName) {
     try {
+      const data = {
+        entryId: entryId,
+        newStatus: newStatus,
+        approverName: approverName
+      };
       const response = await this.makeApprovalAPIRequest('updateUnionPaymentStatus', data);
       return response;
     } catch (error) {
@@ -1737,8 +1762,13 @@ class AuthService {
   }
 
   // Update Service Payment Status
-  async updateServicePaymentStatus(data) {
+  async updateServicePaymentStatus(entryId, newStatus, approverName) {
     try {
+      const data = {
+        entryId: entryId,
+        newStatus: newStatus,
+        approverName: approverName
+      };
       const response = await this.makeApprovalAPIRequest('updateServicePaymentStatus', data);
       return response;
     } catch (error) {
@@ -1748,8 +1778,13 @@ class AuthService {
   }
 
   // Update Other Payment Status
-  async updateOtherPaymentStatus(data) {
+  async updateOtherPaymentStatus(entryId, newStatus, approverName) {
     try {
+      const data = {
+        entryId: entryId,
+        newStatus: newStatus,
+        approverName: approverName
+      };
       const response = await this.makeApprovalAPIRequest('updateOtherPaymentStatus', data);
       return response;
     } catch (error) {
