@@ -884,7 +884,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       type="number"
                       className="form-control"
                       value={bookingData.cashAmount}
-                      onChange{(e) => setBookingData({ ...bookingData, cashAmount: e.target.value })}
+                      onChange={(e) => setBookingData({ ...bookingData, cashAmount: e.target.value })}
                       placeholder="Enter cash amount"
                       min="0"
                     />
