@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../css/CashSummary.css";
 
-function CashSummary({ fareData, expenseData }) {
+function CashSummary({ fareData, expenseData, currentUser }) {
   // 📊 RECEIVED DATA EXPLANATION:
   // fareData = Daily entries (income) + Booking entries + Off days
   // expenseData = Fuel + Adda + Union + Service + Other payments
@@ -9,17 +9,12 @@ function CashSummary({ fareData, expenseData }) {
   const [filteredData, setFilteredData] = useState([]);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  const [currentUser, setCurrentUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedEntries, setSelectedEntries] = useState([]);
   const [entriesPerPage] = useState(10);
   const [showDialog, setShowDialog] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
 
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    setCurrentUser(user);
-  }, []);
 
   useEffect(() => {
     console.log('🔄 CashSummary: Props data updated');

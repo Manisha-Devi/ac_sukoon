@@ -58,7 +58,7 @@ const convertToDateString = (date) => {
   return String(date);
 };
 
-function MiscPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
+function MiscPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries, currentUser }) {
   const [activeTab, setActiveTab] = useState("service");
   const [editingEntry, setEditingEntry] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -86,8 +86,7 @@ function MiscPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBoo
 
   // Calculate totals for summary - only for current user
   const calculateSummaryTotals = () => {
-    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const currentUserName = currentUser.fullName || currentUser.username;
+    const currentUserName = currentUser?.fullName || currentUser?.username;
 
     const userExpenseData = expenseData.filter(entry => 
       (entry.type === 'service' || entry.type === 'other') &&
@@ -114,8 +113,7 @@ function MiscPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBoo
   };
 
   const getCurrentUserMiscEntries = () => {
-    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const currentUserName = currentUser.fullName || currentUser.username;
+    const currentUserName = currentUser?.fullName || currentUser?.username;
 
     return expenseData.filter(entry => 
       (entry.type === 'service' || entry.type === 'other') &&
@@ -128,8 +126,7 @@ function MiscPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBoo
     setIsLoading(true);
 
     try {
-      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+      const submittedBy = currentUser?.fullName || currentUser?.username || 'Unknown User';
       const now = new Date();
       const timeOnly = now.toLocaleTimeString('en-US', { 
         hour12: true, 

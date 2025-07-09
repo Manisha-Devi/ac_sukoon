@@ -88,7 +88,7 @@ const formatISTTime = () => {
     });
 };
 
-function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries }) {
+function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries, currentUser }) {
   const [activeTab, setActiveTab] = useState("daily");
   const [editingEntry, setEditingEntry] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -205,8 +205,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const cashAmount = parseInt(dailyFareData.cashAmount) || 0;
       const bankAmount = parseInt(dailyFareData.bankAmount) || 0;
       const totalAmount = cashAmount + bankAmount;
-      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+      const submittedBy = currentUser?.fullName || currentUser?.username || 'Unknown User';
       const now = new Date();
       const timeOnly = now.toLocaleTimeString('en-US', { 
         hour12: true, 
@@ -319,8 +318,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const cashAmount = parseInt(bookingData.cashAmount) || 0;
       const bankAmount = parseInt(bookingData.bankAmount) || 0;
       const totalAmount = cashAmount + bankAmount;
-      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+      const submittedBy = currentUser?.fullName || currentUser?.username || 'Unknown User';
       const timeOnly = formatISTTime(); // IST time in H:MM:SS AM/PM format
 
       if (editingEntry) {
@@ -415,8 +413,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         return;
       }
 
-      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+      const submittedBy = currentUser?.fullName || currentUser?.username || 'Unknown User';
       const now = new Date();
       const timeOnly = now.toLocaleTimeString('en-US', { 
         hour12: true, 
@@ -575,8 +572,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
   // Calculate totals for summary - only for current user and exclude approved entries
   const calculateSummaryTotals = () => {
-    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const currentUserName = currentUser.fullName || currentUser.username;
+    const currentUserName = currentUser?.fullName || currentUser?.username;
 
     const userFareData = fareData.filter(entry => 
       entry.submittedBy === currentUserName && entry.entryStatus !== 'approved'
@@ -591,9 +587,8 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
   // Filter function to get non-approved entries for current user
   const getCurrentUserNonApprovedEntries = () => {
-    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const currentUserName = currentUser.fullName || currentUser.username;
-    
+    const currentUserName = currentUser?.fullName || currentUser?.username;
+
     return fareData.filter(entry => 
       entry.submittedBy === currentUserName && entry.entryStatus !== 'approved'
     );
@@ -603,7 +598,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
   // Load data on component mount and listen for refresh events
   useEffect(() => {
-    
+
 
     // Listen for centralized refresh events
     const handleDataRefresh = () => {
@@ -615,7 +610,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     return () => {
       window.removeEventListener('dataRefreshed', handleDataRefresh);
     };
-  }, []);
+  }, [currentUser]);
 
   return (
     <div className="fare-entry-container">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../css/BankSummary.css";
 
-function BankSummary({ fareData, expenseData }) {
+function BankSummary({ fareData, expenseData, currentUser }) {
   // 📊 RECEIVED DATA EXPLANATION:
   // fareData = Daily entries (income) + Booking entries + Off days
   // expenseData = Fuel + Adda + Union + Service + Other payments
@@ -9,17 +9,11 @@ function BankSummary({ fareData, expenseData }) {
   const [filteredData, setFilteredData] = useState([]);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  const [currentUser, setCurrentUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedEntries, setSelectedEntries] = useState([]);
+  const [selectedEntries, setSelectedEntries] useState([]);
   const [entriesPerPage] = useState(10);
   const [showDialog, setShowDialog] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
-
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    setCurrentUser(user);
-  }, []);
 
   useEffect(() => {
     console.log('🔄 BankSummary: Props data updated');
@@ -259,7 +253,7 @@ function BankSummary({ fareData, expenseData }) {
         // Background API call to Google Sheets (don't wait for it)
         try {
           const authService = (await import('../../services/authService.js')).default;
-          
+
           if (entry.entryType === 'daily') {
             authService.updateFareReceiptStatus({
               entryId: entryId,

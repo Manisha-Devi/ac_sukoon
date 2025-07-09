@@ -57,7 +57,7 @@ const convertToDateString = (date) => {
   return String(date);
 };
 
-function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries }) {
+function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBookEntries, currentUser }) {
   const [activeTab, setActiveTab] = useState("fuel");
   const [editingEntry, setEditingEntry] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -93,8 +93,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
 
   // Calculate totals for summary - only for current user
   const calculateSummaryTotals = () => {
-    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const currentUserName = currentUser.fullName || currentUser.username;
+    const currentUserName = currentUser?.fullName || currentUser?.username;
 
     const userExpenseData = expenseData.filter(entry => 
       (entry.type === 'fuel' || entry.type === 'adda' || entry.type === 'union') &&
@@ -123,8 +122,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
   };
 
   const getCurrentUserPaymentEntries = () => {
-    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const currentUserName = currentUser.fullName || currentUser.username;
+    const currentUserName = currentUser?.fullName || currentUser?.username;
 
     return expenseData.filter(entry => 
       (entry.type === 'fuel' || entry.type === 'adda' || entry.type === 'union') &&
@@ -137,8 +135,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
     setIsLoading(true);
 
     try {
-      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const submittedBy = currentUser.fullName || currentUser.username || 'Unknown User';
+      const submittedBy = currentUser?.fullName || currentUser?.username || 'Unknown User';
       const now = new Date();
       const timeOnly = now.toLocaleTimeString('en-US', { 
         hour12: true, 
@@ -458,8 +455,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
     try {
       console.log('🔄 BasicPayment: Loading payment data...');
       
-      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const currentUserName = currentUser.fullName || currentUser.username;
+      const currentUserName = currentUser?.fullName || currentUser?.username;
 
       // Load all payment types
       const [fuelResult, addaResult, unionResult] = await Promise.all([

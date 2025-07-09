@@ -508,83 +508,79 @@ function App() {
 
       {/* Main Content */}
       <div className="main-content">
-        <div className="container-fluid">
-          {activeTab === "dashboard" && (
-            <Dashboard
-              totalEarnings={totalEarnings}
-              totalExpenses={totalExpenses}
-              profit={profit}
-              profitPercentage={profitPercentage}
-              setFareData={setFareData}
-              setExpenseData={setExpenseData}
-              setCashBookEntries={setCashBookEntries}
-              isRefreshing={isRefreshing}
-              dataStats={dataStats}
-              dataStatistics={dataStatistics}
-              onRefreshComplete={() => setLastRefreshTime(new Date())}
-            />
-          )}
-          {activeTab === "fare-entry" && (
-            <FareEntry
-              fareData={fareData}
-              setFareData={setFareData}
-              setTotalEarnings={setTotalEarnings}
-              setCashBookEntries={setCashBookEntries}
-            />
-          )}
-          {activeTab === "basic-payment" && (
-            <BasicPayment
-              expenseData={expenseData}
-              setExpenseData={setExpenseData}
-              setTotalExpenses={setTotalExpenses}
-              setCashBookEntries={setCashBookEntries}
-            />
-          )}
-          {activeTab === "misc-payment" && (
-            <MiscPayment 
-              expenseData={expenseData}
-              setExpenseData={setExpenseData}
-              setTotalExpenses={setTotalExpenses}
-              setCashBookEntries={setCashBookEntries}
-            />
-          )}
-          {activeTab === "bonus-calc" && <BonusCalculator />}
-          {activeTab === "analytics" && (
-            <Analytics 
-              fareData={fareData} 
-              expenseData={expenseData} 
-              totalEarnings={totalEarnings} 
-              totalExpenses={totalExpenses} 
-            />
-          )}
-          {activeTab === "cash-book" && (
-            <CashBook
-              cashBookEntries={cashBookEntries}
-              setCashBookEntries={setCashBookEntries}
-            />
-          )}
-          {activeTab === "data-summary" && (user?.userType === 'Manager' || user?.userType === 'Admin') && (
-            <DataSummary 
-              fareData={fareData}
-              expenseData={expenseData}
-              currentUser={user}
-            />
-          )}
-          {activeTab === "cash-summary" && (
-            <CashSummary 
-              fareData={fareData} 
-              expenseData={expenseData}
-              currentUser={user}
-            />
-          )}
-          {activeTab === "bank-summary" && (
-            <BankSummary 
-              fareData={fareData} 
-              expenseData={expenseData}
-              currentUser={user}
-            />
-          )}
-        </div>
+        {activeTab === "dashboard" && (
+          <Dashboard 
+            expenseData={expenseData} 
+            fareData={fareData} 
+            totalExpenses={totalExpenses} 
+            totalEarnings={totalEarnings}
+            dataStatistics={dataStatistics}
+            currentUser={user}
+          />
+        )}
+        {activeTab === "fare-entry" && (
+          <FareEntry 
+            fareData={fareData} 
+            setFareData={setFareData} 
+            setTotalEarnings={setTotalEarnings}
+            setCashBookEntries={setCashBookEntries}
+            currentUser={user}
+          />
+        )}
+        {activeTab === "basic-payment" && (
+          <BasicPayment 
+            expenseData={expenseData} 
+            setExpenseData={setExpenseData} 
+            setTotalExpenses={setTotalExpenses}
+            setCashBookEntries={setCashBookEntries}
+            currentUser={user}
+          />
+        )}
+        {activeTab === "misc-payment" && (
+          <MiscPayment 
+            expenseData={expenseData} 
+            setExpenseData={setExpenseData} 
+            setTotalExpenses={setTotalExpenses}
+            setCashBookEntries={setCashBookEntries}
+            currentUser={user}
+          />
+        )}
+        {activeTab === "bonus-calc" && <BonusCalculator currentUser={user} />}
+        {activeTab === "analytics" && (
+          <Analytics 
+            expenseData={expenseData} 
+            fareData={fareData}
+            currentUser={user}
+          />
+        )}
+        {activeTab === "cash-book" && (
+          <CashBook 
+            cashBookEntries={cashBookEntries} 
+            setCashBookEntries={setCashBookEntries}
+            currentUser={user}
+          />
+        )}
+        {activeTab === "data-summary" && (
+          <DataSummary 
+            fareData={fareData} 
+            expenseData={expenseData} 
+            currentUser={user}
+          />
+        )}
+        {activeTab === "cash-summary" && (
+          <CashSummary 
+            fareData={fareData} 
+            expenseData={expenseData}
+            currentUser={user}
+          />
+        )}
+        {activeTab === "bank-summary" && (
+          <BankSummary 
+            fareData={fareData} 
+            expenseData={expenseData}
+            currentUser={user}
+          />
+        )}
       </div>
     </div>
   );
