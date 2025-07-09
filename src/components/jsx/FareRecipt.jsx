@@ -884,8 +884,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       type="number"
                       className="form-control"
                       value={bookingData.cashAmount}
-                      onChange={(e) => set```text
-BookingData({ ...bookingData, cashAmount: e.target.value })}
+                      onChange{(e) => setBookingData({ ...bookingData, cashAmount: e.target.value })}
                       placeholder="Enter cash amount"
                       min="0"
                     />
@@ -916,7 +915,8 @@ BookingData({ ...bookingData, cashAmount: e.target.value })}
                   </div>
                 </div>
                 <div className="button-group">
-                  <button type="submit" className="btn fare-entry-btn" disabled={isLoading}>                    <i className={isLoading ? "bi bi bi-arrow-repeat" : editingEntry ? "bi bi-check-circle" : "bi bi-journal-plus"}></i> 
+                  <button type="submit" className="btn fare-entry-btn" disabled={isLoading}>
+                    <i className={isLoading ? "bi bi-arrow-repeat" : editingEntry ? "bi bi-check-circle" : "bi bi-journal-plus"}></i>
                     {isLoading ? "Processing..." : editingEntry ? "Update Entry" : "Add Booking Entry"}
                   </button>
                   {editingEntry && (
@@ -966,7 +966,7 @@ BookingData({ ...bookingData, cashAmount: e.target.value })}
                 </div>
                 <div className="button-group">
                   <button type="submit" className="btn fare-entry-btn" disabled={isLoading}>
-                    <i className={isLoading ? "bi bi-arrow-repeat" : editingEntry ? "bi bi-check-circle" : "bi bi-check-circle"}></i> 
+                    <i className={isLoading ? "bi bi-arrow-repeat" : editingEntry ? "bi bi-check-circle" : "bi bi-check-circle"}></i>
                     {isLoading ? "Processing..." : editingEntry ? "Update Entry" : "Mark Day as Off"}
                   </button>
                   {editingEntry && (
@@ -994,7 +994,7 @@ BookingData({ ...bookingData, cashAmount: e.target.value })}
                       <div className="card-body">
                         <div className="entry-header">
                           <span className={`entry-type ${entry.type}`}>
-{entry.type === "daily" ? "Daily" : 
+{entry.type === "daily" ? "Daily" :
                              entry.type === "booking" ? "Booking" : "Off Day"}
                           </span>
 
@@ -1002,15 +1002,15 @@ BookingData({ ...bookingData, cashAmount: e.target.value })}
 
                             {entry.entryStatus === 'pending' && (
                             <>
-                              <button 
-                                className="btn btn-sm btn-edit" 
+                              <button
+                                className="btn btn-sm btn-edit"
                                 onClick={() => handleEditEntry(entry)}
                                 title="Edit Entry"
                               >
                                 <i className="bi bi-pencil"></i>
                               </button>
-                              <button 
-                                className="btn btn-sm btn-delete" 
+                              <button
+                                className="btn btn-sm btn-delete"
                                 onClick={() => handleDeleteEntry(entry.entryId)}
                                 title="Delete Entry"
                               >
@@ -1019,9 +1019,9 @@ BookingData({ ...bookingData, cashAmount: e.target.value })}
                             </>
                           )}
 
-                          {(entry.entryStatus === 'forwardedBank' || 
-                            entry.entryStatus === 'approvedBank' || 
-                            entry.entryStatus === 'forwardedCash' || 
+                          {(entry.entryStatus === 'forwardedBank' ||
+                            entry.entryStatus === 'approvedBank' ||
+                            entry.entryStatus === 'forwardedCash' ||
                             entry.entryStatus === 'approvedCash') && (
                             <span className="status-badge status-locked" title="Entry is locked">
                               <i className="bi bi-lock-fill"></i>
