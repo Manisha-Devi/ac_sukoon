@@ -82,12 +82,7 @@ function getScriptProperties() {
   };
 }
 
-/**
- * Generate unique entry ID based on current timestamp
- */
-function generateEntryId() {
-  return Date.now().toString();
-}
+
 
 // Sheet names configuration - centralized configuration
 const SHEET_NAMES = {
