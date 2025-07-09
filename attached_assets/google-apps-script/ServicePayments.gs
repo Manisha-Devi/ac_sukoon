@@ -25,9 +25,10 @@ function addServicePayment(data) {
         .insertSheet(SHEET_NAMES.SERVICE_PAYMENTS);
       
       // Add headers exactly as specified
-      sheet.getRange(1, 1, 1, 10).setValues([[
+      sheet.getRange(1, 1, 1, 12).setValues([[
         "Timestamp", "Date", "ServiceType", "CashAmount", "BankAmount", 
-        "TotalAmount", "ServiceDetails", "SubmittedBy", "EntryType", "EntryId"
+        "TotalAmount", "ServiceDetails", "SubmittedBy", "EntryType", "EntryId",
+        "EntryStatus", "ApprovedBy"
       ]]);
     }
 
@@ -42,7 +43,7 @@ function addServicePayment(data) {
     sheet.insertRowBefore(2);
     
     // Add data to the new row
-    sheet.getRange(2, 1, 1, 10).setValues([[
+    sheet.getRange(2, 1, 1, 12).setValues([[
       timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
       data.date,                     // B: Date from frontend
       data.serviceType || "",        // C: Service Type
@@ -53,6 +54,8 @@ function addServicePayment(data) {
       data.submittedBy || "",        // H: Submitted By
       "service",                     // I: Entry Type (static)
       entryId,                       // J: Entry ID
+      "pending",                     // K: Entry Status (pending/waiting/approved)
+      "",                            // L: Approved By (empty initially)
     ]]);
 
     console.log("✅ Service payment added successfully with ID:", entryId);
@@ -112,6 +115,8 @@ function getServicePayments() {
         serviceDetails: row[6],               // Service details from column G
         submittedBy: row[7],                  // Submitted by from column H
         entryType: row[8],                    // Entry type from column I
+        entryStatus: row[10] || "pending",    // Entry status from column K
+        approvedBy: row[11] || "",            // Approved by from column L
         rowIndex: index + 2,                  // Store row index for updates/deletes
       };
     });
@@ -289,14 +294,6 @@ function updateServicePaymentStatus(data) {
       throw new Error('ServicePayments sheet not found');
     }
 
-    // Add status columns if they don't exist
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-    if (!headers.includes('EntryStatus')) {
-      const lastCol = sheet.getLastColumn();
-      sheet.getRange(1, lastCol + 1).setValue('EntryStatus');
-      sheet.getRange(1, lastCol + 2).setValue('ApprovedBy');
-    }
-
     const entryIdColumn = 10; // Column J contains Entry ID
 
     // Find the row with matching entryId
@@ -315,12 +312,9 @@ function updateServicePaymentStatus(data) {
       throw new Error(`Service payment not found with ID: ${entryId}`);
     }
 
-    // Update status and approver (columns K and L if they exist)
-    const totalCols = sheet.getLastColumn();
-    if (totalCols >= 11) {
-      sheet.getRange(rowIndex, 11).setValue(newStatus); // Column K: EntryStatus
-    }
-    if (totalCols >= 12 && approverName) {
+    // Update status and approver (columns K and L)
+    sheet.getRange(rowIndex, 11).setValue(newStatus); // Column K: EntryStatus
+    if (approverName) {
       sheet.getRange(rowIndex, 12).setValue(approverName); // Column L: ApprovedBy
     }
 
