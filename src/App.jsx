@@ -25,7 +25,11 @@ function App() {
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [cashBookEntries, setCashBookEntries] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    // Initialize user state from localStorage if available
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState(null);
   const [dataStats, setDataStats] = useState({
@@ -57,11 +61,15 @@ function App() {
 
   const handleLogin = (userData) => {
     setUser(userData);
+    // Also store in localStorage for persistence across page refreshes
+    localStorage.setItem('user', JSON.stringify(userData));
   };
 
   const handleLogout = () => {
     setUser(null);
     setActiveTab("dashboard");
+    // Clear localStorage on logout
+    localStorage.removeItem('user');
   };
 
   // Data refresh function for Navbar component
@@ -559,18 +567,21 @@ function App() {
             <DataSummary 
               fareData={fareData}
               expenseData={expenseData}
+              currentUser={user}
             />
           )}
           {activeTab === "cash-summary" && (
             <CashSummary 
               fareData={fareData} 
               expenseData={expenseData}
+              currentUser={user}
             />
           )}
           {activeTab === "bank-summary" && (
             <BankSummary 
               fareData={fareData} 
               expenseData={expenseData}
+              currentUser={user}
             />
           )}
         </div>

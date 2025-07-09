@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import "../css/DataSummary.css";
 import authService from "../../services/authService.js";
 
-function DataSummary({ fareData, expenseData }) {
+function DataSummary({ fareData, expenseData, currentUser }) {
   const [activeTab, setActiveTab] = useState('pending');
   const [pendingData, setPendingData] = useState([]);
   const [bankApprovalData, setBankApprovalData] = useState([]);
@@ -11,20 +11,13 @@ function DataSummary({ fareData, expenseData }) {
   const [approvedData, setApprovedData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEntries, setSelectedEntries] = useState([]);
-  const [currentUser, setCurrentUser] = useState(null);
 
-  // Check if user has permission to access this component
+  // Log user data for debugging
   useEffect(() => {
-    const userString = localStorage.getItem('user');
-    console.log('🔍 DataSummary - Raw localStorage user:', userString);
-    
-    const user = JSON.parse(userString || '{}');
-    console.log('👤 DataSummary - Parsed user object:', user);
-    console.log('🔑 DataSummary - User role:', user?.role);
-    console.log('🔑 DataSummary - User type:', user?.userType);
-    
-    setCurrentUser(user);
-  }, []);
+    console.log('🔍 DataSummary - User from props:', currentUser);
+    console.log('🔑 DataSummary - User role:', currentUser?.role);
+    console.log('🔑 DataSummary - User type:', currentUser?.userType);
+  }, [currentUser]);
 
   // Process data whenever fareData or expenseData changes
   useEffect(() => {
@@ -167,7 +160,7 @@ function DataSummary({ fareData, expenseData }) {
     }
 
     try {
-      const approverName = currentUser.fullName || currentUser.username;
+      const approverName = currentUser?.fullName || currentUser?.username;
       let newStatus = '';
 
       // Determine new status based on current tab

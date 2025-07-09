@@ -74,7 +74,7 @@ function Login({ onLogin }) {
       setIsLoading(false);
 
       if (authResult.success) {
-        // Store user details locally (without password)
+        // Create user details object (without password)
         const userDetails = {
           username: authResult.user.username,
           userType: authResult.user.userType,
@@ -82,8 +82,7 @@ function Login({ onLogin }) {
           status: authResult.user.status,
           isAuthenticated: true
         };
-        localStorage.setItem('user', JSON.stringify(userDetails));
-        console.log('👤 User details stored locally:', userDetails);
+        console.log('👤 User details for login:', userDetails);
         onLogin(userDetails);
       } else {
         setErrors({
