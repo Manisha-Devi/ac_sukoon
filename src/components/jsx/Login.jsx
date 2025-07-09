@@ -80,6 +80,7 @@ function Login({ onLogin }) {
           userType: authResult.user.userType,
           fullName: authResult.user.fullName,
           status: authResult.user.status,
+          fixedCash: authResult.user.fixedCash || 0,
           isAuthenticated: true
         };
         console.log('👤 User details for login:', userDetails);
