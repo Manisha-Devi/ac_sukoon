@@ -10,7 +10,7 @@ function BankSummary({ fareData, expenseData, currentUser }) {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedEntries, setSelectedEntries] useState([]);
+  const [selectedEntries, setSelectedEntries] = useState([]);
   const [entriesPerPage] = useState(10);
   const [showDialog, setShowDialog] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
