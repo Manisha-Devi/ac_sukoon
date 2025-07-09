@@ -1,4 +1,5 @@
 
+
 # 🚀 **AC SUKOON TRANSPORT MANAGEMENT - Google Apps Script Backend**
 
 ## 📖 **Complete System Documentation**
@@ -7,355 +8,636 @@ This Google Apps Script backend provides a complete CRUD (Create, Read, Update, 
 
 ---
 
-## 📁 **File Structure & Working Analysis**
+## 📁 **File Structure & Detailed Working Analysis**
 
 ### **1. FareReceipts.gs** ✅ **COMPLETE - 6/6 Functions**
 
-**Purpose**: Manages daily fare collection receipts from transport operations
+**Purpose**: Daily fare collection receipts management karta hai transport operations se
 
 **Sheet Structure**: 11 columns
 - A=Timestamp, B=Date, C=Route, D=CashAmount, E=BankAmount
 - F=TotalAmount, G=EntryType, H=EntryId, I=SubmittedBy
 - J=EntryStatus, K=ApprovedBy
 
-**Available Functions**:
-1. **`addFareReceipt(data)`** - Add new fare receipt entry
-2. **`getFareReceipts()`** - Retrieve all fare receipts
-3. **`updateFareReceipt(data)`** - Update existing fare receipt
-4. **`deleteFareReceipt(data)`** - Delete fare receipt by ID
-5. **`updateFareReceiptStatus(data)`** - Update approval status (pending/approved)
-6. **`approveFareReceipt(data)`** - Quick approve function
+#### **1. addFareReceipt(data) Function**
+**Purpose**: Nayi fare receipt entry add karna
+**Working**:
+- Sheet structure validate karta hai, agar exist nahi hai to create karta hai
+- EntryId frontend se use karta hai ya auto-generate karta hai
+- IST timestamp format mein time store karta hai
+- Row 2 position par insert karta hai (newest entries top par)
+- EntryType "daily" fix set karta hai
+- Default status "pending" set karta hai
+- Total amount validation karta hai (cash + bank = total)
 
-**Key Features**:
-- Automatic EntryID generation using Date.now()
-- IST timestamp formatting
-- Status management (pending → approved)
-- Newest entries at top (insertRowBefore(2))
-- Complete error handling with console logging
-
-**Usage Example**:
+**Example Response**:
 ```javascript
-addFareReceipt({
-  entryId: "1736369834123",
-  date: "09-01-2025",
-  route: "Delhi-Gurgaon",
-  cashAmount: 5000,
-  bankAmount: 3000,
-  totalAmount: 8000,
-  submittedBy: "Driver1"
-});
+{
+  "success": true,
+  "message": "Fare receipt added successfully",
+  "entryId": "1736369834123",
+  "timestamp": "18:30:45 PM"
+}
 ```
+
+#### **2. getFareReceipts() Function**
+**Purpose**: Sab fare receipts retrieve karna
+**Working**:
+- Sheet se complete data fetch karta hai
+- Empty sheet case handle karta hai
+- Data ko proper format mein map karta hai:
+  - Column H se EntryId (8th column)
+  - Column A se Timestamp
+  - Column B se Date, Column C se Route
+  - Cash/Bank amounts properly format karta hai
+- Row index store karta hai updates/deletes ke liye
+- Data reverse order mein return karta hai (newest first)
+
+#### **3. updateFareReceipt(data) Function**
+**Purpose**: Existing fare receipt update karna
+**Working**:
+- EntryId ke basis par row find karta hai (Column H search)
+- Individual columns update karta hai:
+  - Column B: Date, Column C: Route
+  - Column D: CashAmount, Column E: BankAmount
+  - Column F: TotalAmount
+- Only provided fields update karta hai
+- Automatic total recalculation nahi karta (frontend responsibility)
+
+#### **4. deleteFareReceipt(data) Function**
+**Purpose**: Fare receipt delete karna
+**Working**:
+- EntryId se row locate karta hai
+- Complete row delete karta hai using sheet.deleteRow()
+- Error handling agar entry not found
+
+#### **5. updateFareReceiptStatus(data) Function**
+**Purpose**: Entry approval status change karna
+**Working**:
+- Status options: 'pending', 'approved'
+- Column J mein status update karta hai
+- Column K mein approver name set karta hai
+- Approval timestamp tracking
+
+#### **6. approveFareReceipt(data) Function**
+**Purpose**: Direct approval function
+**Working**:
+- Wrapper function hai updateFareReceiptStatus() ka
+- Status automatically 'approved' set karta hai
+- Approver name required parameter hai
 
 ---
 
 ### **2. BookingEntries.gs** ✅ **COMPLETE - 6/6 Functions**
 
-**Purpose**: Manages special booking entries for contracted transport services
+**Purpose**: Special booking entries manage karta hai (weddings, tours, corporate events)
 
 **Sheet Structure**: 12 columns
 - A=Timestamp, B=BookingDetails, C=DateFrom, D=DateTo
 - E=CashAmount, F=BankAmount, G=TotalAmount, H=EntryType
 - I=EntryId, J=SubmittedBy, K=EntryStatus, L=ApprovedBy
 
-**Available Functions**:
-1. **`addBookingEntry(data)`** - Add new booking entry
-2. **`getBookingEntries()`** - Retrieve all booking entries
-3. **`updateBookingEntry(data)`** - Update existing booking entry
-4. **`deleteBookingEntry(data)`** - Delete booking entry by ID
-5. **`updateBookingEntryStatus(data)`** - Update approval status
-6. **`approveBookingEntry(data)`** - Quick approve function
+#### **1. addBookingEntry(data) Function**
+**Purpose**: Nayi special booking entry add karna
+**Working**:
+- Sheet structure: A=Timestamp, B=BookingDetails, C=DateFrom, D=DateTo, E=CashAmount, F=BankAmount, G=TotalAmount, H=EntryType, I=EntryId, J=SubmittedBy, K=EntryStatus, L=ApprovedBy
+- Agar sheet exist nahi hai to automatically create karta hai with headers
+- Data mein se entryId use karta hai (frontend se already unique ID aati hai)
+- Timestamp ko time-only format mein store karta hai
+- New row position 2 par insert karta hai (newest entries top par)
+- EntryType "booking" fix hai
+- Default status "pending" set karta hai
 
-**Key Features**:
-- Date range support (DateFrom to DateTo)
-- Booking details with custom descriptions
-- Multi-day booking support
-- Automatic status reset to 'pending' on updates
-
-**Usage Example**:
+**Example Response**:
 ```javascript
-addBookingEntry({
-  entryId: "1736369834124",
-  bookingDetails: "Corporate Event Transport",
-  dateFrom: "15-01-2025",
-  dateTo: "17-01-2025",
-  cashAmount: 0,
-  bankAmount: 25000,
-  totalAmount: 25000,
-  submittedBy: "Manager1"
-});
+{
+  "success": true,
+  "message": "Booking entry added successfully",
+  "entryId": "1704726185847",
+  "timestamp": "14:30:15"
+}
 ```
+
+#### **2. getBookingEntries() Function**
+**Purpose**: Sab booking entries retrieve karna
+**Working**:
+- Sheet se all data fetch karta hai
+- Empty sheet case handle karta hai
+- Data ko proper format mein map karta hai:
+  - Column I se EntryId (9th column)
+  - Column A se Timestamp
+  - Column B se BookingDetails
+  - Column C se DateFrom, Column D se DateTo
+  - Remaining columns accordingly
+- Row index bhi store karta hai updates/deletes ke liye
+
+**Return Format**:
+```javascript
+{
+  "success": true,
+  "data": [
+    {
+      "entryId": "1704726185847",
+      "timestamp": "14:30:15",
+      "bookingDetails": "Wedding booking from Bhaderwah to Jammu",
+      "dateFrom": "2024-01-20",
+      "dateTo": "2024-01-22",
+      "cashAmount": 5000,
+      "bankAmount": 10000,
+      "totalAmount": 15000,
+      "entryType": "booking",
+      "submittedBy": "testdriver",
+      "entryStatus": "pending",
+      "approvedBy": "",
+      "rowIndex": 2
+    }
+  ]
+}
+```
+
+#### **3. updateBookingEntry(data) Function**
+**Purpose**: Existing booking entry update karna
+**Working**:
+- EntryId ke basis par row find karta hai (Column I mein search)
+- Updated fields ko individual columns mein update karta hai:
+  - Column B: BookingDetails
+  - Column C: DateFrom, Column D: DateTo
+  - Column E: CashAmount, Column F: BankAmount
+  - Column G: TotalAmount
+- Status ko automatically "pending" set karta hai (Column K)
+- Only provided fields update karta hai (undefined fields skip)
+
+#### **4. deleteBookingEntry(data) Function**
+**Purpose**: Booking entry delete karna
+**Working**:
+- EntryId se row find karta hai
+- Entire row delete kar deta hai using sheet.deleteRow(rowIndex)
+- Error handling agar entry not found
+
+#### **5. updateBookingEntryStatus(data) Function**
+**Purpose**: Entry ka status change karna
+**Working**:
+- Status options: 'pending', 'bank', 'cash', 'approved'
+- Column K mein status update karta hai
+- Agar status 'approved' hai to Column L mein approver name set karta hai
+- Other statuses ke liye approver field clear kar deta hai
+
+#### **6. approveBookingEntry(data) Function**
+**Purpose**: Direct approval function
+**Working**:
+- Simple wrapper function hai
+- Internally updateBookingEntryStatus() call karta hai
+- Status 'approved' aur approver name set karta hai
 
 ---
 
 ### **3. FuelPayments.gs** ✅ **COMPLETE - 6/6 Functions**
 
-**Purpose**: Manages fuel purchase payments and pump transactions
+**Purpose**: Fuel purchase payments aur pump transactions manage karta hai
 
 **Sheet Structure**: 14 columns
 - A=Timestamp, B=Date, C=PumpName, D=Liters, E=RatePerLiter
 - F=CashAmount, G=BankAmount, H=TotalAmount, I=Remarks
 - J=SubmittedBy, K=EntryType, L=EntryId, M=EntryStatus, N=ApprovedBy
 
-**Available Functions**:
-1. **`addFuelPayment(data)`** - Add new fuel payment entry
-2. **`getFuelPayments()`** - Retrieve all fuel payments
-3. **`updateFuelPayment(data)`** - Update existing fuel payment
-4. **`deleteFuelPayment(data)`** - Delete fuel payment by ID
-5. **`updateFuelPaymentStatus(data)`** - Update approval status
-6. **`approveFuelPayment(data)`** - Quick approve function
+#### **1. addFuelPayment(data) Function**
+**Purpose**: Nayi fuel payment entry add karna
+**Working**:
+- Sheet structure validate karta hai, auto-create agar missing
+- Headers: "Timestamp", "Date", "PumpName", "Liters", "Rate", "CashAmount", "BankAmount", "TotalAmount", "Remarks", "SubmittedBy", "EntryType", "EntryId", "EntryStatus", "ApprovedBy"
+- EntryId frontend se use karta hai ya Date.now() se generate
+- IST time format: HH:MM:SS AM/PM
+- Row 2 par insert karta hai (newest first)
+- EntryType "fuel" static set karta hai
+- Default status "pending"
+- Fuel calculation: liters × rate = expected total
 
-**Key Features**:
-- Detailed fuel transaction tracking (liters, rate, pump name)
-- Automatic total calculation validation
-- Pump-wise fuel consumption reports
-- Rate per liter tracking for cost analysis
-
-**Usage Example**:
+**Example Response**:
 ```javascript
-addFuelPayment({
-  entryId: "1736369834125",
-  date: "09-01-2025",
-  pumpName: "HP Petrol Pump",
-  liters: 50,
-  rate: 95.50,
-  cashAmount: 4775,
-  bankAmount: 0,
-  totalAmount: 4775,
-  remarks: "Full tank",
-  submittedBy: "Driver2"
-});
+{
+  "success": true,
+  "entryId": "1736369834125",
+  "message": "Fuel payment added successfully",
+  "timestamp": "18:30:45 PM"
+}
 ```
+
+#### **2. getFuelPayments() Function**
+**Purpose**: Sab fuel payments retrieve karna
+**Working**:
+- Complete sheet data fetch with headers validation
+- Empty sheet graceful handling
+- Data mapping:
+  - Column L se EntryId (12th column)
+  - Column A se Timestamp (string conversion)
+  - Column B se Date, Column C se PumpName
+  - Column D se Liters, Column E se Rate
+  - Columns F,G,H se amounts
+  - Column I se Remarks
+- Row index tracking for operations
+- Reverse chronological order (newest first)
+
+#### **3. updateFuelPayment(data) Function**
+**Purpose**: Existing fuel payment update karna
+**Working**:
+- EntryId ke basis par row locate (Column L search)
+- Individual field updates:
+  - Column B: Date, Column C: PumpName
+  - Column D: Liters, Column E: Rate
+  - Columns F,G,H: Cash/Bank/Total amounts
+  - Column I: Remarks
+- Partial updates support (undefined fields skip)
+- No automatic recalculation
+
+#### **4. deleteFuelPayment(data) Function**
+**Purpose**: Fuel payment delete karna
+**Working**:
+- EntryId validation aur row finding
+- Complete row deletion
+- Success confirmation with deleted row info
+
+#### **5. updateFuelPaymentStatus(data) Function**
+**Purpose**: Fuel payment status update karna
+**Working**:
+- Status values: 'pending', 'approved', 'rejected'
+- Column M mein status update
+- Column N mein approver name (optional)
+- Timestamp tracking for status changes
+
+#### **6. approveFuelPayment(data) Function**
+**Purpose**: Quick fuel payment approval
+**Working**:
+- Wrapper function for updateFuelPaymentStatus()
+- Auto-set status to 'approved'
+- Approver name mandatory parameter
 
 ---
 
 ### **4. AddaPayments.gs** ✅ **COMPLETE - 6/6 Functions**
 
-**Purpose**: Manages payments made at transport addas (stations/terminals)
+**Purpose**: Transport addas (stations/terminals) mein payments manage karta hai
 
 **Sheet Structure**: 12 columns
 - A=Timestamp, B=Date, C=AddaName, D=CashAmount, E=BankAmount
 - F=TotalAmount, G=Remarks, H=SubmittedBy, I=EntryType
 - J=EntryId, K=EntryStatus, L=ApprovedBy
 
-**Available Functions**:
-1. **`addAddaPayment(data)`** - Add new adda payment entry
-2. **`getAddaPayments()`** - Retrieve all adda payments
-3. **`updateAddaPayment(data)`** - Update existing adda payment
-4. **`deleteAddaPayment(data)`** - Delete adda payment by ID
-5. **`updateAddaPaymentStatus(data)`** - Update approval status
-6. **`approveAddaPayment(data)`** - Quick approve function
+#### **1. addAddaPayment(data) Function**
+**Purpose**: Nayi adda payment entry add karna
+**Working**:
+- Sheet auto-creation with proper headers
+- Headers: "Timestamp", "Date", "AddaName", "CashAmount", "BankAmount", "TotalAmount", "Remarks", "SubmittedBy", "EntryType", "EntryId", "EntryStatus", "ApprovedBy"
+- EntryId handling (frontend provided ya auto-generated)
+- IST timestamp formatting
+- Row 2 insertion (newest entries top)
+- EntryType "adda" fixed value
+- Status "pending" default
+- Adda name validation for proper station tracking
 
-**Key Features**:
-- Adda-wise payment tracking
-- Station/terminal specific charges
-- Route-based adda management
-- Automatic header validation and creation
+#### **2. getAddaPayments() Function**
+**Purpose**: Sab adda payments retrieve karna
+**Working**:
+- Complete data fetch with error handling
+- Data structure mapping:
+  - Column J se EntryId (10th column)
+  - Column A se Timestamp
+  - Column B se Date, Column C se AddaName
+  - Columns D,E,F se payment amounts
+  - Column G se Remarks
+- Adda-wise categorization possible
+- Row index preservation for updates
 
-**Usage Example**:
-```javascript
-addAddaPayment({
-  entryId: "1736369834126",
-  date: "09-01-2025",
-  addaName: "ISBT Kashmere Gate",
-  cashAmount: 500,
-  bankAmount: 0,
-  totalAmount: 500,
-  remarks: "Parking charges",
-  submittedBy: "Driver1"
-});
-```
+#### **3. updateAddaPayment(data) Function**
+**Purpose**: Existing adda payment update karna
+**Working**:
+- EntryId-based row location (Column J)
+- Field-wise updates:
+  - Column B: Date, Column C: AddaName
+  - Columns D,E,F: Cash/Bank/Total amounts
+  - Column G: Remarks
+- Selective field updating
+- Status reset to 'pending' on data changes
+
+#### **4. deleteAddaPayment(data) Function**
+**Purpose**: Adda payment delete karna
+**Working**:
+- EntryId validation
+- Row deletion with confirmation
+- Error handling for non-existent entries
+
+#### **5. updateAddaPaymentStatus(data) Function**
+**Purpose**: Adda payment approval status change
+**Working**:
+- Status management: 'pending', 'approved'
+- Column K status update
+- Column L approver information
+- Audit trail maintenance
+
+#### **6. approveAddaPayment(data) Function**
+**Purpose**: Direct adda payment approval
+**Working**:
+- Status set to 'approved'
+- Approver name required
+- Single-step approval process
 
 ---
 
 ### **5. UnionPayments.gs** ✅ **COMPLETE - 6/6 Functions**
 
-**Purpose**: Manages transport union payments and dues
+**Purpose**: Transport union payments aur dues manage karta hai
 
 **Sheet Structure**: 12 columns
 - A=Timestamp, B=Date, C=UnionName, D=CashAmount, E=BankAmount
 - F=TotalAmount, G=Remarks, H=SubmittedBy, I=EntryType
 - J=EntryId, K=EntryStatus, L=ApprovedBy
 
-**Available Functions**:
-1. **`addUnionPayment(data)`** - Add new union payment entry
-2. **`getUnionPayments()`** - Retrieve all union payments
-3. **`updateUnionPayment(data)`** - Update existing union payment
-4. **`deleteUnionPayment(data)`** - Delete union payment by ID
-5. **`updateUnionPaymentStatus(data)`** - Update approval status
-6. **`approveUnionPayment(data)`** - Quick approve function
+#### **1. addUnionPayment(data) Function**
+**Purpose**: Nayi union payment entry add karna
+**Working**:
+- Sheet creation with union-specific headers
+- Union name validation for proper categorization
+- Payment type tracking (monthly dues, membership, penalties)
+- EntryType "union" static assignment
+- Timestamp IST formatting
+- Default status "pending"
 
-**Key Features**:
-- Union-specific payment tracking
-- Membership dues management
-- Multiple union support
-- Monthly/yearly payment cycles
+#### **2. getUnionPayments() Function**
+**Purpose**: Sab union payments retrieve karna
+**Working**:
+- Complete data extraction
+- Union-wise payment history
+- Date-wise sorting (newest first)
+- Payment categorization by union name
+- Amount aggregation possibilities
 
-**Usage Example**:
-```javascript
-addUnionPayment({
-  entryId: "1736369834127",
-  date: "09-01-2025",
-  unionName: "Delhi Transport Union",
-  cashAmount: 2000,
-  bankAmount: 0,
-  totalAmount: 2000,
-  remarks: "Monthly dues",
-  submittedBy: "Admin1"
-});
-```
+#### **3. updateUnionPayment(data) Function**
+**Purpose**: Existing union payment update karna
+**Working**:
+- EntryId-based record location
+- Union name, payment details updates
+- Amount modifications with validation
+- Remarks field for additional details
+
+#### **4. deleteUnionPayment(data) Function**
+**Purpose**: Union payment delete karna
+**Working**:
+- Secure deletion with EntryId validation
+- Complete row removal
+- History maintenance for audit
+
+#### **5. updateUnionPaymentStatus(data) Function**
+**Purpose**: Union payment status management
+**Working**:
+- Multi-status support (pending, approved, disputed)
+- Approver information tracking
+- Union-specific approval workflows
+
+#### **6. approveUnionPayment(data) Function**
+**Purpose**: Union payment approval
+**Working**:
+- Direct approval mechanism
+- Union relationship management
+- Payment confirmation tracking
 
 ---
 
 ### **6. ServicePayments.gs** ✅ **COMPLETE - 6/6 Functions**
 
-**Purpose**: Manages vehicle service and maintenance payments
+**Purpose**: Vehicle service aur maintenance payments manage karta hai
 
 **Sheet Structure**: 12 columns
 - A=Timestamp, B=Date, C=ServiceType, D=CashAmount, E=BankAmount
 - F=TotalAmount, G=ServiceDetails, H=SubmittedBy, I=EntryType
 - J=EntryId, K=EntryStatus, L=ApprovedBy
 
-**Available Functions**:
-1. **`addServicePayment(data)`** - Add new service payment entry
-2. **`getServicePayments()`** - Retrieve all service payments
-3. **`updateServicePayment(data)`** - Update existing service payment
-4. **`deleteServicePayment(data)`** - Delete service payment by ID
-5. **`updateServicePaymentStatus(data)`** - Update approval status
-6. **`approveServicePayment(data)`** - Quick approve function
+#### **1. addServicePayment(data) Function**
+**Purpose**: Nayi service payment entry add karna
+**Working**:
+- Service categorization (Engine, Brake, AC, Body, etc.)
+- Detailed service description tracking
+- Service provider information
+- Cost breakdown (parts + labor)
+- Warranty information possibility
+- EntryType "service" fixed
 
-**Key Features**:
-- Service type categorization
-- Detailed service descriptions
-- Maintenance cost tracking
-- Service provider management
+#### **2. getServicePayments() Function**
+**Purpose**: Sab service payments retrieve karna
+**Working**:
+- Service history complete tracking
+- Service type wise categorization
+- Cost analysis data preparation
+- Maintenance schedule insights
+- Vehicle downtime correlation
 
-**Usage Example**:
-```javascript
-addServicePayment({
-  entryId: "1736369834128",
-  date: "09-01-2025",
-  serviceType: "Engine Service",
-  cashAmount: 0,
-  bankAmount: 8500,
-  totalAmount: 8500,
-  serviceDetails: "Oil change and engine tuning",
-  submittedBy: "Mechanic1"
-});
-```
+#### **3. updateServicePayment(data) Function**
+**Purpose**: Existing service payment update karna
+**Working**:
+- Service details modification
+- Cost adjustments
+- Service type changes
+- Additional service documentation
+
+#### **4. deleteServicePayment(data) Function**
+**Purpose**: Service payment delete karna
+**Working**:
+- Service record removal
+- Maintenance history cleanup
+- Cost calculation adjustments
+
+#### **5. updateServicePaymentStatus(data) Function**
+**Purpose**: Service payment status management
+**Working**:
+- Service completion tracking
+- Payment authorization
+- Quality assurance status
+- Warranty activation
+
+#### **6. approveServicePayment(data) Function**
+**Purpose**: Service payment approval
+**Working**:
+- Service quality confirmation
+- Payment authorization
+- Maintenance record finalization
 
 ---
 
 ### **7. OtherPayments.gs** ✅ **COMPLETE - 6/6 Functions**
 
-**Purpose**: Manages miscellaneous payments that don't fit other categories
+**Purpose**: Miscellaneous payments manage karta hai jo other categories mein fit nahi karte
 
 **Sheet Structure**: 12 columns
 - A=Timestamp, B=Date, C=PaymentType, D=CashAmount, E=BankAmount
 - F=TotalAmount, G=PaymentDetails, H=SubmittedBy, I=EntryType
 - J=EntryId, K=EntryStatus, L=ApprovedBy
 
-**Available Functions**:
-1. **`addOtherPayment(data)`** - Add new other payment entry
-2. **`getOtherPayments()`** - Retrieve all other payments
-3. **`updateOtherPayment(data)`** - Update existing other payment
-4. **`deleteOtherPayment(data)`** - Delete other payment by ID
-5. **`updateOtherPaymentStatus(data)`** - Update approval status
-6. **`approveOtherPayment(data)`** - Quick approve function
-
-**Key Features**:
-- Flexible payment type categorization
-- Custom payment descriptions
+#### **1. addOtherPayment(data) Function**
+**Purpose**: Nayi miscellaneous payment entry add karna
+**Working**:
+- Flexible payment categorization
+- Custom payment type definition
 - Emergency expense tracking
 - Administrative cost management
+- Insurance, permits, legal fees
+- EntryType "other" assignment
 
-**Usage Example**:
-```javascript
-addOtherPayment({
-  entryId: "1736369834129",
-  date: "09-01-2025",
-  paymentType: "Permit Renewal",
-  cashAmount: 5000,
-  bankAmount: 0,
-  totalAmount: 5000,
-  paymentDetails: "RTO permit renewal fees",
-  submittedBy: "Admin1"
-});
-```
+#### **2. getOtherPayments() Function**
+**Purpose**: Sab other payments retrieve karna
+**Working**:
+- Complete miscellaneous payment history
+- Payment type wise analysis
+- Custom categorization support
+- Expense pattern identification
+
+#### **3. updateOtherPayment(data) Function**
+**Purpose**: Existing other payment update karna
+**Working**:
+- Payment type modification
+- Amount adjustments
+- Detail description updates
+- Category reclassification
+
+#### **4. deleteOtherPayment(data) Function**
+**Purpose**: Other payment delete karna
+**Working**:
+- Miscellaneous payment removal
+- Expense tracking cleanup
+- Budget calculation adjustments
+
+#### **5. updateOtherPaymentStatus(data) Function**
+**Purpose**: Other payment status management
+**Working**:
+- Payment authorization tracking
+- Administrative approval
+- Expense justification
+
+#### **6. approveOtherPayment(data) Function**
+**Purpose**: Other payment approval
+**Working**:
+- Administrative approval
+- Expense validation
+- Budget compliance check
 
 ---
 
 ### **8. OffDays.gs** ✅ **COMPLETE - 6/6 Functions**
 
-**Purpose**: Manages vehicle off-days and non-operational periods
+**Purpose**: Vehicle off-days aur non-operational periods manage karta hai
 
 **Sheet Structure**: 8 columns
 - A=Timestamp, B=Date, C=Reason, D=EntryType, E=EntryId
 - F=SubmittedBy, G=EntryStatus, H=ApprovedBy
 
-**Available Functions**:
-1. **`addOffDay(data)`** - Add new off day entry
-2. **`getOffDays()`** - Retrieve all off days
-3. **`updateOffDay(data)`** - Update existing off day
-4. **`deleteOffDay(data)`** - Delete off day by ID
-5. **`updateOffDayStatus(data)`** - Update approval status
-6. **`approveOffDay(data)`** - Quick approve function
-
-**Key Features**:
-- Reason-based off day categorization
-- Vehicle downtime tracking
-- Maintenance scheduling support
+#### **1. addOffDay(data) Function**
+**Purpose**: Nayi off day entry add karna
+**Working**:
+- Off day reason categorization
+- Date-wise vehicle availability tracking
 - Driver leave management
+- Maintenance scheduling
+- Weather-related off days
+- EntryType "off" static
+- Simplified 8-column structure
 
-**Usage Example**:
-```javascript
-addOffDay({
-  entryId: "1736369834130",
-  date: "10-01-2025",
-  reason: "Vehicle maintenance",
-  submittedBy: "Driver1"
-});
-```
+#### **2. getOffDays() Function**
+**Purpose**: Sab off days retrieve karna
+**Working**:
+- Complete off day history
+- Reason-wise categorization
+- Date range filtering support
+- Vehicle utilization analysis
+- Driver availability tracking
+
+#### **3. updateOffDay(data) Function**
+**Purpose**: Existing off day update karna
+**Working**:
+- Reason modification
+- Date adjustments
+- Status updates
+- Documentation improvements
+
+#### **4. deleteOffDay(data) Function**
+**Purpose**: Off day delete karna
+**Working**:
+- Off day record removal
+- Availability calculation update
+- Schedule adjustment
+
+#### **5. updateOffDayStatus(data) Function**
+**Purpose**: Off day status management
+**Working**:
+- Approval workflow
+- Manager authorization
+- Schedule confirmation
+
+#### **6. approveOffDay(data) Function**
+**Purpose**: Off day approval
+**Working**:
+- Management approval
+- Schedule validation
+- Resource planning confirmation
 
 ---
 
-### **9. Code.gs** ✅ **COMPLETE - Main Entry Point**
+### **9. Code.gs** ✅ **COMPLETE - Main Entry Point & API Router**
 
-**Purpose**: Central request handler and API router for all operations
+**Purpose**: Central request handler aur API router for all operations
 
-**Key Components**:
-- **`doPost(e)`** - Handles POST requests with action routing
-- **`doGet(e)`** - Handles GET requests for data retrieval
-- **`doOptions()`** - CORS support for cross-origin requests
+#### **Key Components**:
 
-**Supported Actions (40+ actions)**:
+**A. doPost(e) Function**
+**Purpose**: POST requests handle karna with action routing
+**Working**:
+- Request body se action parameter extract karta hai
+- 40+ different actions support karta hai
+- Action-based routing to specific module functions
+- Centralized error handling with try-catch
+- JSON response formatting
+- Comprehensive logging system
+
+**Supported Actions**:
 - **Authentication**: `login`, `test`
-- **Fare Receipts**: `addFareReceipt`, `getFareReceipts`, `updateFareReceipt`, `deleteFareReceipt`, `updateFareReceiptStatus`
-- **Booking Entries**: `addBookingEntry`, `getBookingEntries`, `updateBookingEntry`, `deleteBookingEntry`, `updateBookingEntryStatus`
-- **Fuel Payments**: `addFuelPayment`, `getFuelPayments`, `updateFuelPayment`, `deleteFuelPayment`, `updateFuelPaymentStatus`
-- **Adda Payments**: `addAddaPayment`, `getAddaPayments`, `updateAddaPayment`, `deleteAddaPayment`, `updateAddaPaymentStatus`
-- **Union Payments**: `addUnionPayment`, `getUnionPayments`, `updateUnionPayment`, `deleteUnionPayment`, `updateUnionPaymentStatus`
-- **Service Payments**: `addServicePayment`, `getServicePayments`, `updateServicePayment`, `deleteServicePayment`, `updateServicePaymentStatus`
-- **Other Payments**: `addOtherPayment`, `getOtherPayments`, `updateOtherPayment`, `deleteOtherPayment`, `updateOtherPaymentStatus`
+- **Fare Receipts**: `addFareReceipt`, `getFareReceipts`, `updateFareReceipt`, `deleteFareReceipt`, `updateFareReceiptStatus`, `approveFareReceipt`
+- **Booking Entries**: `addBookingEntry`, `getBookingEntries`, `updateBookingEntry`, `deleteBookingEntry`, `updateBookingEntryStatus`, `approveBookingEntry`
+- **Fuel Payments**: `addFuelPayment`, `getFuelPayments`, `updateFuelPayment`, `deleteFuelPayment`, `updateFuelPaymentStatus`, `approveFuelPayment`
+- **Adda Payments**: `addAddaPayment`, `getAddaPayments`, `updateAddaPayment`, `deleteAddaPayment`, `updateAddaPaymentStatus`, `approveAddaPayment`
+- **Union Payments**: `addUnionPayment`, `getUnionPayments`, `updateUnionPayment`, `deleteUnionPayment`, `updateUnionPaymentStatus`, `approveUnionPayment`
+- **Service Payments**: `addServicePayment`, `getServicePayments`, `updateServicePayment`, `deleteServicePayment`, `updateServicePaymentStatus`, `approveServicePayment`
+- **Other Payments**: `addOtherPayment`, `getOtherPayments`, `updateOtherPayment`, `deleteOtherPayment`, `updateOtherPaymentStatus`, `approveOtherPayment`
 - **Off Days**: `addOffDay`, `getOffDays`, `updateOffDay`, `deleteOffDay`, `updateOffDayStatus`, `approveOffDay`
-- **Approval Workflow**: All approve functions for each module
 - **Legacy Support**: `updateFareEntry`, `deleteFareEntry`
 
-**Key Features**:
-- Centralized error handling
-- Comprehensive logging system
-- JSON response formatting
-- Action-based routing system
-- CORS support for web applications
+**B. doGet(e) Function**
+**Purpose**: GET requests handle karna for data retrieval
+**Working**:
+- Query parameters se action extract karta hai
+- Read-only operations support
+- CORS headers for cross-origin requests
+- Error handling with user-friendly messages
+
+**C. doOptions() Function**
+**Purpose**: CORS support for preflight requests
+**Working**:
+- Cross-origin resource sharing enable karta hai
+- Frontend integration support
+- Browser compatibility
 
 ---
 
-### **10. LegacyFunctions.gs** ✅ **COMPLETE - Backward Compatibility**
+### **10. LegacyFunctions.gs** ✅ **COMPLETE - Backward Compatibility Layer**
 
-**Purpose**: Provides backward compatibility for older API calls
+**Purpose**: Older API calls ke liye backward compatibility provide karta hai
 
-**Legacy Function Categories**:
+#### **Legacy Function Categories**:
 
 **A. CRUD Legacy Functions (16 functions)**:
+**Purpose**: Purane CRUD operations support karna
+**Working**:
+- Direct routing to modern implementations
+- Function naming backward compatibility
+- Error handling preservation
+- Logging for legacy call tracking
+
+**Functions**:
 - `updateFuelPayment()`, `deleteFuelPayment()`
 - `updateAddaPayment()`, `deleteAddaPayment()`
 - `updateUnionPayment()`, `deleteUnionPayment()`
@@ -366,6 +648,13 @@ addOffDay({
 - `updateOffDay()`, `deleteOffDay()`
 
 **B. Status Update Legacy Functions (16 functions)**:
+**Purpose**: Purane status management functions support
+**Working**:
+- Status update routing to modern functions
+- Approval workflow compatibility
+- Parameter mapping preservation
+
+**Functions**:
 - `updateFuelPaymentStatus()`, `approveFuelPayment()`
 - `updateAddaPaymentStatus()`, `approveAddaPayment()`
 - `updateUnionPaymentStatus()`, `approveUnionPayment()`
@@ -376,47 +665,86 @@ addOffDay({
 - `updateOffDayStatus()`, `approveOffDay()`
 
 **C. Universal Legacy Routers (2 functions)**:
-- `updateFareEntryLegacy(data)` - Routes updates based on entryType
-- `deleteFareEntryLegacy(data)` - Routes deletes based on entryType
 
-**Key Features**:
-- Complete backward compatibility
-- Proper error handling and logging
-- Seamless routing to modern implementations
-- No breaking changes for existing frontend code
+**1. updateFareEntryLegacy(data) Function**
+**Purpose**: Universal update router for legacy calls
+**Working**:
+- EntryType ke basis par specific function route karta hai
+- Supported types: 'daily', 'booking', 'off', 'adda', 'fuel', 'union', 'service', 'other'
+- Error handling for invalid entry types
+- Seamless integration with existing frontend
+
+**2. deleteFareEntryLegacy(data) Function**
+**Purpose**: Universal delete router for legacy calls
+**Working**:
+- EntryType-based routing system
+- Same type support as update function
+- Consistent error handling
+- Legacy parameter compatibility
 
 ---
 
-### **11. Utils.gs** ✅ **COMPLETE - Utility Functions**
+### **11. Utils.gs** ✅ **COMPLETE - Utility Functions & Configuration**
 
-**Purpose**: Common utility functions used across all modules
+**Purpose**: Common utility functions aur configuration management
 
-**Available Functions**:
+#### **Available Functions**:
 
 **A. Connection Testing**:
-- **`testConnection()`** - Tests Google Apps Script connectivity
-- Returns version info and timestamp
+**1. testConnection() Function**
+**Purpose**: Google Apps Script connectivity test
+**Working**:
+- Script version information return karta hai
+- Current timestamp IST mein provide karta hai
+- Database connectivity verification
+- Health check for monitoring
+
+**Response Format**:
+```javascript
+{
+  "success": true,
+  "message": "Google Apps Script is working!",
+  "timestamp": "09/07/2025, 06:17:14 pm",
+  "version": "2.0.0"
+}
+```
 
 **B. Timestamp Management**:
-- **`formatISTTimestamp()`** - Formats current time in IST
-- Format: "DD-MM-YYYY HH:MM:SS"
-- Automatic timezone conversion (+5.5 hours)
+**1. formatISTTimestamp() Function**
+**Purpose**: Current time ko IST mein format karna
+**Working**:
+- UTC time ko IST (+5.5 hours) mein convert karta hai
+- Format: "DD-MM-YYYY HH:MM:SS AM/PM"
+- Consistent timezone handling across all modules
+- Date object ko Indian format mein convert karta hai
 
-**C. Configuration Management**:
-- **`setupScriptProperties()`** - Configures spreadsheet ID
-- **`getScriptProperties()`** - Debug function for properties
+**C. ID Generation**:
+**1. generateEntryId() Function**
+**Purpose**: Unique entry IDs generate karna
+**Working**:
+- Date.now() timestamp use karta hai
+- Unique identification guarantee
+- Collision-free ID generation
+- Frontend integration support
 
-**D. Sheet Names Configuration**:
-- **`SHEET_NAMES`** object with centralized sheet names
-- Consistent naming across all modules
+**D. Configuration Management**:
+**1. setupScriptProperties() Function**
+**Purpose**: Spreadsheet configuration setup
+**Working**:
+- PropertiesService use karta hai
+- SPREADSHEET_ID configuration
+- Environment variables management
 
-**Key Features**:
-- IST timezone support for Indian operations
-- Centralized configuration management
-- Debug utilities for troubleshooting
-- Consistent sheet naming convention
+**2. getScriptProperties() Function**
+**Purpose**: Debug aur configuration verification
+**Working**:
+- Current properties display karta hai
+- Troubleshooting support
+- Configuration validation
 
-**Configuration Example**:
+**E. Sheet Names Configuration**:
+**Purpose**: Centralized sheet naming convention
+**Working**:
 ```javascript
 const SHEET_NAMES = {
   USERS: "Users",
@@ -431,6 +759,12 @@ const SHEET_NAMES = {
 };
 ```
 
+**Key Features**:
+- Consistent naming across all modules
+- Easy maintenance aur updates
+- Centralized configuration management
+- Module independence with shared constants
+
 ---
 
 ## 🔧 **System Architecture Overview**
@@ -439,6 +773,14 @@ const SHEET_NAMES = {
 ```
 Frontend (React) → Code.gs (Router) → Specific Module → Google Sheet → Response
 ```
+
+### **Request-Response Cycle**:
+1. **Frontend Request**: Action-based JSON payload
+2. **Router Processing**: Code.gs action routing
+3. **Module Execution**: Specific function execution
+4. **Sheet Operations**: Google Sheets API calls
+5. **Response Formatting**: Standardized JSON response
+6. **Error Handling**: Comprehensive error management
 
 ### **Common Function Pattern (All Modules)**:
 1. **Add**: Create new entries with auto-generated IDs
@@ -450,14 +792,16 @@ Frontend (React) → Code.gs (Router) → Specific Module → Google Sheet → R
 
 ### **Error Handling Pattern**:
 - Try-catch blocks in all functions
-- Detailed console logging
+- Detailed console logging with emojis
 - Structured error responses
 - Graceful fallback mechanisms
+- User-friendly error messages
 
 ### **Security Features**:
 - Entry ID validation
 - Sheet existence checking
 - Data type validation
+- Input sanitization
 - Proper error messages without exposing internal details
 
 ---
@@ -525,3 +869,4 @@ Frontend (React) → Code.gs (Router) → Specific Module → Google Sheet → R
 **Last Updated**: January 9, 2025
 **Version**: 2.0.0
 **Status**: Production Ready 🚀
+
