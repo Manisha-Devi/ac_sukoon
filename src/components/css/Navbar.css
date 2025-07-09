@@ -1,4 +1,9 @@
 
+/* CSS Variables */
+:root {
+  --navbar-height: 70px;
+}
+
 /* Custom Navbar */
 .custom-navbar {
   background: var(--primary-gradient) !important;
@@ -95,22 +100,22 @@
 }
 
 .user-dropdown-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
+  position: fixed;
+  top: calc(var(--navbar-height) + 8px);
+  right: 20px;
   background: white;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(0, 0, 0, 0.1);
   min-width: 280px;
-  z-index: 1060;
+  z-index: 9999;
   animation: dropdownSlide 0.2s ease-out;
-  margin-top: 8px;
 }
 
 .user-dropdown-menu.mobile-dropdown {
-  right: -10px;
+  right: 10px;
   min-width: 260px;
+  top: calc(var(--navbar-height) + 8px);
 }
 
 @keyframes dropdownSlide {

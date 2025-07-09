@@ -4,11 +4,24 @@ import "../css/Navbar.css";
 
 function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime, setLastRefreshTime, onDataRefresh, onToggleSidebar }) {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
 
   // Toggle user dropdown
   const toggleUserDropdown = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!showUserDropdown) {
+      // Calculate position based on button position
+      const rect = e.currentTarget.getBoundingClientRect();
+      const isMobile = window.innerWidth < 992;
+      
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        right: isMobile ? 10 : window.innerWidth - rect.right
+      });
+    }
+    
     setShowUserDropdown(!showUserDropdown);
   };
 
@@ -145,7 +158,15 @@ function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime
 
               {/* Dropdown Menu */}
               {showUserDropdown && (
-                <div className="user-dropdown-menu">
+                <div 
+                  className="user-dropdown-menu"
+                  style={{
+                    position: 'fixed',
+                    top: `${dropdownPosition.top}px`,
+                    right: `${dropdownPosition.right}px`,
+                    zIndex: 9999
+                  }}
+                >
                   <div className="dropdown-header">
                     <div className="user-avatar">
                       <i className="bi bi-person-circle"></i>
@@ -230,7 +251,15 @@ function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime
 
               {/* Mobile Dropdown Menu */}
               {showUserDropdown && (
-                <div className="user-dropdown-menu mobile-dropdown">
+                <div 
+                  className="user-dropdown-menu mobile-dropdown"
+                  style={{
+                    position: 'fixed',
+                    top: `${dropdownPosition.top}px`,
+                    right: `${dropdownPosition.right}px`,
+                    zIndex: 9999
+                  }}
+                >
                   <div className="dropdown-header">
                     <div className="user-avatar">
                       <i className="bi bi-person-circle"></i>
