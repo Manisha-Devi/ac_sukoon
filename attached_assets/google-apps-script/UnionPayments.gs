@@ -1,4 +1,3 @@
-
 // ============================================================================
 // UNION PAYMENTS OPERATIONS (UnionPayments.gs)
 // ============================================================================
@@ -13,7 +12,7 @@
 function addUnionPayment(data) {
   try {
     console.log("📝 Adding new union payment:", data);
-    
+
     let sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
       .getSheetByName(SHEET_NAMES.UNION_PAYMENTS);
 
@@ -22,7 +21,7 @@ function addUnionPayment(data) {
       console.log("📋 Creating UnionPayments sheet...");
       sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
         .insertSheet(SHEET_NAMES.UNION_PAYMENTS);
-      
+
       sheet.getRange(1, 1, 1, 12).setValues([[
         "Timestamp", "Date", "UnionName", "CashAmount", "BankAmount", 
         "TotalAmount", "Remarks", "SubmittedBy", "EntryType", "EntryId",
@@ -35,7 +34,7 @@ function addUnionPayment(data) {
       formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
 
     sheet.insertRowBefore(2);
-    
+
     sheet.getRange(2, 1, 1, 12).setValues([[
       timeOnly,                    // A: Time in IST
       data.date,                   // B: Date
@@ -75,7 +74,7 @@ function addUnionPayment(data) {
 function getUnionPayments() {
   try {
     console.log("📋 Fetching all union payments...");
-    
+
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
       .getSheetByName(SHEET_NAMES.UNION_PAYMENTS);
 
@@ -308,6 +307,33 @@ function updateUnionPaymentStatus(data) {
     return {
       success: false,
       error: 'Update union payment status error: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Approve Union Payment
+ * @param {Object} data - Approval data containing entryId and approverName
+ * @returns {Object} Success/error response
+ */
+function approveUnionPayment(data) {
+  try {
+    const entryId = data.entryId;
+    const approverName = data.approverName;
+
+    console.log(`✅ Approving union payment ID: ${entryId} by ${approverName}`);
+
+    return updateUnionPaymentStatus({
+      entryId: entryId,
+      newStatus: 'approved',
+      approverName: approverName
+    });
+
+  } catch (error) {
+    console.error('❌ Error approving union payment:', error);
+    return {
+      success: false,
+      error: 'Approve union payment error: ' + error.toString()
     };
   }
 }
