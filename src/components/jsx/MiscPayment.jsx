@@ -223,11 +223,14 @@ function MiscPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBoo
           entryId: Date.now(),
           timestamp: timeOnly,
           type: activeTab,
+          entryType: activeTab, // Add for compatibility
+          entryStatus: 'pending', // Add default status
           cashAmount: cashAmount,
           bankAmount: bankAmount,
           totalAmount: totalAmount,
           date: dateOnly,
           submittedBy: submittedBy,
+          approvedBy: null, // Add field for approval tracking
           ...(activeTab === 'service' && {
             serviceDetails: serviceFormData.serviceDetails,
             description: serviceFormData.description,

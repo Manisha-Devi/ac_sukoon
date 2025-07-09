@@ -252,6 +252,59 @@ function App() {
     };
   }, []);
 
+  // Global function to update entry status (accessible from DataSummary)
+  useEffect(() => {
+    window.updateEntryStatusInParent = (entryId, newStatus, entryType) => {
+      console.log(`🔄 Global update: Entry ${entryId} → ${newStatus} (Type: ${entryType})`);
+
+      // Update fareData
+      setFareData(prevData => 
+        prevData.map(entry => 
+          entry.entryId === entryId 
+            ? { ...entry, entryStatus: newStatus }
+            : entry
+        )
+      );
+
+      // Update expenseData
+      setExpenseData(prevData => 
+        prevData.map(entry => 
+          entry.entryId === entryId 
+            ? { ...entry, entryStatus: newStatus }
+            : entry
+        )
+      );
+    };
+
+    // Add specific state updaters
+    window.updateExpenseDataState = (entryId, newStatus, approverName) => {
+      setExpenseData(prevData => 
+        prevData.map(entry => 
+          entry.entryId === entryId 
+            ? { ...entry, entryStatus: newStatus, approvedBy: approverName }
+            : entry
+        )
+      );
+    };
+
+    window.updateFareDataState = (entryId, newStatus, approverName) => {
+      setFareData(prevData => 
+        prevData.map(entry => 
+          entry.entryId === entryId 
+            ? { ...entry, entryStatus: newStatus, approvedBy: approverName }
+            : entry
+        )
+      );
+    };
+
+    // Cleanup function
+    return () => {
+      delete window.updateEntryStatusInParent;
+      delete window.updateExpenseDataState;
+      delete window.updateFareDataState;
+    };
+  }, []);
+
   // Update data stats when data changes
   useEffect(() => {
     setDataStats({

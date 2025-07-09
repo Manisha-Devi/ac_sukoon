@@ -246,13 +246,14 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
           entryId: Date.now(),
           timestamp: timeOnly,
           type: activeTab,
+          entryType: activeTab, // Add for compatibility
+          entryStatus: 'pending', // Add default status
           cashAmount: cashAmount,
           bankAmount: bankAmount,
           totalAmount: totalAmount,
           date: dateOnly,
           submittedBy: submittedBy,
-          entryStatus: 'pending',
-          approvedBy: '',
+          approvedBy: null, // Add field for approval tracking
           ...(activeTab === 'fuel' && {
             pumpName: fuelFormData.pumpName,
             liters: fuelFormData.liters,
@@ -457,7 +458,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
   const loadData = async () => {
     try {
       console.log('🔄 BasicPayment: Loading payment data...');
-      
+
       const currentUserName = currentUser?.fullName || currentUser?.username;
 
       // Load all payment types

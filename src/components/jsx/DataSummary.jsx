@@ -281,7 +281,15 @@ function DataSummary({ fareData, expenseData, currentUser }) {
 
         // Update parent state after successful sync
         if (window.updateEntryStatusInParent) {
-          window.updateEntryStatusInParent(entryId, newStatus, entry.type);
+          window.updateEntryStatusInParent(entryId, newStatus, entry.type || entry.entryType);
+        }
+        
+        // Also update parent component states directly
+        if (result.success && typeof window.updateExpenseDataState === 'function') {
+          window.updateExpenseDataState(entryId, newStatus, approverName);
+        }
+        if (result.success && typeof window.updateFareDataState === 'function') {
+          window.updateFareDataState(entryId, newStatus, approverName);
         }
       });
 
