@@ -14,7 +14,7 @@ import CashBook from "./components/jsx/CashBook";
 import DataSummary from './components/jsx/DataSummary.jsx';
 import CashSummary from './components/jsx/CashSummary.jsx';
 import BankSummary from './components/jsx/BankSummary.jsx';
-import localStorageService from "./services/localStorageService.js";
+import authService from "./services/authService";
 
 
 function App() {
@@ -25,11 +25,7 @@ function App() {
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [cashBookEntries, setCashBookEntries] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [user, setUser] = useState(() => {
-    // Initialize user state from localStorage if available
-    const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+  const [user, setUser] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState(null);
   const [dataStats, setDataStats] = useState({
@@ -59,17 +55,16 @@ function App() {
     }
   });
 
+  // Handle user login - Only React state, no localStorage
   const handleLogin = (userData) => {
     setUser(userData);
-    // Also store in localStorage for persistence across page refreshes
-    localStorage.setItem('user', JSON.stringify(userData));
+    console.log('👤 User logged in via React state:', userData);
   };
 
+  // Handle user logout - Only clear React state
   const handleLogout = () => {
     setUser(null);
     setActiveTab("dashboard");
-    // Clear localStorage on logout
-    localStorage.removeItem('user');
   };
 
   // Data refresh function for Navbar component

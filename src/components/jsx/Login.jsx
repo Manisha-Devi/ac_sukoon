@@ -83,6 +83,7 @@ function Login({ onLogin }) {
           isAuthenticated: true
         };
         console.log('👤 User details for login:', userDetails);
+        // Direct pass to parent component, no localStorage saving
         onLogin(userDetails);
       } else {
         setErrors({
