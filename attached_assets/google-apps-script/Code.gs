@@ -98,6 +98,9 @@ function doPost(e) {
       case "updateOffDayStatus":
         result = updateOffDayStatus(data);
         break;
+      case "approveOffDay":
+        result = approveOffDay(data);
+        break;
 
       // ==================== ADDA PAYMENTS ====================
       case "addAddaPayment":
