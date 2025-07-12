@@ -15,7 +15,18 @@ const SPREADSHEET_ID = spreadsheetId || "1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidE
 // MAIN REQUEST HANDLERS
 // ============================================================================
 
-// CORS handling removed as requested
+/**
+ * Handle OPTIONS requests for CORS (Cross-Origin Resource Sharing)
+ */
+function doOptions() {
+  return ContentService.createTextOutput("")
+    .setMimeType(ContentService.MimeType.TEXT)
+    .setHeaders({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    });
+}
 
 /**
  * Main POST request handler - Routes to appropriate functions
