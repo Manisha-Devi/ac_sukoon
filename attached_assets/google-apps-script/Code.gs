@@ -34,18 +34,6 @@ function doPost(e) {
 
     const data = JSON.parse(e.postData.contents);
     const action = data.action;
-    
-    // API Key Authentication Check (except for login and test)
-    if (action !== 'login' && action !== 'test') {
-      const apiKeyValidation = validateApiKey(data.apiKey, data.username);
-      if (!apiKeyValidation.success) {
-        return ContentService.createTextOutput(JSON.stringify({
-          success: false,
-          error: "Unauthorized access. Invalid API key or session expired."
-        })).setMimeType(ContentService.MimeType.JSON);
-      }
-    }
-
     let result;
 
     console.log(`📥 Incoming POST request - Action: ${action}`);

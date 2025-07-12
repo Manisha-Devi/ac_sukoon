@@ -1,11 +1,3 @@
-` tags.
-
-```
-Applying the changes, focusing on API key handling, authentication, and request modifications.
-```
-
-```
-<replit_final_file>
 // Authentication service for Google Sheets database
 class AuthService {
   constructor() {
@@ -63,31 +55,25 @@ class AuthService {
 
       console.log('🔍 Authentication response:', result);
 
-      if (result.success && result.user) {
-        console.log('✅ Authentication successful:', result.user);
-
-        // Store user data and API key in localStorage
-        const userData = {
-          ...result.user,
-          loginTimestamp: new Date().toISOString(),
-          apiKey: result.apiKey,
-          sessionExpiry: result.sessionExpiry
-        };
-
-        localStorage.setItem('currentUser', JSON.stringify(userData));
-        localStorage.setItem('userLoginTime', userData.loginTimestamp);
-        localStorage.setItem('userApiKey', result.apiKey);
-        localStorage.setItem('sessionExpiry', result.sessionExpiry);
+      if (result.success) {
+        // Update last login timestamp
+        await this.updateLastLogin(username);
 
         return {
           success: true,
-          user: userData
+          user: {
+            username: result.user.username,
+            userType: result.user.userType,
+            fullName: result.user.fullName,
+            status: result.user.status,
+            fixedCash: result.user.fixedCash || 0,
+            isAuthenticated: true
+          }
         };
       } else {
-        console.log('❌ Authentication failed:', result);
         return {
           success: false,
-          error: result.error || 'Authentication failed'
+          message: result.message || 'Invalid credentials'
         };
       }
     } catch (error) {
@@ -1865,43 +1851,6 @@ class AuthService {
   // ============================================================================
   // ANALYTICS FUNCTIONS
   // ============================================================================
-
-  // Helper method to make authenticated requests to Google Sheets
-  async makeAuthenticatedRequest(actionData) {
-    try {
-      console.log('📡 Making authenticated request:', actionData.action);
-
-      // Add API key and username to request
-      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-      const apiKey = localStorage.getItem('userApiKey');
-
-      if (!apiKey || !currentUser.username) {
-        throw new Error('Session expired. Please login again.');
-      }
-
-      // Add authentication data to request
-      actionData.apiKey = apiKey;
-      actionData.username = currentUser.username;
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(actionData)
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      return result;
-    } catch (error) {
-      console.error('❌ Authentication error:', error);
-      return { success: false, error: error.message };
-    }
-  }
 }
 
 export default new AuthService();
