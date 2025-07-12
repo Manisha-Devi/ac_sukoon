@@ -375,28 +375,4 @@ function resendOffDay(data) {
   }
 }
 
-/**
- * Set Off Day to Waiting Status
- * @param {Object} data - Waiting data containing entryId
- * @returns {Object} Success/error response
- */
-function setOffDayWaiting(data) {
-  try {
-    const entryId = data.entryId;
 
-    console.log(`⏳ Setting off day to waiting ID: ${entryId}`);
-
-    return updateOffDayStatus({
-      entryId: entryId,
-      newStatus: 'waiting',
-      approverName: ''
-    });
-
-  } catch (error) {
-    console.error('❌ Error setting off day to waiting:', error);
-    return {
-      success: false,
-      error: 'Set off day waiting error: ' + error.toString()
-    };
-  }
-}
