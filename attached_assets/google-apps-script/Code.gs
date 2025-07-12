@@ -339,10 +339,10 @@ function doPost(e) {
 function doGet(e) {
   try {
     if (!e || !e.parameter || !e.parameter.action) {
-      return ContentService.createTextOutput(JSON.stringify({
+      return createResponse({
         success: false,
         error: "No action parameter provided in GET request",
-      })).setMimeType(ContentService.MimeType.JSON);
+      });
     }
 
     const action = e.parameter.action;
