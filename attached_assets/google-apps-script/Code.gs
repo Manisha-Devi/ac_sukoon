@@ -206,6 +206,15 @@ function doPost(e) {
       case "resendAddaPayment":
         result = resendAddaPayment(data);
         break;
+      case "resendUnionPayment":
+        result = resendUnionPayment(data);
+        break;
+      case "resendServicePayment":
+        result = resendServicePayment(data);
+        break;
+      case "resendOffDay":
+        result = resendOffDay(data);
+        break;
 
       // ==================== APPROVAL WORKFLOW OPERATIONS ====================
       // Fare Receipts Approval
