@@ -61,13 +61,13 @@ function CashSummary({ fareData, expenseData, currentUser }) {
       console.log('🔸 Sample Expense Entry:', expenseData[0]);
     }
 
-    // 📈 Filter fare data (INCOME) for current user - Only CASH entries  
+    // 📈 Filter fare data (INCOME) for current user - Include all entries including off days  
     // Data now comes pre-filtered: entryId, date, cashAmount, type, submittedBy, entryStatus, approvedBy
     if (fareData && fareData.length > 0) {
       const userFareData = fareData.filter(entry => 
         entry.submittedBy === currentUserName && 
-        entry.cashAmount > 0 &&
-        (entry.type === 'daily' || entry.type === 'booking') // No off days
+        (entry.cashAmount > 0 || entry.type === 'off') && // Include off days
+        (entry.type === 'daily' || entry.type === 'booking' || entry.type === 'off') // Include off days
       );
       console.log('💰 Cash Income entries found:', userFareData.length);
       console.log('📋 Sample Filtered Cash Entry:', userFareData[0]);
@@ -75,13 +75,13 @@ function CashSummary({ fareData, expenseData, currentUser }) {
       allData = [...allData, ...userFareData.map(entry => ({
         entryId: entry.entryId,
         date: entry.date,
-        cashAmount: entry.cashAmount,
-        type: 'income',
-        entryType: entry.type, // daily or booking
+        cashAmount: entry.type === 'off' ? 0 : entry.cashAmount, // Off days have 0 cash amount
+        type: entry.type === 'off' ? 'off-day' : 'income', // Special type for off days
+        entryType: entry.type, // daily, booking, or off
         submittedBy: entry.submittedBy,
         entryStatus: entry.entryStatus,
         approvedBy: entry.approvedBy,
-        description: entry.route || entry.bookingDetails || 'Fare Collection'
+        description: entry.type === 'off' ? `Off Day - ${entry.reason}` : (entry.route || entry.bookingDetails || 'Fare Collection')
       }))];
     }
 

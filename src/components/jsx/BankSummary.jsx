@@ -60,13 +60,13 @@ function BankSummary({ fareData, expenseData, currentUser }) {
       console.log('🔸 Sample Expense Entry:', expenseData[0]);
     }
 
-    // 📈 Filter fare data (INCOME) for current user - Only BANK entries  
+    // 📈 Filter fare data (INCOME) for current user - Include all entries including off days  
     // Data now comes pre-filtered: entryId, date, bankAmount, type, submittedBy, entryStatus, approvedBy
     if (fareData && fareData.length > 0) {
       const userFareData = fareData.filter(entry => 
         entry.submittedBy === currentUserName && 
-        entry.bankAmount > 0 &&
-        (entry.type === 'daily' || entry.type === 'booking') // No off days
+        (entry.bankAmount > 0 || entry.type === 'off') && // Include off days
+        (entry.type === 'daily' || entry.type === 'booking' || entry.type === 'off') // Include off days
       );
       console.log('💰 Bank Income entries found:', userFareData.length);
       console.log('📋 Sample Filtered Bank Entry:', userFareData[0]);
@@ -74,13 +74,13 @@ function BankSummary({ fareData, expenseData, currentUser }) {
       allData = [...allData, ...userFareData.map(entry => ({
         entryId: entry.entryId,
         date: entry.date,
-        bankAmount: entry.bankAmount,
-        type: 'income',
-        entryType: entry.type, // daily or booking
+        bankAmount: entry.type === 'off' ? 0 : entry.bankAmount, // Off days have 0 bank amount
+        type: entry.type === 'off' ? 'off-day' : 'income', // Special type for off days
+        entryType: entry.type, // daily, booking, or off
         submittedBy: entry.submittedBy,
         entryStatus: entry.entryStatus,
         approvedBy: entry.approvedBy,
-        description: entry.route || entry.bookingDetails || 'Fare Collection'
+        description: entry.type === 'off' ? `Off Day - ${entry.reason}` : (entry.route || entry.bookingDetails || 'Fare Collection')
       }))];
     }
 
@@ -302,7 +302,7 @@ function BankSummary({ fareData, expenseData, currentUser }) {
 
   // Calculate totals
   const totalBankIncome = filteredData
-    .filter(entry => entry.type === 'income')
+    .filter(entry => entry.type === 'income') // Exclude off-day type from income calculation
     .reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
 
   const totalBankExpense = filteredData
@@ -469,12 +469,19 @@ function BankSummary({ fareData, expenseData, currentUser }) {
                         </span>
                       </td>
                       <td>
-                        <span className={`badge ${entry.type === 'income' ? 'bg-success' : 'bg-danger'}`}>
-                          {entry.type === 'income' ? 'I' : 'E'}
+                        <span className={`badge ${
+                          entry.type === 'income' ? 'bg-success' : 
+                          entry.type === 'off-day' ? 'bg-warning' : 'bg-danger'
+                        }`}>
+                          {entry.type === 'income' ? 'I' : 
+                           entry.type === 'off-day' ? 'O' : 'E'}
                         </span>
                       </td>
-                      <td className={entry.type === 'income' ? 'text-success' : 'text-danger'}>
-                        ₹{(entry.bankAmount || 0).toLocaleString()}
+                      <td className={
+                        entry.type === 'income' ? 'text-success' : 
+                        entry.type === 'off-day' ? 'text-warning' : 'text-danger'
+                      }>
+                        {entry.type === 'off-day' ? 'Off Day' : `₹${(entry.bankAmount || 0).toLocaleString()}`}
                       </td>
                       <td>
                         {entry.entryStatus === 'pending' ? (
