@@ -29,7 +29,7 @@ function addAddaPayment(data) {
       ]]);
     }
 
-    const entryId = data.entryId || generateEntryId();
+    const entryId = data.entryId || Utilities.getUuid();
     const timeOnly = data.timestamp || 
       formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
 

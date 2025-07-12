@@ -82,8 +82,6 @@ function getScriptProperties() {
   };
 }
 
-
-
 // Sheet names configuration - centralized configuration
 const SHEET_NAMES = {
   USERS: "Users",

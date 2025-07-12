@@ -31,6 +31,7 @@ function addFuelPayment(data) {
       ]]);
     }
 
+    // Assuming generateEntryId() is defined elsewhere or is a global function
     const entryId = data.entryId || generateEntryId();
     const timeOnly = data.timestamp || 
       formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
@@ -370,4 +371,3 @@ function resendFuelPayment(data) {
     };
   }
 }
-

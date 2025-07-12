@@ -5,8 +5,8 @@
 /**
  * Add new Other Payment
  * Sheet Columns: A=Timestamp, B=Date, C=PaymentType, D=Description, E=CashAmount, 
- *                F=BankAmount, G=TotalAmount, H=Category, I=SubmittedBy, J=EntryType, K=EntryId,
- *                L=EntryStatus, M=ApprovedBy
+ *                F=BankAmount, G=TotalAmount, H=Category, I=SubmittedBy, J=EntryType, K=EntryStatus,
+ *                L=ApprovedBy
  * @param {Object} data - Other payment data
  * @returns {Object} Success/error response with entry details
  */
@@ -33,7 +33,7 @@ function addOtherPayment(data) {
     }
 
     // Generate entry ID if not provided
-    const entryId = data.entryId || generateEntryId();
+    const entryId = data.entryId;
 
     // Format timestamp (store only time part)
     const timeOnly = data.timestamp || 

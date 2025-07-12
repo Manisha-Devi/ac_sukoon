@@ -24,7 +24,7 @@ function addUnionPayment(data) {
 
       sheet.getRange(1, 1, 1, 12).setValues([[
         "Timestamp", "Date", "UnionName", "CashAmount", "BankAmount", 
-        "TotalAmount", "Remarks", "SubmittedBy", "EntryType", "EntryId",
+        "TotalAmount", "Remarks", "SubmittedBy", "SubmittedBy", "EntryId",
         "EntryStatus", "ApprovedBy"
       ]]);
     }
