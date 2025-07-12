@@ -194,12 +194,11 @@ class AuthService {
         let requestData;
         try {
           requestData = JSON.parse(body);
-          // Add API key to request (skip only for test action - login needs API key)
+          // Add API key to request (skip only for test action)
           if (requestData.action !== 'test') {
             requestData = keysService.addApiKeyToRequest(requestData);
             body = JSON.stringify(requestData);
           }
-          // Only test action uses original body without API key
         } catch (error) {
           console.error('❌ Error adding API key to request:', error);
           // For test requests, this is not a fatal error
@@ -490,29 +489,11 @@ class AuthService {
     try {
       console.log('📋 Fetching adda payments from Google Sheets...');
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'getAddaPayments'
-        })
+      const requestBody = JSON.stringify({
+        action: 'getAddaPayments'
       });
 
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
       console.log('✅ Adda payments fetched:', result);
       return result;
     } catch (error) {
@@ -621,29 +602,11 @@ class AuthService {
     try {
       console.log('📋 Fetching union payments from Google Sheets...');
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'getUnionPayments'
-        })
+      const requestBody = JSON.stringify({
+        action: 'getUnionPayments'
       });
 
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
       console.log('✅ Union payments fetched:', result);
       return result;
     } catch (error) {
@@ -758,29 +721,11 @@ class AuthService {
     try {
       console.log('📋 Fetching service payments from Google Sheets...');
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'getServicePayments'
-        })
+      const requestBody = JSON.stringify({
+        action: 'getServicePayments'
       });
 
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
       console.log('✅ Service payments fetched:', result);
       return result;
     } catch (error) {
@@ -899,29 +844,11 @@ class AuthService {
     try {
       console.log('📋 Fetching other payments from Google Sheets...');
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'getOtherPayments'
-        })
+      const requestBody = JSON.stringify({
+        action: 'getOtherPayments'
       });
 
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
       console.log('✅ Other payments fetched:', result);
       return result;
     } catch (error) {
@@ -1040,29 +967,11 @@ class AuthService {
     try {
       console.log('📋 Fetching fuel payments from Google Sheets...');
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'getFuelPayments'
-        })
+      const requestBody = JSON.stringify({
+        action: 'getFuelPayments'
       });
 
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
       console.log('✅ Fuel payments fetched:', result);
       return result;
     } catch (error) {
@@ -1165,29 +1074,11 @@ class AuthService {
     try {
       console.log('📋 Fetching fare receipts from Google Sheets...');
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'getFareReceipts'
-        })
+      const requestBody = JSON.stringify({
+        action: 'getFareReceipts'
       });
 
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
       console.log('✅ Fare receipts fetched:', result);
       return result;
     } catch (error) {
@@ -1206,29 +1097,11 @@ class AuthService {
     try {
       console.log('📋 Fetching booking entries from Google Sheets...');
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'getBookingEntries'
-        })
+      const requestBody = JSON.stringify({
+        action: 'getBookingEntries'
       });
 
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
       console.log('✅ Booking entries fetched:', result);
       return result;
     } catch (error) {
@@ -1247,29 +1120,11 @@ class AuthService {
     try {
       console.log('📋 Fetching off days from Google Sheets...');
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'getOffDays'
-        })
+      const requestBody = JSON.stringify({
+        action: 'getOffDays'
       });
 
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
       console.log('✅ Off days fetched:', result);
       return result;
     } catch (error) {
@@ -1378,29 +1233,11 @@ class AuthService {
     try {
       console.log('📋 Fetching service payments from Google Sheets...');
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'getServicePayments'
-        })
+      const requestBody = JSON.stringify({
+        action: 'getServicePayments'
       });
 
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
       console.log('✅ Service payments fetched:', result);
       return result;
     } catch (error) {
@@ -1418,29 +1255,11 @@ class AuthService {
     try {
       console.log('📋 Fetching other payments from Google Sheets...');
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'getOtherPayments'
-        })
+      const requestBody = JSON.stringify({
+        action: 'getOtherPayments'
       });
 
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
       console.log('✅ Other payments fetched:', result);
       return result;
     } catch (error) {
