@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../css/BankSummary.css";
+import authService from "../../services/authService";
 
 function BankSummary({ fareData, expenseData, currentUser }) {
   // 📊 RECEIVED DATA EXPLANATION:
@@ -230,7 +231,7 @@ function BankSummary({ fareData, expenseData, currentUser }) {
   };
 
   // Forward entries for bank approval (only forward, not approve)
-  const handleForwardForBankApproval = () => {
+  const handleForwardForBankApproval = async () => {
     if (selectedEntries.length === 0) {
       alert('Please select entries to forward for bank approval');
       return;
@@ -239,8 +240,10 @@ function BankSummary({ fareData, expenseData, currentUser }) {
     try {
       console.log('🔄 BankSummary: Forwarding entries for bank approval:', selectedEntries);
 
-      // Step 1: Update local state immediately for UI feedback
+      const approverName = currentUser?.fullName || currentUser?.username;
       const updatedEntries = [...selectedEntries];
+
+      // Step 1: Update local state immediately for UI feedback
       updatedEntries.forEach(entryId => {
         updateEntryStatus(entryId, "forwardedBank");
       });
@@ -257,7 +260,75 @@ function BankSummary({ fareData, expenseData, currentUser }) {
       setSelectedEntries([]);
       alert(`✅ ${updatedEntries.length} entries forwarded for bank approval!`);
 
-      // Note: Actual Google Sheets sync will be handled by DataSummary's approve function
+      // Step 4: Sync with Google Sheets in background
+      const syncPromises = updatedEntries.map(async (entryId) => {
+        const entry = filteredData.find(e => e.entryId === entryId);
+        if (!entry) {
+          console.error(`Entry ${entryId} not found in filteredData`);
+          return;
+        }
+
+        console.log(`🔄 Syncing entry ${entryId} to Google Sheets:`, entry);
+
+        // Call appropriate status update function based on entry type
+        let result;
+        try {
+          if (entry.type === 'income') {
+            if (entry.entryType === 'daily') {
+              result = await authService.updateFareReceiptStatus(entryId, "forwardedBank", approverName);
+            } else if (entry.entryType === 'booking') {
+              result = await authService.updateBookingEntryStatus(entryId, "forwardedBank", approverName);
+            }
+          } else if (entry.type === 'expense') {
+            switch (entry.entryType) {
+              case 'fuel':
+                result = await authService.updateFuelPaymentStatus(entryId, "forwardedBank", approverName);
+                break;
+              case 'adda':
+                result = await authService.updateAddaPaymentStatus(entryId, "forwardedBank", approverName);
+                break;
+              case 'union':
+                result = await authService.updateUnionPaymentStatus(entryId, "forwardedBank", approverName);
+                break;
+              case 'service':
+                result = await authService.updateServicePaymentStatus(entryId, "forwardedBank", approverName);
+                break;
+              case 'other':
+                result = await authService.updateOtherPaymentStatus(entryId, "forwardedBank", approverName);
+                break;
+              default:
+                console.error(`Unsupported expense entry type: ${entry.entryType}`);
+                return { success: false, error: 'Unsupported expense entry type' };
+            }
+          }
+        } catch (error) {
+          console.error(`Error updating ${entry.entryType} status:`, error);
+          result = { success: false, error: error.message };
+        }
+
+        if (!result || !result.success) {
+          console.error(`❌ Failed to sync entry ${entryId} to Google Sheets:`, result?.error || 'Unknown error');
+        } else {
+          console.log(`✅ Entry ${entryId} synced to Google Sheets successfully`);
+        }
+
+        // Update parent state after successful sync
+        if (result?.success) {
+          if (typeof window.updateExpenseDataState === 'function') {
+            window.updateExpenseDataState(entryId, "forwardedBank", approverName);
+          }
+          if (typeof window.updateFareDataState === 'function') {
+            window.updateFareDataState(entryId, "forwardedBank", approverName);
+          }
+        }
+      });
+
+      // Wait for all syncs to complete in background
+      Promise.all(syncPromises).then(() => {
+        console.log('✅ All entries synced to Google Sheets from BankSummary');
+      }).catch((error) => {
+        console.error('❌ Some entries failed to sync to Google Sheets:', error);
+      });
 
     } catch (error) {
       console.error('❌ Error forwarding entries:', error);
