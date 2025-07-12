@@ -186,6 +186,26 @@ function doPost(e) {
       case "updateOtherPaymentStatus":
         result = updateOtherPaymentStatus(data);
         break;
+      case "approveOtherPayment":
+        result = approveOtherPayment(data);
+        break;
+      case "resendOtherPayment":
+        result = resendOtherPayment(data);
+        break;
+
+      // Resend operations for all entry types
+      case "resendFareReceipt":
+        result = resendFareReceipt(data);
+        break;
+      case "resendBookingEntry":
+        result = resendBookingEntry(data);
+        break;
+      case "resendFuelPayment":
+        result = resendFuelPayment(data);
+        break;
+      case "resendAddaPayment":
+        result = resendAddaPayment(data);
+        break;
 
       // ==================== APPROVAL WORKFLOW OPERATIONS ====================
       // Fare Receipts Approval
@@ -195,9 +215,6 @@ function doPost(e) {
       case 'resendFareReceipt':
         result = resendFareReceipt(data);
         break;
-      case 'setFareReceiptWaiting':
-        result = setFareReceiptWaiting(data);
-        break;
 
       // Fuel Payments Approval
       case 'approveFuelPayment':
@@ -205,9 +222,6 @@ function doPost(e) {
         break;
       case 'resendFuelPayment':
         result = resendFuelPayment(data);
-        break;
-      case 'setFuelPaymentWaiting':
-        result = setFuelPaymentWaiting(data);
         break;
 
       // Other Payments Approval
@@ -217,9 +231,6 @@ function doPost(e) {
       case 'resendOtherPayment':
         result = resendOtherPayment(data);
         break;
-      case 'setOtherPaymentWaiting':
-        result = setOtherPaymentWaiting(data);
-        break;
 
       // Adda Payments Approval
       case 'approveAddaPayment':
@@ -227,9 +238,6 @@ function doPost(e) {
         break;
       case 'resendAddaPayment':
         result = resendAddaPayment(data);
-        break;
-      case 'setAddaPaymentWaiting':
-        result = setAddaPaymentWaiting(data);
         break;
 
       // Service Payments Approval
@@ -239,9 +247,6 @@ function doPost(e) {
       case 'resendServicePayment':
         result = resendServicePayment(data);
         break;
-      case 'setServicePaymentWaiting':
-        result = setServicePaymentWaiting(data);
-        break;
 
       // Union Payments Approval
       case 'approveUnionPayment':
@@ -249,9 +254,6 @@ function doPost(e) {
         break;
       case 'resendUnionPayment':
         result = resendUnionPayment(data);
-        break;
-      case 'setUnionPaymentWaiting':
-        result = setUnionPaymentWaiting(data);
         break;
 
       // ==================== LEGACY SUPPORT ====================

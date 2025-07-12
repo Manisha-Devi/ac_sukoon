@@ -365,3 +365,29 @@ function approveFareReceipt(data) {
     };
   }
 }
+
+/**
+ * Resend Fare Receipt (Reset to pending for fresh approval)
+ * @param {Object} data - Resend data containing entryId
+ * @returns {Object} Success/error response
+ */
+function resendFareReceipt(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log(`🔄 Resending fare receipt ID: ${entryId} for fresh approval`);
+
+    return updateFareReceiptStatus({
+      entryId: entryId,
+      newStatus: 'pending',
+      approverName: ''
+    });
+
+  } catch (error) {
+    console.error('❌ Error resending fare receipt:', error);
+    return {
+      success: false,
+      error: 'Resend fare receipt error: ' + error.toString()
+    };
+  }
+}
