@@ -735,87 +735,11 @@ function approveOffDayLegacy(data) {
 // FareReceipt functions are implemented in FareReceipts.gs
 // No placeholder functions needed here
 
-// Direct function aliases for BookingEntries (placeholders)
-function updateBookingEntry(data) {
-  try {
-    console.log('📝 updateBookingEntry called - placeholder implementation');
-    return { success: false, error: 'updateBookingEntry not yet implemented' };
-  } catch (error) {
-    console.error('❌ updateBookingEntry error:', error);
-    return { success: false, error: error.toString() };
-  }
-}
+// BookingEntry functions are implemented in BookingEntries.gs
+// No placeholder functions needed here - functions automatically available
 
-function deleteBookingEntry(data) {
-  try {
-    console.log('🗑️ deleteBookingEntry called - placeholder implementation');
-    return { success: false, error: 'deleteBookingEntry not yet implemented' };
-  } catch (error) {
-    console.error('❌ deleteBookingEntry error:', error);
-    return { success: false, error: error.toString() };
-  }
-}
-
-function updateBookingEntryStatus(data) {
-  try {
-    console.log('🔄 updateBookingEntryStatus called - placeholder implementation');
-    return { success: false, error: 'updateBookingEntryStatus not yet implemented' };
-  } catch (error) {
-    console.error('❌ updateBookingEntryStatus error:', error);
-    return { success: false, error: error.toString() };
-  }
-}
-
-function approveBookingEntry(data) {
-  try {
-    console.log('✅ approveBookingEntry called - placeholder implementation');
-    return { success: false, error: 'approveBookingEntry not yet implemented' };
-  } catch (error) {
-    console.error('❌ approveBookingEntry error:', error);
-    return { success: false, error: error.toString() };
-  }
-}
-
-// Direct function aliases for OffDays (placeholders)
-function updateOffDay(data) {
-  try {
-    console.log('📝 updateOffDay called - placeholder implementation');
-    return { success: false, error: 'updateOffDay not yet implemented' };
-  } catch (error) {
-    console.error('❌ updateOffDay error:', error);
-    return { success: false, error: error.toString() };
-  }
-}
-
-function deleteOffDay(data) {
-  try {
-    console.log('🗑️ deleteOffDay called - placeholder implementation');
-    return { success: false, error: 'deleteOffDay not yet implemented' };
-  } catch (error) {
-    console.error('❌ deleteOffDay error:', error);
-    return { success: false, error: error.toString() };
-  }
-}
-
-function updateOffDayStatus(data) {
-  try {
-    console.log('🔄 updateOffDayStatus called - placeholder implementation');
-    return { success: false, error: 'updateOffDayStatus not yet implemented' };
-  } catch (error) {
-    console.error('❌ updateOffDayStatus error:', error);
-    return { success: false, error: error.toString() };
-  }
-}
-
-function approveOffDay(data) {
-  try {
-    console.log('✅ approveOffDay called - placeholder implementation');
-    return { success: false, error: 'approveOffDay not yet implemented' };
-  } catch (error) {
-    console.error('❌ approveOffDay error:', error);
-    return { success: false, error: error.toString() };
-  }
-}
+// OffDay functions are implemented in OffDays.gs
+// No placeholder functions needed here - functions automatically available
 
 // Legacy functions for backward compatibility with existing API calls
 // ============================================================================
