@@ -119,7 +119,8 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       setApprovedData(allEntries.filter(entry => 
         entry.entryStatus === 'approved' || 
         entry.entryStatus === 'approvedCash' || 
-        entry.entryStatus === 'approvedBank'
+        entry.entryStatus === 'approvedBank' ||
+        entry.entryStatus === 'cashApproved'
       ));
 
       setLoading(false);
@@ -400,7 +401,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                   FORWARDED TO CASH
                 </>
               )}
-              {entry.entryStatus === 'approvedCash' && (
+              {(entry.entryStatus === 'approvedCash' || entry.entryStatus === 'cashApproved') && (
                 <>
                   <i className="bi bi-check-circle me-1"></i>
                   CASH APPROVED
