@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import "../css/DataSummary.css";
 import authService from "../../services/authService.js";
@@ -152,7 +151,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
   const handleSelectAll = () => {
     const currentData = getCurrentTabData();
     const currentIds = currentData.map(entry => entry.entryId);
-    
+
     if (selectedEntries.length === currentIds.length && currentIds.length > 0) {
       setSelectedEntries([]);
     } else {
@@ -198,7 +197,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
 
       // First update local UI state immediately
       const updatedEntryIds = [...selectedEntries];
-      
+
       // Update local state for immediate UI feedback
       const updateLocalData = (dataArray) => {
         return dataArray.map(entry => {
@@ -229,16 +228,16 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       const syncPromises = updatedEntryIds.map(async (entryId) => {
         // Find entry from all data sources, not just current tab
         let entry = null;
-        
+
         // Search in all data arrays
         const allData = [...pendingData, ...bankApprovalData, ...cashApprovalData, ...approvedData];
         entry = allData.find(e => e.entryId === entryId);
-        
+
         if (!entry) {
           console.error(`Entry ${entryId} not found in any data source`);
           return;
         }
-        
+
         console.log(`🔄 Syncing entry ${entryId} to Google Sheets:`, entry);
 
         // Call appropriate status update function
@@ -289,7 +288,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
         if (window.updateEntryStatusInParent) {
           window.updateEntryStatusInParent(entryId, newStatus, entry.type || entry.entryType);
         }
-        
+
         // Also update parent component states directly
         if (result.success && typeof window.updateExpenseDataState === 'function') {
           window.updateExpenseDataState(entryId, newStatus, approverName);
@@ -319,11 +318,11 @@ function DataSummary({ fareData, expenseData, currentUser }) {
   // Helper function to format date for display - consistent format
   const formatDisplayDate = (dateStr) => {
     if (!dateStr) return '';
-    
+
     try {
       const date = new Date(dateStr);
       if (isNaN(date.getTime())) return dateStr;
-      
+
       // Always show in "07 Sept 2025" format for consistency
       return date.toLocaleDateString('en-GB', {
         day: '2-digit',
@@ -338,11 +337,11 @@ function DataSummary({ fareData, expenseData, currentUser }) {
   // Helper function to format time for display - simple format
   const formatDisplayTime = (timestampStr) => {
     if (!timestampStr) return '';
-    
+
     try {
       const date = new Date(timestampStr);
       if (isNaN(date.getTime())) return timestampStr;
-      
+
       // Simple time format - HH:MM AM/PM
       return date.toLocaleTimeString('en-US', {
         hour: '2-digit',
@@ -357,7 +356,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
   // Render entry card
   const renderEntryCard = (entry) => {
     const isSelected = selectedEntries.includes(entry.entryId);
-    
+
     return (
       <div 
         key={entry.entryId} 
@@ -429,7 +428,12 @@ function DataSummary({ fareData, expenseData, currentUser }) {
             </div>
             <div className="entry-row">
               <span className="label">Date:</span>
-              <span className="value">{formatDisplayDate(entry.date)}</span>
+              <span className="value">
+                        {entry.entryType === 'booking' && entry.dateFrom ? 
+                          formatDisplayDate(entry.dateFrom) : 
+                          formatDisplayDate(entry.date)
+                        }
+                      </span>
             </div>
             <div className="entry-row">
               <span className="label">Description:</span>
@@ -554,7 +558,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                 Select All ({selectedEntries.length}/{currentData.length})
               </label>
             </div>
-            
+
             {selectedEntries.length > 0 && (
               <button 
                 className="btn btn-success approve-btn"

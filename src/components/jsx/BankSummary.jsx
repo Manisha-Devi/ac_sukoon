@@ -74,6 +74,7 @@ function BankSummary({ fareData, expenseData, currentUser }) {
       allData = [...allData, ...userFareData.map(entry => ({
         entryId: entry.entryId,
         date: entry.date,
+        dateFrom: entry.dateFrom, // Add dateFrom for booking entries
         bankAmount: entry.type === 'off' ? 0 : entry.bankAmount, // Off days have 0 bank amount
         type: entry.type === 'off' ? 'off-day' : 'income', // Special type for off days
         entryType: entry.type, // daily, booking, or off
