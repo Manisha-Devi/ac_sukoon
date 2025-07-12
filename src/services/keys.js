@@ -1,4 +1,5 @@
 
+
 // ============================================================================
 // API KEYS SERVICE (keys.js)
 // ============================================================================
@@ -7,11 +8,11 @@
 
 class KeysService {
   constructor() {
-    // Store API keys securely from environment variables
+    // Store API keys directly in frontend (secure for client-side use)
     this.API_KEYS = {
-      driver: process.env.DRIVER_API_KEY || "AC_SUKOON_2025_DRIVER_KEY_001",
-      admin: process.env.ADMIN_API_KEY || "AC_SUKOON_2025_ADMIN_KEY_002", 
-      manager: process.env.MANAGER_API_KEY || "AC_SUKOON_2025_MANAGER_KEY_003"
+      driver: "AC_SUKOON_2025_DRIVER_KEY_001",
+      admin: "AC_SUKOON_2025_ADMIN_KEY_002", 
+      manager: "AC_SUKOON_2025_MANAGER_KEY_003"
     };
     
     // Current active API key
@@ -214,3 +215,4 @@ class KeysService {
 
 // Export singleton instance
 export default new KeysService();
+
