@@ -117,7 +117,6 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       setBankApprovalData(allEntries.filter(entry => entry.entryStatus === 'forwardedBank'));
       setCashApprovalData(allEntries.filter(entry => entry.entryStatus === 'forwardedCash'));
       setApprovedData(allEntries.filter(entry => 
-        entry.entryStatus === 'approved' || 
         entry.entryStatus === 'approvedCash' || 
         entry.entryStatus === 'approvedBank' ||
         entry.entryStatus === 'cashApproved' ||
@@ -183,19 +182,19 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       const approverName = currentUser?.fullName || currentUser?.username;
       let newStatus = '';
 
-      // Determine new status based on current tab - Direct approval from pending
+      // Determine new status based on current tab and proper flow
       switch (activeTab) {
         case 'pending':
           newStatus = 'approved'; // Direct approval from pending
           break;
         case 'bankApproval':
-          newStatus = 'approved';
+          newStatus = 'approvedBank'; // forwardedBank -> approvedBank
           break;
         case 'cashApproval':
-          newStatus = 'approved';
+          newStatus = 'approvedCash'; // forwardedCash -> approvedCash
           break;
         case 'approved':
-          newStatus = 'approved';
+          newStatus = 'approved'; // Final approval (approvedCash/approvedBank -> approved)
           break;
         default:
           throw new Error('Invalid tab for approval');
@@ -414,10 +413,10 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                   BANK APPROVED
                 </>
               )}
-              {(entry.entryStatus === 'approved' || entry.entryStatus === 'approvedCash' || entry.entryStatus === 'approvedBank') && (
+              {entry.entryStatus === 'approved' && (
                 <>
                   <i className="bi bi-check-circle-fill me-1"></i>
-                  APPROVED
+                  FINAL APPROVED
                 </>
               )}
             </div>
