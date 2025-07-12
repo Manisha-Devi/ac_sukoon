@@ -1539,12 +1539,13 @@ class AuthService {
   // Update Fare Receipt Status
   async updateFareReceiptStatus(entryId, newStatus, approverName) {
     try {
-      const data = {
+      const requestBody = JSON.stringify({
+        action: 'updateFareReceiptStatus',
         entryId: entryId,
         newStatus: newStatus,
         approverName: approverName
-      };
-      const response = await this.makeApprovalAPIRequest('updateFareReceiptStatus', data);
+      });
+      const response = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
       return response;
     } catch (error) {
       console.error('Error updating fare receipt status:', error);
@@ -1555,12 +1556,13 @@ class AuthService {
   // Update Booking Entry Status
   async updateBookingEntryStatus(entryId, newStatus, approverName) {
     try {
-      const data = {
+      const requestBody = JSON.stringify({
+        action: 'updateBookingEntryStatus',
         entryId: entryId,
         newStatus: newStatus,
         approverName: approverName
-      };
-      const response = await this.makeApprovalAPIRequest('updateBookingEntryStatus', data);
+      });
+      const response = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
       return response;
     } catch (error) {
       console.error('Error updating booking entry status:', error);
@@ -1571,12 +1573,13 @@ class AuthService {
   // Update Fuel Payment Status
   async updateFuelPaymentStatus(entryId, newStatus, approverName) {
     try {
-      const data = {
+      const requestBody = JSON.stringify({
+        action: 'updateFuelPaymentStatus',
         entryId: entryId,
         newStatus: newStatus,
         approverName: approverName
-      };
-      const response = await this.makeApprovalAPIRequest('updateFuelPaymentStatus', data);
+      });
+      const response = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
       return response;
     } catch (error) {
       console.error('Error updating fuel payment status:', error);
@@ -1587,12 +1590,13 @@ class AuthService {
   // Update Adda Payment Status
   async updateAddaPaymentStatus(entryId, newStatus, approverName) {
     try {
-      const data = {
+      const requestBody = JSON.stringify({
+        action: 'updateAddaPaymentStatus',
         entryId: entryId,
         newStatus: newStatus,
         approverName: approverName
-      };
-      const response = await this.makeApprovalAPIRequest('updateAddaPaymentStatus', data);
+      });
+      const response = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
       return response;
     } catch (error) {
       console.error('Error updating adda payment status:', error);
@@ -1603,12 +1607,13 @@ class AuthService {
   // Update Union Payment Status
   async updateUnionPaymentStatus(entryId, newStatus, approverName) {
     try {
-      const data = {
+      const requestBody = JSON.stringify({
+        action: 'updateUnionPaymentStatus',
         entryId: entryId,
         newStatus: newStatus,
         approverName: approverName
-      };
-      const response = await this.makeApprovalAPIRequest('updateUnionPaymentStatus', data);
+      });
+      const response = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
       return response;
     } catch (error) {
       console.error('Error updating union payment status:', error);
@@ -1619,12 +1624,13 @@ class AuthService {
   // Update Service Payment Status
   async updateServicePaymentStatus(entryId, newStatus, approverName) {
     try {
-      const data = {
+      const requestBody = JSON.stringify({
+        action: 'updateServicePaymentStatus',
         entryId: entryId,
         newStatus: newStatus,
         approverName: approverName
-      };
-      const response = await this.makeApprovalAPIRequest('updateServicePaymentStatus', data);
+      });
+      const response = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
       return response;
     } catch (error) {
       console.error('Error updating service payment status:', error);
@@ -1635,12 +1641,13 @@ class AuthService {
   // Update Other Payment Status
   async updateOtherPaymentStatus(entryId, newStatus, approverName) {
     try {
-      const data = {
+      const requestBody = JSON.stringify({
+        action: 'updateOtherPaymentStatus',
         entryId: entryId,
         newStatus: newStatus,
         approverName: approverName
-      };
-      const response = await this.makeApprovalAPIRequest('updateOtherPaymentStatus', data);
+      });
+      const response = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
       return response;
     } catch (error) {
       console.error('Error updating other payment status:', error);
