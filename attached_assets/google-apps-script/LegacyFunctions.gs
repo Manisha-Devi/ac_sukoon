@@ -11,6 +11,18 @@
 const SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('SHEET_ID') || 
                       '1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidEmhzgM';
 
+// Sheet names constant
+const SHEET_NAMES = {
+  FUEL_PAYMENTS: 'FuelPayments',
+  ADDA_PAYMENTS: 'AddaPayments',
+  UNION_PAYMENTS: 'UnionPayments',
+  SERVICE_PAYMENTS: 'ServicePayments',
+  OTHER_PAYMENTS: 'OtherPayments',
+  FARE_RECEIPTS: 'FareReceipts',
+  BOOKING_ENTRIES: 'BookingEntries',
+  OFF_DAYS: 'OffDays'
+};
+
 // Generate unique entry ID
 function generateEntryId() {
   return Date.now().toString();
@@ -740,6 +752,129 @@ function updateOffDayStatusLegacy(data) {
 function approveOffDayLegacy(data) {
   console.log('🔄 Legacy approveOffDay called, routing to modern implementation');
   return approveOffDay(data);
+}
+
+// Direct function aliases for FareReceipts (placeholders)
+function updateFareReceipt(data) {
+  try {
+    console.log('📝 updateFareReceipt called - placeholder implementation');
+    return { success: false, error: 'updateFareReceipt not yet implemented' };
+  } catch (error) {
+    console.error('❌ updateFareReceipt error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+function deleteFareReceipt(data) {
+  try {
+    console.log('🗑️ deleteFareReceipt called - placeholder implementation');
+    return { success: false, error: 'deleteFareReceipt not yet implemented' };
+  } catch (error) {
+    console.error('❌ deleteFareReceipt error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+function updateFareReceiptStatus(data) {
+  try {
+    console.log('🔄 updateFareReceiptStatus called - placeholder implementation');
+    return { success: false, error: 'updateFareReceiptStatus not yet implemented' };
+  } catch (error) {
+    console.error('❌ updateFareReceiptStatus error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+function approveFareReceipt(data) {
+  try {
+    console.log('✅ approveFareReceipt called - placeholder implementation');
+    return { success: false, error: 'approveFareReceipt not yet implemented' };
+  } catch (error) {
+    console.error('❌ approveFareReceipt error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+// Direct function aliases for BookingEntries (placeholders)
+function updateBookingEntry(data) {
+  try {
+    console.log('📝 updateBookingEntry called - placeholder implementation');
+    return { success: false, error: 'updateBookingEntry not yet implemented' };
+  } catch (error) {
+    console.error('❌ updateBookingEntry error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+function deleteBookingEntry(data) {
+  try {
+    console.log('🗑️ deleteBookingEntry called - placeholder implementation');
+    return { success: false, error: 'deleteBookingEntry not yet implemented' };
+  } catch (error) {
+    console.error('❌ deleteBookingEntry error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+function updateBookingEntryStatus(data) {
+  try {
+    console.log('🔄 updateBookingEntryStatus called - placeholder implementation');
+    return { success: false, error: 'updateBookingEntryStatus not yet implemented' };
+  } catch (error) {
+    console.error('❌ updateBookingEntryStatus error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+function approveBookingEntry(data) {
+  try {
+    console.log('✅ approveBookingEntry called - placeholder implementation');
+    return { success: false, error: 'approveBookingEntry not yet implemented' };
+  } catch (error) {
+    console.error('❌ approveBookingEntry error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+// Direct function aliases for OffDays (placeholders)
+function updateOffDay(data) {
+  try {
+    console.log('📝 updateOffDay called - placeholder implementation');
+    return { success: false, error: 'updateOffDay not yet implemented' };
+  } catch (error) {
+    console.error('❌ updateOffDay error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+function deleteOffDay(data) {
+  try {
+    console.log('🗑️ deleteOffDay called - placeholder implementation');
+    return { success: false, error: 'deleteOffDay not yet implemented' };
+  } catch (error) {
+    console.error('❌ deleteOffDay error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+function updateOffDayStatus(data) {
+  try {
+    console.log('🔄 updateOffDayStatus called - placeholder implementation');
+    return { success: false, error: 'updateOffDayStatus not yet implemented' };
+  } catch (error) {
+    console.error('❌ updateOffDayStatus error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+function approveOffDay(data) {
+  try {
+    console.log('✅ approveOffDay called - placeholder implementation');
+    return { success: false, error: 'approveOffDay not yet implemented' };
+  } catch (error) {
+    console.error('❌ approveOffDay error:', error);
+    return { success: false, error: error.toString() };
+  }
 }
 
 // Legacy functions for backward compatibility with existing API calls
