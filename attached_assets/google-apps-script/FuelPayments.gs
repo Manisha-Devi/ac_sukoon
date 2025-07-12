@@ -371,28 +371,3 @@ function resendFuelPayment(data) {
   }
 }
 
-/**
- * Set Fuel Payment to Waiting Status
- * @param {Object} data - Waiting data containing entryId
- * @returns {Object} Success/error response
- */
-function setFuelPaymentWaiting(data) {
-  try {
-    const entryId = data.entryId;
-
-    console.log(`⏳ Setting fuel payment to waiting ID: ${entryId}`);
-
-    return updateFuelPaymentStatus({
-      entryId: entryId,
-      newStatus: 'waiting',
-      approverName: ''
-    });
-
-  } catch (error) {
-    console.error('❌ Error setting fuel payment to waiting:', error);
-    return {
-      success: false,
-      error: 'Set fuel payment waiting error: ' + error.toString()
-    };
-  }
-}
