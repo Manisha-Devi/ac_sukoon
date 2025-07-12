@@ -813,48 +813,44 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                   <div className="entry-card">
                     <div className="card-body">
                       <div className="entry-header">
-                        <div className="entry-main-row">
-                          <span className={`entry-type ${entry.type}`}>
-                            {entry.type === 'fuel' ? 'Fuel' : 
-                             entry.type === 'adda' ? 'Adda' : 'Union'}
+                        <span className={`entry-type ${entry.type}`}>
+                          {entry.type === 'fuel' ? 'Fuel' : 
+                           entry.type === 'adda' ? 'Adda' : 'Union'}
+                        </span>
+
+                        {entry.entryStatus === 'pending' && (
+                          <>
+                            <button
+                              className="btn btn-sm btn-edit"
+                              onClick={() => handleEditEntry(entry)}
+                              title="Edit Entry"
+                            >
+                              <i className="bi bi-pencil"></i>
+                            </button>
+                            <button
+                              className="btn btn-sm btn-delete"
+                              onClick={() => handleDeleteEntry(entry.entryId)}
+                              title="Delete Entry"
+                            >
+                              <i className="bi bi-trash"></i>
+                            </button>
+                          </>
+                        )}
+
+                        {(entry.entryStatus === 'forwardedBank' ||
+                          entry.entryStatus === 'approvedBank' ||
+                          entry.entryStatus === 'forwardedCash' ||
+                          entry.entryStatus === 'approvedCash') && (
+                          <span className="status-badge status-locked" title="Entry is locked">
+                            <i className="bi bi-lock-fill"></i>
                           </span>
-                          
-                          <div className="entry-actions">
-                            {entry.entryStatus === 'pending' && (
-                              <>
-                                <button
-                                  className="btn btn-sm btn-edit"
-                                  onClick={() => handleEditEntry(entry)}
-                                  title="Edit Entry"
-                                >
-                                  <i className="bi bi-pencil"></i>
-                                </button>
-                                <button
-                                  className="btn btn-sm btn-delete"
-                                  onClick={() => handleDeleteEntry(entry.entryId)}
-                                  title="Delete Entry"
-                                >
-                                  <i className="bi bi-trash"></i>
-                                </button>
-                              </>
-                            )}
+                        )}
 
-                            {(entry.entryStatus === 'forwardedBank' ||
-                              entry.entryStatus === 'approvedBank' ||
-                              entry.entryStatus === 'forwardedCash' ||
-                              entry.entryStatus === 'approvedCash') && (
-                              <span className="status-badge status-locked" title="Entry is locked">
-                                <i className="bi bi-lock-fill"></i>
-                              </span>
-                            )}
-
-                            {entry.entryStatus === 'approved' && (
-                              <span className="status-badge status-final-approved" title="Final Approved">
-                                <i className="bi bi-check-circle-fill"></i>
-                              </span>
-                            )}
-                          </div>
-                        </div>
+                        {entry.entryStatus === 'approved' && (
+                          <span className="status-badge status-final-approved" title="Final Approved">
+                            <i className="bi bi-check-circle-fill"></i>
+                          </span>
+                        )}
                       </div>
                       <div className="entry-date">
                         <small className="text-muted">
