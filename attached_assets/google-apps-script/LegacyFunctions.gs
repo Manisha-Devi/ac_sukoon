@@ -732,46 +732,8 @@ function approveOffDayLegacy(data) {
   return approveOffDay(data);
 }
 
-// Direct function aliases for FareReceipts (placeholders)
-function updateFareReceipt(data) {
-  try {
-    console.log('📝 updateFareReceipt called - placeholder implementation');
-    return { success: false, error: 'updateFareReceipt not yet implemented' };
-  } catch (error) {
-    console.error('❌ updateFareReceipt error:', error);
-    return { success: false, error: error.toString() };
-  }
-}
-
-function deleteFareReceipt(data) {
-  try {
-    console.log('🗑️ deleteFareReceipt called - placeholder implementation');
-    return { success: false, error: 'deleteFareReceipt not yet implemented' };
-  } catch (error) {
-    console.error('❌ deleteFareReceipt error:', error);
-    return { success: false, error: error.toString() };
-  }
-}
-
-function updateFareReceiptStatus(data) {
-  try {
-    console.log('🔄 updateFareReceiptStatus called - placeholder implementation');
-    return { success: false, error: 'updateFareReceiptStatus not yet implemented' };
-  } catch (error) {
-    console.error('❌ updateFareReceiptStatus error:', error);
-    return { success: false, error: error.toString() };
-  }
-}
-
-function approveFareReceipt(data) {
-  try {
-    console.log('✅ approveFareReceipt called - placeholder implementation');
-    return { success: false, error: 'approveFareReceipt not yet implemented' };
-  } catch (error) {
-    console.error('❌ approveFareReceipt error:', error);
-    return { success: false, error: error.toString() };
-  }
-}
+// FareReceipt functions are implemented in FareReceipts.gs
+// No placeholder functions needed here
 
 // Direct function aliases for BookingEntries (placeholders)
 function updateBookingEntry(data) {
