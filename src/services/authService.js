@@ -1,3 +1,5 @@
+import keysService from './keys.js';
+
 // Authentication service for Google Sheets database
 class AuthService {
   constructor() {
@@ -56,6 +58,16 @@ class AuthService {
       console.log('🔍 Authentication response:', result);
 
       if (result.success) {
+        // Initialize API key for the authenticated user
+        const keyInitialized = keysService.initializeForUser(result.user);
+        if (!keyInitialized) {
+          console.error('❌ Failed to initialize API key for user');
+          return {
+            success: false,
+            message: 'Authentication failed: API key initialization error'
+          };
+        }
+
         // Update last login timestamp
         await this.updateLastLogin(username);
 
@@ -172,6 +184,23 @@ class AuthService {
       try {
         attempt++;
         console.log(`Attempt ${attempt} of ${retries + 1} to make API request`);
+        
+        // Parse body to add API key
+        let requestData;
+        try {
+          requestData = JSON.parse(body);
+          // Add API key to request (skip for test action)
+          if (requestData.action !== 'test') {
+            requestData = keysService.addApiKeyToRequest(requestData);
+          }
+          body = JSON.stringify(requestData);
+        } catch (error) {
+          console.error('❌ Error adding API key to request:', error);
+          if (requestData && requestData.action !== 'test') {
+            throw new Error('API key authentication required');
+          }
+        }
+
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -1846,6 +1875,28 @@ class AuthService {
       console.error('Error in batch update:', error);
       return { success: false, error: error.message };
     }
+  }
+
+  // ============================================================================
+  // LOGOUT AND CLEANUP
+  // ============================================================================
+
+  // Logout user and clear API keys
+  logout() {
+    try {
+      console.log('🔐 Logging out user and clearing API keys');
+      keysService.clearApiKey();
+      console.log('✅ Logout successful');
+      return { success: true, message: 'Logged out successfully' };
+    } catch (error) {
+      console.error('❌ Error during logout:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Check if user is authenticated
+  isAuthenticated() {
+    return keysService.isAuthenticated();
   }
 
   // ============================================================================

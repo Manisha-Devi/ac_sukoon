@@ -28,18 +28,33 @@ function doOptions() {
  */
 function doPost(e) {
   try {
-    if (!e || !e.postData || !e.postData.contents) {
-      throw new Error("No data received in POST request");
+    console.log("📥 Received POST request");
+
+    // Parse request data
+    let data;
+    try {
+      data = JSON.parse(e.postData.contents);
+    } catch (parseError) {
+      console.error("❌ Invalid JSON in request:", parseError);
+      return createResponse({ success: false, error: "Invalid JSON format" });
     }
 
-    const data = JSON.parse(e.postData.contents);
-    const action = data.action;
+    console.log("📋 Request action:", data.action);
+
+    // Skip authentication for test endpoint
+    if (data.action !== 'test') {
+      // Authenticate request using API key
+      const authResult = authenticateRequest(data);
+      if (!authResult.success) {
+        console.log("❌ Authentication failed:", authResult.error);
+        return createResponse(authResult);
+      }
+      console.log("✅ Request authenticated successfully");
+    }
+
+    // Route requests based on action
     let result;
-
-    console.log(`📥 Incoming POST request - Action: ${action}`);
-
-    // Route request to appropriate handler based on action
-    switch (action) {
+    switch (data.action) {
       // ==================== AUTHENTICATION ====================
       case "login":
         result = handleLogin(data);
