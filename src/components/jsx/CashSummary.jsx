@@ -83,7 +83,7 @@ function CashSummary({ fareData, expenseData, currentUser }) {
         entryStatus: entry.entryStatus,
         approvedBy: entry.approvedBy,
         description: entry.type === 'off' ? `Off Day - ${entry.reason}` : (entry.route || entry.bookingDetails || 'Fare Collection')
-      }));
+      })));
     }
 
     // 📉 Filter expense data (EXPENSE) for current user - Only CASH entries
