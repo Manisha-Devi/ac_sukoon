@@ -293,12 +293,7 @@ function doPost(e) {
       success: false,
       error: "Server Error: " + error.toString(),
       timestamp: formatISTTimestamp()
-    })).setMimeType(ContentService.MimeType.JSON)
-    .setHeaders({
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      });
+    })).setMimeType(ContentService.MimeType.JSON);
   }
 }
 
@@ -311,12 +306,7 @@ function doGet(e) {
       return ContentService.createTextOutput(JSON.stringify({
         success: false,
         error: "No action parameter provided in GET request",
-      })).setMimeType(ContentService.MimeType.JSON)
-      .setHeaders({
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      });
+      })).setMimeType(ContentService.MimeType.JSON);
     }
 
     const action = e.parameter.action;
@@ -375,11 +365,6 @@ function doGet(e) {
     return ContentService.createTextOutput(JSON.stringify({
       success: false,
       error: "GET Error: " + error.toString(),
-    })).setMimeType(ContentService.MimeType.JSON)
-    .setHeaders({
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      });
+    })).setMimeType(ContentService.MimeType.JSON);
   }
 }
