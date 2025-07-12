@@ -6,27 +6,7 @@
 
 // This file maintains compatibility with older API calls
 // All functions here route to their respective modern implementations
-
-// Get the spreadsheet ID from script properties
-const SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('SHEET_ID') || 
-                      '1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidEmhzgM';
-
-// Sheet names constant
-const SHEET_NAMES = {
-  FUEL_PAYMENTS: 'FuelPayments',
-  ADDA_PAYMENTS: 'AddaPayments',
-  UNION_PAYMENTS: 'UnionPayments',
-  SERVICE_PAYMENTS: 'ServicePayments',
-  OTHER_PAYMENTS: 'OtherPayments',
-  FARE_RECEIPTS: 'FareReceipts',
-  BOOKING_ENTRIES: 'BookingEntries',
-  OFF_DAYS: 'OffDays'
-};
-
-// Generate unique entry ID
-function generateEntryId() {
-  return Date.now().toString();
-}
+// Constants are handled in Code.gs to avoid duplication
 
 // Legacy Fuel Payment functions
 function updateFuelPaymentLegacy(data) {
