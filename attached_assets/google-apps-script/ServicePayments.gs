@@ -1,4 +1,3 @@
-
 // ============================================================================
 // SERVICE PAYMENTS - COMPLETE CRUD OPERATIONS
 // ============================================================================
@@ -13,7 +12,7 @@
 function addServicePayment(data) {
   try {
     console.log("📝 Adding new service payment:", data);
-    
+
     // Get or create ServicePayments sheet
     let sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
       .getSheetByName(SHEET_NAMES.SERVICE_PAYMENTS);
@@ -23,11 +22,11 @@ function addServicePayment(data) {
       console.log("📋 Creating ServicePayments sheet...");
       sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
         .insertSheet(SHEET_NAMES.SERVICE_PAYMENTS);
-      
+
       // Add headers exactly as specified
       sheet.getRange(1, 1, 1, 12).setValues([[
         "Timestamp", "Date", "ServiceType", "CashAmount", "BankAmount", 
-        "TotalAmount", "ServiceDetails", "SubmittedBy", "EntryType", "EntryId",
+        "TotalAmount", "ServiceDetails", "SubmittedBy", "SubmittedBy", "EntryType", "EntryId",
         "EntryStatus", "ApprovedBy"
       ]]);
     }
@@ -41,7 +40,7 @@ function addServicePayment(data) {
 
     // Insert new row at position 2 (keeps newest entries at top)
     sheet.insertRowBefore(2);
-    
+
     // Add data to the new row
     sheet.getRange(2, 1, 1, 12).setValues([[
       timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
@@ -83,7 +82,7 @@ function addServicePayment(data) {
 function getServicePayments() {
   try {
     console.log("📋 Fetching all service payments...");
-    
+
     // Get ServicePayments sheet
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
       .getSheetByName(SHEET_NAMES.SERVICE_PAYMENTS);
@@ -360,6 +359,32 @@ function approveServicePayment(data) {
     return {
       success: false,
       error: 'Approve service payment error: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Resend Service Payment (Reset to pending status)
+ * @param {Object} data - Resend data containing entryId
+ * @returns {Object} Success/error response
+ */
+function resendServicePayment(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log(`🔄 Resending service payment ID: ${entryId}`);
+
+    return updateServicePaymentStatus({
+      entryId: entryId,
+      newStatus: 'pending',
+      approverName: ''
+    });
+
+  } catch (error) {
+    console.error('❌ Error resending service payment:', error);
+    return {
+      success: false,
+      error: 'Resend service payment error: ' + error.toString()
     };
   }
 }

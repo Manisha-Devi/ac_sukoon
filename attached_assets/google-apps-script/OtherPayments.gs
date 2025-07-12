@@ -365,3 +365,29 @@ function approveOtherPayment(data) {
     };
   }
 }
+
+/**
+ * Resend Other Payment (Reset to pending status)
+ * @param {Object} data - Resend data containing entryId
+ * @returns {Object} Success/error response
+ */
+function resendOtherPayment(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log(`🔄 Resending other payment ID: ${entryId}`);
+
+    return updateOtherPaymentStatus({
+      entryId: entryId,
+      newStatus: 'pending',
+      approverName: ''
+    });
+
+  } catch (error) {
+    console.error('❌ Error resending other payment:', error);
+    return {
+      success: false,
+      error: 'Resend other payment error: ' + error.toString()
+    };
+  }
+}
