@@ -189,14 +189,14 @@ class AuthService {
         let requestData;
         try {
           requestData = JSON.parse(body);
-          // Add API key to request (skip for test action)
-          if (requestData.action !== 'test') {
+          // Add API key to request (skip for test and login actions)
+          if (requestData.action !== 'test' && requestData.action !== 'login') {
             requestData = keysService.addApiKeyToRequest(requestData);
           }
           body = JSON.stringify(requestData);
         } catch (error) {
           console.error('❌ Error adding API key to request:', error);
-          if (requestData && requestData.action !== 'test') {
+          if (requestData && requestData.action !== 'test' && requestData.action !== 'login') {
             throw new Error('API key authentication required');
           }
         }
