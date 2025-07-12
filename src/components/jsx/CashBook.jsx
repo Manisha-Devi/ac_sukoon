@@ -70,6 +70,8 @@ const CashBook = ({ cashBookEntries, setCashBookEntries, allUsers }) => {
         return `By Union Payment - ${entry.particulars || entry.description}`;
       case 'other-payment':
         return `By Other Payment - ${entry.particulars || entry.description}`;
+      case 'fixed-cash-payment':
+        return `By Fixed Cash - ${entry.particulars || entry.submittedBy}`;
       default:
         return entry.type === 'dr' ? `To ${entry.particulars || entry.description}` : `By ${entry.particulars || entry.description}`;
     }

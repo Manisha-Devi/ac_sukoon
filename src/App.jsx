@@ -419,6 +419,26 @@ function App() {
         });
       });
 
+      // Add Fixed Cash entries for all users (Cr - payments)
+      if (allUsers && allUsers.length > 0) {
+        allUsers.forEach(user => {
+          if (user.fixedCash > 0) {
+            entries.push({
+              id: `fixed-cash-${user.username}`,
+              date: user.date,
+              description: `Fixed Cash - ${user.name}`,
+              cashAmount: user.fixedCash,
+              bankAmount: 0,
+              type: 'cr', // Credit (payment)
+              source: 'fixed-cash-payment',
+              particulars: user.name,
+              jfNo: `FC-${user.username}`,
+              submittedBy: user.name
+            });
+          }
+        });
+      }
+
       // Sort by date (newest first)
       entries.sort((a, b) => new Date(b.date) - new Date(a.date));
 
@@ -427,7 +447,7 @@ function App() {
     };
 
     generateCashBookEntries();
-  }, [fareData, expenseData, setCashBookEntries]);
+  }, [fareData, expenseData, allUsers, setCashBookEntries]);
 
   // If user is not logged in, show login component
   if (!user) {
