@@ -467,10 +467,14 @@
 }
 
 .entry-header {
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.entry-main-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
   width: 100%;
 }
 
