@@ -1602,6 +1602,17 @@ class AuthService {
     }
   }
 
+  // Set Fuel Payment to Waiting Status
+  async setFuelPaymentWaiting(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('setFuelPaymentWaiting', data);
+      return response;
+    } catch (error) {
+      console.error('Error setting fuel payment to waiting:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // ============================================================================
   // STATUS UPDATE FUNCTIONS
   // ============================================================================

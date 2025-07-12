@@ -344,3 +344,55 @@ function approveFuelPayment(data) {
     };
   }
 }
+
+/**
+ * Resend Fuel Payment Entry
+ * @param {Object} data - Resend data containing entryId
+ * @returns {Object} Success/error response
+ */
+function resendFuelPayment(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log(`🔄 Resending fuel payment ID: ${entryId}`);
+
+    return updateFuelPaymentStatus({
+      entryId: entryId,
+      newStatus: 'pending',
+      approverName: ''
+    });
+
+  } catch (error) {
+    console.error('❌ Error resending fuel payment:', error);
+    return {
+      success: false,
+      error: 'Resend fuel payment error: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Set Fuel Payment to Waiting Status
+ * @param {Object} data - Waiting data containing entryId
+ * @returns {Object} Success/error response
+ */
+function setFuelPaymentWaiting(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log(`⏳ Setting fuel payment to waiting ID: ${entryId}`);
+
+    return updateFuelPaymentStatus({
+      entryId: entryId,
+      newStatus: 'waiting',
+      approverName: ''
+    });
+
+  } catch (error) {
+    console.error('❌ Error setting fuel payment to waiting:', error);
+    return {
+      success: false,
+      error: 'Set fuel payment waiting error: ' + error.toString()
+    };
+  }
+}
