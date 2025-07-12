@@ -17,6 +17,28 @@ function deleteFuelPaymentLegacy(data) {
   return deleteFuelPayment(data);
 }
 
+// Direct function aliases for backward compatibility
+function updateFuelPayment(data) {
+  try {
+    return updateFuelPaymentLegacy ? updateFuelPaymentLegacy(data) : 
+           typeof updateFuelPaymentStatus !== 'undefined' ? updateFuelPaymentStatus(data) : 
+           { success: false, error: 'Function not implemented' };
+  } catch (error) {
+    console.error('❌ updateFuelPayment error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+function deleteFuelPayment(data) {
+  try {
+    return deleteFuelPaymentLegacy ? deleteFuelPaymentLegacy(data) : 
+           { success: false, error: 'Function not implemented' };
+  } catch (error) {
+    console.error('❌ deleteFuelPayment error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
 // Legacy Adda Payment functions
 function updateAddaPaymentLegacy(data) {
   console.log('🔄 Legacy updateAddaPayment called, routing to modern implementation');
@@ -59,6 +81,69 @@ function updateOtherPaymentLegacy(data) {
 function deleteOtherPaymentLegacy(data) {
   console.log('🔄 Legacy deleteOtherPayment called, routing to modern implementation');
   return deleteOtherPayment(data);
+}
+
+// Direct function aliases for Adda Payments
+function updateAddaPayment(data) {
+  try {
+    return updateAddaPaymentLegacy ? updateAddaPaymentLegacy(data) : 
+           { success: false, error: 'Function not implemented' };
+  } catch (error) {
+    console.error('❌ updateAddaPayment error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+function deleteAddaPayment(data) {
+  try {
+    return deleteAddaPaymentLegacy ? deleteAddaPaymentLegacy(data) : 
+           { success: false, error: 'Function not implemented' };
+  } catch (error) {
+    console.error('❌ deleteAddaPayment error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+// Direct function aliases for Union Payments
+function updateUnionPayment(data) {
+  try {
+    return updateUnionPaymentLegacy ? updateUnionPaymentLegacy(data) : 
+           { success: false, error: 'Function not implemented' };
+  } catch (error) {
+    console.error('❌ updateUnionPayment error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+function deleteUnionPayment(data) {
+  try {
+    return deleteUnionPaymentLegacy ? deleteUnionPaymentLegacy(data) : 
+           { success: false, error: 'Function not implemented' };
+  } catch (error) {
+    console.error('❌ deleteUnionPayment error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+// Direct function aliases for Other Payments
+function updateOtherPayment(data) {
+  try {
+    return updateOtherPaymentLegacy ? updateOtherPaymentLegacy(data) : 
+           { success: false, error: 'Function not implemented' };
+  } catch (error) {
+    console.error('❌ updateOtherPayment error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+function deleteOtherPayment(data) {
+  try {
+    return deleteOtherPaymentLegacy ? deleteOtherPaymentLegacy(data) : 
+           { success: false, error: 'Function not implemented' };
+  } catch (error) {
+    console.error('❌ deleteOtherPayment error:', error);
+    return { success: false, error: error.toString() };
+  }
 }
 
 // Legacy FareReceipts functions
