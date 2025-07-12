@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "../css/CashSummary.css";
 
-function CashSummary({ fareData, expenseData, currentUser }) {
+function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
   // 📊 RECEIVED DATA EXPLANATION:
   // fareData = Daily entries (income) + Booking entries + Off days
   // expenseData = Fuel + Adda + Union + Service + Other payments
+  // allUsers = Array of all users with fixedCash data
 
   const [filteredData, setFilteredData] = useState([]);
   const [dateFrom, setDateFrom] = useState('');
@@ -108,6 +109,26 @@ function CashSummary({ fareData, expenseData, currentUser }) {
                     entry.serviceType || entry.serviceDetails || 
                     entry.paymentType || entry.paymentDetails || 'Payment'
       }))];
+    }
+
+    // 💰 Add Fixed Cash entries for all users (as expense)
+    if (allUsers && allUsers.length > 0) {
+      const fixedCashEntries = allUsers
+        .filter(user => user.fixedCash > 0)
+        .map(user => ({
+          entryId: `fixed-cash-${user.username}`,
+          date: user.date,
+          cashAmount: user.fixedCash,
+          type: 'expense',
+          entryType: 'fixed-cash',
+          submittedBy: user.name,
+          entryStatus: 'approved',
+          approvedBy: 'System',
+          description: `Fixed Cash - ${user.name}`
+        }));
+      
+      console.log('💰 Fixed Cash entries added:', fixedCashEntries.length);
+      allData = [...allData, ...fixedCashEntries];
     }
 
     // Apply date filter if dates are selected

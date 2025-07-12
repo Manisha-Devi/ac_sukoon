@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import "../css/CashBook.css";
 
-const CashBook = ({ cashBookEntries, setCashBookEntries }) => {
+const CashBook = ({ cashBookEntries, setCashBookEntries, allUsers }) => {
   
   const [customDateFrom, setCustomDateFrom] = useState('');
   const [customDateTo, setCustomDateTo] = useState('');

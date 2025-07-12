@@ -34,6 +34,8 @@ function App() {
     expenseRecords: 0,
     lastSync: null
   });
+    const [allUsers, setAllUsers] = useState([]);
+
 
   // New detailed statistics state
   const [dataStatistics, setDataStatistics] = useState({
@@ -77,7 +79,6 @@ function App() {
 
       console.log('🚀 App.jsx: Loading all data from Google Sheets...');
 
-      // Load all data types in parallel
       const [
         fareReceipts, 
         bookingEntries, 
@@ -86,7 +87,8 @@ function App() {
         addaPayments,
         unionPayments,
         servicePayments,
-        otherPayments
+        otherPayments,
+        users
       ] = await Promise.all([
         authService.getFareReceipts(),
         authService.getBookingEntries(),
@@ -95,7 +97,8 @@ function App() {
         authService.getAddaPayments(),
         authService.getUnionPayments(),
         authService.getServicePayments(),
-        authService.getOtherPayments()
+        authService.getOtherPayments(),
+        authService.getAllUsers()
       ]);
 
       // Process fare data (fare receipts + booking entries)
@@ -163,9 +166,23 @@ function App() {
         })));
       }
 
+        // Process users data
+        let processedUsers = [];
+        if (users.success && users.data) {
+            processedUsers = users.data.map(user => ({
+                username: user.username,
+                name: user.fullName,
+                date: user.createdDate || new Date().toISOString().split('T')[0],
+                fixedCash: user.fixedCash || 0
+            }));
+            console.log('👥 All users loaded:', processedUsers.length);
+        }
+
       // Update parent state
       setFareData(combinedFareData);
       setExpenseData(combinedExpenseData);
+        setAllUsers(processedUsers);
+
 
       // Calculate and update totals
       const totalEarningsAmount = combinedFareData
@@ -605,6 +622,7 @@ function App() {
           <CashBook 
             cashBookEntries={cashBookEntries} 
             setCashBookEntries={setCashBookEntries}
+             allUsers={allUsers}
             currentUser={user}
           />
         )}
@@ -620,6 +638,7 @@ function App() {
             fareData={fareData} 
             expenseData={expenseData}
             currentUser={user}
+              allUsers={allUsers}
           />
         )}
         {activeTab === "bank-summary" && (
