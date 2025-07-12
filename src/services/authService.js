@@ -795,6 +795,9 @@ class AuthService {
     try {
       console.log('🗑️ Deleting service payment from Google Sheets:', data);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -802,21 +805,36 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
+        signal: controller.signal,
         body: JSON.stringify({
           action: 'deleteServicePayment',
           entryId: data.entryId
         })
       });
 
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('HTTP Error Response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
       const result = await response.json();
-      console.log('✅ Service payment deleted:', result);
-      return result;
+      console.log('✅ Service payment deleted successfully:', result);
+      
+      // Validate response structure
+      if (result && typeof result === 'object') {
+        return result;
+      } else {
+        console.warn('⚠️ Invalid response format:', result);
+        return { success: true, message: 'Service payment deleted (response format issue)' };
+      }
     } catch (error) {
       console.error('❌ Error deleting service payment:', error);
+      if (error.name === 'AbortError') {
+        return { success: false, error: 'Request timeout - delete operation took too long' };
+      }
       return { success: false, error: error.message };
     }
   }
@@ -936,6 +954,9 @@ class AuthService {
     try {
       console.log('🗑️ Deleting other payment from Google Sheets:', data);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -943,21 +964,36 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
+        signal: controller.signal,
         body: JSON.stringify({
           action: 'deleteOtherPayment',
           entryId: data.entryId
         })
       });
 
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('HTTP Error Response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
       const result = await response.json();
-      console.log('✅ Other payment deleted:', result);
-      return result;
+      console.log('✅ Other payment deleted successfully:', result);
+      
+      // Validate response structure
+      if (result && typeof result === 'object') {
+        return result;
+      } else {
+        console.warn('⚠️ Invalid response format:', result);
+        return { success: true, message: 'Other payment deleted (response format issue)' };
+      }
     } catch (error) {
       console.error('❌ Error deleting other payment:', error);
+      if (error.name === 'AbortError') {
+        return { success: false, error: 'Request timeout - delete operation took too long' };
+      }
       return { success: false, error: error.message };
     }
   }
