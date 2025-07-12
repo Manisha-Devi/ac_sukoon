@@ -230,7 +230,7 @@ function BankSummary({ fareData, expenseData, currentUser }) {
   };
 
   // Forward entries for bank approval (only forward, not approve)
-  const handleForwardForBankApproval = async () => {
+  const handleForwardForBankApproval = () => {
     if (selectedEntries.length === 0) {
       alert('Please select entries to forward for bank approval');
       return;
@@ -238,7 +238,6 @@ function BankSummary({ fareData, expenseData, currentUser }) {
 
     try {
       console.log('🔄 BankSummary: Forwarding entries for bank approval:', selectedEntries);
-      const forwarderName = currentUser?.fullName || currentUser?.username || "";
 
       // Step 1: Update local state immediately for UI feedback
       const updatedEntries = [...selectedEntries];
@@ -258,62 +257,7 @@ function BankSummary({ fareData, expenseData, currentUser }) {
       setSelectedEntries([]);
       alert(`✅ ${updatedEntries.length} entries forwarded for bank approval!`);
 
-      // Step 4: Background sync to Google Sheets
-      const authService = (await import('../../services/authService.js')).default;
-      
-      const syncPromises = updatedEntries.map(async (entryId) => {
-        const entry = filteredData.find(e => e.entryId === entryId);
-        if (!entry) return;
-
-        try {
-          let result;
-          switch (entry.entryType) {
-            case 'daily':
-              result = await authService.updateFareReceiptStatus(entryId, "forwardedBank", forwarderName);
-              break;
-            case 'booking':
-              result = await authService.updateBookingEntryStatus(entryId, "forwardedBank", forwarderName);
-              break;
-            case 'fuel':
-              result = await authService.updateFuelPaymentStatus(entryId, "forwardedBank", forwarderName);
-              break;
-            case 'adda':
-              result = await authService.updateAddaPaymentStatus(entryId, "forwardedBank", forwarderName);
-              break;
-            case 'union':
-              result = await authService.updateUnionPaymentStatus(entryId, "forwardedBank", forwarderName);
-              break;
-            case 'service':
-              result = await authService.updateServicePaymentStatus(entryId, "forwardedBank", forwarderName);
-              break;
-            case 'other':
-              result = await authService.updateOtherPaymentStatus(entryId, "forwardedBank", forwarderName);
-              break;
-            default:
-              console.error(`Unknown entry type: ${entry.entryType}`);
-              return;
-          }
-
-          if (result && result.success) {
-            console.log(`✅ Entry ${entryId} synced to Google Sheets successfully`);
-          } else {
-            console.error(`❌ Failed to sync entry ${entryId}:`, result?.error);
-          }
-        } catch (error) {
-          console.error(`❌ Error syncing entry ${entryId}:`, error);
-        }
-      });
-
-      // Wait for all syncs to complete
-      Promise.all(syncPromises).then(() => {
-        console.log('✅ All entries synced to Google Sheets');
-        // Trigger parent refresh after successful sync
-        window.dispatchEvent(new CustomEvent('dataRefreshed', {
-          detail: { source: 'bankSummary', action: 'forwardedBank' }
-        }));
-      }).catch((error) => {
-        console.error('❌ Some entries failed to sync:', error);
-      });
+      // Note: Actual Google Sheets sync will be handled by DataSummary's approve function
 
     } catch (error) {
       console.error('❌ Error forwarding entries:', error);
