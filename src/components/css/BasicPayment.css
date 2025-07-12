@@ -482,7 +482,7 @@
 }
 
 .entry-actions .btn {
-  padding: 6px 10px;
+  padding: 5px 8px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -491,8 +491,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 32px;
-  height: 32px;
+  min-width: 30px;
+  height: 30px;
 }
 
 .entry-actions .btn-edit {

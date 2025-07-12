@@ -817,6 +817,7 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                           {entry.type === 'fuel' ? 'Fuel' : 
                            entry.type === 'adda' ? 'Adda' : 'Union'}
                         </span>
+                        
                         <div className="entry-actions">
                           {entry.entryStatus === 'pending' && (
                             <>
