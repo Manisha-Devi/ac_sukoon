@@ -406,28 +406,4 @@ function resendBookingEntry(data) {
   }
 }
 
-/**
- * Set Booking Entry to Waiting Status
- * @param {Object} data - Waiting data containing entryId
- * @returns {Object} Success/error response
- */
-function setBookingEntryWaiting(data) {
-  try {
-    const entryId = data.entryId;
 
-    console.log(`⏳ Setting booking entry to waiting ID: ${entryId}`);
-
-    return updateBookingEntryStatus({
-      entryId: entryId,
-      newStatus: 'waiting',
-      approverName: ''
-    });
-
-  } catch (error) {
-    console.error('❌ Error setting booking entry to waiting:', error);
-    return {
-      success: false,
-      error: 'Set booking entry waiting error: ' + error.toString()
-    };
-  }
-}

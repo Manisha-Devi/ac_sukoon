@@ -195,9 +195,7 @@ function doPost(e) {
       case 'resendFareReceipt':
         result = resendFareReceipt(data);
         break;
-      case 'setFareReceiptWaiting':
-        result = setFareReceiptWaiting(data);
-        break;
+      
 
       // Fuel Payments Approval
       case 'approveFuelPayment':
@@ -206,9 +204,7 @@ function doPost(e) {
       case 'resendFuelPayment':
         result = resendFuelPayment(data);
         break;
-      case 'setFuelPaymentWaiting':
-        result = setFuelPaymentWaiting(data);
-        break;
+      
 
       // Other Payments Approval
       case 'approveOtherPayment':
@@ -217,9 +213,7 @@ function doPost(e) {
       case 'resendOtherPayment':
         result = resendOtherPayment(data);
         break;
-      case 'setOtherPaymentWaiting':
-        result = setOtherPaymentWaiting(data);
-        break;
+      
 
       // Adda Payments Approval
       case 'approveAddaPayment':
@@ -228,9 +222,7 @@ function doPost(e) {
       case 'resendAddaPayment':
         result = resendAddaPayment(data);
         break;
-      case 'setAddaPaymentWaiting':
-        result = setAddaPaymentWaiting(data);
-        break;
+      
 
       // Service Payments Approval
       case 'approveServicePayment':
@@ -239,9 +231,7 @@ function doPost(e) {
       case 'resendServicePayment':
         result = resendServicePayment(data);
         break;
-      case 'setServicePaymentWaiting':
-        result = setServicePaymentWaiting(data);
-        break;
+      
 
       // Union Payments Approval
       case 'approveUnionPayment':
@@ -250,9 +240,7 @@ function doPost(e) {
       case 'resendUnionPayment':
         result = resendUnionPayment(data);
         break;
-      case 'setUnionPaymentWaiting':
-        result = setUnionPaymentWaiting(data);
-        break;
+      
       
       // Booking Entries Approval
       case 'approveBookingEntry':
@@ -261,9 +249,7 @@ function doPost(e) {
       case 'resendBookingEntry':
         result = resendBookingEntry(data);
         break;
-      case 'setBookingEntryWaiting':
-        result = setBookingEntryWaiting(data);
-        break;
+      
 
       // ==================== LEGACY SUPPORT ====================
       case "updateFareEntry":

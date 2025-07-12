@@ -27,8 +27,8 @@ function addOffDay(data) {
       ]]);
     }
 
-    // Generate entry ID if not provided
-    const entryId = data.entryId || generateEntryId();
+    // Use entry ID from data (already provided by frontend)
+    const entryId = data.entryId;
 
     // Format timestamp (store only time part)
     const timeOnly = data.timestamp || 
