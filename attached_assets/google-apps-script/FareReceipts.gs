@@ -365,3 +365,55 @@ function approveFareReceipt(data) {
     };
   }
 }
+
+/**
+ * Resend Fare Receipt Entry
+ * @param {Object} data - Resend data containing entryId
+ * @returns {Object} Success/error response
+ */
+function resendFareReceipt(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log(`🔄 Resending fare receipt ID: ${entryId}`);
+
+    return updateFareReceiptStatus({
+      entryId: entryId,
+      newStatus: 'pending',
+      approverName: ''
+    });
+
+  } catch (error) {
+    console.error('❌ Error resending fare receipt:', error);
+    return {
+      success: false,
+      error: 'Resend fare receipt error: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Set Fare Receipt to Waiting Status
+ * @param {Object} data - Waiting data containing entryId
+ * @returns {Object} Success/error response
+ */
+function setFareReceiptWaiting(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log(`⏳ Setting fare receipt to waiting ID: ${entryId}`);
+
+    return updateFareReceiptStatus({
+      entryId: entryId,
+      newStatus: 'waiting',
+      approverName: ''
+    });
+
+  } catch (error) {
+    console.error('❌ Error setting fare receipt to waiting:', error);
+    return {
+      success: false,
+      error: 'Set fare receipt waiting error: ' + error.toString()
+    };
+  }
+}

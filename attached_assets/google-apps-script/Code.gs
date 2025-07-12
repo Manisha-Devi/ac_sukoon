@@ -253,6 +253,17 @@ function doPost(e) {
       case 'setUnionPaymentWaiting':
         result = setUnionPaymentWaiting(data);
         break;
+      
+      // Booking Entries Approval
+      case 'approveBookingEntry':
+        result = approveBookingEntry(data);
+        break;
+      case 'resendBookingEntry':
+        result = resendBookingEntry(data);
+        break;
+      case 'setBookingEntryWaiting':
+        result = setBookingEntryWaiting(data);
+        break;
 
       // ==================== LEGACY SUPPORT ====================
       case "updateFareEntry":
