@@ -353,3 +353,68 @@ function doGet(e) {
     })).setMimeType(ContentService.MimeType.JSON);
   }
 }
+
+
+/**
+ * Get All Users with Fixed Cash Information
+ * Returns all users from the Authentication sheet with their fixed cash amounts
+ */
+function getAllUsers() {
+  try {
+    console.log('👥 Getting all users with fixed cash data...');
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.AUTHENTICATION);
+
+    if (!sheet) {
+      throw new Error('Authentication sheet not found');
+    }
+
+    const values = sheet.getDataRange().getValues();
+    const headers = values[0];
+    const users = [];
+
+    // Find column indices
+    const usernameCol = headers.indexOf('Username');
+    const fullNameCol = headers.indexOf('Full Name');
+    const createdDateCol = headers.indexOf('Created Date');
+    const fixedCashCol = headers.indexOf('Fixed Cash');
+
+    if (usernameCol === -1 || fullNameCol === -1) {
+      throw new Error('Required columns not found in Authentication sheet');
+    }
+
+    // Process each user row (skip header)
+    for (let i = 1; i < values.length; i++) {
+      const row = values[i];
+      
+      if (row[usernameCol]) { // Only if username exists
+        users.push({
+          username: row[usernameCol] || '',
+          name: row[fullNameCol] || '',
+          date: row[createdDateCol] ? 
+            (row[createdDateCol] instanceof Date ? 
+              row[createdDateCol].toISOString().split('T')[0] : 
+              row[createdDateCol]) : 
+            new Date().toISOString().split('T')[0],
+          fixedCash: parseFloat(row[fixedCashCol]) || 0
+        });
+      }
+    }
+
+    console.log(`✅ Retrieved ${users.length} users`);
+    
+    return {
+      success: true,
+      data: users,
+      count: users.length
+    };
+
+  } catch (error) {
+    console.error('❌ getAllUsers error:', error);
+    return { 
+      success: false, 
+      error: error.toString() 
+    };
+  }
+}
