@@ -116,7 +116,11 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       setPendingData(allEntries.filter(entry => entry.entryStatus === 'pending'));
       setBankApprovalData(allEntries.filter(entry => entry.entryStatus === 'forwardedBank'));
       setCashApprovalData(allEntries.filter(entry => entry.entryStatus === 'forwardedCash'));
-      setApprovedData(allEntries.filter(entry => entry.entryStatus === 'approvedCash'));
+      setApprovedData(allEntries.filter(entry => 
+        entry.entryStatus === 'approved' || 
+        entry.entryStatus === 'approvedCash' || 
+        entry.entryStatus === 'approvedBank'
+      ));
 
       setLoading(false);
     } catch (error) {
@@ -177,16 +181,16 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       const approverName = currentUser?.fullName || currentUser?.username;
       let newStatus = '';
 
-      // Determine new status based on current tab
+      // Determine new status based on current tab - Direct approval from pending
       switch (activeTab) {
         case 'pending':
-          newStatus = 'forwardedCash'; // First forward to cash approval
+          newStatus = 'approved'; // Direct approval from pending
           break;
         case 'bankApproval':
-          newStatus = 'approvedBank';
+          newStatus = 'approved';
           break;
         case 'cashApproval':
-          newStatus = 'approvedCash';
+          newStatus = 'approved';
           break;
         case 'approved':
           newStatus = 'approved';
@@ -408,7 +412,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                   BANK APPROVED
                 </>
               )}
-              {entry.entryStatus === 'approved' && (
+              {(entry.entryStatus === 'approved' || entry.entryStatus === 'approvedCash' || entry.entryStatus === 'approvedBank') && (
                 <>
                   <i className="bi bi-check-circle-fill me-1"></i>
                   APPROVED
