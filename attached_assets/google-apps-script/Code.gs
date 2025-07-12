@@ -189,7 +189,7 @@ function doPost(e) {
       case 'resendFareReceipt':
         result = resendFareReceipt(data);
         break;
-      
+
 
       // Fuel Payments Approval
       case 'approveFuelPayment':
@@ -198,7 +198,7 @@ function doPost(e) {
       case 'resendFuelPayment':
         result = resendFuelPayment(data);
         break;
-      
+
 
       // Other Payments Approval
       case 'approveOtherPayment':
@@ -207,7 +207,7 @@ function doPost(e) {
       case 'resendOtherPayment':
         result = resendOtherPayment(data);
         break;
-      
+
 
       // Adda Payments Approval
       case 'approveAddaPayment':
@@ -216,7 +216,7 @@ function doPost(e) {
       case 'resendAddaPayment':
         result = resendAddaPayment(data);
         break;
-      
+
 
       // Service Payments Approval
       case 'approveServicePayment':
@@ -225,7 +225,7 @@ function doPost(e) {
       case 'resendServicePayment':
         result = resendServicePayment(data);
         break;
-      
+
 
       // Union Payments Approval
       case 'approveUnionPayment':
@@ -234,8 +234,8 @@ function doPost(e) {
       case 'resendUnionPayment':
         result = resendUnionPayment(data);
         break;
-      
-      
+
+
       // Booking Entries Approval
       case 'approveBookingEntry':
         result = approveBookingEntry(data);
@@ -243,7 +243,7 @@ function doPost(e) {
       case 'resendBookingEntry':
         result = resendBookingEntry(data);
         break;
-      
+
 
       // ==================== LEGACY SUPPORT ====================
       case "updateFareEntry":
@@ -268,7 +268,12 @@ function doPost(e) {
     console.log(`✅ POST request completed - Action: ${action}, Success: ${result.success}`);
 
     return ContentService.createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON);
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeaders({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      });
 
   } catch (error) {
     console.error(`❌ POST request error:`, error);
@@ -277,7 +282,12 @@ function doPost(e) {
       success: false,
       error: "Server Error: " + error.toString(),
       timestamp: formatISTTimestamp()
-    })).setMimeType(ContentService.MimeType.JSON);
+    })).setMimeType(ContentService.MimeType.JSON)
+    .setHeaders({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      });
   }
 }
 
@@ -290,7 +300,12 @@ function doGet(e) {
       return ContentService.createTextOutput(JSON.stringify({
         success: false,
         error: "No action parameter provided in GET request",
-      })).setMimeType(ContentService.MimeType.JSON);
+      })).setMimeType(ContentService.MimeType.JSON)
+      .setHeaders({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      });
     }
 
     const action = e.parameter.action;
@@ -336,7 +351,12 @@ function doGet(e) {
     console.log(`✅ GET request completed - Action: ${action}, Success: ${result.success}`);
 
     return ContentService.createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON);
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeaders({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      });
 
   } catch (error) {
     console.error(`❌ GET request error:`, error);
@@ -344,6 +364,11 @@ function doGet(e) {
     return ContentService.createTextOutput(JSON.stringify({
       success: false,
       error: "GET Error: " + error.toString(),
-    })).setMimeType(ContentService.MimeType.JSON);
+    })).setMimeType(ContentService.MimeType.JSON)
+    .setHeaders({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      });
   }
 }
