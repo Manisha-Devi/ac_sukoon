@@ -84,6 +84,9 @@ function getScriptProperties() {
 
 
 
+// Spreadsheet configuration
+const SPREADSHEET_ID = "1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidEmhzgM";
+
 // Sheet names configuration - centralized configuration
 const SHEET_NAMES = {
   USERS: "Users",
