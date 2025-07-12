@@ -229,15 +229,16 @@ function BankSummary({ fareData, expenseData, currentUser }) {
     }));
   };
 
-  const handleForwardForApproval = async () => {
+  // Forward entries for bank approval (only forward, not approve)
+  const handleForwardForBankApproval = async () => {
     if (selectedEntries.length === 0) {
-      alert('Please select entries to forward for approval');
+      alert('Please select entries to forward for bank approval');
       return;
     }
 
     try {
       console.log('🔄 BankSummary: Forwarding entries for bank approval:', selectedEntries);
-      const approverName = currentUser?.fullName || currentUser?.username || "";
+      const forwarderName = currentUser?.fullName || currentUser?.username || "";
 
       // Step 1: Update local state immediately for UI feedback
       const updatedEntries = [...selectedEntries];
@@ -268,25 +269,25 @@ function BankSummary({ fareData, expenseData, currentUser }) {
           let result;
           switch (entry.entryType) {
             case 'daily':
-              result = await authService.updateFareReceiptStatus(entryId, "forwardedBank", approverName);
+              result = await authService.updateFareReceiptStatus(entryId, "forwardedBank", forwarderName);
               break;
             case 'booking':
-              result = await authService.updateBookingEntryStatus(entryId, "forwardedBank", approverName);
+              result = await authService.updateBookingEntryStatus(entryId, "forwardedBank", forwarderName);
               break;
             case 'fuel':
-              result = await authService.updateFuelPaymentStatus(entryId, "forwardedBank", approverName);
+              result = await authService.updateFuelPaymentStatus(entryId, "forwardedBank", forwarderName);
               break;
             case 'adda':
-              result = await authService.updateAddaPaymentStatus(entryId, "forwardedBank", approverName);
+              result = await authService.updateAddaPaymentStatus(entryId, "forwardedBank", forwarderName);
               break;
             case 'union':
-              result = await authService.updateUnionPaymentStatus(entryId, "forwardedBank", approverName);
+              result = await authService.updateUnionPaymentStatus(entryId, "forwardedBank", forwarderName);
               break;
             case 'service':
-              result = await authService.updateServicePaymentStatus(entryId, "forwardedBank", approverName);
+              result = await authService.updateServicePaymentStatus(entryId, "forwardedBank", forwarderName);
               break;
             case 'other':
-              result = await authService.updateOtherPaymentStatus(entryId, "forwardedBank", approverName);
+              result = await authService.updateOtherPaymentStatus(entryId, "forwardedBank", forwarderName);
               break;
             default:
               console.error(`Unknown entry type: ${entry.entryType}`);
@@ -316,7 +317,7 @@ function BankSummary({ fareData, expenseData, currentUser }) {
 
     } catch (error) {
       console.error('❌ Error forwarding entries:', error);
-      alert('Error forwarding entries for approval');
+      alert('Error forwarding entries for bank approval');
     }
   };
 
@@ -440,9 +441,9 @@ function BankSummary({ fareData, expenseData, currentUser }) {
           {selectedEntries.length > 0 && (
             <button 
               className="btn btn-primary btn-sm"
-              onClick={handleForwardForApproval}
+              onClick={handleForwardForBankApproval}
             >
-              <i className="bi bi-send"></i> Forward {selectedEntries.length} for Approval
+              <i className="bi bi-send"></i> Forward {selectedEntries.length} for Bank Approval
             </button>
           )}
         </div>
