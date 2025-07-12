@@ -26,7 +26,7 @@ function addServicePayment(data) {
       // Add headers exactly as specified
       sheet.getRange(1, 1, 1, 12).setValues([[
         "Timestamp", "Date", "ServiceType", "CashAmount", "BankAmount", 
-        "TotalAmount", "ServiceDetails", "SubmittedBy", "SubmittedBy", "EntryType", "EntryId",
+        "TotalAmount", "ServiceDetails", "SubmittedBy", "EntryType", "EntryId",
         "EntryStatus", "ApprovedBy"
       ]]);
     }

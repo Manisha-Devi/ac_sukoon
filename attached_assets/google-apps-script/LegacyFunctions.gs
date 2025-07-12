@@ -1,3 +1,4 @@
+
 // ============================================================================
 // LEGACY FUNCTIONS (LegacyFunctions.gs)
 // ============================================================================
@@ -6,205 +7,182 @@
 // All functions here route to their respective modern implementations
 
 // Legacy Fuel Payment functions
-function updateFuelPayment(data) {
+function updateFuelPaymentLegacy(data) {
   console.log('🔄 Legacy updateFuelPayment called, routing to modern implementation');
-  return FuelPayments.updateFuelPayment(data);
+  return updateFuelPayment(data);
 }
 
-function deleteFuelPayment(data) {
+function deleteFuelPaymentLegacy(data) {
   console.log('🔄 Legacy deleteFuelPayment called, routing to modern implementation');
-  return FuelPayments.deleteFuelPayment(data);
+  return deleteFuelPayment(data);
 }
 
 // Legacy Adda Payment functions
-function updateAddaPayment(data) {
+function updateAddaPaymentLegacy(data) {
   console.log('🔄 Legacy updateAddaPayment called, routing to modern implementation');
-  return AddaPayments.updateAddaPayment(data);
+  return updateAddaPayment(data);
 }
 
-function deleteAddaPayment(data) {
+function deleteAddaPaymentLegacy(data) {
   console.log('🔄 Legacy deleteAddaPayment called, routing to modern implementation');
-  return AddaPayments.deleteAddaPayment(data);
+  return deleteAddaPayment(data);
 }
 
 // Legacy Union Payment functions
-function updateUnionPayment(data) {
+function updateUnionPaymentLegacy(data) {
   console.log('🔄 Legacy updateUnionPayment called, routing to modern implementation');
-  return UnionPayments.updateUnionPayment(data);
+  return updateUnionPayment(data);
 }
 
-function deleteUnionPayment(data) {
+function deleteUnionPaymentLegacy(data) {
   console.log('🔄 Legacy deleteUnionPayment called, routing to modern implementation');
-  return UnionPayments.deleteUnionPayment(data);
+  return deleteUnionPayment(data);
 }
 
 // Legacy Service Payment functions
-function updateServicePayment(data) {
+function updateServicePaymentLegacy(data) {
   console.log('🔄 Legacy updateServicePayment called, routing to modern implementation');
-  return ServicePayments.updateServicePayment(data);
+  return updateServicePayment(data);
 }
 
-function deleteServicePayment(data) {
+function deleteServicePaymentLegacy(data) {
   console.log('🔄 Legacy deleteServicePayment called, routing to modern implementation');
-  return ServicePayments.deleteServicePayment(data);
+  return deleteServicePayment(data);
 }
 
 // Legacy Other Payment functions
-function updateOtherPayment(data) {
+function updateOtherPaymentLegacy(data) {
   console.log('🔄 Legacy updateOtherPayment called, routing to modern implementation');
-  return OtherPayments.updateOtherPayment(data);
+  return updateOtherPayment(data);
 }
 
-function deleteOtherPayment(data) {
+function deleteOtherPaymentLegacy(data) {
   console.log('🔄 Legacy deleteOtherPayment called, routing to modern implementation');
-  return OtherPayments.deleteOtherPayment(data);
+  return deleteOtherPayment(data);
 }
-
 
 // Legacy FareReceipts functions
-function updateFareReceipt(data) {
+function updateFareReceiptLegacy(data) {
   console.log('🔄 Legacy updateFareReceipt called, routing to modern implementation');
-  return FareReceipts.updateFareReceipt(data);
+  return updateFareReceipt(data);
 }
 
-function deleteFareReceipt(data) {
+function deleteFareReceiptLegacy(data) {
   console.log('🔄 Legacy deleteFareReceipt called, routing to modern implementation');
-  return FareReceipts.deleteFareReceipt(data);
+  return deleteFareReceipt(data);
 }
 
 // Legacy BookingEntries functions
-function updateBookingEntry(data) {
+function updateBookingEntryLegacy(data) {
   console.log('🔄 Legacy updateBookingEntry called, routing to modern implementation');
-  return BookingEntries.updateBookingEntry(data);
+  return updateBookingEntry(data);
 }
 
-function deleteBookingEntry(data) {
+function deleteBookingEntryLegacy(data) {
   console.log('🔄 Legacy deleteBookingEntry called, routing to modern implementation');
-  return BookingEntries.deleteBookingEntry(data);
+  return deleteBookingEntry(data);
 }
 
 // Legacy OffDays functions
-function updateOffDay(data) {
+function updateOffDayLegacy(data) {
   console.log('🔄 Legacy updateOffDay called, routing to modern implementation');
-  return OffDays.updateOffDay(data);
+  return updateOffDay(data);
 }
 
-function deleteOffDay(data) {
+function deleteOffDayLegacy(data) {
   console.log('🔄 Legacy deleteOffDay called, routing to modern implementation');
-  return OffDays.deleteOffDay(data);
-}
-
-// Legacy Service Payment functions
-function updateServicePayment(data) {
-  console.log('🔄 Legacy updateServicePayment called, routing to modern implementation');
-  return ServicePayments.updateServicePayment(data);
-}
-
-function deleteServicePayment(data) {
-  console.log('🔄 Legacy deleteServicePayment called, routing to modern implementation');
-  return ServicePayments.deleteServicePayment(data);
-}
-
-// Legacy Other Payment functions
-function updateOtherPayment(data) {
-  console.log('🔄 Legacy updateOtherPayment called, routing to modern implementation');
-  return OtherPayments.updateOtherPayment(data);
-}
-
-function deleteOtherPayment(data) {
-  console.log('🔄 Legacy deleteOtherPayment called, routing to modern implementation');
-  return OtherPayments.deleteOtherPayment(data);
+  return deleteOffDay(data);
 }
 
 // Legacy Status Update Functions
 // ============================================================================
 
 // Legacy FuelPayments status functions
-function updateFuelPaymentStatus(data) {
+function updateFuelPaymentStatusLegacy(data) {
   console.log('🔄 Legacy updateFuelPaymentStatus called, routing to modern implementation');
-  return FuelPayments.updateFuelPaymentStatus(data);
+  return updateFuelPaymentStatus(data);
 }
 
-function approveFuelPayment(data) {
+function approveFuelPaymentLegacy(data) {
   console.log('🔄 Legacy approveFuelPayment called, routing to modern implementation');
-  return FuelPayments.approveFuelPayment(data);
+  return approveFuelPayment(data);
 }
 
 // Legacy AddaPayments status functions
-function updateAddaPaymentStatus(data) {
+function updateAddaPaymentStatusLegacy(data) {
   console.log('🔄 Legacy updateAddaPaymentStatus called, routing to modern implementation');
-  return AddaPayments.updateAddaPaymentStatus(data);
+  return updateAddaPaymentStatus(data);
 }
 
-function approveAddaPayment(data) {
+function approveAddaPaymentLegacy(data) {
   console.log('🔄 Legacy approveAddaPayment called, routing to modern implementation');
-  return AddaPayments.approveAddaPayment(data);
+  return approveAddaPayment(data);
 }
 
 // Legacy UnionPayments status functions
-function updateUnionPaymentStatus(data) {
+function updateUnionPaymentStatusLegacy(data) {
   console.log('🔄 Legacy updateUnionPaymentStatus called, routing to modern implementation');
-  return UnionPayments.updateUnionPaymentStatus(data);
+  return updateUnionPaymentStatus(data);
 }
 
-function approveUnionPayment(data) {
+function approveUnionPaymentLegacy(data) {
   console.log('🔄 Legacy approveUnionPayment called, routing to modern implementation');
-  return UnionPayments.approveUnionPayment(data);
+  return approveUnionPayment(data);
 }
 
 // Legacy ServicePayments status functions
-function updateServicePaymentStatus(data) {
+function updateServicePaymentStatusLegacy(data) {
   console.log('🔄 Legacy updateServicePaymentStatus called, routing to modern implementation');
-  return ServicePayments.updateServicePaymentStatus(data);
+  return updateServicePaymentStatus(data);
 }
 
-function approveServicePayment(data) {
+function approveServicePaymentLegacy(data) {
   console.log('🔄 Legacy approveServicePayment called, routing to modern implementation');
-  return ServicePayments.approveServicePayment(data);
+  return approveServicePayment(data);
 }
 
 // Legacy OtherPayments status functions
-function updateOtherPaymentStatus(data) {
+function updateOtherPaymentStatusLegacy(data) {
   console.log('🔄 Legacy updateOtherPaymentStatus called, routing to modern implementation');
-  return OtherPayments.updateOtherPaymentStatus(data);
+  return updateOtherPaymentStatus(data);
 }
 
-function approveOtherPayment(data) {
+function approveOtherPaymentLegacy(data) {
   console.log('🔄 Legacy approveOtherPayment called, routing to modern implementation');
-  return OtherPayments.approveOtherPayment(data);
+  return approveOtherPayment(data);
 }
 
 // Legacy FareReceipts status functions
-function updateFareReceiptStatus(data) {
+function updateFareReceiptStatusLegacy(data) {
   console.log('🔄 Legacy updateFareReceiptStatus called, routing to modern implementation');
-  return FareReceipts.updateFareReceiptStatus(data);
+  return updateFareReceiptStatus(data);
 }
 
-function approveFareReceipt(data) {
+function approveFareReceiptLegacy(data) {
   console.log('🔄 Legacy approveFareReceipt called, routing to modern implementation');
-  return FareReceipts.approveFareReceipt(data);
+  return approveFareReceipt(data);
 }
 
 // Legacy BookingEntries status functions
-function updateBookingEntryStatus(data) {
+function updateBookingEntryStatusLegacy(data) {
   console.log('🔄 Legacy updateBookingEntryStatus called, routing to modern implementation');
-  return BookingEntries.updateBookingEntryStatus(data);
+  return updateBookingEntryStatus(data);
 }
 
-function approveBookingEntry(data) {
+function approveBookingEntryLegacy(data) {
   console.log('🔄 Legacy approveBookingEntry called, routing to modern implementation');
-  return BookingEntries.approveBookingEntry(data);
+  return approveBookingEntry(data);
 }
 
 // Legacy OffDays status functions
-function updateOffDayStatus(data) {
+function updateOffDayStatusLegacy(data) {
   console.log('🔄 Legacy updateOffDayStatus called, routing to modern implementation');
-  return OffDays.updateOffDayStatus(data);
+  return updateOffDayStatus(data);
 }
 
-function approveOffDay(data) {
+function approveOffDayLegacy(data) {
   console.log('🔄 Legacy approveOffDay called, routing to modern implementation');
-  return OffDays.approveOffDay(data);
+  return approveOffDay(data);
 }
 
 // Legacy functions for backward compatibility with existing API calls
