@@ -250,7 +250,6 @@ function CashSummary({ fareData, expenseData, currentUser }) {
         if (!entry) continue;
 
         // Determine new status based on current entry status
-        const entry = filteredData.find(e => e.entryId === entryId);
         let newStatus = "forwardedCash";
         
         if (entry && entry.entryStatus === 'pending') {
