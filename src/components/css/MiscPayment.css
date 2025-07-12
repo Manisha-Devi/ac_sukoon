@@ -439,8 +439,9 @@
 .entry-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 10px;
+  gap: 8px;
 }
 
 .entry-actions {
@@ -481,31 +482,40 @@
 }
 
 .btn-edit, .btn-delete {
-  padding: 4px 8px;
+  padding: 6px 8px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   transition: var(--transition);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-edit {
-  background: rgba(96, 165, 250, 0.2);
+  background: rgba(96, 165, 250, 0.15);
   color: #2563eb;
+  border: 1px solid rgba(96, 165, 250, 0.3);
 }
 
 .btn-edit:hover {
-  background: rgba(96, 165, 250, 0.3);
+  background: rgba(96, 165, 250, 0.25);
   color: #1d4ed8;
+  transform: translateY(-1px);
 }
 
 .btn-delete {
-  background: rgba(248, 113, 113, 0.2);
+  background: rgba(248, 113, 113, 0.15);
   color: #dc2626;
+  border: 1px solid rgba(248, 113, 113, 0.3);
 }
 
 .btn-delete:hover {
-  background: rgba(248, 113, 113, 0.3);
+  background: rgba(248, 113, 113, 0.25);
   color: #b91c1c;
+  transform: translateY(-1px);
 }
 
 .button-group {
@@ -516,21 +526,23 @@
 }
 
 .entry-type {
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 25px;
+  font-size: 0.75rem;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
 }
 
 .entry-type.service {
-  background: rgba(74, 222, 128, 0.2);
-  color: #059669;
+  background: #4ade80;
+  color: white;
 }
 
 .entry-type.other {
-  background: rgba(96, 165, 250, 0.2);
-  color: #2563eb;
+  background: #60a5fa;
+  color: white;
 }
 
 .entry-content {
