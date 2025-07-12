@@ -1,3 +1,4 @@
+
 // ============================================================================
 // SERVICE PAYMENTS - COMPLETE CRUD OPERATIONS
 // ============================================================================
@@ -5,7 +6,8 @@
 /**
  * Add new Service Payment
  * Sheet Columns: A=Timestamp, B=Date, C=ServiceType, D=CashAmount, E=BankAmount, 
- *                F=TotalAmount, G=ServiceDetails, H=SubmittedBy, I=EntryType, J=EntryId
+ *                F=TotalAmount, G=ServiceDetails, H=SubmittedBy, I=EntryType, J=EntryId,
+ *                K=EntryStatus, L=ApprovedBy
  * @param {Object} data - Service payment data
  * @returns {Object} Success/error response with entry details
  */
@@ -26,13 +28,13 @@ function addServicePayment(data) {
       // Add headers exactly as specified
       sheet.getRange(1, 1, 1, 12).setValues([[
         "Timestamp", "Date", "ServiceType", "CashAmount", "BankAmount", 
-        "TotalAmount", "ServiceDetails", "SubmittedBy", "SubmittedBy", "EntryType", "EntryId",
+        "TotalAmount", "ServiceDetails", "SubmittedBy", "EntryType", "EntryId",
         "EntryStatus", "ApprovedBy"
       ]]);
     }
 
     // Generate entry ID if not provided
-    const entryId = data.entryId || generateEntryId();
+    const entryId = data.entryId || Utilities.getUuid();
 
     // Format timestamp (store only time part)
     const timeOnly = data.timestamp || 
