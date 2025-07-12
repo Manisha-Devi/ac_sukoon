@@ -35,7 +35,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
     }
 
     filterUserData();
-  }, [fareData, expenseData, dateFrom, dateTo, currentUser]);
+  }, [fareData, expenseData, dateFrom, dateTo, currentUser, allUsers]);
 
   const filterUserData = () => {
     if (!currentUser) {
@@ -126,7 +126,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
           approvedBy: 'System',
           description: `Fixed Cash - ${user.name}`
         }));
-      
+
       console.log('💰 Fixed Cash entries added:', fixedCashEntries.length);
       allData = [...allData, ...fixedCashEntries];
     }
@@ -272,7 +272,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
 
         // Determine new status based on current entry status
         let newStatus = "forwardedCash";
-        
+
         if (entry && entry.entryStatus === 'pending') {
           newStatus = "forwardedCash"; // pending -> forwardedCash
         } else if (entry && entry.entryStatus === 'approvedBank') {
@@ -371,7 +371,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
       window.removeEventListener('dataRefreshed', handleDataRefresh);
       window.removeEventListener('entryStatusUpdated', handleEntryStatusUpdate);
     };
-  }, []);
+  }, [allUsers]);
 
   return (
     <div className="cash-summary-container">

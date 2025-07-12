@@ -61,6 +61,14 @@ function App() {
   const handleLogin = (userData) => {
     setUser(userData);
     console.log('👤 User logged in via React state:', userData);
+          // Add current user to allUsers state
+          const currentUserForAllUsers = {
+            username: userData.username,
+            name: userData.fullName,
+            date: new Date().toISOString().split('T')[0],
+            fixedCash: userData.fixedCash || 0
+          };
+          setAllUsers([currentUserForAllUsers]);
   };
 
   // Handle user logout - Only clear React state
@@ -88,7 +96,6 @@ function App() {
         unionPayments,
         servicePayments,
         otherPayments,
-        users
       ] = await Promise.all([
         authService.getFareReceipts(),
         authService.getBookingEntries(),
@@ -98,7 +105,6 @@ function App() {
         authService.getUnionPayments(),
         authService.getServicePayments(),
         authService.getOtherPayments(),
-        authService.getAllUsers()
       ]);
 
       // Process fare data (fare receipts + booking entries)
@@ -166,22 +172,11 @@ function App() {
         })));
       }
 
-        // Process users data
-        let processedUsers = [];
-        if (users.success && users.data) {
-            processedUsers = users.data.map(user => ({
-                username: user.username,
-                name: user.fullName,
-                date: user.createdDate || new Date().toISOString().split('T')[0],
-                fixedCash: user.fixedCash || 0
-            }));
-            console.log('👥 All users loaded:', processedUsers.length);
-        }
+
 
       // Update parent state
       setFareData(combinedFareData);
       setExpenseData(combinedExpenseData);
-        setAllUsers(processedUsers);
 
 
       // Calculate and update totals
