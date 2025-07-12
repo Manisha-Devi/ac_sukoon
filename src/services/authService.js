@@ -192,10 +192,12 @@ class AuthService {
           // Add API key to request (skip for test and login actions)
           if (requestData.action !== 'test' && requestData.action !== 'login') {
             requestData = keysService.addApiKeyToRequest(requestData);
+            body = JSON.stringify(requestData);
           }
-          body = JSON.stringify(requestData);
+          // For login and test, use original body without API key
         } catch (error) {
-          console.error('❌ Error adding API key to request:', error);
+          console.error('❌ Error parsing request data:', error);
+          // For login and test requests, this is not a fatal error
           if (requestData && requestData.action !== 'test' && requestData.action !== 'login') {
             throw new Error('API key authentication required');
           }
