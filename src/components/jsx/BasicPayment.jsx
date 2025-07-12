@@ -166,16 +166,9 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
         dateOnly = unionFormData.date;
       }
 
-      // Validation: Ensure at least one amount is entered
-      if (cashAmount === 0 && bankAmount === 0) {
-        alert('❌ Please enter at least one amount (Cash or Bank)');
-        setIsLoading(false);
-        return;
-      }
-
       if (editingEntry) {
         // UPDATE: First update React state immediately
-        const oldTotal = editingEntry.totalAmount || 0;
+        const oldTotal = editingEntry.totalAmount;
         const updatedEntries = expenseData.map(entry => 
           entry.entryId === editingEntry.entryId 
             ? {
@@ -185,18 +178,18 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                 totalAmount: totalAmount,
                 date: dateOnly,
                 ...(activeTab === 'fuel' && {
-                  pumpName: fuelFormData.pumpName || '',
-                  liters: fuelFormData.liters || '',
-                  rate: fuelFormData.rate || '',
-                  remarks: fuelFormData.remarks || ''
+                  pumpName: fuelFormData.pumpName,
+                  liters: fuelFormData.liters,
+                  rate: fuelFormData.rate,
+                  remarks: fuelFormData.remarks
                 }),
                 ...(activeTab === 'adda' && {
-                  addaName: addaFormData.addaName || '',
-                  remarks: addaFormData.remarks || ''
+                  addaName: addaFormData.addaName,
+                  remarks: addaFormData.remarks
                 }),
                 ...(activeTab === 'union' && {
-                  unionName: unionFormData.unionName || '',
-                  remarks: unionFormData.remarks || ''
+                  unionName: unionFormData.unionName,
+                  remarks: unionFormData.remarks
                 })
               }
             : entry
@@ -468,88 +461,61 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
 
       const currentUserName = currentUser?.fullName || currentUser?.username;
 
-      if (!currentUserName) {
-        console.warn('⚠️ No current user found, skipping data load');
-        return;
-      }
-
-      // Load all payment types with error handling
-      const loadPaymentType = async (loadFunction, typeName) => {
-        try {
-          const result = await loadFunction();
-          console.log(`📊 ${typeName} result:`, result);
-          return result;
-        } catch (error) {
-          console.error(`❌ Error loading ${typeName}:`, error);
-          return { success: false, data: [] };
-        }
-      };
-
+      // Load all payment types
       const [fuelResult, addaResult, unionResult] = await Promise.all([
-        loadPaymentType(authService.getFuelPayments, 'Fuel Payments'),
-        loadPaymentType(authService.getAddaPayments, 'Adda Payments'), 
-        loadPaymentType(authService.getUnionPayments, 'Union Payments')
+        authService.getFuelPayments(),
+        authService.getAddaPayments(), 
+        authService.getUnionPayments()
       ]);
 
       const allPayments = [];
 
       // Process fuel payments
-      if (fuelResult.success && Array.isArray(fuelResult.data)) {
+      if (fuelResult.success && fuelResult.data) {
         const userFuelPayments = fuelResult.data
           .filter(entry => entry.submittedBy === currentUserName)
           .map(entry => ({
             ...entry,
             type: 'fuel',
-            entryType: 'fuel', // Ensure entryType is set
             timestamp: convertToTimeString(entry.timestamp),
-            date: convertToDateString(entry.date),
-            totalAmount: entry.totalAmount || (entry.cashAmount || 0) + (entry.bankAmount || 0)
+            date: convertToDateString(entry.date)
           }));
         allPayments.push(...userFuelPayments);
-        console.log(`✅ Loaded ${userFuelPayments.length} fuel payments for user: ${currentUserName}`);
       }
 
       // Process adda payments
-      if (addaResult.success && Array.isArray(addaResult.data)) {
+      if (addaResult.success && addaResult.data) {
         const userAddaPayments = addaResult.data
           .filter(entry => entry.submittedBy === currentUserName)
           .map(entry => ({
             ...entry,
             type: 'adda',
-            entryType: 'adda', // Ensure entryType is set
             timestamp: convertToTimeString(entry.timestamp),
-            date: convertToDateString(entry.date),
-            totalAmount: entry.totalAmount || (entry.cashAmount || 0) + (entry.bankAmount || 0)
+            date: convertToDateString(entry.date)
           }));
         allPayments.push(...userAddaPayments);
-        console.log(`✅ Loaded ${userAddaPayments.length} adda payments for user: ${currentUserName}`);
       }
 
       // Process union payments
-      if (unionResult.success && Array.isArray(unionResult.data)) {
+      if (unionResult.success && unionResult.data) {
         const userUnionPayments = unionResult.data
           .filter(entry => entry.submittedBy === currentUserName)
           .map(entry => ({
             ...entry,
             type: 'union',
-            entryType: 'union', // Ensure entryType is set
             timestamp: convertToTimeString(entry.timestamp),
-            date: convertToDateString(entry.date),
-            totalAmount: entry.totalAmount || (entry.cashAmount || 0) + (entry.bankAmount || 0)
+            date: convertToDateString(entry.date)
           }));
         allPayments.push(...userUnionPayments);
-        console.log(`✅ Loaded ${userUnionPayments.length} union payments for user: ${currentUserName}`);
       }
 
-      // Update expense data with payments - keep other expenses and replace payment entries
+      // Update expense data with payments
       const otherExpenses = expenseData.filter(entry => 
         !['fuel', 'adda', 'union'].includes(entry.type)
       );
-      
-      const updatedExpenseData = [...otherExpenses, ...allPayments];
-      setExpenseData(updatedExpenseData);
+      setExpenseData([...otherExpenses, ...allPayments]);
 
-      console.log(`✅ BasicPayment: Data loaded successfully - Total payments: ${allPayments.length}`);
+      console.log('✅ BasicPayment: Data loaded successfully');
 
     } catch (error) {
       console.error('❌ BasicPayment: Error loading data:', error);
