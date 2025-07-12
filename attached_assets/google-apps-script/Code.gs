@@ -16,11 +16,29 @@ const SPREADSHEET_ID = spreadsheetId || "1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidE
 // ============================================================================
 
 /**
+ * Create standardized response with CORS headers
+ */
+function createResponse(data) {
+  return ContentService.createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeaders({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    });
+}
+
+/**
  * Handle OPTIONS requests for CORS (Cross-Origin Resource Sharing)
  */
 function doOptions() {
   return ContentService.createTextOutput("")
-    .setMimeType(ContentService.MimeType.TEXT);
+    .setMimeType(ContentService.MimeType.TEXT)
+    .setHeaders({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    });
 }
 
 /**
@@ -296,23 +314,22 @@ function doPost(e) {
       default:
         result = { 
           success: false, 
-          error: `Invalid action: ${action}` 
+          error: `Invalid action: ${data.action}` 
         };
     }
 
-    console.log(`✅ POST request completed - Action: ${action}, Success: ${result.success}`);
+    console.log(`✅ POST request completed - Action: ${data.action}, Success: ${result.success}`);
 
-    return ContentService.createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON);
+    return createResponse(result);
 
   } catch (error) {
     console.error(`❌ POST request error:`, error);
 
-    return ContentService.createTextOutput(JSON.stringify({
+    return createResponse({
       success: false,
       error: "Server Error: " + error.toString(),
       timestamp: formatISTTimestamp()
-    })).setMimeType(ContentService.MimeType.JSON);
+    });
   }
 }
 
@@ -370,15 +387,14 @@ function doGet(e) {
 
     console.log(`✅ GET request completed - Action: ${action}, Success: ${result.success}`);
 
-    return ContentService.createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON);
+    return createResponse(result);
 
   } catch (error) {
     console.error(`❌ GET request error:`, error);
 
-    return ContentService.createTextOutput(JSON.stringify({
+    return createResponse({
       success: false,
       error: "GET Error: " + error.toString(),
-    })).setMimeType(ContentService.MimeType.JSON);
+    });
   }
 }
