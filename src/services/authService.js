@@ -1719,12 +1719,39 @@ class AuthService {
   }
 
   // Update Off Day Status (if needed)
-  async updateOffDayStatus(data) {
+  async updateOffDayStatus(entryId, newStatus, approverName) {
     try {
+      const data = {
+        entryId: entryId,
+        newStatus: newStatus,
+        approverName: approverName
+      };
       const response = await this.makeApprovalAPIRequest('updateOffDayStatus', data);
       return response;
     } catch (error) {
       console.error('Error updating off day status:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Approve Off Day Entry
+  async approveOffDay(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('approveOffDay', data);
+      return response;
+    } catch (error) {
+      console.error('Error approving off day:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Resend Off Day Entry
+  async resendOffDay(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('resendOffDay', data);
+      return response;
+    } catch (error) {
+      console.error('Error resending off day:', error);
       return { success: false, error: error.message };
     }
   }

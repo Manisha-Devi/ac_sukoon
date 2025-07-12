@@ -348,3 +348,55 @@ function approveOffDay(data) {
     };
   }
 }
+
+/**
+ * Resend Off Day Entry
+ * @param {Object} data - Resend data containing entryId
+ * @returns {Object} Success/error response
+ */
+function resendOffDay(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log(`🔄 Resending off day ID: ${entryId}`);
+
+    return updateOffDayStatus({
+      entryId: entryId,
+      newStatus: 'pending',
+      approverName: ''
+    });
+
+  } catch (error) {
+    console.error('❌ Error resending off day:', error);
+    return {
+      success: false,
+      error: 'Resend off day error: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Set Off Day to Waiting Status
+ * @param {Object} data - Waiting data containing entryId
+ * @returns {Object} Success/error response
+ */
+function setOffDayWaiting(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log(`⏳ Setting off day to waiting ID: ${entryId}`);
+
+    return updateOffDayStatus({
+      entryId: entryId,
+      newStatus: 'waiting',
+      approverName: ''
+    });
+
+  } catch (error) {
+    console.error('❌ Error setting off day to waiting:', error);
+    return {
+      success: false,
+      error: 'Set off day waiting error: ' + error.toString()
+    };
+  }
+}
