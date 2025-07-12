@@ -255,35 +255,48 @@ function BankSummary({ fareData, expenseData, currentUser }) {
         try {
           const authService = (await import('../../services/authService.js')).default;
 
-          if (entry.entryType === 'daily') {
-            authService.updateFareReceiptStatus(entryId, "forwardedBank", "").catch(error => {
-              console.error('Background API sync failed for fare receipt:', error);
-            });
-          } else if (entry.entryType === 'booking') {
-            authService.updateBookingEntryStatus(entryId, "forwardedBank", "").catch(error => {
-              console.error('Background API sync failed for booking entry:', error);
-            });
-          } else if (entry.entryType === 'fuel') {
-            authService.updateFuelPaymentStatus(entryId, "forwardedBank", "").catch(error => {
-              console.error('Background API sync failed for fuel payment:', error);
-            });
-          } else if (entry.entryType === 'adda') {
-            authService.updateAddaPaymentStatus(entryId, "forwardedBank", "").catch(error => {
-              console.error('Background API sync failed for adda payment:', error);
-            });
-          } else if (entry.entryType === 'union') {
-            authService.updateUnionPaymentStatus(entryId, "forwardedBank", "").catch(error => {
-              console.error('Background API sync failed for union payment:', error);
-            });
-          } else if (entry.entryType === 'service') {
-            authService.updateServicePaymentStatus(entryId, "forwardedBank", "").catch(error => {
-              console.error('Background API sync failed for service payment:', error);
-            });
-          } else if (entry.entryType === 'other') {
-            authService.updateOtherPaymentStatus(entryId, "forwardedBank", "").catch(error => {
-              console.error('Background API sync failed for other payment:', error);
-            });
-          }
+          // Call appropriate Google Sheets update function based on entry type
+          const updatePromises = selectedEntries.map(async (entryId) => {
+            const entry = filteredData.find(e => e.entryId === entryId);
+            if (!entry) return { success: false, error: 'Entry not found' };
+
+            try {
+              let result;
+              const approverName = currentUser?.fullName || currentUser?.username;
+              switch (entry.entryType) {
+                case 'daily':
+                  result = await authService.updateFareReceiptStatus(entryId, 'forwardedBank', approverName);
+                  break;
+                case 'booking':
+                  result = await authService.updateBookingEntryStatus(entryId, 'forwardedBank', approverName);
+                  break;
+                case 'fuel':
+                  result = await authService.updateFuelPaymentStatus(entryId, 'forwardedBank', approverName);
+                  break;
+                case 'adda':
+                  result = await authService.updateAddaPaymentStatus(entryId, 'forwardedBank', approverName);
+                  break;
+                case 'union':
+                  result = await authService.updateUnionPaymentStatus(entryId, 'forwardedBank', approverName);
+                  break;
+                case 'service':
+                  result = await authService.updateServicePaymentStatus(entryId, 'forwardedBank', approverName);
+                  break;
+                case 'other':
+                  result = await authService.updateOtherPaymentStatus(entryId, 'forwardedBank', approverName);
+                  break;
+                default:
+                  console.error(`Unsupported entry type: ${entry.entryType}`);
+                  return { success: false, error: 'Unsupported entry type' };
+              }
+              return result;
+            } catch (error) {
+              console.error(`Error updating entry ${entryId}:`, error);
+              return { success: false, error: error.message };
+            }
+          });
+
+          await Promise.all(updatePromises);
         } catch (error) {
           console.error('Error importing authService:', error);
         }
