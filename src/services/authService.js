@@ -15,6 +15,16 @@ class AuthService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
+      // Set temporary API key for login based on user type
+      keysService.setApiKeyForUser(userType);
+
+      const loginData = {
+        action: 'login',
+        username: username,
+        password: password,
+        userType: userType
+      };
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -23,12 +33,7 @@ class AuthService {
         signal: controller.signal,
         redirect: 'follow',
         mode: 'cors',
-        body: JSON.stringify({
-          action: 'login',
-          username: username,
-          password: password,
-          userType: userType
-        })
+        body: JSON.stringify(keysService.addApiKeyToRequest(loginData))
       });
 
       clearTimeout(timeoutId);
@@ -189,16 +194,16 @@ class AuthService {
         let requestData;
         try {
           requestData = JSON.parse(body);
-          // Add API key to request (skip for test and login actions)
-          if (requestData.action !== 'test' && requestData.action !== 'login') {
+          // Add API key to request (skip only for test action - login needs API key)
+          if (requestData.action !== 'test') {
             requestData = keysService.addApiKeyToRequest(requestData);
             body = JSON.stringify(requestData);
           }
-          // For login and test, use original body without API key
+          // Only test action uses original body without API key
         } catch (error) {
-          console.error('❌ Error parsing request data:', error);
-          // For login and test requests, this is not a fatal error
-          if (requestData && requestData.action !== 'test' && requestData.action !== 'login') {
+          console.error('❌ Error adding API key to request:', error);
+          // For test requests, this is not a fatal error
+          if (requestData && requestData.action !== 'test') {
             throw new Error('API key authentication required');
           }
         }
