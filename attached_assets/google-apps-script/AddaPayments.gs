@@ -363,3 +363,29 @@ function resendAddaPayment(data) {
     };
   }
 }
+
+/**
+ * Resend Adda Payment (Reset to pending status) - Alternative name for consistency
+ * @param {Object} data - Resend data containing entryId
+ * @returns {Object} Success/error response
+ */
+function resendAddaPayment(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log(`🔄 Resending adda payment ID: ${entryId} (alternative function)`);
+
+    return updateAddaPaymentStatus({
+      entryId: entryId,
+      newStatus: 'pending',
+      approverName: ''
+    });
+
+  } catch (error) {
+    console.error('❌ Error resending adda payment (alternative):', error);
+    return {
+      success: false,
+      error: 'Resend adda payment error: ' + error.toString()
+    };
+  }
+}

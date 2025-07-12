@@ -350,6 +350,32 @@ function approveOffDay(data) {
 }
 
 /**
+ * Resend Off Day (Reset to pending status)
+ * @param {Object} data - Resend data containing entryId
+ * @returns {Object} Success/error response
+ */
+function resendOffDay(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log(`🔄 Resending off day ID: ${entryId}`);
+
+    return updateOffDayStatus({
+      entryId: entryId,
+      newStatus: 'pending',
+      approverName: ''
+    });
+
+  } catch (error) {
+    console.error('❌ Error resending off day:', error);
+    return {
+      success: false,
+      error: 'Resend off day error: ' + error.toString()
+    };
+  }
+}
+
+/**
  * Resend Off Day Entry
  * @param {Object} data - Resend data containing entryId
  * @returns {Object} Success/error response

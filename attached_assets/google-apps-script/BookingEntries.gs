@@ -381,6 +381,32 @@ function approveBookingEntry(data) {
 }
 
 /**
+ * Resend Booking Entry (Reset to pending status)
+ * @param {Object} data - Resend data containing entryId
+ * @returns {Object} Success/error response
+ */
+function resendBookingEntry(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log(`🔄 Resending booking entry ID: ${entryId}`);
+
+    return updateBookingEntryStatus({
+      entryId: entryId,
+      newStatus: 'pending',
+      approverName: ''
+    });
+
+  } catch (error) {
+    console.error('❌ Error resending booking entry:', error);
+    return {
+      success: false,
+      error: 'Resend booking entry error: ' + error.toString()
+    };
+  }
+}
+
+/**
  * Resend Booking Entry
  * @param {Object} data - Resend data containing entryId
  * @returns {Object} Success/error response
