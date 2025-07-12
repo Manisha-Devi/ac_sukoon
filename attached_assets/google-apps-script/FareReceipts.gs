@@ -1,4 +1,3 @@
-
 /**
  * Add new Fare Receipt
  * Sheet Columns: A=Timestamp, B=Date, C=Route, D=CashAmount, E=BankAmount, 
@@ -152,7 +151,7 @@ function updateFareReceipt(data) {
 
     // Get FareReceipts sheet
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
-      .getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
+      .getSheetByName('FareReceipts');
 
     if (!sheet) {
       throw new Error('FareReceipts sheet not found');
@@ -227,7 +226,7 @@ function deleteFareReceipt(data) {
 
     // Get FareReceipts sheet
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
-      .getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
+      .getSheetByName('FareReceipts');
 
     if (!sheet) {
       throw new Error('FareReceipts sheet not found');
@@ -287,7 +286,7 @@ function updateFareReceiptStatus(data) {
 
     // Get FareReceipts sheet
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
-      .getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
+      .getSheetByName('FareReceipts');
 
     if (!sheet) {
       throw new Error('FareReceipts sheet not found');
