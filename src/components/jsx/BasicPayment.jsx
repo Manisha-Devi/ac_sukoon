@@ -2,6 +2,44 @@ import React, { useState, useEffect } from "react";
 import "../css/BasicPayment.css";
 import authService from '../../services/authService.js';
 
+// Helper function to format date for display - consistent format
+const formatDisplayDate = (dateStr) => {
+  if (!dateStr) return '';
+
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+
+    // Always show in "07 Sept 2025" format for consistency
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  } catch (error) {
+    return dateStr;
+  }
+};
+
+// Helper function to format time for display - simple format
+const formatDisplayTime = (timestampStr) => {
+  if (!timestampStr) return '';
+
+  try {
+    const date = new Date(timestampStr);
+    if (isNaN(date.getTime())) return timestampStr;
+
+    // Simple time format - HH:MM AM/PM
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  } catch (error) {
+    return timestampStr;
+  }
+};
+
 // Helper functions to convert ISO strings to proper format
 const convertToTimeString = (timestamp) => {
   if (!timestamp) return '';
@@ -91,13 +129,14 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
 
   // No automatic data loading - use centralized data from props
 
-  // Calculate totals for summary - only for current user
+  // Calculate totals for summary - only for current user and exclude approved entries
   const calculateSummaryTotals = () => {
     const currentUserName = currentUser?.fullName || currentUser?.username;
 
     const userExpenseData = expenseData.filter(entry => 
       (entry.type === 'fuel' || entry.type === 'adda' || entry.type === 'union') &&
-      entry.submittedBy === currentUserName
+      entry.submittedBy === currentUserName &&
+      entry.entryStatus !== 'approved'
     );
 
     const fuelTotal = userExpenseData.filter(entry => entry.type === 'fuel')
@@ -126,7 +165,8 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
 
     return expenseData.filter(entry => 
       (entry.type === 'fuel' || entry.type === 'adda' || entry.type === 'union') &&
-      entry.submittedBy === currentUserName
+      entry.submittedBy === currentUserName &&
+      entry.entryStatus !== 'approved'
     ).sort((a, b) => b.entryId - a.entryId);
   };
 
@@ -815,8 +855,8 @@ function BasicPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBo
                       </div>
                       <div className="entry-date">
                         <small className="text-muted">
-                          <div>{entry.date}</div>
-                          <div className="timestamp">{entry.timestamp || ''}</div>
+                          <div>{formatDisplayDate(entry.date)}</div>
+                          <div className="timestamp">{formatDisplayTime(entry.timestamp)}</div>
                         </small>
                       </div>
                       <div className="entry-content">
