@@ -1,10 +1,20 @@
 
+
 // ============================================================================
 // LEGACY FUNCTIONS (LegacyFunctions.gs)
 // ============================================================================
 
 // This file maintains compatibility with older API calls
 // All functions here route to their respective modern implementations
+
+// Get the spreadsheet ID from script properties
+const SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('SHEET_ID') || 
+                      '1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidEmhzgM';
+
+// Generate unique entry ID
+function generateEntryId() {
+  return Date.now().toString();
+}
 
 // Legacy Fuel Payment functions
 function updateFuelPaymentLegacy(data) {
@@ -20,9 +30,67 @@ function deleteFuelPaymentLegacy(data) {
 // Direct function aliases for backward compatibility
 function updateFuelPayment(data) {
   try {
-    return updateFuelPaymentLegacy ? updateFuelPaymentLegacy(data) : 
-           typeof updateFuelPaymentStatus !== 'undefined' ? updateFuelPaymentStatus(data) : 
-           { success: false, error: 'Function not implemented' };
+    const entryId = data.entryId;
+    const updatedData = data.updatedData;
+
+    console.log(`📝 Updating fuel payment ID: ${entryId}`, updatedData);
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.FUEL_PAYMENTS);
+
+    if (!sheet) {
+      throw new Error('FuelPayments sheet not found');
+    }
+
+    const entryIdColumn = 12; // Column L contains Entry ID
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error(`Fuel payment not found with ID: ${entryId}`);
+    }
+
+    // Update only provided fields
+    if (updatedData.date !== undefined) {
+      sheet.getRange(rowIndex, 2).setValue(updatedData.date);
+    }
+    if (updatedData.pumpName !== undefined) {
+      sheet.getRange(rowIndex, 3).setValue(updatedData.pumpName);
+    }
+    if (updatedData.liters !== undefined) {
+      sheet.getRange(rowIndex, 4).setValue(updatedData.liters);
+    }
+    if (updatedData.rate !== undefined) {
+      sheet.getRange(rowIndex, 5).setValue(updatedData.rate);
+    }
+    if (updatedData.cashAmount !== undefined) {
+      sheet.getRange(rowIndex, 6).setValue(updatedData.cashAmount);
+    }
+    if (updatedData.bankAmount !== undefined) {
+      sheet.getRange(rowIndex, 7).setValue(updatedData.bankAmount);
+    }
+    if (updatedData.totalAmount !== undefined) {
+      sheet.getRange(rowIndex, 8).setValue(updatedData.totalAmount);
+    }
+    if (updatedData.remarks !== undefined) {
+      sheet.getRange(rowIndex, 9).setValue(updatedData.remarks);
+    }
+
+    console.log(`✅ Fuel payment updated successfully - ID: ${entryId}, Row: ${rowIndex}`);
+
+    return {
+      success: true,
+      message: 'Fuel payment updated successfully',
+      entryId: entryId,
+      updatedRow: rowIndex
+    };
   } catch (error) {
     console.error('❌ updateFuelPayment error:', error);
     return { success: false, error: error.toString() };
@@ -31,8 +99,43 @@ function updateFuelPayment(data) {
 
 function deleteFuelPayment(data) {
   try {
-    return deleteFuelPaymentLegacy ? deleteFuelPaymentLegacy(data) : 
-           { success: false, error: 'Function not implemented' };
+    const entryId = data.entryId;
+
+    console.log(`🗑️ Deleting fuel payment ID: ${entryId}`);
+
+    // Get FuelPayments sheet
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.FUEL_PAYMENTS);
+
+    if (!sheet) {
+      throw new Error('FuelPayments sheet not found');
+    }
+
+    const entryIdColumn = 12; // Column L contains Entry ID
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error(`Fuel payment not found with ID: ${entryId}`);
+    }
+
+    sheet.deleteRow(rowIndex);
+
+    console.log(`✅ Fuel payment deleted successfully - ID: ${entryId}, Row: ${rowIndex}`);
+
+    return {
+      success: true,
+      message: 'Fuel payment deleted successfully',
+      entryId: entryId,
+      deletedRow: rowIndex
+    };
   } catch (error) {
     console.error('❌ deleteFuelPayment error:', error);
     return { success: false, error: error.toString() };
@@ -86,8 +189,61 @@ function deleteOtherPaymentLegacy(data) {
 // Direct function aliases for Adda Payments
 function updateAddaPayment(data) {
   try {
-    return updateAddaPaymentLegacy ? updateAddaPaymentLegacy(data) : 
-           { success: false, error: 'Function not implemented' };
+    const entryId = data.entryId;
+    const updatedData = data.updatedData;
+
+    console.log(`📝 Updating adda payment ID: ${entryId}`, updatedData);
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.ADDA_PAYMENTS);
+
+    if (!sheet) {
+      throw new Error('AddaPayments sheet not found');
+    }
+
+    const entryIdColumn = 10; // Column J contains Entry ID
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error(`Adda payment not found with ID: ${entryId}`);
+    }
+
+    // Update only provided fields
+    if (updatedData.date !== undefined) {
+      sheet.getRange(rowIndex, 2).setValue(updatedData.date);
+    }
+    if (updatedData.addaName !== undefined) {
+      sheet.getRange(rowIndex, 3).setValue(updatedData.addaName);
+    }
+    if (updatedData.cashAmount !== undefined) {
+      sheet.getRange(rowIndex, 4).setValue(updatedData.cashAmount);
+    }
+    if (updatedData.bankAmount !== undefined) {
+      sheet.getRange(rowIndex, 5).setValue(updatedData.bankAmount);
+    }
+    if (updatedData.totalAmount !== undefined) {
+      sheet.getRange(rowIndex, 6).setValue(updatedData.totalAmount);
+    }
+    if (updatedData.remarks !== undefined) {
+      sheet.getRange(rowIndex, 7).setValue(updatedData.remarks);
+    }
+
+    console.log(`✅ Adda payment updated successfully - ID: ${entryId}, Row: ${rowIndex}`);
+
+    return {
+      success: true,
+      message: 'Adda payment updated successfully',
+      entryId: entryId,
+      updatedRow: rowIndex
+    };
   } catch (error) {
     console.error('❌ updateAddaPayment error:', error);
     return { success: false, error: error.toString() };
@@ -96,8 +252,42 @@ function updateAddaPayment(data) {
 
 function deleteAddaPayment(data) {
   try {
-    return deleteAddaPaymentLegacy ? deleteAddaPaymentLegacy(data) : 
-           { success: false, error: 'Function not implemented' };
+    const entryId = data.entryId;
+
+    console.log(`🗑️ Deleting adda payment ID: ${entryId}`);
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.ADDA_PAYMENTS);
+
+    if (!sheet) {
+      throw new Error('AddaPayments sheet not found');
+    }
+
+    const entryIdColumn = 10; // Column J contains Entry ID
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error(`Adda payment not found with ID: ${entryId}`);
+    }
+
+    sheet.deleteRow(rowIndex);
+
+    console.log(`✅ Adda payment deleted successfully - ID: ${entryId}, Row: ${rowIndex}`);
+
+    return {
+      success: true,
+      message: 'Adda payment deleted successfully',
+      entryId: entryId,
+      deletedRow: rowIndex
+    };
   } catch (error) {
     console.error('❌ deleteAddaPayment error:', error);
     return { success: false, error: error.toString() };
@@ -107,8 +297,61 @@ function deleteAddaPayment(data) {
 // Direct function aliases for Union Payments
 function updateUnionPayment(data) {
   try {
-    return updateUnionPaymentLegacy ? updateUnionPaymentLegacy(data) : 
-           { success: false, error: 'Function not implemented' };
+    const entryId = data.entryId;
+    const updatedData = data.updatedData;
+
+    console.log(`📝 Updating union payment ID: ${entryId}`, updatedData);
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.UNION_PAYMENTS);
+
+    if (!sheet) {
+      throw new Error('UnionPayments sheet not found');
+    }
+
+    const entryIdColumn = 10; // Column J contains Entry ID
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error(`Union payment not found with ID: ${entryId}`);
+    }
+
+    // Update only provided fields
+    if (updatedData.date !== undefined) {
+      sheet.getRange(rowIndex, 2).setValue(updatedData.date);
+    }
+    if (updatedData.unionName !== undefined) {
+      sheet.getRange(rowIndex, 3).setValue(updatedData.unionName);
+    }
+    if (updatedData.cashAmount !== undefined) {
+      sheet.getRange(rowIndex, 4).setValue(updatedData.cashAmount);
+    }
+    if (updatedData.bankAmount !== undefined) {
+      sheet.getRange(rowIndex, 5).setValue(updatedData.bankAmount);
+    }
+    if (updatedData.totalAmount !== undefined) {
+      sheet.getRange(rowIndex, 6).setValue(updatedData.totalAmount);
+    }
+    if (updatedData.remarks !== undefined) {
+      sheet.getRange(rowIndex, 7).setValue(updatedData.remarks);
+    }
+
+    console.log(`✅ Union payment updated successfully - ID: ${entryId}, Row: ${rowIndex}`);
+
+    return {
+      success: true,
+      message: 'Union payment updated successfully',
+      entryId: entryId,
+      updatedRow: rowIndex
+    };
   } catch (error) {
     console.error('❌ updateUnionPayment error:', error);
     return { success: false, error: error.toString() };
@@ -117,10 +360,152 @@ function updateUnionPayment(data) {
 
 function deleteUnionPayment(data) {
   try {
-    return deleteUnionPaymentLegacy ? deleteUnionPaymentLegacy(data) : 
-           { success: false, error: 'Function not implemented' };
+    const entryId = data.entryId;
+
+    console.log(`🗑️ Deleting union payment ID: ${entryId}`);
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.UNION_PAYMENTS);
+
+    if (!sheet) {
+      throw new Error('UnionPayments sheet not found');
+    }
+
+    const entryIdColumn = 10; // Column J contains Entry ID
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error(`Union payment not found with ID: ${entryId}`);
+    }
+
+    sheet.deleteRow(rowIndex);
+
+    console.log(`✅ Union payment deleted successfully - ID: ${entryId}, Row: ${rowIndex}`);
+
+    return {
+      success: true,
+      message: 'Union payment deleted successfully',
+      entryId: entryId,
+      deletedRow: rowIndex
+    };
   } catch (error) {
     console.error('❌ deleteUnionPayment error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+// Direct function aliases for Service Payments
+function updateServicePayment(data) {
+  try {
+    const entryId = data.entryId;
+    const updatedData = data.updatedData;
+
+    console.log(`📝 Updating service payment ID: ${entryId}`, updatedData);
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.SERVICE_PAYMENTS);
+
+    if (!sheet) {
+      throw new Error('ServicePayments sheet not found');
+    }
+
+    const entryIdColumn = 10; // Column J contains Entry ID
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error(`Service payment not found with ID: ${entryId}`);
+    }
+
+    // Update only provided fields
+    if (updatedData.date !== undefined) {
+      sheet.getRange(rowIndex, 2).setValue(updatedData.date);
+    }
+    if (updatedData.serviceType !== undefined) {
+      sheet.getRange(rowIndex, 3).setValue(updatedData.serviceType);
+    }
+    if (updatedData.cashAmount !== undefined) {
+      sheet.getRange(rowIndex, 4).setValue(updatedData.cashAmount);
+    }
+    if (updatedData.bankAmount !== undefined) {
+      sheet.getRange(rowIndex, 5).setValue(updatedData.bankAmount);
+    }
+    if (updatedData.totalAmount !== undefined) {
+      sheet.getRange(rowIndex, 6).setValue(updatedData.totalAmount);
+    }
+    if (updatedData.serviceDetails !== undefined) {
+      sheet.getRange(rowIndex, 7).setValue(updatedData.serviceDetails);
+    }
+
+    console.log(`✅ Service payment updated successfully - ID: ${entryId}, Row: ${rowIndex}`);
+
+    return {
+      success: true,
+      message: 'Service payment updated successfully',
+      entryId: entryId,
+      updatedRow: rowIndex
+    };
+  } catch (error) {
+    console.error('❌ updateServicePayment error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+function deleteServicePayment(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log(`🗑️ Deleting service payment ID: ${entryId}`);
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.SERVICE_PAYMENTS);
+
+    if (!sheet) {
+      throw new Error('ServicePayments sheet not found');
+    }
+
+    const entryIdColumn = 10; // Column J contains Entry ID
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error(`Service payment not found with ID: ${entryId}`);
+    }
+
+    sheet.deleteRow(rowIndex);
+
+    console.log(`✅ Service payment deleted successfully - ID: ${entryId}, Row: ${rowIndex}`);
+
+    return {
+      success: true,
+      message: 'Service payment deleted successfully',
+      entryId: entryId,
+      deletedRow: rowIndex
+    };
+  } catch (error) {
+    console.error('❌ deleteServicePayment error:', error);
     return { success: false, error: error.toString() };
   }
 }
@@ -128,8 +513,61 @@ function deleteUnionPayment(data) {
 // Direct function aliases for Other Payments
 function updateOtherPayment(data) {
   try {
-    return updateOtherPaymentLegacy ? updateOtherPaymentLegacy(data) : 
-           { success: false, error: 'Function not implemented' };
+    const entryId = data.entryId;
+    const updatedData = data.updatedData;
+
+    console.log(`📝 Updating other payment ID: ${entryId}`, updatedData);
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.OTHER_PAYMENTS);
+
+    if (!sheet) {
+      throw new Error('OtherPayments sheet not found');
+    }
+
+    const entryIdColumn = 10; // Column J contains Entry ID
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error(`Other payment not found with ID: ${entryId}`);
+    }
+
+    // Update only provided fields
+    if (updatedData.date !== undefined) {
+      sheet.getRange(rowIndex, 2).setValue(updatedData.date);
+    }
+    if (updatedData.paymentType !== undefined) {
+      sheet.getRange(rowIndex, 3).setValue(updatedData.paymentType);
+    }
+    if (updatedData.cashAmount !== undefined) {
+      sheet.getRange(rowIndex, 4).setValue(updatedData.cashAmount);
+    }
+    if (updatedData.bankAmount !== undefined) {
+      sheet.getRange(rowIndex, 5).setValue(updatedData.bankAmount);
+    }
+    if (updatedData.totalAmount !== undefined) {
+      sheet.getRange(rowIndex, 6).setValue(updatedData.totalAmount);
+    }
+    if (updatedData.paymentDetails !== undefined) {
+      sheet.getRange(rowIndex, 7).setValue(updatedData.paymentDetails);
+    }
+
+    console.log(`✅ Other payment updated successfully - ID: ${entryId}, Row: ${rowIndex}`);
+
+    return {
+      success: true,
+      message: 'Other payment updated successfully',
+      entryId: entryId,
+      updatedRow: rowIndex
+    };
   } catch (error) {
     console.error('❌ updateOtherPayment error:', error);
     return { success: false, error: error.toString() };
@@ -138,8 +576,42 @@ function updateOtherPayment(data) {
 
 function deleteOtherPayment(data) {
   try {
-    return deleteOtherPaymentLegacy ? deleteOtherPaymentLegacy(data) : 
-           { success: false, error: 'Function not implemented' };
+    const entryId = data.entryId;
+
+    console.log(`🗑️ Deleting other payment ID: ${entryId}`);
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.OTHER_PAYMENTS);
+
+    if (!sheet) {
+      throw new Error('OtherPayments sheet not found');
+    }
+
+    const entryIdColumn = 10; // Column J contains Entry ID
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error(`Other payment not found with ID: ${entryId}`);
+    }
+
+    sheet.deleteRow(rowIndex);
+
+    console.log(`✅ Other payment deleted successfully - ID: ${entryId}, Row: ${rowIndex}`);
+
+    return {
+      success: true,
+      message: 'Other payment deleted successfully',
+      entryId: entryId,
+      deletedRow: rowIndex
+    };
   } catch (error) {
     console.error('❌ deleteOtherPayment error:', error);
     return { success: false, error: error.toString() };
@@ -352,3 +824,4 @@ function deleteFareEntryLegacy(data) {
     };
   }
 }
+
