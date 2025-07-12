@@ -16,31 +16,11 @@ const SPREADSHEET_ID = spreadsheetId || "1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidE
 // ============================================================================
 
 /**
- * Create standardized response with CORS headers
- */
-function createResponse(data) {
-  return ContentService.createTextOutput(JSON.stringify(data))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Max-Age': '86400'
-    });
-}
-
-/**
- * Handle OPTIONS requests with CORS support
+ * Handle OPTIONS requests for CORS (Cross-Origin Resource Sharing)
  */
 function doOptions() {
   return ContentService.createTextOutput("")
-    .setMimeType(ContentService.MimeType.TEXT)
-    .setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Max-Age': '86400'
-    });
+    .setMimeType(ContentService.MimeType.TEXT);
 }
 
 /**
@@ -48,33 +28,18 @@ function doOptions() {
  */
 function doPost(e) {
   try {
-    console.log("📥 Received POST request");
-
-    // Parse request data
-    let data;
-    try {
-      data = JSON.parse(e.postData.contents);
-    } catch (parseError) {
-      console.error("❌ Invalid JSON in request:", parseError);
-      return createResponse({ success: false, error: "Invalid JSON format" });
+    if (!e || !e.postData || !e.postData.contents) {
+      throw new Error("No data received in POST request");
     }
 
-    console.log("📋 Request action:", data.action);
-
-    // Skip authentication for test endpoint
-    if (data.action !== 'test') {
-      // Authenticate request using API key
-      const authResult = authenticateRequest(data);
-      if (!authResult.success) {
-        console.log("❌ Authentication failed:", authResult.error);
-        return createResponse(authResult);
-      }
-      console.log("✅ Request authenticated successfully");
-    }
-
-    // Route requests based on action
+    const data = JSON.parse(e.postData.contents);
+    const action = data.action;
     let result;
-    switch (data.action) {
+
+    console.log(`📥 Incoming POST request - Action: ${action}`);
+
+    // Route request to appropriate handler based on action
+    switch (action) {
       // ==================== AUTHENTICATION ====================
       case "login":
         result = handleLogin(data);
@@ -221,35 +186,6 @@ function doPost(e) {
       case "updateOtherPaymentStatus":
         result = updateOtherPaymentStatus(data);
         break;
-      case "approveOtherPayment":
-        result = approveOtherPayment(data);
-        break;
-      case "resendOtherPayment":
-        result = resendOtherPayment(data);
-        break;
-
-      // Resend operations for all entry types
-      case "resendFareReceipt":
-        result = resendFareReceipt(data);
-        break;
-      case "resendBookingEntry":
-        result = resendBookingEntry(data);
-        break;
-      case "resendFuelPayment":
-        result = resendFuelPayment(data);
-        break;
-      case "resendAddaPayment":
-        result = resendAddaPayment(data);
-        break;
-      case "resendUnionPayment":
-        result = resendUnionPayment(data);
-        break;
-      case "resendServicePayment":
-        result = resendServicePayment(data);
-        break;
-      case "resendOffDay":
-        result = resendOffDay(data);
-        break;
 
       // ==================== APPROVAL WORKFLOW OPERATIONS ====================
       // Fare Receipts Approval
@@ -259,6 +195,9 @@ function doPost(e) {
       case 'resendFareReceipt':
         result = resendFareReceipt(data);
         break;
+      case 'setFareReceiptWaiting':
+        result = setFareReceiptWaiting(data);
+        break;
 
       // Fuel Payments Approval
       case 'approveFuelPayment':
@@ -266,6 +205,9 @@ function doPost(e) {
         break;
       case 'resendFuelPayment':
         result = resendFuelPayment(data);
+        break;
+      case 'setFuelPaymentWaiting':
+        result = setFuelPaymentWaiting(data);
         break;
 
       // Other Payments Approval
@@ -275,6 +217,9 @@ function doPost(e) {
       case 'resendOtherPayment':
         result = resendOtherPayment(data);
         break;
+      case 'setOtherPaymentWaiting':
+        result = setOtherPaymentWaiting(data);
+        break;
 
       // Adda Payments Approval
       case 'approveAddaPayment':
@@ -282,6 +227,9 @@ function doPost(e) {
         break;
       case 'resendAddaPayment':
         result = resendAddaPayment(data);
+        break;
+      case 'setAddaPaymentWaiting':
+        result = setAddaPaymentWaiting(data);
         break;
 
       // Service Payments Approval
@@ -291,6 +239,9 @@ function doPost(e) {
       case 'resendServicePayment':
         result = resendServicePayment(data);
         break;
+      case 'setServicePaymentWaiting':
+        result = setServicePaymentWaiting(data);
+        break;
 
       // Union Payments Approval
       case 'approveUnionPayment':
@@ -298,6 +249,9 @@ function doPost(e) {
         break;
       case 'resendUnionPayment':
         result = resendUnionPayment(data);
+        break;
+      case 'setUnionPaymentWaiting':
+        result = setUnionPaymentWaiting(data);
         break;
 
       // ==================== LEGACY SUPPORT ====================
@@ -316,22 +270,23 @@ function doPost(e) {
       default:
         result = { 
           success: false, 
-          error: `Invalid action: ${data.action}` 
+          error: `Invalid action: ${action}` 
         };
     }
 
-    console.log(`✅ POST request completed - Action: ${data.action}, Success: ${result.success}`);
+    console.log(`✅ POST request completed - Action: ${action}, Success: ${result.success}`);
 
-    return createResponse(result);
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
     console.error(`❌ POST request error:`, error);
 
-    return createResponse({
+    return ContentService.createTextOutput(JSON.stringify({
       success: false,
       error: "Server Error: " + error.toString(),
       timestamp: formatISTTimestamp()
-    });
+    })).setMimeType(ContentService.MimeType.JSON);
   }
 }
 
@@ -341,10 +296,10 @@ function doPost(e) {
 function doGet(e) {
   try {
     if (!e || !e.parameter || !e.parameter.action) {
-      return createResponse({
+      return ContentService.createTextOutput(JSON.stringify({
         success: false,
         error: "No action parameter provided in GET request",
-      });
+      })).setMimeType(ContentService.MimeType.JSON);
     }
 
     const action = e.parameter.action;
@@ -389,14 +344,15 @@ function doGet(e) {
 
     console.log(`✅ GET request completed - Action: ${action}, Success: ${result.success}`);
 
-    return createResponse(result);
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
     console.error(`❌ GET request error:`, error);
 
-    return createResponse({
+    return ContentService.createTextOutput(JSON.stringify({
       success: false,
       error: "GET Error: " + error.toString(),
-    });
+    })).setMimeType(ContentService.MimeType.JSON);
   }
 }

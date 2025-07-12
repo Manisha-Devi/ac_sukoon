@@ -344,29 +344,3 @@ function approveFuelPayment(data) {
     };
   }
 }
-
-/**
- * Resend Fuel Payment (Reset to pending for fresh approval)
- * @param {Object} data - Resend data containing entryId
- * @returns {Object} Success/error response
- */
-function resendFuelPayment(data) {
-  try {
-    const entryId = data.entryId;
-
-    console.log(`🔄 Resending fuel payment ID: ${entryId} for fresh approval`);
-
-    return updateFuelPaymentStatus({
-      entryId: entryId,
-      newStatus: 'pending',
-      approverName: ''
-    });
-
-  } catch (error) {
-    console.error('❌ Error resending fuel payment:', error);
-    return {
-      success: false,
-      error: 'Resend fuel payment error: ' + error.toString()
-    };
-  }
-}

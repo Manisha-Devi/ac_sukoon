@@ -207,57 +207,6 @@ function approveOffDay(data) {
   return OffDays.approveOffDay(data);
 }
 
-// Legacy Resend Functions
-// ============================================================================
-
-// Legacy FareReceipts resend functions
-function resendFareReceipt(data) {
-  console.log('🔄 Legacy resendFareReceipt called, routing to modern implementation');
-  return FareReceipts.resendFareReceipt(data);
-}
-
-// Legacy BookingEntries resend functions
-function resendBookingEntry(data) {
-  console.log('🔄 Legacy resendBookingEntry called, routing to modern implementation');
-  return BookingEntries.resendBookingEntry(data);
-}
-
-// Legacy OffDays resend functions
-function resendOffDay(data) {
-  console.log('🔄 Legacy resendOffDay called, routing to modern implementation');
-  return OffDays.resendOffDay(data);
-}
-
-// Legacy FuelPayments resend functions
-function resendFuelPayment(data) {
-  console.log('🔄 Legacy resendFuelPayment called, routing to modern implementation');
-  return FuelPayments.resendFuelPayment(data);
-}
-
-// Legacy AddaPayments resend functions
-function resendAddaPayment(data) {
-  console.log('🔄 Legacy resendAddaPayment called, routing to modern implementation');
-  return AddaPayments.resendAddaPayment(data);
-}
-
-// Legacy UnionPayments resend functions
-function resendUnionPayment(data) {
-  console.log('🔄 Legacy resendUnionPayment called, routing to modern implementation');
-  return UnionPayments.resendUnionPayment(data);
-}
-
-// Legacy ServicePayments resend functions
-function resendServicePayment(data) {
-  console.log('🔄 Legacy resendServicePayment called, routing to modern implementation');
-  return ServicePayments.resendServicePayment(data);
-}
-
-// Legacy OtherPayments resend functions
-function resendOtherPayment(data) {
-  console.log('🔄 Legacy resendOtherPayment called, routing to modern implementation');
-  return OtherPayments.resendOtherPayment(data);
-}
-
 // Legacy functions for backward compatibility with existing API calls
 // ============================================================================
 

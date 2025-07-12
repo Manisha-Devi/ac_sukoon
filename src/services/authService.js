@@ -1,5 +1,3 @@
-import keysService from './keys.js';
-
 // Authentication service for Google Sheets database
 class AuthService {
   constructor() {
@@ -15,16 +13,6 @@ class AuthService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-      // Set temporary API key for login based on user type
-      keysService.setApiKeyForUser(userType);
-
-      const loginData = {
-        action: 'login',
-        username: username,
-        password: password,
-        userType: userType
-      };
-
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -33,7 +21,12 @@ class AuthService {
         signal: controller.signal,
         redirect: 'follow',
         mode: 'cors',
-        body: JSON.stringify(keysService.addApiKeyToRequest(loginData))
+        body: JSON.stringify({
+          action: 'login',
+          username: username,
+          password: password,
+          userType: userType
+        })
       });
 
       clearTimeout(timeoutId);
@@ -63,16 +56,6 @@ class AuthService {
       console.log('🔍 Authentication response:', result);
 
       if (result.success) {
-        // Initialize API key for the authenticated user
-        const keyInitialized = keysService.initializeForUser(result.user);
-        if (!keyInitialized) {
-          console.error('❌ Failed to initialize API key for user');
-          return {
-            success: false,
-            message: 'Authentication failed: API key initialization error'
-          };
-        }
-
         // Update last login timestamp
         await this.updateLastLogin(username);
 
@@ -189,24 +172,6 @@ class AuthService {
       try {
         attempt++;
         console.log(`Attempt ${attempt} of ${retries + 1} to make API request`);
-        
-        // Parse body to add API key
-        let requestData;
-        try {
-          requestData = JSON.parse(body);
-          // Add API key to request (skip only for test action)
-          if (requestData.action !== 'test') {
-            requestData = keysService.addApiKeyToRequest(requestData);
-            body = JSON.stringify(requestData);
-          }
-        } catch (error) {
-          console.error('❌ Error adding API key to request:', error);
-          // For test requests, this is not a fatal error
-          if (requestData && requestData.action !== 'test') {
-            throw new Error('API key authentication required');
-          }
-        }
-
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -489,11 +454,29 @@ class AuthService {
     try {
       console.log('📋 Fetching adda payments from Google Sheets...');
 
-      const requestBody = JSON.stringify({
-        action: 'getAddaPayments'
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'getAddaPayments'
+        })
       });
 
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
       console.log('✅ Adda payments fetched:', result);
       return result;
     } catch (error) {
@@ -602,11 +585,29 @@ class AuthService {
     try {
       console.log('📋 Fetching union payments from Google Sheets...');
 
-      const requestBody = JSON.stringify({
-        action: 'getUnionPayments'
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'getUnionPayments'
+        })
       });
 
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
       console.log('✅ Union payments fetched:', result);
       return result;
     } catch (error) {
@@ -721,11 +722,29 @@ class AuthService {
     try {
       console.log('📋 Fetching service payments from Google Sheets...');
 
-      const requestBody = JSON.stringify({
-        action: 'getServicePayments'
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'getServicePayments'
+        })
       });
 
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
       console.log('✅ Service payments fetched:', result);
       return result;
     } catch (error) {
@@ -844,11 +863,29 @@ class AuthService {
     try {
       console.log('📋 Fetching other payments from Google Sheets...');
 
-      const requestBody = JSON.stringify({
-        action: 'getOtherPayments'
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'getOtherPayments'
+        })
       });
 
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
       console.log('✅ Other payments fetched:', result);
       return result;
     } catch (error) {
@@ -967,11 +1004,29 @@ class AuthService {
     try {
       console.log('📋 Fetching fuel payments from Google Sheets...');
 
-      const requestBody = JSON.stringify({
-        action: 'getFuelPayments'
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'getFuelPayments'
+        })
       });
 
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
       console.log('✅ Fuel payments fetched:', result);
       return result;
     } catch (error) {
@@ -1074,11 +1129,29 @@ class AuthService {
     try {
       console.log('📋 Fetching fare receipts from Google Sheets...');
 
-      const requestBody = JSON.stringify({
-        action: 'getFareReceipts'
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'getFareReceipts'
+        })
       });
 
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
       console.log('✅ Fare receipts fetched:', result);
       return result;
     } catch (error) {
@@ -1097,11 +1170,29 @@ class AuthService {
     try {
       console.log('📋 Fetching booking entries from Google Sheets...');
 
-      const requestBody = JSON.stringify({
-        action: 'getBookingEntries'
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'getBookingEntries'
+        })
       });
 
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
       console.log('✅ Booking entries fetched:', result);
       return result;
     } catch (error) {
@@ -1120,11 +1211,29 @@ class AuthService {
     try {
       console.log('📋 Fetching off days from Google Sheets...');
 
-      const requestBody = JSON.stringify({
-        action: 'getOffDays'
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'getOffDays'
+        })
       });
 
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
       console.log('✅ Off days fetched:', result);
       return result;
     } catch (error) {
@@ -1233,11 +1342,29 @@ class AuthService {
     try {
       console.log('📋 Fetching service payments from Google Sheets...');
 
-      const requestBody = JSON.stringify({
-        action: 'getServicePayments'
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'getServicePayments'
+        })
       });
 
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
       console.log('✅ Service payments fetched:', result);
       return result;
     } catch (error) {
@@ -1255,11 +1382,29 @@ class AuthService {
     try {
       console.log('📋 Fetching other payments from Google Sheets...');
 
-      const requestBody = JSON.stringify({
-        action: 'getOtherPayments'
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'getOtherPayments'
+        })
       });
 
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
       console.log('✅ Other payments fetched:', result);
       return result;
     } catch (error) {
@@ -1539,13 +1684,12 @@ class AuthService {
   // Update Fare Receipt Status
   async updateFareReceiptStatus(entryId, newStatus, approverName) {
     try {
-      const requestBody = JSON.stringify({
-        action: 'updateFareReceiptStatus',
+      const data = {
         entryId: entryId,
         newStatus: newStatus,
         approverName: approverName
-      });
-      const response = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
+      };
+      const response = await this.makeApprovalAPIRequest('updateFareReceiptStatus', data);
       return response;
     } catch (error) {
       console.error('Error updating fare receipt status:', error);
@@ -1556,13 +1700,12 @@ class AuthService {
   // Update Booking Entry Status
   async updateBookingEntryStatus(entryId, newStatus, approverName) {
     try {
-      const requestBody = JSON.stringify({
-        action: 'updateBookingEntryStatus',
+      const data = {
         entryId: entryId,
         newStatus: newStatus,
         approverName: approverName
-      });
-      const response = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
+      };
+      const response = await this.makeApprovalAPIRequest('updateBookingEntryStatus', data);
       return response;
     } catch (error) {
       console.error('Error updating booking entry status:', error);
@@ -1573,13 +1716,12 @@ class AuthService {
   // Update Fuel Payment Status
   async updateFuelPaymentStatus(entryId, newStatus, approverName) {
     try {
-      const requestBody = JSON.stringify({
-        action: 'updateFuelPaymentStatus',
+      const data = {
         entryId: entryId,
         newStatus: newStatus,
         approverName: approverName
-      });
-      const response = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
+      };
+      const response = await this.makeApprovalAPIRequest('updateFuelPaymentStatus', data);
       return response;
     } catch (error) {
       console.error('Error updating fuel payment status:', error);
@@ -1590,13 +1732,12 @@ class AuthService {
   // Update Adda Payment Status
   async updateAddaPaymentStatus(entryId, newStatus, approverName) {
     try {
-      const requestBody = JSON.stringify({
-        action: 'updateAddaPaymentStatus',
+      const data = {
         entryId: entryId,
         newStatus: newStatus,
         approverName: approverName
-      });
-      const response = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
+      };
+      const response = await this.makeApprovalAPIRequest('updateAddaPaymentStatus', data);
       return response;
     } catch (error) {
       console.error('Error updating adda payment status:', error);
@@ -1607,13 +1748,12 @@ class AuthService {
   // Update Union Payment Status
   async updateUnionPaymentStatus(entryId, newStatus, approverName) {
     try {
-      const requestBody = JSON.stringify({
-        action: 'updateUnionPaymentStatus',
+      const data = {
         entryId: entryId,
         newStatus: newStatus,
         approverName: approverName
-      });
-      const response = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
+      };
+      const response = await this.makeApprovalAPIRequest('updateUnionPaymentStatus', data);
       return response;
     } catch (error) {
       console.error('Error updating union payment status:', error);
@@ -1624,13 +1764,12 @@ class AuthService {
   // Update Service Payment Status
   async updateServicePaymentStatus(entryId, newStatus, approverName) {
     try {
-      const requestBody = JSON.stringify({
-        action: 'updateServicePaymentStatus',
+      const data = {
         entryId: entryId,
         newStatus: newStatus,
         approverName: approverName
-      });
-      const response = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
+      };
+      const response = await this.makeApprovalAPIRequest('updateServicePaymentStatus', data);
       return response;
     } catch (error) {
       console.error('Error updating service payment status:', error);
@@ -1641,13 +1780,12 @@ class AuthService {
   // Update Other Payment Status
   async updateOtherPaymentStatus(entryId, newStatus, approverName) {
     try {
-      const requestBody = JSON.stringify({
-        action: 'updateOtherPaymentStatus',
+      const data = {
         entryId: entryId,
         newStatus: newStatus,
         approverName: approverName
-      });
-      const response = await this.makeAPIRequest(this.API_URL, requestBody, 15000, 1);
+      };
+      const response = await this.makeApprovalAPIRequest('updateOtherPaymentStatus', data);
       return response;
     } catch (error) {
       console.error('Error updating other payment status:', error);
@@ -1708,28 +1846,6 @@ class AuthService {
       console.error('Error in batch update:', error);
       return { success: false, error: error.message };
     }
-  }
-
-  // ============================================================================
-  // LOGOUT AND CLEANUP
-  // ============================================================================
-
-  // Logout user and clear API keys
-  logout() {
-    try {
-      console.log('🔐 Logging out user and clearing API keys');
-      keysService.clearApiKey();
-      console.log('✅ Logout successful');
-      return { success: true, message: 'Logged out successfully' };
-    } catch (error) {
-      console.error('❌ Error during logout:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Check if user is authenticated
-  isAuthenticated() {
-    return keysService.isAuthenticated();
   }
 
   // ============================================================================

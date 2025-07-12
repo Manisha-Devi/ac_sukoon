@@ -1,3 +1,4 @@
+
 # 🌐 **AC SUKOON TRANSPORT - API ENDPOINTS DOCUMENTATION**
 
 ## 📖 **Complete API Reference Guide**
@@ -7,27 +8,6 @@
 **Method**: `POST`
 
 **Content-Type**: `application/json`
-
----
-
-## 🔐 **AUTHENTICATION & API KEYS**
-
-### **API Key Requirements**
-**Required for all endpoints except**: `test` and `login`
-
-**Available API Keys**:
-- **Driver**: `AC_SUKOON_2025_DRIVER_KEY_001`
-- **Admin**: `AC_SUKOON_2025_ADMIN_KEY_002`
-- **Manager**: `AC_SUKOON_2025_MANAGER_KEY_003`
-
-**API Key Format**: All requests (except test/login) must include valid API key in request body:
-```json
-{
-  "action": "addFareReceipt",
-  "apiKey": "AC_SUKOON_2025_DRIVER_KEY_001",
-  ...
-}
-```
 
 ---
 
@@ -57,9 +37,9 @@
     "fullName": "Test Driver",
     "status": "active",
     "fixedCash": 5000,
-    "lastLogin": "13/07/2025, 01:40:55 pm"
+    "lastLogin": "09/07/2025, 06:18:13 pm"
   },
-  "timestamp": "13/07/2025, 01:40:55 pm"
+  "timestamp": "09/07/2025, 06:18:13 pm"
 }
 ```
 
@@ -77,13 +57,11 @@
 
 ### **1. Add Fare Receipt**
 **Action**: `addFareReceipt`
-**API Key Required**: Yes
 
 **Request Body**:
 ```json
 {
   "action": "addFareReceipt",
-  "apiKey": "AC_SUKOON_2025_DRIVER_KEY_001",
   "entryId": "1704726185847",
   "timestamp": "14:30:15 PM",
   "date": "2024-01-08",
@@ -107,13 +85,11 @@
 
 ### **2. Get All Fare Receipts**
 **Action**: `getFareReceipts`
-**API Key Required**: Yes
 
 **Request Body**:
 ```json
 {
-  "action": "getFareReceipts",
-  "apiKey": "AC_SUKOON_2025_DRIVER_KEY_001"
+  "action": "getFareReceipts"
 }
 ```
 
@@ -142,13 +118,11 @@
 
 ### **3. Update Fare Receipt**
 **Action**: `updateFareReceipt`
-**API Key Required**: Yes
 
 **Request Body**:
 ```json
 {
   "action": "updateFareReceipt",
-  "apiKey": "AC_SUKOON_2025_DRIVER_KEY_001",
   "entryId": "1704726185847",
   "updatedData": {
     "route": "Updated Route",
@@ -171,13 +145,11 @@
 
 ### **4. Delete Fare Receipt**
 **Action**: `deleteFareReceipt`
-**API Key Required**: Yes
 
 **Request Body**:
 ```json
 {
   "action": "deleteFareReceipt",
-  "apiKey": "AC_SUKOON_2025_DRIVER_KEY_001",
   "entryId": "1704726185847"
 }
 ```
@@ -194,13 +166,11 @@
 
 ### **5. Update Fare Receipt Status**
 **Action**: `updateFareReceiptStatus`
-**API Key Required**: Yes (Admin/Manager level for approval)
 
 **Request Body**:
 ```json
 {
   "action": "updateFareReceiptStatus",
-  "apiKey": "AC_SUKOON_2025_ADMIN_KEY_002",
   "entryId": "1704726185847",
   "newStatus": "approved",
   "approverName": "Manager Name"
@@ -219,13 +189,11 @@
 
 ### **6. Approve Fare Receipt**
 **Action**: `approveFareReceipt`
-**API Key Required**: Yes (Admin/Manager level)
 
 **Request Body**:
 ```json
 {
   "action": "approveFareReceipt",
-  "apiKey": "AC_SUKOON_2025_ADMIN_KEY_002",
   "entryId": "1704726185847",
   "approverName": "Manager Name"
 }
@@ -241,42 +209,17 @@
 }
 ```
 
-### **7. Resend Fare Receipt**
-**Action**: `resendFareReceipt`
-**API Key Required**: Yes
-
-**Request Body**:
-```json
-{
-  "action": "resendFareReceipt",
-  "apiKey": "AC_SUKOON_2025_DRIVER_KEY_001",
-  "entryId": "1704726185847"
-}
-```
-
-**Success Response**:
-```json
-{
-  "success": true,
-  "message": "Fare receipt status updated to pending",
-  "entryId": "1704726185847",
-  "newStatus": "pending"
-}
-```
-
 ---
 
 ## 📋 **BOOKING ENTRIES ENDPOINTS**
 
 ### **1. Add Booking Entry**
 **Action**: `addBookingEntry`
-**API Key Required**: Yes
 
 **Request Body**:
 ```json
 {
   "action": "addBookingEntry",
-  "apiKey": "AC_SUKOON_2025_DRIVER_KEY_001",
   "entryId": "1704726185848",
   "timestamp": "15:45:30 PM",
   "bookingDetails": "Wedding booking from Bhaderwah to Jammu",
@@ -289,25 +232,102 @@
 }
 ```
 
+**Success Response**:
+```json
+{
+  "success": true,
+  "message": "Booking entry added successfully",
+  "entryId": "1704726185848",
+  "timestamp": "15:45:30 PM"
+}
+```
+
 ### **2. Get All Booking Entries**
 **Action**: `getBookingEntries`
-**API Key Required**: Yes
+
+**Request Body**:
+```json
+{
+  "action": "getBookingEntries"
+}
+```
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "entryId": "1704726185848",
+      "timestamp": "15:45:30 PM",
+      "bookingDetails": "Wedding booking from Bhaderwah to Jammu",
+      "dateFrom": "2024-01-20",
+      "dateTo": "2024-01-22",
+      "cashAmount": 5000,
+      "bankAmount": 10000,
+      "totalAmount": 15000,
+      "entryType": "booking",
+      "submittedBy": "testdriver",
+      "entryStatus": "pending",
+      "approvedBy": "",
+      "rowIndex": 2
+    }
+  ]
+}
+```
 
 ### **3. Update Booking Entry**
 **Action**: `updateBookingEntry`
-**API Key Required**: Yes
+
+**Request Body**:
+```json
+{
+  "action": "updateBookingEntry",
+  "entryId": "1704726185848",
+  "updatedData": {
+    "bookingDetails": "Updated wedding booking details",
+    "cashAmount": 6000,
+    "bankAmount": 12000,
+    "totalAmount": 18000
+  }
+}
+```
 
 ### **4. Delete Booking Entry**
 **Action**: `deleteBookingEntry`
-**API Key Required**: Yes
+
+**Request Body**:
+```json
+{
+  "action": "deleteBookingEntry",
+  "entryId": "1704726185848"
+}
+```
 
 ### **5. Update Booking Entry Status**
 **Action**: `updateBookingEntryStatus`
-**API Key Required**: Yes (Admin/Manager for approval)
+
+**Request Body**:
+```json
+{
+  "action": "updateBookingEntryStatus",
+  "entryId": "1704726185848",
+  "newStatus": "approved",
+  "approverName": "Manager Name"
+}
+```
 
 ### **6. Approve Booking Entry**
 **Action**: `approveBookingEntry`
-**API Key Required**: Yes (Admin/Manager level)
+
+**Request Body**:
+```json
+{
+  "action": "approveBookingEntry",
+  "entryId": "1704726185848",
+  "approverName": "Manager Name"
+}
+```
 
 ---
 
@@ -315,13 +335,11 @@
 
 ### **1. Add Fuel Payment**
 **Action**: `addFuelPayment`
-**API Key Required**: Yes
 
 **Request Body**:
 ```json
 {
   "action": "addFuelPayment",
-  "apiKey": "AC_SUKOON_2025_DRIVER_KEY_001",
   "entryId": "1704726185849",
   "timestamp": "16:20:45 PM",
   "date": "2024-01-08",
@@ -336,25 +354,105 @@
 }
 ```
 
+**Success Response**:
+```json
+{
+  "success": true,
+  "entryId": "1704726185849",
+  "message": "Fuel payment added successfully",
+  "timestamp": "16:20:45 PM"
+}
+```
+
 ### **2. Get All Fuel Payments**
 **Action**: `getFuelPayments`
-**API Key Required**: Yes
+
+**Request Body**:
+```json
+{
+  "action": "getFuelPayments"
+}
+```
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "entryId": "1704726185849",
+      "timestamp": "16:20:45 PM",
+      "date": "2024-01-08",
+      "pumpName": "HP Petrol Pump",
+      "liters": 50,
+      "rate": 85.50,
+      "cashAmount": 2000,
+      "bankAmount": 2275,
+      "totalAmount": 4275,
+      "remarks": "Full tank for long route",
+      "submittedBy": "testdriver",
+      "entryType": "fuel",
+      "entryStatus": "pending",
+      "approvedBy": "",
+      "rowIndex": 2
+    }
+  ],
+  "count": 1
+}
+```
 
 ### **3. Update Fuel Payment**
 **Action**: `updateFuelPayment`
-**API Key Required**: Yes
+
+**Request Body**:
+```json
+{
+  "action": "updateFuelPayment",
+  "entryId": "1704726185849",
+  "updatedData": {
+    "pumpName": "Updated Pump Name",
+    "liters": 55,
+    "rate": 86.00,
+    "totalAmount": 4730
+  }
+}
+```
 
 ### **4. Delete Fuel Payment**
 **Action**: `deleteFuelPayment`
-**API Key Required**: Yes
+
+**Request Body**:
+```json
+{
+  "action": "deleteFuelPayment",
+  "entryId": "1704726185849"
+}
+```
 
 ### **5. Update Fuel Payment Status**
 **Action**: `updateFuelPaymentStatus`
-**API Key Required**: Yes (Admin/Manager for approval)
+
+**Request Body**:
+```json
+{
+  "action": "updateFuelPaymentStatus",
+  "entryId": "1704726185849",
+  "newStatus": "approved",
+  "approverName": "Manager Name"
+}
+```
 
 ### **6. Approve Fuel Payment**
 **Action**: `approveFuelPayment`
-**API Key Required**: Yes (Admin/Manager level)
+
+**Request Body**:
+```json
+{
+  "action": "approveFuelPayment",
+  "entryId": "1704726185849",
+  "approverName": "Manager Name"
+}
+```
 
 ---
 
@@ -362,27 +460,120 @@
 
 ### **1. Add Adda Payment**
 **Action**: `addAddaPayment`
-**API Key Required**: Yes
+
+**Request Body**:
+```json
+{
+  "action": "addAddaPayment",
+  "entryId": "1704726185850",
+  "timestamp": "17:10:20 PM",
+  "date": "2024-01-08",
+  "addaName": "Jammu Bus Stand",
+  "cashAmount": 500,
+  "bankAmount": 0,
+  "totalAmount": 500,
+  "remarks": "Daily adda charges",
+  "submittedBy": "testdriver"
+}
+```
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "entryId": "1704726185850",
+  "message": "Adda payment added successfully",
+  "timestamp": "17:10:20 PM"
+}
+```
 
 ### **2. Get All Adda Payments**
 **Action**: `getAddaPayments`
-**API Key Required**: Yes
+
+**Request Body**:
+```json
+{
+  "action": "getAddaPayments"
+}
+```
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "entryId": "1704726185850",
+      "timestamp": "17:10:20 PM",
+      "date": "2024-01-08",
+      "addaName": "Jammu Bus Stand",
+      "cashAmount": 500,
+      "bankAmount": 0,
+      "totalAmount": 500,
+      "remarks": "Daily adda charges",
+      "submittedBy": "testdriver",
+      "entryType": "adda",
+      "entryStatus": "pending",
+      "approvedBy": "",
+      "rowIndex": 2
+    }
+  ],
+  "count": 1
+}
+```
 
 ### **3. Update Adda Payment**
 **Action**: `updateAddaPayment`
-**API Key Required**: Yes
+
+**Request Body**:
+```json
+{
+  "action": "updateAddaPayment",
+  "entryId": "1704726185850",
+  "updatedData": {
+    "addaName": "Updated Adda Name",
+    "cashAmount": 600,
+    "totalAmount": 600,
+    "remarks": "Updated remarks"
+  }
+}
+```
 
 ### **4. Delete Adda Payment**
 **Action**: `deleteAddaPayment`
-**API Key Required**: Yes
+
+**Request Body**:
+```json
+{
+  "action": "deleteAddaPayment",
+  "entryId": "1704726185850"
+}
+```
 
 ### **5. Update Adda Payment Status**
 **Action**: `updateAddaPaymentStatus`
-**API Key Required**: Yes (Admin/Manager for approval)
+
+**Request Body**:
+```json
+{
+  "action": "updateAddaPaymentStatus",
+  "entryId": "1704726185850",
+  "newStatus": "approved",
+  "approverName": "Manager Name"
+}
+```
 
 ### **6. Approve Adda Payment**
 **Action**: `approveAddaPayment`
-**API Key Required**: Yes (Admin/Manager level)
+
+**Request Body**:
+```json
+{
+  "action": "approveAddaPayment",
+  "entryId": "1704726185850",
+  "approverName": "Manager Name"
+}
+```
 
 ---
 
@@ -390,27 +581,79 @@
 
 ### **1. Add Union Payment**
 **Action**: `addUnionPayment`
-**API Key Required**: Yes
+
+**Request Body**:
+```json
+{
+  "action": "addUnionPayment",
+  "entryId": "1704726185851",
+  "timestamp": "18:05:15 PM",
+  "date": "2024-01-08",
+  "unionName": "Transport Workers Union",
+  "cashAmount": 1000,
+  "bankAmount": 0,
+  "totalAmount": 1000,
+  "remarks": "Monthly union fees",
+  "submittedBy": "testdriver"
+}
+```
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "message": "Union payment added successfully",
+  "entryId": "1704726185851",
+  "timestamp": "18:05:15 PM"
+}
+```
 
 ### **2. Get All Union Payments**
 **Action**: `getUnionPayments`
-**API Key Required**: Yes
+
+**Request Body**:
+```json
+{
+  "action": "getUnionPayments"
+}
+```
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "entryId": "1704726185851",
+      "timestamp": "18:05:15 PM",
+      "date": "2024-01-08",
+      "unionName": "Transport Workers Union",
+      "cashAmount": 1000,
+      "bankAmount": 0,
+      "totalAmount": 1000,
+      "remarks": "Monthly union fees",
+      "submittedBy": "testdriver",
+      "entryType": "union",
+      "entryStatus": "pending",
+      "approvedBy": "",
+      "rowIndex": 2
+    }
+  ],
+  "count": 1
+}
+```
 
 ### **3. Update Union Payment**
 **Action**: `updateUnionPayment`
-**API Key Required**: Yes
 
 ### **4. Delete Union Payment**
 **Action**: `deleteUnionPayment`
-**API Key Required**: Yes
 
 ### **5. Update Union Payment Status**
 **Action**: `updateUnionPaymentStatus`
-**API Key Required**: Yes (Admin/Manager for approval)
 
 ### **6. Approve Union Payment**
 **Action**: `approveUnionPayment`
-**API Key Required**: Yes (Admin/Manager level)
 
 ---
 
@@ -418,27 +661,79 @@
 
 ### **1. Add Service Payment**
 **Action**: `addServicePayment`
-**API Key Required**: Yes
+
+**Request Body**:
+```json
+{
+  "action": "addServicePayment",
+  "entryId": "1704726185852",
+  "timestamp": "19:30:40 PM",
+  "date": "2024-01-08",
+  "serviceType": "Engine Repair",
+  "cashAmount": 2500,
+  "bankAmount": 1500,
+  "totalAmount": 4000,
+  "serviceDetails": "Engine oil change and filter replacement",
+  "submittedBy": "testdriver"
+}
+```
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "message": "Service payment added successfully",
+  "entryId": "1704726185852",
+  "timestamp": "19:30:40 PM"
+}
+```
 
 ### **2. Get All Service Payments**
 **Action**: `getServicePayments`
-**API Key Required**: Yes
+
+**Request Body**:
+```json
+{
+  "action": "getServicePayments"
+}
+```
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "entryId": "1704726185852",
+      "timestamp": "19:30:40 PM",
+      "date": "2024-01-08",
+      "serviceType": "Engine Repair",
+      "cashAmount": 2500,
+      "bankAmount": 1500,
+      "totalAmount": 4000,
+      "serviceDetails": "Engine oil change and filter replacement",
+      "submittedBy": "testdriver",
+      "entryType": "service",
+      "entryStatus": "pending",
+      "approvedBy": "",
+      "rowIndex": 2
+    }
+  ],
+  "count": 1
+}
+```
 
 ### **3. Update Service Payment**
 **Action**: `updateServicePayment`
-**API Key Required**: Yes
 
 ### **4. Delete Service Payment**
 **Action**: `deleteServicePayment`
-**API Key Required**: Yes
 
 ### **5. Update Service Payment Status**
 **Action**: `updateServicePaymentStatus`
-**API Key Required**: Yes (Admin/Manager for approval)
 
 ### **6. Approve Service Payment**
 **Action**: `approveServicePayment`
-**API Key Required**: Yes (Admin/Manager level)
 
 ---
 
@@ -446,27 +741,79 @@
 
 ### **1. Add Other Payment**
 **Action**: `addOtherPayment`
-**API Key Required**: Yes
+
+**Request Body**:
+```json
+{
+  "action": "addOtherPayment",
+  "entryId": "1704726185853",
+  "timestamp": "20:15:25 PM",
+  "date": "2024-01-08",
+  "paymentType": "Miscellaneous Expense",
+  "cashAmount": 800,
+  "bankAmount": 200,
+  "totalAmount": 1000,
+  "paymentDetails": "Cleaning and maintenance supplies",
+  "submittedBy": "testdriver"
+}
+```
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "message": "Other payment added successfully",
+  "entryId": "1704726185853",
+  "timestamp": "20:15:25 PM"
+}
+```
 
 ### **2. Get All Other Payments**
 **Action**: `getOtherPayments`
-**API Key Required**: Yes
+
+**Request Body**:
+```json
+{
+  "action": "getOtherPayments"
+}
+```
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "entryId": "1704726185853",
+      "timestamp": "20:15:25 PM",
+      "date": "2024-01-08",
+      "paymentType": "Miscellaneous Expense",
+      "cashAmount": 800,
+      "bankAmount": 200,
+      "totalAmount": 1000,
+      "paymentDetails": "Cleaning and maintenance supplies",
+      "submittedBy": "testdriver",
+      "entryType": "other",
+      "entryStatus": "pending",
+      "approvedBy": "",
+      "rowIndex": 2
+    }
+  ],
+  "count": 1
+}
+```
 
 ### **3. Update Other Payment**
 **Action**: `updateOtherPayment`
-**API Key Required**: Yes
 
 ### **4. Delete Other Payment**
 **Action**: `deleteOtherPayment`
-**API Key Required**: Yes
 
 ### **5. Update Other Payment Status**
 **Action**: `updateOtherPaymentStatus`
-**API Key Required**: Yes (Admin/Manager for approval)
 
 ### **6. Approve Other Payment**
 **Action**: `approveOtherPayment`
-**API Key Required**: Yes (Admin/Manager level)
 
 ---
 
@@ -474,27 +821,74 @@
 
 ### **1. Add Off Day**
 **Action**: `addOffDay`
-**API Key Required**: Yes
+
+**Request Body**:
+```json
+{
+  "action": "addOffDay",
+  "entryId": "1704726185854",
+  "timestamp": "21:00:10 PM",
+  "date": "2024-01-08",
+  "offDate": "2024-01-10",
+  "reason": "Personal emergency",
+  "offType": "Emergency Leave",
+  "submittedBy": "testdriver"
+}
+```
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "message": "Off day added successfully",
+  "entryId": "1704726185854",
+  "timestamp": "21:00:10 PM"
+}
+```
 
 ### **2. Get All Off Days**
 **Action**: `getOffDays`
-**API Key Required**: Yes
+
+**Request Body**:
+```json
+{
+  "action": "getOffDays"
+}
+```
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "entryId": "1704726185854",
+      "timestamp": "21:00:10 PM",
+      "date": "2024-01-08",
+      "offDate": "2024-01-10",
+      "reason": "Personal emergency",
+      "offType": "Emergency Leave",
+      "submittedBy": "testdriver",
+      "entryType": "off",
+      "entryStatus": "pending",
+      "approvedBy": "",
+      "rowIndex": 2
+    }
+  ]
+}
+```
 
 ### **3. Update Off Day**
 **Action**: `updateOffDay`
-**API Key Required**: Yes
 
 ### **4. Delete Off Day**
 **Action**: `deleteOffDay`
-**API Key Required**: Yes
 
 ### **5. Update Off Day Status**
 **Action**: `updateOffDayStatus`
-**API Key Required**: Yes (Admin/Manager for approval)
 
 ### **6. Approve Off Day**
 **Action**: `approveOffDay`
-**API Key Required**: Yes (Admin/Manager level)
 
 ---
 
@@ -502,7 +896,6 @@
 
 ### **1. Test Connection**
 **Action**: `test`
-**API Key Required**: No
 
 **Request Body**:
 ```json
@@ -516,35 +909,10 @@
 {
   "success": true,
   "message": "Google Apps Script is working!",
-  "timestamp": "13/07/2025, 01:40:55 pm",
+  "timestamp": "09/07/2025, 06:20:18 pm",
   "version": "2.0.0"
 }
 ```
-
----
-
-## 🔑 **API KEY VALIDATION & PERMISSIONS**
-
-### **Permission Levels**:
-
-**Driver Keys** (`AC_SUKOON_2025_DRIVER_KEY_001`):
-- ✅ Add, Get, Update, Delete all entry types
-- ❌ Approve entries (Admin/Manager only)
-- ❌ Change status to 'approved'
-
-**Admin Keys** (`AC_SUKOON_2025_ADMIN_KEY_002`):
-- ✅ All driver permissions
-- ✅ Approve all entry types
-- ✅ Update status to 'approved'
-- ✅ Full system access
-
-**Manager Keys** (`AC_SUKOON_2025_MANAGER_KEY_003`):
-- ✅ All admin permissions
-- ✅ Full system management access
-
-### **API Key Format Validation**:
-- Pattern: `AC_SUKOON_YYYY_TYPE_KEY_NNN`
-- Example: `AC_SUKOON_2025_DRIVER_KEY_001`
 
 ---
 
@@ -555,7 +923,7 @@
 {
   "success": true,
   "message": "Operation successful",
-  "data": {}, // or array for get operations
+  "data": {}, // or array
   "entryId": "1704726185847", // for add/update operations
   "timestamp": "14:30:15 PM" // for add operations
 }
@@ -574,36 +942,91 @@
 ## ⚠️ **ERROR CODES & MESSAGES**
 
 ### **Authentication Errors**:
-- `"Invalid API key provided"`
-- `"API key authentication required"`
-- `"Permission denied for action: {action} with key type: {keyType}"`
+- `"Invalid username or password"`
+- `"Users sheet not found. Please check sheet configuration."`
+- `"No users configured in the system"`
 
 ### **Entry Not Found Errors**:
 - `"Fare receipt not found with ID: {entryId}"`
 - `"Booking entry not found with ID: {entryId}"`
 - `"Fuel payment not found with ID: {entryId}"`
-- And similar for other entry types...
+- `"Adda payment not found with ID: {entryId}"`
+- `"Union payment not found with ID: {entryId}"`
+- `"Service payment not found with ID: {entryId}"`
+- `"Other payment not found with ID: {entryId}"`
+- `"Off day not found with ID: {entryId}"`
 
 ### **Sheet Errors**:
 - `"FareReceipts sheet not found"`
 - `"BookingEntries sheet not found"`
-- And similar for other sheet types...
+- `"FuelPayments sheet not found"`
+- `"AddaPayments sheet not found"`
+- `"UnionPayments sheet not found"`
+- `"ServicePayments sheet not found"`
+- `"OtherPayments sheet not found"`
+- `"OffDays sheet not found"`
+
+---
+
+## 🔄 **REQUEST FLOW EXAMPLE**
+
+### **Complete Add Fare Receipt Flow**:
+
+**1. Frontend Request**:
+```javascript
+const response = await fetch(API_URL, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    action: 'addFareReceipt',
+    entryId: '1704726185847',
+    timestamp: '14:30:15 PM',
+    date: '2024-01-08',
+    route: 'Jammu to Srinagar',
+    cashAmount: 3000,
+    bankAmount: 2000,
+    totalAmount: 5000,
+    submittedBy: 'testdriver'
+  })
+});
+```
+
+**2. Backend Processing**:
+- Code.gs routes to FareReceipts.addFareReceipt()
+- Function validates data
+- Creates/gets FareReceipts sheet
+- Inserts new row with data
+- Returns success response
+
+**3. Frontend Response Handling**:
+```javascript
+const result = await response.json();
+if (result.success) {
+  console.log('Entry added:', result.entryId);
+  // Update UI with new entry
+} else {
+  console.error('Error:', result.error);
+  // Show error message to user
+}
+```
 
 ---
 
 ## 📝 **NOTES**
 
-1. **API Key Required**: All endpoints except `test` and `login` require valid API key
-2. **Permission-Based Access**: Different key types have different permission levels
-3. **EntryId**: Always generated by frontend using `Date.now()` for uniqueness
-4. **Timestamps**: Stored in IST format as time-only strings
-5. **Status Values**: `"pending"`, `"approved"`, `"waiting"`, `"cash"`, `"bank"`
-6. **Sheet Auto-Creation**: All sheets are created automatically if they don't exist
-7. **Error Handling**: All functions include comprehensive try-catch blocks
-8. **Legacy Support**: Old function names are supported through LegacyFunctions.gs
+1. **EntryId**: Always generated by frontend using `Date.now()` for uniqueness
+2. **Timestamps**: Stored in IST format as time-only strings
+3. **Status Values**: `"pending"`, `"approved"`, `"waiting"`, `"cash"`, `"bank"`
+4. **Sheet Auto-Creation**: All sheets are created automatically if they don't exist
+5. **Error Handling**: All functions include comprehensive try-catch blocks
+6. **Legacy Support**: Old function names are supported through LegacyFunctions.gs
+7. **Data Consistency**: All modules follow the same 6-function pattern
+8. **Row Indexing**: Sheet rows are 1-indexed, data rows start from row 2
 
 ---
 
-**Last Updated**: January 13, 2025  
-**Version**: 2.1.0  
-**Status**: Production Ready with API Key Authentication 🚀
+**Last Updated**: January 9, 2025  
+**Version**: 2.0.0  
+**Status**: Production Ready 🚀

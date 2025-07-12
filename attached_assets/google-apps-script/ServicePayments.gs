@@ -363,29 +363,3 @@ function approveServicePayment(data) {
     };
   }
 }
-
-/**
- * Resend Service Payment (Reset to pending for fresh approval)
- * @param {Object} data - Resend data containing entryId
- * @returns {Object} Success/error response
- */
-function resendServicePayment(data) {
-  try {
-    const entryId = data.entryId;
-
-    console.log(`🔄 Resending service payment ID: ${entryId} for fresh approval`);
-
-    return updateServicePaymentStatus({
-      entryId: entryId,
-      newStatus: 'pending',
-      approverName: ''
-    });
-
-  } catch (error) {
-    console.error('❌ Error resending service payment:', error);
-    return {
-      success: false,
-      error: 'Resend service payment error: ' + error.toString()
-    };
-  }
-}

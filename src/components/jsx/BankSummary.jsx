@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "../css/BankSummary.css";
-import authService from "../../services/authService";
 
 function BankSummary({ fareData, expenseData, currentUser }) {
   // 📊 RECEIVED DATA EXPLANATION:
@@ -230,109 +229,102 @@ function BankSummary({ fareData, expenseData, currentUser }) {
     }));
   };
 
-  // Forward entries for bank approval (only forward, not approve)
-  const handleForwardForBankApproval = async () => {
+  const handleForwardForApproval = async () => {
     if (selectedEntries.length === 0) {
-      alert('Please select entries to forward for bank approval');
+      alert('Please select entries to forward for approval');
       return;
     }
 
     try {
       console.log('🔄 BankSummary: Forwarding entries for bank approval:', selectedEntries);
 
-      const approverName = currentUser?.fullName || currentUser?.username;
-      const updatedEntries = [...selectedEntries];
-
-      // Step 1: Update local state immediately for UI feedback
-      updatedEntries.forEach(entryId => {
-        updateEntryStatus(entryId, "forwardedBank");
-      });
-
-      // Step 2: Update parent component state immediately
-      updatedEntries.forEach(entryId => {
+      // Process each selected entry
+      for (const entryId of selectedEntries) {
         const entry = filteredData.find(e => e.entryId === entryId);
-        if (entry && window.updateEntryStatusInParent) {
+        if (!entry) continue;
+
+        // Update status locally first (for immediate UI feedback)
+        updateEntryStatus(entryId, "forwardedBank");
+
+        // Update parent state
+        if (window.updateEntryStatusInParent) {
           window.updateEntryStatusInParent(entryId, "forwardedBank", entry.entryType);
         }
-      });
 
-      // Step 3: Clear selection and show immediate feedback
-      setSelectedEntries([]);
-      alert(`✅ ${updatedEntries.length} entries forwarded for bank approval!`);
-
-      // Step 4: Sync with Google Sheets in background
-      const syncPromises = updatedEntries.map(async (entryId) => {
-        const entry = filteredData.find(e => e.entryId === entryId);
-        if (!entry) {
-          console.error(`Entry ${entryId} not found in filteredData`);
-          return;
-        }
-
-        console.log(`🔄 Syncing entry ${entryId} to Google Sheets:`, entry);
-
-        // Call appropriate status update function based on entry type
-        let result;
+        // Background API call to Google Sheets (don't wait for it)
         try {
-          if (entry.type === 'income') {
-            if (entry.entryType === 'daily') {
-              result = await authService.updateFareReceiptStatus(entryId, "forwardedBank", approverName);
-            } else if (entry.entryType === 'booking') {
-              result = await authService.updateBookingEntryStatus(entryId, "forwardedBank", approverName);
-            }
-          } else if (entry.type === 'expense') {
-            switch (entry.entryType) {
-              case 'fuel':
-                result = await authService.updateFuelPaymentStatus(entryId, "forwardedBank", approverName);
-                break;
-              case 'adda':
-                result = await authService.updateAddaPaymentStatus(entryId, "forwardedBank", approverName);
-                break;
-              case 'union':
-                result = await authService.updateUnionPaymentStatus(entryId, "forwardedBank", approverName);
-                break;
-              case 'service':
-                result = await authService.updateServicePaymentStatus(entryId, "forwardedBank", approverName);
-                break;
-              case 'other':
-                result = await authService.updateOtherPaymentStatus(entryId, "forwardedBank", approverName);
-                break;
-              default:
-                console.error(`Unsupported expense entry type: ${entry.entryType}`);
-                return { success: false, error: 'Unsupported expense entry type' };
-            }
+          const authService = (await import('../../services/authService.js')).default;
+
+          if (entry.entryType === 'daily') {
+            authService.updateFareReceiptStatus({
+              entryId: entryId,
+              newStatus: "forwardedBank",
+              approverName: ""
+            }).catch(error => {
+              console.error('Background API sync failed for fare receipt:', error);
+            });
+          } else if (entry.entryType === 'booking') {
+            authService.updateBookingEntryStatus({
+              entryId: entryId,
+              newStatus: "forwardedBank", 
+              approverName: ""
+            }).catch(error => {
+              console.error('Background API sync failed for booking entry:', error);
+            });
+          } else if (entry.entryType === 'fuel') {
+            authService.updateFuelPaymentStatus({
+              entryId: entryId,
+              newStatus: "forwardedBank",
+              approverName: ""
+            }).catch(error => {
+              console.error('Background API sync failed for fuel payment:', error);
+            });
+          } else if (entry.entryType === 'adda') {
+            authService.updateAddaPaymentStatus({
+              entryId: entryId,
+              newStatus: "forwardedBank",
+              approverName: ""
+            }).catch(error => {
+              console.error('Background API sync failed for adda payment:', error);
+            });
+          } else if (entry.entryType === 'union') {
+            authService.updateUnionPaymentStatus({
+              entryId: entryId,
+              newStatus: "forwardedBank",
+              approverName: ""
+            }).catch(error => {
+              console.error('Background API sync failed for union payment:', error);
+            });
+          } else if (entry.entryType === 'service') {
+            authService.updateServicePaymentStatus({
+              entryId: entryId,
+              newStatus: "forwardedBank",
+              approverName: ""
+            }).catch(error => {
+              console.error('Background API sync failed for service payment:', error);
+            });
+          } else if (entry.entryType === 'other') {
+            authService.updateOtherPaymentStatus({
+              entryId: entryId,
+              newStatus: "forwardedBank",
+              approverName: ""
+            }).catch(error => {
+              console.error('Background API sync failed for other payment:', error);
+            });
           }
         } catch (error) {
-          console.error(`Error updating ${entry.entryType} status:`, error);
-          result = { success: false, error: error.message };
+          console.error('Error importing authService:', error);
         }
+      }
 
-        if (!result || !result.success) {
-          console.error(`❌ Failed to sync entry ${entryId} to Google Sheets:`, result?.error || 'Unknown error');
-        } else {
-          console.log(`✅ Entry ${entryId} synced to Google Sheets successfully`);
-        }
+      alert(`✅ ${selectedEntries.length} entries forwarded for bank approval!`);
+      setSelectedEntries([]);
 
-        // Update parent state after successful sync
-        if (result?.success) {
-          if (typeof window.updateExpenseDataState === 'function') {
-            window.updateExpenseDataState(entryId, "forwardedBank", approverName);
-          }
-          if (typeof window.updateFareDataState === 'function') {
-            window.updateFareDataState(entryId, "forwardedBank", approverName);
-          }
-        }
-      });
-
-      // Wait for all syncs to complete in background
-      Promise.all(syncPromises).then(() => {
-        console.log('✅ All entries synced to Google Sheets from BankSummary');
-      }).catch((error) => {
-        console.error('❌ Some entries failed to sync to Google Sheets:', error);
-      });
+      console.log('✅ BankSummary: Status update completed');
 
     } catch (error) {
       console.error('❌ Error forwarding entries:', error);
-      alert('Error forwarding entries for bank approval');
+      alert('Error forwarding entries for approval');
     }
   };
 
@@ -456,9 +448,9 @@ function BankSummary({ fareData, expenseData, currentUser }) {
           {selectedEntries.length > 0 && (
             <button 
               className="btn btn-primary btn-sm"
-              onClick={handleForwardForBankApproval}
+              onClick={handleForwardForApproval}
             >
-              <i className="bi bi-send"></i> Forward {selectedEntries.length} for Bank Approval
+              <i className="bi bi-send"></i> Forward {selectedEntries.length} for Approval
             </button>
           )}
         </div>

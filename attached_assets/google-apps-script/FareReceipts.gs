@@ -1,3 +1,4 @@
+
 /**
  * Add new Fare Receipt
  * Sheet Columns: A=Timestamp, B=Date, C=Route, D=CashAmount, E=BankAmount, 
@@ -151,7 +152,7 @@ function updateFareReceipt(data) {
 
     // Get FareReceipts sheet
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
-      .getSheetByName('FareReceipts');
+      .getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
 
     if (!sheet) {
       throw new Error('FareReceipts sheet not found');
@@ -226,7 +227,7 @@ function deleteFareReceipt(data) {
 
     // Get FareReceipts sheet
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
-      .getSheetByName('FareReceipts');
+      .getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
 
     if (!sheet) {
       throw new Error('FareReceipts sheet not found');
@@ -286,7 +287,7 @@ function updateFareReceiptStatus(data) {
 
     // Get FareReceipts sheet
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
-      .getSheetByName('FareReceipts');
+      .getSheetByName(SHEET_NAMES.FARE_RECEIPTS);
 
     if (!sheet) {
       throw new Error('FareReceipts sheet not found');
@@ -361,32 +362,6 @@ function approveFareReceipt(data) {
     return {
       success: false,
       error: 'Approve fare receipt error: ' + error.toString()
-    };
-  }
-}
-
-/**
- * Resend Fare Receipt (Reset to pending for fresh approval)
- * @param {Object} data - Resend data containing entryId
- * @returns {Object} Success/error response
- */
-function resendFareReceipt(data) {
-  try {
-    const entryId = data.entryId;
-
-    console.log(`🔄 Resending fare receipt ID: ${entryId} for fresh approval`);
-
-    return updateFareReceiptStatus({
-      entryId: entryId,
-      newStatus: 'pending',
-      approverName: ''
-    });
-
-  } catch (error) {
-    console.error('❌ Error resending fare receipt:', error);
-    return {
-      success: false,
-      error: 'Resend fare receipt error: ' + error.toString()
     };
   }
 }
