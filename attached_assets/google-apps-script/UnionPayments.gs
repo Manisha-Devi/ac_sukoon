@@ -337,3 +337,29 @@ function approveUnionPayment(data) {
     };
   }
 }
+
+/**
+ * Resend Union Payment (Reset to pending status)
+ * @param {Object} data - Resend data containing entryId
+ * @returns {Object} Success/error response
+ */
+function resendUnionPayment(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log(`🔄 Resending union payment ID: ${entryId}`);
+
+    return updateUnionPaymentStatus({
+      entryId: entryId,
+      newStatus: 'pending',
+      approverName: ''
+    });
+
+  } catch (error) {
+    console.error('❌ Error resending union payment:', error);
+    return {
+      success: false,
+      error: 'Resend union payment error: ' + error.toString()
+    };
+  }
+}
