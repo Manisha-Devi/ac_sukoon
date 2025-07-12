@@ -256,59 +256,31 @@ function BankSummary({ fareData, expenseData, currentUser }) {
           const authService = (await import('../../services/authService.js')).default;
 
           if (entry.entryType === 'daily') {
-            authService.updateFareReceiptStatus({
-              entryId: entryId,
-              newStatus: "forwardedBank",
-              approverName: ""
-            }).catch(error => {
+            authService.updateFareReceiptStatus(entryId, "forwardedBank", "").catch(error => {
               console.error('Background API sync failed for fare receipt:', error);
             });
           } else if (entry.entryType === 'booking') {
-            authService.updateBookingEntryStatus({
-              entryId: entryId,
-              newStatus: "forwardedBank", 
-              approverName: ""
-            }).catch(error => {
+            authService.updateBookingEntryStatus(entryId, "forwardedBank", "").catch(error => {
               console.error('Background API sync failed for booking entry:', error);
             });
           } else if (entry.entryType === 'fuel') {
-            authService.updateFuelPaymentStatus({
-              entryId: entryId,
-              newStatus: "forwardedBank",
-              approverName: ""
-            }).catch(error => {
+            authService.updateFuelPaymentStatus(entryId, "forwardedBank", "").catch(error => {
               console.error('Background API sync failed for fuel payment:', error);
             });
           } else if (entry.entryType === 'adda') {
-            authService.updateAddaPaymentStatus({
-              entryId: entryId,
-              newStatus: "forwardedBank",
-              approverName: ""
-            }).catch(error => {
+            authService.updateAddaPaymentStatus(entryId, "forwardedBank", "").catch(error => {
               console.error('Background API sync failed for adda payment:', error);
             });
           } else if (entry.entryType === 'union') {
-            authService.updateUnionPaymentStatus({
-              entryId: entryId,
-              newStatus: "forwardedBank",
-              approverName: ""
-            }).catch(error => {
+            authService.updateUnionPaymentStatus(entryId, "forwardedBank", "").catch(error => {
               console.error('Background API sync failed for union payment:', error);
             });
           } else if (entry.entryType === 'service') {
-            authService.updateServicePaymentStatus({
-              entryId: entryId,
-              newStatus: "forwardedBank",
-              approverName: ""
-            }).catch(error => {
+            authService.updateServicePaymentStatus(entryId, "forwardedBank", "").catch(error => {
               console.error('Background API sync failed for service payment:', error);
             });
           } else if (entry.entryType === 'other') {
-            authService.updateOtherPaymentStatus({
-              entryId: entryId,
-              newStatus: "forwardedBank",
-              approverName: ""
-            }).catch(error => {
+            authService.updateOtherPaymentStatus(entryId, "forwardedBank", "").catch(error => {
               console.error('Background API sync failed for other payment:', error);
             });
           }
