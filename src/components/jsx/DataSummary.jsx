@@ -120,7 +120,8 @@ function DataSummary({ fareData, expenseData, currentUser }) {
         entry.entryStatus === 'approved' || 
         entry.entryStatus === 'approvedCash' || 
         entry.entryStatus === 'approvedBank' ||
-        entry.entryStatus === 'cashApproved'
+        entry.entryStatus === 'cashApproved' ||
+        entry.entryStatus === 'bankApproved'
       ));
 
       setLoading(false);
@@ -407,7 +408,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                   CASH APPROVED
                 </>
               )}
-              {entry.entryStatus === 'approvedBank' && (
+              {(entry.entryStatus === 'approvedBank' || entry.entryStatus === 'bankApproved') && (
                 <>
                   <i className="bi bi-check-circle me-1"></i>
                   BANK APPROVED
