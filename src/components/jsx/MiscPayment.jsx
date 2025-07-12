@@ -312,6 +312,12 @@ function MiscPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBoo
   };
 
   const handleDeleteEntry = async (entryId) => {
+    // Add confirmation dialog
+    const confirmDelete = window.confirm('Are you sure you want to delete this entry? This action cannot be undone.');
+    if (!confirmDelete) {
+      return;
+    }
+
     try {
       const entryToDelete = expenseData.find(entry => entry.entryId === entryId);
 
@@ -337,7 +343,7 @@ function MiscPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBoo
 
       console.log('✅ Entry removed from React state immediately');
 
-      // Then sync deletion to Google Sheets in background
+      // Then sync deletion to Google Sheets in background with improved error handling
       try {
         let deleteResult;
         if (entryToDelete.type === 'service') {
@@ -346,13 +352,16 @@ function MiscPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBoo
           deleteResult = await authService.deleteOtherPayment({ entryId: entryToDelete.entryId });
         }
 
-        if (deleteResult.success) {
+        if (deleteResult && deleteResult.success) {
           console.log('✅ Entry successfully deleted from Google Sheets');
+          alert('✅ Entry deleted successfully!');
         } else {
-          console.warn('⚠️ Delete from Google Sheets failed but entry removed locally:', deleteResult.error);
+          console.warn('⚠️ Delete from Google Sheets failed but entry removed locally:', deleteResult?.error);
+          // Don't alert user as UI was already updated successfully
         }
       } catch (syncError) {
         console.warn('⚠️ Background delete sync failed but entry removed locally:', syncError.message);
+        // Silent error - UI already updated successfully
       }
 
     } catch (error) {
@@ -524,14 +533,13 @@ function MiscPayment({ expenseData, setExpenseData, setTotalExpenses, setCashBoo
 
               <div className="row">
                 <div className="col-12 mb-3">
-                  <label className="form-label">Description</label>
+                  <label className="form-label">Description (Optional)</label>
                   <textarea
                     className="form-control"
                     rows={3}
                     value={getCurrentFormData().description}
                     onChange={(e) => setCurrentFormData({ ...getCurrentFormData(), description: e.target.value })}
-                    placeholder={`Enter detailed description of ${activeTab === 'service' ? 'service work' : 'payment'}`}
-                    required
+                    placeholder={`Enter detailed description of ${activeTab === 'service' ? 'service work' : 'payment'} (optional)`}
                   />
                 </div>
               </div>
