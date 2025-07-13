@@ -332,7 +332,10 @@ function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
     .filter(entry => entry.type === 'expense')
     .reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
 
-  const bankBalance = totalBankIncome - totalBankExpense;
+  // Bank balance = Only Non-Approved Income Bank Amount (exclude approved entries)
+  const bankBalance = filteredData
+    .filter(entry => entry.type === 'income' && entry.entryStatus !== 'approved')
+    .reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
 
   useEffect(() => {
   }, []);
@@ -450,8 +453,9 @@ function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
               <h6><i className="bi bi-calculator"></i> Bank Balance</h6>
               <h4 className={bankBalance >= 0 ? 'text-success' : 'text-danger'}>
                 ₹{Math.abs(bankBalance).toLocaleString()}
-                {bankBalance < 0 && ' (Overdraft)'}
+                {bankBalance < 0 && ' (Deficit)'}
               </h4>
+              <small className="text-muted">Unapproved Income Only</small>
             </div>
           </div>
         </div>
