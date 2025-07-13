@@ -531,6 +531,24 @@ function App() {
         });
       });
 
+      // Add Cash Deposits (Cr - payments)
+      if (cashDeposit && cashDeposit.length > 0) {
+        cashDeposit.forEach(deposit => {
+          entries.push({
+            id: `cash-deposit-${deposit.entryId}`,
+            date: deposit.date,
+            description: `Cash Deposit - ${deposit.description}`,
+            cashAmount: deposit.cashAmount || 0,
+            bankAmount: 0,
+            type: 'cr', // Credit (cash going to bank)
+            source: 'cash-deposit',
+            particulars: deposit.description,
+            jfNo: `CD-${deposit.entryId}`,
+            submittedBy: deposit.depositedBy
+          });
+        });
+      }
+
       // Add Fixed Cash entries for all users (Cr - payments)
       if (allUsers && allUsers.length > 0) {
         allUsers.forEach(user => {
