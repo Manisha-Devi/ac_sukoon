@@ -98,11 +98,11 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'updateLastLogin',
           username: username,
           timestamp: new Date().toISOString()
-        })
+        }))
       });
     } catch (error) {
       console.error('⚠️ Failed to update last login:', error);
@@ -154,7 +154,7 @@ class AuthService {
       }
     } catch (error) {
       console.error('❌ Error fetching users:', error);
-      
+
       if (error.name === 'AbortError') {
         return { 
           success: false, 
@@ -163,7 +163,7 @@ class AuthService {
           count: 0
         };
       }
-      
+
       return { 
         success: false, 
         error: error.message || 'Failed to fetch users',
@@ -224,7 +224,7 @@ class AuthService {
         } else {
           requestData = bodyData;
         }
-        
+
         const authenticatedBody = JSON.stringify(this.apiKeyService.addAPIKey(requestData));
 
         const response = await fetch(url, {
@@ -273,7 +273,7 @@ class AuthService {
     try {
       console.log('📝 Adding booking entry to Google Sheets:', data);
 
-      const requestBody = JSON.stringify({
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
         action: 'addBookingEntry',
         entryId: data.entryId,
         timestamp: data.timestamp,
@@ -284,7 +284,7 @@ class AuthService {
         bankAmount: data.bankAmount || 0,
         totalAmount: data.totalAmount || 0,
         submittedBy: data.submittedBy || 'driver'
-      });
+      }));
 
       const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
 
@@ -313,11 +313,11 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'updateFareReceipt',
           entryId: data.entryId,
           updatedData: data.updatedData
-        })
+        }))
       });
 
       const result = await response.json();
@@ -341,11 +341,11 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'updateBookingEntry',
           entryId: data.entryId,
           updatedData: data.updatedData
-        })
+        }))
       });
 
       const result = await response.json();
@@ -369,11 +369,11 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'updateOffDay',
           entryId: data.entryId,
           updatedData: data.updatedData
-        })
+        }))
       });
 
       const result = await response.json();
@@ -397,10 +397,10 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'deleteFareReceipt',
           entryId: data.entryId
-        })
+        }))
       });
 
       const result = await response.json();
@@ -424,10 +424,10 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'deleteBookingEntry',
           entryId: data.entryId
-        })
+        }))
       });
 
       const result = await response.json();
@@ -451,10 +451,10 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'deleteOffDay',
           entryId: data.entryId
-        })
+        }))
       });
 
       const result = await response.json();
@@ -473,7 +473,7 @@ class AuthService {
     try {
       console.log('📝 Adding adda payment to Google Sheets:', data);
 
-      const requestBody = JSON.stringify({
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
         action: 'addAddaPayment',
         entryId: data.entryId,
         timestamp: data.timestamp,
@@ -484,7 +484,7 @@ class AuthService {
         totalAmount: data.totalAmount || 0,
         remarks: data.remarks || '',
         submittedBy: data.submittedBy || 'driver'
-      });
+      }));
 
       const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
 
@@ -517,9 +517,9 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         signal: controller.signal,
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'getAddaPayments'
-        })
+        }))
       });
 
       clearTimeout(timeoutId);
@@ -554,11 +554,11 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'updateAddaPayment',
           entryId: data.entryId,
           updatedData: data.updatedData
-        })
+        }))
       });
 
       const result = await response.json();
@@ -582,10 +582,10 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'deleteAddaPayment',
           entryId: data.entryId
-        })
+        }))
       });
 
       const result = await response.json();
@@ -604,7 +604,7 @@ class AuthService {
     try {
       console.log('📝 Adding union payment to Google Sheets:', data);
 
-      const requestBody = JSON.stringify({
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
         action: 'addUnionPayment',
         entryId: data.entryId,
         timestamp: data.timestamp,
@@ -615,7 +615,7 @@ class AuthService {
         totalAmount: data.totalAmount || 0,
         remarks: data.remarks || '',
         submittedBy: data.submittedBy || 'driver'
-      });
+      }));
 
       const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
 
@@ -648,9 +648,9 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         signal: controller.signal,
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'getUnionPayments'
-        })
+        }))
       });
 
       clearTimeout(timeoutId);
@@ -685,11 +685,11 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'updateUnionPayment',
           entryId: data.entryId,
           updatedData: data.updatedData
-        })
+        }))
       });
 
       const result = await response.json();
@@ -713,10 +713,10 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'deleteUnionPayment',
           entryId: data.entryId
-        })
+        }))
       });
 
       if (!response.ok) {
@@ -741,7 +741,7 @@ class AuthService {
     try {
       console.log('📝 Adding service payment to Google Sheets:', data);
 
-      const requestBody = JSON.stringify({
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
         action: 'addServicePayment',
         entryId: data.entryId,
         timestamp: data.timestamp,
@@ -752,7 +752,7 @@ class AuthService {
         totalAmount: data.totalAmount || 0,
         serviceDetails: data.serviceDetails || '',
         submittedBy: data.submittedBy || 'driver'
-      });
+      }));
 
       const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
 
@@ -785,9 +785,9 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         signal: controller.signal,
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'getServicePayments'
-        })
+        }))
       });
 
       clearTimeout(timeoutId);
@@ -822,11 +822,11 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'updateServicePayment',
           entryId: data.entryId,
           updatedData: data.updatedData
-        })
+        }))
       });
 
       if (!response.ok) {
@@ -858,10 +858,10 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         signal: controller.signal,
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'deleteServicePayment',
           entryId: data.entryId
-        })
+        }))
       });
 
       clearTimeout(timeoutId);
@@ -900,7 +900,7 @@ class AuthService {
     try {
       console.log('📝 Adding other payment to Google Sheets:', data);
 
-      const requestBody = JSON.stringify({
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
         action: 'addOtherPayment',
         entryId: data.entryId,
         timestamp: data.timestamp,
@@ -911,7 +911,7 @@ class AuthService {
         totalAmount: data.totalAmount || 0,
         paymentDetails: data.paymentDetails || '',
         submittedBy: data.submittedBy || 'driver'
-      });
+      }));
 
       const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
 
@@ -944,9 +944,9 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         signal: controller.signal,
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'getOtherPayments'
-        })
+        }))
       });
 
       clearTimeout(timeoutId);
@@ -981,11 +981,11 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'updateOtherPayment',
           entryId: data.entryId,
           updatedData: data.updatedData
-        })
+        }))
       });
 
       if (!response.ok) {
@@ -1017,10 +1017,10 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         signal: controller.signal,
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'deleteOtherPayment',
           entryId: data.entryId
-        })
+        }))
       });
 
       clearTimeout(timeoutId);
@@ -1057,7 +1057,7 @@ class AuthService {
     try {
       console.log('📝 Adding fuel payment to Google Sheets:', data);
 
-      const requestBody = JSON.stringify({
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
         action: 'addFuelPayment',
         entryId: data.entryId,
         timestamp: data.timestamp,
@@ -1070,7 +1070,7 @@ class AuthService {
         totalAmount: data.totalAmount || 0,
         remarks: data.remarks || '',
         submittedBy: data.submittedBy || 'driver'
-      });
+      }));
 
       const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
 
@@ -1103,9 +1103,9 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         signal: controller.signal,
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'getFuelPayments'
-        })
+        }))
       });
 
       clearTimeout(timeoutId);
@@ -1140,11 +1140,11 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'updateFuelPayment',
           entryId: data.entryId,
           updatedData: data.updatedData
-        })
+        }))
       });
 
       const result = await response.json();
@@ -1168,10 +1168,10 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'deleteFuelPayment',
           entryId: data.entryId
-        })
+        }))
       });
 
       const result = await response.json();
@@ -1188,14 +1188,14 @@ class AuthService {
     try {
       console.log('📝 Adding off day to Google Sheets:', data);
 
-      const requestBody = JSON.stringify({
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
         action: 'addOffDay',
         entryId: data.entryId,
         timestamp: data.timestamp,
         date: data.date,
         reason: data.reason,
         submittedBy: data.submittedBy || 'driver'
-      });
+      }));
 
       const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
 
@@ -1228,9 +1228,9 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         signal: controller.signal,
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'getFareReceipts'
-        })
+        }))
       });
 
       clearTimeout(timeoutId);
@@ -1269,9 +1269,9 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         signal: controller.signal,
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'getBookingEntries'
-        })
+        }))
       });
 
       clearTimeout(timeoutId);
@@ -1310,9 +1310,9 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         signal: controller.signal,
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'getOffDays'
-        })
+        }))
       });
 
       clearTimeout(timeoutId);
@@ -1347,12 +1347,12 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'updateFareEntry',
           entryId: entryId,
           updatedData: updatedData,
           entryType: entryType
-        })
+        }))
       });
 
       const result = await response.json();
@@ -1376,11 +1376,11 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'deleteFareEntry',
           entryId: entryId,
           entryType: entryType
-        })
+        }))
       });
 
       const result = await response.json();
@@ -1441,9 +1441,9 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         signal: controller.signal,
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'getServicePayments'
-        })
+        }))
       });
 
       clearTimeout(timeoutId);
@@ -1481,9 +1481,9 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         signal: controller.signal,
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'getOtherPayments'
-        })
+        }))
       });
 
       clearTimeout(timeoutId);
@@ -1520,10 +1520,10 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: action,
           ...data
-        })
+        }))
       });
 
       if (!response.ok) {
@@ -1899,7 +1899,7 @@ class AuthService {
     try {
       console.log('💰 Adding cash deposit to Google Sheets:', data);
 
-      const requestBody = JSON.stringify({
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
         action: 'addCashDeposit',
         entryId: data.entryId,
         timestamp: data.timestamp,
@@ -1908,7 +1908,7 @@ class AuthService {
         cashAmount: data.cashAmount || 0,
         description: data.description || '',
         depositedBy: data.depositedBy || 'Unknown'
-      });
+      }));
 
       const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
 
@@ -1941,9 +1941,9 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         signal: controller.signal,
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'getCashDeposits'
-        })
+        }))
       });
 
       clearTimeout(timeoutId);
@@ -1956,7 +1956,7 @@ class AuthService {
 
       const result = await response.json();
       console.log('✅ Cash deposits API response:', result);
-      
+
       if (result.success && result.data) {
         console.log(`💰 Successfully fetched ${result.data.length} cash deposits from Google Sheets`);
         result.data.forEach((deposit, index) => {
@@ -1970,7 +1970,7 @@ class AuthService {
       } else {
         console.warn('⚠️ Cash deposits API returned error:', result.error || 'Unknown error');
       }
-      
+
       return result;
     } catch (error) {
       console.error('❌ Error fetching cash deposits:', error);
@@ -1996,11 +1996,11 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'updateCashDeposit',
           entryId: data.entryId,
           updatedData: data.updatedData
-        })
+        }))
       });
 
       if (!response.ok) {
@@ -2032,10 +2032,10 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         signal: controller.signal,
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'deleteCashDeposit',
           entryId: data.entryId
-        })
+        }))
       });
 
       clearTimeout(timeoutId);
