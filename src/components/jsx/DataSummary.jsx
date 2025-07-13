@@ -173,6 +173,36 @@ function DataSummary({ fareData, expenseData, currentUser }) {
     return currentIds.length > 0 && currentIds.every(id => selectedEntries.includes(id));
   };
 
+  // Get approved entries for current user
+  const getApprovedEntriesForCurrentUser = () => {
+    const currentUserName = currentUser?.fullName || currentUser?.username;
+    if (!currentUserName) return [];
+    
+    return approvedData.filter(entry => entry.submittedBy === currentUserName);
+  };
+
+  // Calculate total cash from approved entries of current user
+  const calculateTotalCash = () => {
+    const userApprovedEntries = getApprovedEntriesForCurrentUser();
+    return userApprovedEntries.reduce((total, entry) => total + (entry.cashAmount || 0), 0);
+  };
+
+  // Calculate total bank from approved entries of current user
+  const calculateTotalBank = () => {
+    const userApprovedEntries = getApprovedEntriesForCurrentUser();
+    return userApprovedEntries.reduce((total, entry) => total + (entry.bankAmount || 0), 0);
+  };
+
+  // Get fixed cash for current user
+  const getFixedCash = () => {
+    return currentUser?.fixedCash || 0;
+  };
+
+  // Calculate cash in hand (Total Cash + Fixed Cash)
+  const calculateCashInHand = () => {
+    return calculateTotalCash() + getFixedCash();
+  };
+
   // Handle approval action
   const handleApproval = async () => {
     if (selectedEntries.length === 0) {
@@ -564,7 +594,105 @@ function DataSummary({ fareData, expenseData, currentUser }) {
           <div className="summary-card-container">
             <div className="summary-card-content">
               <h5><i className="bi bi-bar-chart"></i> Data Summary</h5>
-              <div className="summary-stats">
+              
+              {/* Financial Summary Cards */}
+              <div className="financial-summary-cards mb-4">
+                <div className="row">
+                  <div className="col-md-3">
+                    <div className="financial-card total-cash">
+                      <div className="financial-icon">
+                        <i className="bi bi-cash-stack"></i>
+                      </div>
+                      <div className="financial-details">
+                        <div className="financial-amount">₹{calculateTotalCash().toLocaleString('en-IN')}</div>
+                        <div className="financial-label">Total Cash</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="financial-card total-bank">
+                      <div className="financial-icon">
+                        <i className="bi bi-bank"></i>
+                      </div>
+                      <div className="financial-details">
+                        <div className="financial-amount">₹{calculateTotalBank().toLocaleString('en-IN')}</div>
+                        <div className="financial-label">Total Bank</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="financial-card fixed-cash">
+                      <div className="financial-icon">
+                        <i className="bi bi-piggy-bank"></i>
+                      </div>
+                      <div className="financial-details">
+                        <div className="financial-amount">₹{getFixedCash().toLocaleString('en-IN')}</div>
+                        <div className="financial-label">Fixed Cash</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="financial-card cash-in-hand">
+                      <div className="financial-icon">
+                        <i className="bi bi-wallet2"></i>
+                      </div>
+                      <div className="financial-details">
+                        <div className="financial-amount">₹{calculateCashInHand().toLocaleString('en-IN')}</div>
+                        <div className="financial-label">Cash in Hand</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Approved Entries Table */}
+              <div className="approved-entries-section">
+                <h6><i className="bi bi-check-circle-fill"></i> Approved Entries</h6>
+                {getApprovedEntriesForCurrentUser().length > 0 ? (
+                  <div className="table-responsive">
+                    <table className="table table-striped table-sm approved-entries-table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Type</th>
+                          <th>Description</th>
+                          <th>Cash</th>
+                          <th>Bank</th>
+                          <th>Total</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {getApprovedEntriesForCurrentUser().map((entry) => (
+                          <tr key={entry.entryId}>
+                            <td>{formatDisplayDate(entry.date)}</td>
+                            <td>
+                              <span className="badge bg-info">{entry.dataType}</span>
+                            </td>
+                            <td>{entry.displayName}</td>
+                            <td className="text-success">₹{(entry.cashAmount || 0).toLocaleString('en-IN')}</td>
+                            <td className="text-primary">₹{(entry.bankAmount || 0).toLocaleString('en-IN')}</td>
+                            <td className="fw-bold">₹{(entry.totalAmount || 0).toLocaleString('en-IN')}</td>
+                            <td>
+                              <span className="badge bg-success">
+                                <i className="bi bi-check-circle"></i> Approved
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="no-approved-entries">
+                    <i className="bi bi-inbox"></i>
+                    <p>No approved entries found for current user</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Entry Count Summary */}
+              <div className="summary-stats mt-4">
                 <div className="row">
                   <div className="col-md-3">
                     <div className="stat-card pending-stat">
