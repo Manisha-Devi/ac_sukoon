@@ -11,6 +11,16 @@
 function handleLogin(data) {
   try {
     console.log("🔐 Processing login attempt for user:", data.username);
+    
+    // Validate API key first
+    const keyValidation = validateAPIKey(data.apiKey);
+    if (!keyValidation.valid) {
+      console.log("❌ Invalid API key for login attempt");
+      return {
+        success: false,
+        error: "Invalid API key"
+      };
+    }
 
     // Get Users sheet
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
@@ -82,9 +92,19 @@ function handleLogin(data) {
 /**
  * Get all users from Users sheet
  */
-function getAllUsers() {
+function getAllUsers(data) {
   try {
     console.log('👥 Fetching all users...');
+    
+    // Validate API key first
+    const keyValidation = validateAPIKey(data.apiKey);
+    if (!keyValidation.valid) {
+      console.log("❌ Invalid API key for getAllUsers");
+      return {
+        success: false,
+        error: "Invalid API key"
+      };
+    }
 
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Users');
 
@@ -160,9 +180,19 @@ function getAllUsers() {
 /**
  * Test connection to Google Sheets
  */
-function testConnection() {
+function testConnection(data) {
   try {
     console.log('🔍 Testing connection...');
+    
+    // Validate API key first
+    const keyValidation = validateAPIKey(data.apiKey);
+    if (!keyValidation.valid) {
+      console.log("❌ Invalid API key for test connection");
+      return {
+        success: false,
+        error: "Invalid API key"
+      };
+    }
 
     return {
       success: true,

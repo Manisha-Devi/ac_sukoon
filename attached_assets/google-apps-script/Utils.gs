@@ -58,9 +58,19 @@ function formatDateForDisplay(dateValue) {
 /**
  * Test the connection to Google Apps Script
  */
-function testConnection() {
+function testConnection(data) {
   try {
     console.log("🔍 Testing connection to Google Apps Script...");
+    
+    // Validate API key first
+    const keyValidation = validateAPIKey(data.apiKey);
+    if (!keyValidation.valid) {
+      console.log("❌ Invalid API key for test connection");
+      return {
+        success: false,
+        error: "Invalid API key"
+      };
+    }
 
     return {
       success: true,
