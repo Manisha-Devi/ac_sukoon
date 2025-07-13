@@ -230,7 +230,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
       if (entry.entryId === entryId) {
         return { ...entry, entryStatus: newStatus };
       }
-      return entry;
+      return;
     });
 
     setFilteredData(updatedFilteredData);
@@ -488,7 +488,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
                   ₹{Math.abs(cashBalance).toLocaleString()}
                   {cashBalance < 0 && ' (Deficit)'}
                 </h4>
-                <small className="text-muted">Pending + Fixed - Pending Expense</small>
+                <small className="text-muted">Unapproved Income Only</small>
               </div>
             </div>
           </div>
