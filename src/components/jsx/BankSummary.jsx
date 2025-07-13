@@ -12,6 +12,8 @@ function BankSummary({ fareData, expenseData, currentUser }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedEntries, setSelectedEntries] = useState([]);
   const [entriesPerPage] = useState(10);
+  const [showFilter, setShowFilter] = useState(false);
+  const [showSummary, setShowSummary] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
 
@@ -340,12 +342,31 @@ function BankSummary({ fareData, expenseData, currentUser }) {
 
   return (
     <div className="bank-summary-container">
-      <div className="summary-header">
-        <h3><i className="bi bi-bank"></i> Bank Summary</h3>
-        <small className="text-muted">Use navbar refresh icon to update data</small>
+      <div className="cash-book-header">
+        <h2><i className="bi bi-bank"></i> Bank Summary</h2>
+        <p>Personal bank transactions and balance overview</p>
+
+        {/* Toggle Buttons */}
+        <div className="filter-toggle-section">
+          <button 
+            className="btn btn-outline-primary btn-sm filter-toggle-btn me-2"
+            onClick={() => setShowFilter(!showFilter)}
+          >
+            <i className={`bi ${showFilter ? 'bi-eye-slash' : 'bi-funnel'}`}></i>
+            {showFilter ? 'Hide Filter' : 'Show Filter'}
+          </button>
+          <button 
+            className="btn btn-outline-info btn-sm filter-toggle-btn"
+            onClick={() => setShowSummary(!showSummary)}
+          >
+            <i className={`bi ${showSummary ? 'bi-eye-slash' : 'bi-bar-chart'}`}></i>
+            {showSummary ? 'Hide Summary' : 'Show Summary'}
+          </button>
+        </div>
       </div>
 
       {/* Date Filter */}
+      {showFilter && (
       <div className="date-filter mb-3">
         <div className="row align-items-end">
           <div className="col-md-3">
@@ -382,8 +403,10 @@ function BankSummary({ fareData, expenseData, currentUser }) {
           </div>
         </div>
       </div>
+      )}
 
       {/* Summary Cards */}
+      {showSummary && (
       <div className="row mb-4">
         <div className="col-md-4">
           <div className="summary-card income-card">
@@ -413,6 +436,7 @@ function BankSummary({ fareData, expenseData, currentUser }) {
           </div>
         </div>
       </div>
+      )}
 
       {/* Transactions List with Pagination */}
       <div className="transactions-list">

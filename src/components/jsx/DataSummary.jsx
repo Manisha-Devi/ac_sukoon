@@ -10,6 +10,8 @@ function DataSummary({ fareData, expenseData, currentUser }) {
   const [approvedData, setApprovedData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEntries, setSelectedEntries] = useState([]);
+  const [showFilter, setShowFilter] = useState(false);
+  const [showSummary, setShowSummary] = useState(true);
 
   // Log user data for debugging
   useEffect(() => {
@@ -504,12 +506,31 @@ function DataSummary({ fareData, expenseData, currentUser }) {
   return (
     <div className="data-approval-container">
       <div className="container-fluid">
-        <div className="approval-header">
+        <div className="cash-book-header">
           <h2><i className="bi bi-clipboard-check"></i> Data Summary</h2>
           <p>Review and approve submitted entries</p>
+
+          {/* Toggle Buttons */}
+          <div className="filter-toggle-section">
+            <button 
+              className="btn btn-outline-primary btn-sm filter-toggle-btn me-2"
+              onClick={() => setShowFilter(!showFilter)}
+            >
+              <i className={`bi ${showFilter ? 'bi-eye-slash' : 'bi-funnel'}`}></i>
+              {showFilter ? 'Hide Filter' : 'Show Filter'}
+            </button>
+            <button 
+              className="btn btn-outline-info btn-sm filter-toggle-btn"
+              onClick={() => setShowSummary(!showSummary)}
+            >
+              <i className={`bi ${showSummary ? 'bi-eye-slash' : 'bi-bar-chart'}`}></i>
+              {showSummary ? 'Hide Summary' : 'Show Summary'}
+            </button>
+          </div>
         </div>
 
         {/* Approval Tabs - Correct Order */}
+        {showFilter && (
         <div className="approval-tabs">
           <button 
             className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
@@ -548,9 +569,10 @@ function DataSummary({ fareData, expenseData, currentUser }) {
             <i className="bi bi-check-circle"></i> Approved ({approvedData.length})
           </button>
         </div>
+        )}
 
         {/* Selection Controls */}
-        {currentData.length > 0 && (
+        {showSummary && currentData.length > 0 && (
           <div className="selection-controls">
             <div className="select-all-container">
               <input
