@@ -2,6 +2,7 @@
 class AuthService {
   constructor() {
     // Google Apps Script Web App URL - Updated to use the correct deployment URL
+    // IMPORTANT: Replace with your NEW deployment URL after redeploying the script
     this.API_URL = 'https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec';
   }
 
@@ -20,7 +21,7 @@ class AuthService {
         },
         signal: controller.signal,
         redirect: 'follow',
-        mode: 'cors',
+        mode: 'cors', // Keep as 'cors' after proper deployment
         body: JSON.stringify({
           action: 'login',
           username: username,
