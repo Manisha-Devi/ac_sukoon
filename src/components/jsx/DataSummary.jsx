@@ -185,29 +185,31 @@ function DataSummary({ fareData, expenseData, currentUser }) {
     return currentIds.length > 0 && currentIds.every(id => selectedEntries.includes(id));
   };
 
-  // Get approved entries for current user
+  // Get approved entries for current user - only approvedCash status
   const getApprovedEntriesForCurrentUser = () => {
     const currentUserName = currentUser?.fullName || currentUser?.username;
     if (!currentUserName) return [];
 
-    const filteredEntries = approvedData.filter(entry => entry.approvedBy === currentUserName);
+    const filteredEntries = approvedData.filter(entry => 
+      entry.approvedBy === currentUserName && entry.entryStatus === 'approvedCash'
+    );
     
     console.log('🔍 DataSummary - Checking approved entries:');
     console.log('📊 Current user:', currentUserName);
     console.log('📋 Total approved data:', approvedData.length);
-    console.log('✅ Entries approved by current user:', filteredEntries.length);
-    console.log('📝 Approved entries details:', filteredEntries);
+    console.log('💰 Entries with approvedCash status approved by current user:', filteredEntries.length);
+    console.log('📝 ApprovedCash entries details:', filteredEntries);
 
     return filteredEntries;
   };
 
-  // Calculate total cash from approved entries of current user
+  // Calculate total cash from approvedCash entries of current user
   const calculateTotalCash = () => {
     const userApprovedEntries = getApprovedEntriesForCurrentUser();
     return userApprovedEntries.reduce((total, entry) => total + (entry.cashAmount || 0), 0);
   };
 
-  // Calculate total bank from approved entries of current user
+  // Calculate total bank from approvedCash entries of current user
   const calculateTotalBank = () => {
     const userApprovedEntries = getApprovedEntriesForCurrentUser();
     return userApprovedEntries.reduce((total, entry) => total + (entry.bankAmount || 0), 0);
@@ -696,7 +698,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
 
               {/* Approved Entries Table */}
               <div className="approved-entries-section">
-                <h6><i className="bi bi-check-circle-fill"></i> Entries Approved By You</h6>
+                <h6><i className="bi bi-check-circle-fill"></i> Cash Approved Entries By You</h6>
                 {getApprovedEntriesForCurrentUser().length > 0 ? (
                   <div className="table-responsive">
                     <table className="table table-striped table-sm approved-entries-table">
@@ -735,7 +737,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                 ) : (
                   <div className="no-approved-entries">
                     <i className="bi bi-inbox"></i>
-                    <p>No entries approved by you found</p>
+                    <p>No cash approved entries found</p>
                   </div>
                 )}
               </div>
