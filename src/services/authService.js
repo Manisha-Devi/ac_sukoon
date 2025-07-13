@@ -1915,7 +1915,7 @@ class AuthService {
   // Get all Cash Deposits from Google Sheets
   async getCashDeposits() {
     try {
-      console.log('📋 Fetching cash deposits from Google Sheets...');
+      console.log('💰 Fetching cash deposits from Google Sheets...');
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
@@ -1936,19 +1936,37 @@ class AuthService {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('❌ Cash deposits HTTP error:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
       const result = await response.json();
-      console.log('✅ Cash deposits fetched:', result);
+      console.log('✅ Cash deposits API response:', result);
+      
+      if (result.success && result.data) {
+        console.log(`💰 Successfully fetched ${result.data.length} cash deposits from Google Sheets`);
+        result.data.forEach((deposit, index) => {
+          console.log(`${index + 1}. Cash Deposit:`, {
+            entryId: deposit.entryId,
+            amount: deposit.cashAmount,
+            date: deposit.date,
+            depositedBy: deposit.depositedBy
+          });
+        });
+      } else {
+        console.warn('⚠️ Cash deposits API returned error:', result.error || 'Unknown error');
+      }
+      
       return result;
     } catch (error) {
       console.error('❌ Error fetching cash deposits:', error);
       // Return empty data structure instead of error to prevent UI crashes
       return { 
-        success: true, 
+        success: false, 
         data: [],
-        message: 'Cash deposits loaded from local cache (API temporarily unavailable)'
+        error: error.message,
+        message: 'Cash deposits API temporarily unavailable'
       };
     }
   }

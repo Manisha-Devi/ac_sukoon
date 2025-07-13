@@ -20,6 +20,42 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
     date: new Date().toISOString().split('T')[0]
   });
 
+  // Load cash deposits when component mounts
+  useEffect(() => {
+    const loadCashDeposits = async () => {
+      try {
+        console.log('💰 DataSummary: Loading cash deposits...');
+        const result = await authService.getCashDeposits();
+
+        if (result.success && result.data) {
+          console.log('💰 DataSummary: Cash deposits loaded successfully:', result.data.length);
+          setCashDeposit(result.data);
+        } else {
+          console.warn('⚠️ DataSummary: Failed to load cash deposits:', result.error);
+        }
+      } catch (error) {
+        console.error('❌ DataSummary: Error loading cash deposits:', error);
+      }
+    };
+
+    // Load cash deposits if not already loaded
+    if (!cashDeposit || cashDeposit.length === 0) {
+      loadCashDeposits();
+    }
+
+    // Listen for data refresh events
+    const handleDataRefresh = () => {
+      console.log('💰 DataSummary: Refreshing cash deposits...');
+      loadCashDeposits();
+    };
+
+    window.addEventListener('dataRefreshed', handleDataRefresh);
+
+    return () => {
+      window.removeEventListener('dataRefreshed', handleDataRefresh);
+    };
+  }, []);
+
   // Log user data for debugging
   useEffect(() => {
     console.log('🔍 DataSummary - User from props:', currentUser);
@@ -887,25 +923,26 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                                 <th>SubmittedBy</th>
                               </tr>
                             </thead>
-                            <tbody>
-                              {getFinalApprovedEntriesForTable().map((entry) => (
-                                <tr key={entry.entryId}>
-                                  <td>{formatDisplayDate(entry.date)}</td>
-                                  <td>
-                                    <span className={`badge ${entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'bg-success' : 'bg-danger'}`}>
-                                      {entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'I' : 'E'}
-                                    </span>
-                                  </td>
-                                  <td>{entry.displayName}</td>
-                                  <td className="text-success">₹{(entry.cashAmount || 0).toLocaleString('en-IN')}</td>
-                                  <td className="text-primary">₹{(entry.bankAmount || 0).toLocaleString('en-IN')}</td>
-                                  <td className="fw-bold">₹{(entry.totalAmount || 0).toLocaleString('en-IN')}</td>
-                                  <td>
-                                    <span className="badge bg-info">
-                                      <i className="bi bi-person"></i> {entry.submittedBy || 'N/A'}
-                                    </span>
-                                  </td>
-                                </tr>
+```text
+                              <tbody>
+                                {getFinalApprovedEntriesForTable().map((entry) => (
+                                  <tr key={entry.entryId}>
+                                    <td>{formatDisplayDate(entry.date)}</td>
+                                    <td>
+                                      <span className={`badge ${entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'bg-success' : 'bg-danger'}`}>
+                                        {entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'I' : 'E'}
+                                      </span>
+                                    </td>
+                                    <td>{entry.displayName}</td>
+                                    <td className="text-success">₹{(entry.cashAmount || 0).toLocaleString('en-IN')}</td>
+                                    <td className="text-primary">₹{(entry.bankAmount || 0).toLocaleString('en-IN')}</td>
+                                    <td className="fw-bold">₹{(entry.totalAmount || 0).toLocaleString('en-IN')}</td>
+                                    <td>
+                                      <span className="badge bg-info">
+                                        <i className="bi bi-person"></i> {entry.submittedBy || 'N/A'}
+                                      </span>
+                                    </td>
+                                  </tr>
                                 ))}
                               </tbody>
                             </table>

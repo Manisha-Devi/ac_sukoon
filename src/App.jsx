@@ -273,11 +273,13 @@ function App() {
       // Update cashDeposit state with fetched data
       if (cashDepositsData?.success && cashDepositsData?.data) {
         console.log('💰 Setting cashDeposit data:', cashDepositsData.data.length, 'deposits');
+        console.log('💰 Cash deposits fetched from Google Sheets:', cashDepositsData.data);
         setCashDeposit(cashDepositsData.data);
       } else {
         console.warn('⚠️ Failed to load cash deposits data:', cashDepositsData?.error);
-        // Optionally, handle the error or set an empty array
-        setCashDeposit([]);
+        console.warn('⚠️ Full cash deposits response:', cashDepositsData);
+        // Keep existing data instead of clearing it
+        console.log('💰 Keeping existing cash deposits data');
       }
 
       // Calculate and update totals
