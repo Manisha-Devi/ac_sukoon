@@ -691,6 +691,12 @@ html, body {
   }
 }
 
+/* Sidebar overflow control */
+.sidebar {
+  overflow-x: hidden !important;
+  overflow-y: auto;
+}
+
 /* Custom scrollbar */
 .sidebar::-webkit-scrollbar {
   width: 4px;
