@@ -156,26 +156,30 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
 
   // Handle checkbox selection for individual rows (only for specific conditions)
   const handleSelectEntry = (entryId) => {
-    const entry = currentEntries.find(e => e.entryId === entryId);
-    const bankAmount = entry?.bankAmount || 0;
+    const entry = filteredData.find(e => e.entryId === entryId);
+    
+    if (!entry) {
+      console.log('⚠️ Entry not found:', entryId);
+      return;
+    }
+
+    // Get bankAmount from original entry data
+    const originalEntry = [...(fareData || []), ...(expenseData || [])].find(e => e.entryId === entryId);
+    const bankAmount = originalEntry?.bankAmount || 0;
     
     console.log('🎯 handleSelectEntry called:', {
       entryId: entryId,
-      entryStatus: entry?.entryStatus,
+      entryStatus: entry.entryStatus,
       bankAmount: bankAmount,
-      shouldShowCheckbox: entry && (
-        entry.entryStatus === 'approvedBank' || 
-        (entry.entryStatus === 'pending' && bankAmount === 0)
-      )
+      shouldShowCheckbox: entry.entryStatus === 'approvedBank' || 
+                         (entry.entryStatus === 'pending' && bankAmount === 0)
     });
     
     // Show checkbox only for:
     // 1. status = 'approvedBank' (regardless of bankAmount)  
     // 2. status = 'pending' AND bankAmount = 0
-    if (entry && (
-      entry.entryStatus === 'approvedBank' || 
-      (entry.entryStatus === 'pending' && bankAmount === 0)
-    )) {
+    if (entry.entryStatus === 'approvedBank' || 
+        (entry.entryStatus === 'pending' && bankAmount === 0)) {
       setSelectedEntries(prev => {
         if (prev.includes(entryId)) {
           return prev.filter(id => id !== entryId);
@@ -189,7 +193,10 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
   // Handle select all checkbox (for selectable entries only)
   const handleSelectAll = () => {
     const selectableEntries = currentEntries.filter(entry => {
-      const bankAmount = entry.bankAmount || 0;
+      // Get bankAmount from original entry data
+      const originalEntry = [...(fareData || []), ...(expenseData || [])].find(e => e.entryId === entry.entryId);
+      const bankAmount = originalEntry?.bankAmount || 0;
+      
       return entry.entryStatus === 'approvedBank' || 
              (entry.entryStatus === 'pending' && bankAmount === 0);
     });
@@ -210,7 +217,10 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
 
   // Check if all visible selectable entries are selected
   const selectableEntries = currentEntries.filter(entry => {
-    const bankAmount = entry.bankAmount || 0;
+    // Get bankAmount from original entry data
+    const originalEntry = [...(fareData || []), ...(expenseData || [])].find(e => e.entryId === entry.entryId);
+    const bankAmount = originalEntry?.bankAmount || 0;
+    
     return entry.entryStatus === 'approvedBank' || 
            (entry.entryStatus === 'pending' && bankAmount === 0);
   });
@@ -232,7 +242,10 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
   // Get status icon for entry based on status and bankAmount
   const getStatusIcon = (entry) => {
     const entryStatus = entry.entryStatus;
-    const bankAmount = entry.bankAmount || 0;
+    
+    // Get bankAmount from original entry data
+    const originalEntry = [...(fareData || []), ...(expenseData || [])].find(e => e.entryId === entry.entryId);
+    const bankAmount = originalEntry?.bankAmount || 0;
     
     console.log('🔍 getStatusIcon called for entry:', {
       entryId: entry.entryId,
@@ -253,6 +266,12 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
       case 'forwardedBank':
         console.log('➖ Showing dash for forwardedBank entry');
         return <i className="bi bi-dash text-muted" title="Forwarded to Bank"></i>; // - icon
+      case 'forwardedCash':
+        console.log('➖ Showing dash for forwardedCash entry');
+        return <i className="bi bi-dash text-muted" title="Forwarded to Cash"></i>; // - icon
+      case 'approvedBank':
+        console.log('✅ Showing checkbox for approvedBank entry');
+        return null; // Show checkbox
       case 'approved':
         console.log('✅ Showing green tick for approved entry');
         return <i className="bi bi-check-circle-fill text-success" title="Final Approved"></i>; // green tick icon
@@ -601,7 +620,9 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
                       </td>
                       <td>
                         {(() => {
-                          const bankAmount = entry.bankAmount || 0;
+                          // Get bankAmount from original entry data
+                          const originalEntry = [...(fareData || []), ...(expenseData || [])].find(e => e.entryId === entry.entryId);
+                          const bankAmount = originalEntry?.bankAmount || 0;
                           const shouldShowCheckbox = entry.entryStatus === 'approvedBank' || 
                                                    (entry.entryStatus === 'pending' && bankAmount === 0);
                           
