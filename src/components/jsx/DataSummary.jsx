@@ -504,7 +504,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       <div 
         key={entry.entryId} 
         className={`recent-entry-card ${isSelected ? 'selected' : ''}`}
-        onClick={() => handleEntrySelect(entry.entryId)}
+        onClick={()={() => handleEntrySelect(entry.entryId)}
       >
         <div className="entry-checkbox">
           <input
@@ -636,6 +636,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
 
   const currentData = getCurrentTabData();
 
+  // Handle cash deposit submission
   const handleCashDeposit = async () => {
     if (!cashDepositAmount || parseFloat(cashDepositAmount) <= 0) {
       alert('Please enter a valid deposit amount');
@@ -649,14 +650,40 @@ function DataSummary({ fareData, expenseData, currentUser }) {
 
     try {
       const depositedBy = currentUser?.fullName || currentUser?.username;
-      const result = await authService.createCashDeposit(parseFloat(cashDepositAmount), depositedBy);
+      const entryId = Date.now();
+      const today = new Date().toISOString().split('T')[0];
+
+      console.log('💰 Submitting cash deposit:', {
+        entryId,
+        amount: parseFloat(cashDepositAmount),
+        depositedBy,
+        date: today
+      });
+
+      const result = await authService.addCashDeposit({
+        entryId: entryId,
+        timestamp: new Date().toISOString(),
+        date: today,
+        cashAmount: parseFloat(cashDepositAmount),
+        depositedBy: depositedBy
+      });
 
       if (result && result.success) {
         alert('Cash deposit submitted successfully');
         setShowCashDepositModal(false);
         setCashDepositAmount('');
-        // Refresh data to reflect changes (optional)
+
+        // Refresh data to reflect changes
+        console.log('🔄 Refreshing data after cash deposit...');
         processAllData();
+
+        // Trigger global refresh event
+        window.dispatchEvent(new CustomEvent('dataRefreshed', {
+          detail: {
+            timestamp: new Date(),
+            source: 'cash-deposit'
+          }
+        }));
       } else {
         alert('Failed to submit cash deposit: ' + (result?.error || 'Unknown error'));
       }
@@ -848,7 +875,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
         <div className="approval-tabs">
           <button 
             className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
-            onClick={() => {
+            onClick={()={() => {
               setActiveTab('pending');
               setSelectedEntries([]);
             }}
@@ -857,7 +884,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
           </button>
           <button 
             className={`tab-btn ${activeTab === 'bankApproval' ? 'active' : ''}`}
-            onClick={() => {
+            onClick={()={() => {
               setActiveTab('bankApproval');
               setSelectedEntries([]);
             }}
@@ -866,7 +893,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
           </button>
           <button 
             className={`tab-btn ${activeTab === 'cashApproval' ? 'active' : ''}`}
-            onClick={() => {
+            onClick={()={() => {
               setActiveTab('cashApproval');
               setSelectedEntries([]);
             }}
@@ -875,7 +902,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
           </button>
           <button 
             className={`tab-btn ${activeTab === 'approved' ? 'active' : ''}`}
-            onClick={() => {
+            onClick={()={() => {
               setActiveTab('approved');
               setSelectedEntries([]);
             }}

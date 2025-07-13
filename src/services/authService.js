@@ -1826,6 +1826,77 @@ class AuthService {
   }
 
   // ============================================================================
+  // CASH DEPOSIT FUNCTIONS
+  // ============================================================================
+
+  async addCashDeposit(data) {
+    try {
+      console.log('💰 Adding cash deposit via authService:', data);
+
+      const requestData = {
+        action: 'addCashDeposit',
+        entryId: data.entryId,
+        timestamp: data.timestamp,
+        date: data.date,
+        cashAmount: data.cashAmount,
+        depositedBy: data.depositedBy
+      };
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Cash deposit response:', result);
+
+      return result;
+    } catch (error) {
+      console.error('❌ Error adding cash deposit:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getCashDeposits() {
+    try {
+      console.log('📋 Fetching cash deposits via authService...');
+
+      const requestData = {
+        action: 'getCashDeposits'
+      };
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Cash deposits response:', result);
+
+      return result;
+    } catch (error) {
+      console.error('❌ Error fetching cash deposits:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ============================================================================
   // ANALYTICS FUNCTIONS
   // ============================================================================
 
