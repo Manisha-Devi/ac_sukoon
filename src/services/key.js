@@ -8,7 +8,7 @@
 class APIKeyService {
   constructor() {
     // Store API key securely - In production, use environment variables
-    this.API_KEY = 'ac-sukoon-transport-2025';
+    this.API_KEY = 'adsfsyieryieradafas123ew45';
     this.BACKUP_KEY = 'backup-key-emergency-2025';
   }
 
