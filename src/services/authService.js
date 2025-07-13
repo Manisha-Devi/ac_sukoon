@@ -1153,6 +1153,7 @@ class AuthService {
       return { success: false, error: error.message };
     }
   }
+}
 
   // ======= FUEL PAYMENTS API METHODS =======
 
