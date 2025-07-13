@@ -504,7 +504,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       <div 
         key={entry.entryId} 
         className={`recent-entry-card ${isSelected ? 'selected' : ''}`}
-        onClick={()={() => handleEntrySelect(entry.entryId)}
+        onClick={() => handleEntrySelect(entry.entryId)}
       >
         <div className="entry-checkbox">
           <input
