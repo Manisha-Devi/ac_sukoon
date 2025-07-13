@@ -514,23 +514,20 @@ function DataSummary({ fareData, expenseData, currentUser }) {
           <div className="filter-toggle-section">
             <button 
               className="btn btn-outline-primary btn-sm filter-toggle-btn me-2"
-              onClick={() => setShowFilter(!showFilter)}
             >
-              <i className={`bi ${showFilter ? 'bi-eye-slash' : 'bi-funnel'}`}></i>
-              {showFilter ? 'Hide Filter' : 'Show Filter'}
+              <i className="bi bi-funnel"></i>
+              Filter
             </button>
             <button 
               className="btn btn-outline-info btn-sm filter-toggle-btn"
-              onClick={() => setShowSummary(!showSummary)}
             >
-              <i className={`bi ${showSummary ? 'bi-eye-slash' : 'bi-bar-chart'}`}></i>
-              {showSummary ? 'Hide Summary' : 'Show Summary'}
+              <i className="bi bi-bar-chart"></i>
+              Summary
             </button>
           </div>
         </div>
 
         {/* Approval Tabs - Correct Order */}
-        {showFilter && (
         <div className="approval-tabs">
           <button 
             className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
@@ -569,10 +566,9 @@ function DataSummary({ fareData, expenseData, currentUser }) {
             <i className="bi bi-check-circle"></i> Approved ({approvedData.length})
           </button>
         </div>
-        )}
 
         {/* Selection Controls */}
-        {showSummary && currentData.length > 0 && (
+        {currentData.length > 0 && (
           <div className="selection-controls">
             <div className="select-all-container">
               <input
