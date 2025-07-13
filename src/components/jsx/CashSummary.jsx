@@ -341,20 +341,8 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
     .filter(entry => entry.type === 'expense' && entry.entryStatus !== 'approved')
     .reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
 
-  // Get Fixed Cash for current user
-  const getCurrentUserFixedCash = () => {
-    if (!currentUser || !allUsers) return 0;
-    const currentUserName = currentUser.fullName || currentUser.username;
-    const userInfo = allUsers.find(user => 
-      user.name === currentUserName || user.username === currentUserName
-    );
-    return userInfo ? (userInfo.fixedCash || 0) : 0;
-  };
-
-  const fixedCash = getCurrentUserFixedCash();
-
-  // Cash balance = Non-Approved Income + Fixed Cash - Non-Approved Expenses
-  const cashBalance = nonApprovedCashIncome + fixedCash - nonApprovedCashExpense;
+  // Cash balance = Non-Approved Income - Non-Approved Expenses (Fixed Cash excluded)
+  const cashBalance = nonApprovedCashIncome - nonApprovedCashExpense;
 
   useEffect(() => {
   }, []);
@@ -453,7 +441,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
       {/* Summary Cards */}
       {showSummary && (
         <div className="row mb-4">
-          <div className="col-lg-3 col-md-6 mb-3">
+          <div className="col-lg-4 col-md-6 mb-3">
             <div className="summary-card income-card">
               <div className="card-body">
                 <h6><i className="bi bi-arrow-up-circle"></i> Cash Income</h6>
@@ -462,7 +450,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
               </div>
             </div>
           </div>
-          <div className="col-lg-3 col-md-6 mb-3">
+          <div className="col-lg-4 col-md-6 mb-3">
             <div className="summary-card expense-card">
               <div className="card-body">
                 <h6><i className="bi bi-arrow-down-circle"></i> Cash Expense</h6>
@@ -471,16 +459,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
               </div>
             </div>
           </div>
-          <div className="col-lg-3 col-md-6 mb-3">
-            <div className="summary-card fixed-cash-card">
-              <div className="card-body">
-                <h6><i className="bi bi-cash-coin"></i> Fixed Cash</h6>
-                <h4 className="text-info">₹{fixedCash.toLocaleString()}</h4>
-                <small className="text-muted">Starting amount</small>
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-3 col-md-6 mb-3">
+          <div className="col-lg-4 col-md-6 mb-3">
             <div className="summary-card balance-card">
               <div className="card-body">
                 <h6><i className="bi bi-calculator"></i> Cash Balance</h6>
@@ -488,7 +467,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
                   ₹{Math.abs(cashBalance).toLocaleString()}
                   {cashBalance < 0 && ' (Deficit)'}
                 </h4>
-                <small className="text-muted">Pending + Fixed - Pending Expense</small>
+                <small className="text-muted">Pending Income - Pending Expense</small>
               </div>
             </div>
           </div>
