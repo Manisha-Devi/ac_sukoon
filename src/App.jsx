@@ -798,9 +798,10 @@ function App() {
         {activeTab === "bonus-calc" && <BonusCalculator currentUser={user} />}
         {activeTab === "analytics" && (
           <Analytics 
-            expenseData={expenseData} 
             fareData={fareData}
-            currentUser={user}
+            expenseData={expenseData}
+            totalEarnings={totalEarnings}
+            totalExpenses={totalExpenses}
           />
         )}
         {activeTab === "cash-book" && (
