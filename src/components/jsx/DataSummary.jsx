@@ -532,11 +532,44 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
 
   // Helper function to format time for display - with seconds format
   const formatDisplayTime = (timestampStr) => {
-    if (!timestampStr) return '';
+    if (!timestampStr) return '--:--:-- --';
 
     try {
-      const date = new Date(timestampStr);
-      if (isNaN(date.getTime())) return timestampStr;
+      let date;
+      
+      // Handle different timestamp formats
+      if (timestampStr.includes('/')) {
+        // Handle format like "13/07/2025 16:14:45"
+        const parts = timestampStr.split(' ');
+        if (parts.length >= 2) {
+          const datePart = parts[0]; // "13/07/2025"
+          const timePart = parts[1]; // "16:14:45"
+          
+          // Convert to proper date format
+          const [day, month, year] = datePart.split('/');
+          const properDateStr = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${timePart}`;
+          date = new Date(properDateStr);
+        } else {
+          date = new Date(timestampStr);
+        }
+      } else {
+        date = new Date(timestampStr);
+      }
+
+      if (isNaN(date.getTime())) {
+        // If still invalid, try to extract just time part if possible
+        if (timestampStr.includes(' ')) {
+          const timePart = timestampStr.split(' ')[1];
+          if (timePart && timePart.includes(':')) {
+            const [hours, minutes, seconds] = timePart.split(':');
+            const hour = parseInt(hours);
+            const period = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+            return `${displayHour}:${minutes}:${seconds || '00'} ${period}`;
+          }
+        }
+        return timestampStr;
+      }
 
       // Time format with seconds - HH:MM:SS AM/PM
       return date.toLocaleTimeString('en-US', {
@@ -547,7 +580,8 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
         timeZone: 'Asia/Kolkata'
       });
     } catch (error) {
-      return timestampStr;
+      console.error('Error formatting time:', error, timestampStr);
+      return '--:--:-- --';
     }
   };
 
