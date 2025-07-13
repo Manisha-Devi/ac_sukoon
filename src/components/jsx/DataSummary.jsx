@@ -511,10 +511,11 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
     }
 
     // Create new cash deposit entry
+    const entryIdNumber = Date.now();
     const newCashDeposit = {
-      id: Date.now(),
+      id: entryIdNumber,
       entryType: 'Cash Deposit',
-      entryId: `CD-${Date.now()}`,
+      entryId: entryIdNumber,
       date: cashDepositForm.date,
       cashAmount: parseFloat(cashDepositForm.amount),
       description: cashDepositForm.description,
