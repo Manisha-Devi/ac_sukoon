@@ -106,6 +106,89 @@ class AuthService {
     }
   }
 
+  // Generic API request method with timeout and better error handling
+  async makeAPIRequest(url, body, timeout = 10000, retries = 1) {
+    let attempt = 0;
+    while (attempt < retries + 1) {
+      try {
+        attempt++;
+        console.log(`Attempt ${attempt} of ${retries + 1} to make API request`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8',
+          },
+          mode: 'cors',
+          redirect: 'follow',
+          signal: controller.signal,
+          body: body
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`HTTP Error Response (Attempt ${attempt}):`, errorText);
+          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        const result = await response.json();
+        return result;
+      } catch (error) {
+        console.error(`API Request failed (Attempt ${attempt}):`, error);
+        if (error.name === 'AbortError') {
+          if (attempt <= retries) {
+            console.log(`Request timed out. Retrying... (${attempt}/${retries})`);
+            continue; // Retry if timeout and retries are remaining
+          } else {
+            throw new Error('Request timeout - API took too long to respond after multiple retries');
+          }
+        }
+        if (attempt <= retries) {
+          console.log(`Request failed. Retrying... (${attempt}/${retries})`);
+          continue; // Retry if other errors and retries are remaining
+        } else {
+          throw new Error(`Failed to fetch after multiple retries: ${error.message}`);
+        }
+      }
+    }
+  }
+
+  // Generic request method for consistent API calls
+  async makeRequest(action, data) {
+    try {
+      console.log(`🔄 Making API request: ${action}`, data);
+
+      const requestBody = JSON.stringify({
+        action: action,
+        ...data
+      });
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors',
+        body: requestBody
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log(`✅ API response for ${action}:`, result);
+      return result;
+    } catch (error) {
+      console.error(`❌ API request failed for ${action}:`, error);
+      throw error;
+    }
+  }
+
   // Get all users from Users sheet
   async getAllUsers() {
     try {
@@ -170,1763 +253,6 @@ class AuthService {
     }
   }
 
-  // Cash Deposit Functions
-  async addCashDeposit(data) {
-    try {
-      console.log('💰 Adding cash deposit to Google Sheets:', data);
-
-      const requestBody = JSON.stringify({
-        action: 'addCashDeposit',
-        ...data
-      });
-
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
-
-      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
-        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
-        return { success: false, error: 'API temporarily unavailable - data saved locally' };
-      }
-
-      console.log('✅ Cash deposit add response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error adding cash deposit:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  async getCashDeposits() {
-    try {
-      console.log('📋 Fetching cash deposits from Google Sheets...');
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'getCashDeposits'
-        })
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Cash deposits fetch response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error fetching cash deposits:', error);
-      // Return empty data structure instead of error to prevent UI crashes
-      return { 
-        success: true, 
-        data: [],
-        message: 'Cash deposits loaded from local cache (API temporarily unavailable)'
-      };
-    }
-  }
-
-  async updateCashDeposit(data) {
-    try {
-      console.log('📝 Updating cash deposit in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'updateCashDeposit',
-          entryId: data.entryId,
-          updatedData: data.updatedData
-        })
-      });
-
-      const result = await response.json();
-      console.log('✅ Cash deposit update response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error updating cash deposit:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  async deleteCashDeposit(data) {
-    try {
-      console.log('🗑️ Deleting cash deposit in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'deleteCashDeposit',
-          entryId: data.entryId
-        })
-      });
-
-      const result = await response.json();
-      console.log('✅ Cash deposit delete response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error deleting cash deposit:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Add Fare Receipt to Google Sheets with retry mechanism
-  async addFareReceipt(data) {
-    try {
-      console.log('📝 Adding fare receipt to Google Sheets:', data);
-
-      const requestBody = JSON.stringify({
-        action: 'addFareReceipt',
-        entryId: data.entryId,
-        timestamp: data.timestamp,
-        date: data.date,
-        route: data.route,
-        cashAmount: data.cashAmount || 0,
-        bankAmount: data.bankAmount || 0,
-        totalAmount: data.totalAmount || 0,
-        submittedBy: data.submittedBy || 'driver'
-      });
-
-      // Try primary URL first
-      let result = await this.makeAPIRequest(this.API_URL, requestBody);
-
-      // If primary fails, don't retry - just return error for hybrid system to handle
-      if (!result.success && result.error.includes('Failed to fetch')) {
-        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
-        return { success: false, error: 'API temporarily unavailable - data saved locally' };
-      }
-
-      console.log('✅ Fare receipt response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error adding fare receipt:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Generic API request method with timeout and better error handling
-  async makeAPIRequest(url, body, timeout = 10000, retries = 1) {
-    let attempt = 0;
-    while (attempt < retries + 1) {
-      try {
-        attempt++;
-        console.log(`Attempt ${attempt} of ${retries + 1} to make API request`);
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8',
-          },
-          mode: 'cors',
-          redirect: 'follow',
-          signal: controller.signal,
-          body: body
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`HTTP Error Response (Attempt ${attempt}):`, errorText);
-          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-        }
-
-        const result = await response.json();
-        return result;
-      } catch (error) {
-        console.error(`API Request failed (Attempt ${attempt}):`, error);
-        if (error.name === 'AbortError') {
-          if (attempt <= retries) {
-            console.log(`Request timed out. Retrying... (${attempt}/${retries})`);
-            continue; // Retry if timeout and retries are remaining
-          } else {
-            throw new Error('Request timeout - API took too long to respond after multiple retries');
-          }
-        }
-        if (attempt <= retries) {
-          console.log(`Request failed. Retrying... (${attempt}/${retries})`);
-          continue; // Retry if other errors and retries are remaining
-        } else {
-          throw new Error(`Failed to fetch after multiple retries: ${error.message}`);
-        }
-      }
-    }
-  }
-
-  // Add Booking Entry to Google Sheets
-  async addBookingEntry(data) {
-    try {
-      console.log('📝 Adding booking entry to Google Sheets:', data);
-
-      const requestBody = JSON.stringify({
-        action: 'addBookingEntry',
-        entryId: data.entryId,
-        timestamp: data.timestamp,
-        bookingDetails: data.bookingDetails,
-        dateFrom: data.dateFrom,
-        dateTo: data.dateTo,
-        cashAmount: data.cashAmount || 0,
-        bankAmount: data.bankAmount || 0,
-        totalAmount: data.totalAmount || 0,
-        submittedBy: data.submittedBy || 'driver'
-      });
-
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
-
-      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
-        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
-        return { success: false, error: 'API temporarily unavailable - data saved locally' };
-      }
-
-      console.log('✅ Booking entry response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error adding booking entry:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Get all Fare Receipts from Google Sheets
-  async getFareReceipts() {
-    try {
-      console.log('📋 Fetching fare receipts from Google Sheets...');
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'getFareReceipts'
-        })
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Fare receipts fetched:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error fetching fare receipts:', error);
-      // Return empty datastructure instead of error to prevent UI crashes
-      return { 
-        success: true, 
-        data: [],
-        message: 'Fare receipts loaded from local cache (API temporarily unavailable)'
-      };
-    }
-  }
-
-  // Get Booking Entries from Google Sheets
-  async getBookingEntries() {
-    try {
-      console.log('📋 Fetching booking entries from Google Sheets...');
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'getBookingEntries'
-        })
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Booking entries fetched:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error fetching booking entries:', error);
-      // Return empty data structure instead of error to prevent UI crashes
-      return { 
-        success: true, 
-        data: [],
-        message: 'Booking entries loaded from local cache (API temporarily unavailable)'
-      };
-    }
-  }
-
-  // Get Off Days from Google Sheets
-  async getOffDays() {
-    try {
-      console.log('📋 Fetching off days from Google Sheets...');
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'getOffDays'
-        })
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Off days fetched:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error fetching off days:', error);
-      // Return empty data structure instead of error to prevent UI crashes
-      return { 
-        success: true, 
-        data: [],
-        message: 'Off days loaded from local cache (API temporarily unavailable)'
-      };
-    }
-  }
-
-  // Test connection to Google Sheets database
-  async testConnection() {
-    try {
-      console.log('🔍 Testing Google Sheets database connection...');
-      console.log('📍 API URL:', this.API_URL);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'test'
-        })
-      });
-
-      console.log('Response status:', response.status);
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('✅ Database connection successful:', result);
-        return true;
-      } else {
-        console.log('❌ Database connection failed');
-        return false;
-      }
-    } catch (error) {
-      console.error('❌ Database connection error:', error);
-      return false;
-    }
-  }
-
-  // Add remaining API methods...
-  async addOffDay(data) {
-    try {
-      console.log('📝 Adding off day to Google Sheets:', data);
-
-      const requestBody = JSON.stringify({
-        action: 'addOffDay',
-        entryId: data.entryId,
-        timestamp: data.timestamp,
-        date: data.date,
-        reason: data.reason,
-        submittedBy: data.submittedBy || 'driver'
-      });
-
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
-
-      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
-        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
-        return { success: false, error: 'API temporarily unavailable - data saved locally' };
-      }
-
-      console.log('✅ Off day response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error adding off day:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Add all the payment related methods
-  async getFuelPayments() {
-    try {
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        mode: 'cors',
-        body: JSON.stringify({ action: 'getFuelPayments' })
-      });
-      return await response.json();
-    } catch (error) {
-      return { success: true, data: [] };
-    }
-  }
-
-  async getAddaPayments() {
-    try {
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        mode: 'cors',
-        body: JSON.stringify({ action: 'getAddaPayments' })
-      });
-      return await response.json();
-    } catch (error) {
-      return { success: true, data: [] };
-    }
-  }
-
-  async getUnionPayments() {
-    try {
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        mode: 'cors',
-        body: JSON.stringify({ action: 'getUnionPayments' })
-      });
-      return await response.json();
-    } catch (error) {
-      return { success: true, data: [] };
-    }
-  }
-
-  async getServicePayments() {
-    try {
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        mode: 'cors',
-        body: JSON.stringify({ action: 'getServicePayments' })
-      });
-      return await response.json();
-    } catch (error) {
-      return { success: true, data: [] };
-    }
-  }
-
-  async getOtherPayments() {
-    try {
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        mode: 'cors',
-        body: JSON.stringify({ action: 'getOtherPayments' })
-      });
-      return await response.json();
-    } catch (error) {
-      return { success: true, data: [] };
-    }
-  }
-
-  // Add all other required methods with simplified implementations
-  async updateFareReceipt(data) {
-    try {
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        mode: 'cors',
-        body: JSON.stringify({
-          action: 'updateFareReceipt',
-          entryId: data.entryId,
-          updatedData: data.updatedData
-        })
-      });
-      return await response.json();
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  async deleteFareReceipt(data) {
-    try {
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        mode: 'cors',
-        body: JSON.stringify({
-          action: 'deleteFareReceipt',
-          entryId: data.entryId
-        })
-      });
-      return await response.json();
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  async updateBookingEntry(data) {
-    try {
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        mode: 'cors',
-        body: JSON.stringify({
-          action: 'updateBookingEntry',
-          entryId: data.entryId,
-          updatedData: data.updatedData
-        })
-      });
-      return await response.json();
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  async deleteBookingEntry(data) {
-    try {
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        mode: 'cors',
-        body: JSON.stringify({
-          action: 'deleteBookingEntry',
-          entryId: data.entryId
-        })
-      });
-      return await response.json();
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  async updateOffDay(data) {
-    try {
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        mode: 'cors',
-        body: JSON.stringify({
-          action: 'updateOffDay',
-          entryId: data.entryId,
-          updatedData: data.updatedData
-        })
-      });
-      return await response.json();
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  async deleteOffDay(data) {
-    try {
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        mode: 'cors',
-        body: JSON.stringify({
-          action: 'deleteOffDay',
-          entryId: data.entryId
-        })
-      });
-      return await response.json();
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  // ======= ADDA PAYMENTS API METHODS =======
-
-  // Add Adda Payment to Google Sheets
-  async addAddaPayment(data) {
-    try {
-      console.log('📝 Adding adda payment to Google Sheets:', data);
-
-      const requestBody = JSON.stringify({
-        action: 'addAddaPayment',
-        entryId: data.entryId,
-        timestamp: data.timestamp,
-        date: data.date,
-        addaName: data.addaName || '',
-        cashAmount: data.cashAmount || 0,
-        bankAmount: data.bankAmount || 0,
-        totalAmount: data.totalAmount || 0,
-        remarks: data.remarks || '',
-        submittedBy: data.submittedBy || 'driver'
-      });
-
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
-
-      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
-        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
-        return { success: false, error: 'API temporarily unavailable - data saved locally' };
-      }
-
-      console.log('✅ Adda payment response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error adding adda payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Update Adda Payment
-  async updateAddaPayment(data) {
-    try {
-      console.log('📝 Updating adda payment in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'updateAddaPayment',
-          entryId: data.entryId,
-          updatedData: data.updatedData
-        })
-      });
-
-      const result = await response.json();
-      console.log('✅ Adda payment update response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error updating adda payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Delete Adda Payment
-  async deleteAddaPayment(data) {
-    try {
-      console.log('🗑️ Deleting adda payment in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'deleteAddaPayment',
-          entryId: data.entryId
-        })
-      });
-
-      const result = await response.json();
-      console.log('✅ Adda payment delete response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error deleting adda payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // ======= UNION PAYMENTS API METHODS =======
-
-  // Add Union Payment to Google Sheets
-  async addUnionPayment(data) {
-    try {
-      console.log('📝 Adding union payment to Google Sheets:', data);
-
-      const requestBody = JSON.stringify({
-        action: 'addUnionPayment',
-        entryId: data.entryId,
-        timestamp: data.timestamp,
-        date: data.date,
-        unionName: data.unionName || '',
-        cashAmount: data.cashAmount || 0,
-        bankAmount: data.bankAmount || 0,
-        totalAmount: data.totalAmount || 0,
-        remarks: data.remarks || '',
-        submittedBy: data.submittedBy || 'driver'
-      });
-
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
-
-      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
-        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
-        return { success: false, error: 'API temporarily unavailable - data saved locally' };
-      }
-
-      console.log('✅ Union payment response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error adding union payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Update Union Payment
-  async updateUnionPayment(data) {
-    try {
-      console.log('📝 Updating union payment in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'updateUnionPayment',
-          entryId: data.entryId,
-          updatedData: data.updatedData
-        })
-      });
-
-      const result = await response.json();
-      console.log('✅ Union payment update response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error updating union payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Delete Union Payment
-  async deleteUnionPayment(data) {
-    try {
-      console.log('🗑️ Deleting union payment from Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'deleteUnionPayment',
-          entryId: data.entryId
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Union payment deleted:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error deleting union payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // ============================================================================
-  // SERVICE PAYMENTS - COMPLETE API INTEGRATION
-  // ============================================================================
-
-  // Add new Service Payment to Google Sheets
-  async addServicePayment(data) {
-    try {
-      console.log('📝 Adding service payment to Google Sheets:', data);
-
-      const requestBody = JSON.stringify({
-        action: 'addServicePayment',
-        entryId: data.entryId,
-        timestamp: data.timestamp,
-        date: data.date,
-        serviceType: data.serviceType || '',
-        cashAmount: data.cashAmount || 0,
-        bankAmount: data.bankAmount || 0,
-        totalAmount: data.totalAmount || 0,
-        serviceDetails: data.serviceDetails || '',
-        submittedBy: data.submittedBy || 'driver'
-      });
-
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
-
-      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
-        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
-        return { success: false, error: 'API temporarily unavailable - data saved locally' };
-      }
-
-      console.log('✅ Service payment response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error adding service payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Update Service Payment
-  async updateServicePayment(data) {
-    try {
-      console.log('📝 Updating service payment in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'updateServicePayment',
-          entryId: data.entryId,
-          updatedData: data.updatedData
-        })
-      });
-
-      if (!response.ok) {
-        ```tool_code
-throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Service payment updated:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error updating service payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Delete Service Payment
-  async deleteServicePayment(data) {
-    try {
-      console.log('🗑️ Deleting service payment from Google Sheets:', data);
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'deleteServicePayment',
-          entryId: data.entryId
-        })
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('HTTP Error Response:', errorText);
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Service payment deleted successfully:', result);
-
-      // Validate response structure
-      if (result && typeof result === 'object') {
-        return result;
-      } else {
-        console.warn('⚠️ Invalid response format:', result);
-        return { success: true, message: 'Service payment deleted (response format issue)' };
-      }
-    } catch (error) {
-      console.error('❌ Error deleting service payment:', error);
-      if (error.name === 'AbortError') {
-        return { success: false, error: 'Request timeout - delete operation took too long' };
-      }
-      return { success: false, error: error.message };
-    }
-  }
-
-  // ====================================================================
-  // OTHER PAYMENTS OPERATIONS
-  // ====================================================================
-
-  // Add Other Payment
-  async addOtherPayment(data) {
-    try {
-      console.log('📝 Adding other payment to Google Sheets:', data);
-
-      const requestBody = JSON.stringify({
-        action: 'addOtherPayment',
-        entryId: data.entryId,
-        timestamp: data.timestamp,
-        date: data.date,
-        paymentType: data.paymentType || '',
-        cashAmount: data.cashAmount || 0,
-        bankAmount: data.bankAmount || 0,
-        totalAmount: data.totalAmount || 0,
-        paymentDetails: data.paymentDetails || '',
-        submittedBy: data.submittedBy || 'driver'
-      });
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
-
-      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
-        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
-        return { success: false, error: 'API temporarily unavailable - data saved locally' };
-      }
-
-      console.log('✅ Other payment response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error adding other payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Update Other Payment
-  async updateOtherPayment(data) {
-    try {
-      console.log('📝 Updating other payment in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'updateOtherPayment',
-          entryId: data.entryId,
-          updatedData: data.updatedData
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Other payment updated:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error updating other payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Delete Other Payment
-  async deleteOtherPayment(data) {
-    try {
-      console.log('🗑️ Deleting other payment from Google Sheets:', data);
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'deleteOtherPayment',
-          entryId: data.entryId
-        })
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('HTTP Error Response:', errorText);
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Other payment deleted successfully:', result);
-
-      // Validate response structure
-      if (result && typeof result === 'object') {
-        return result;
-      } else {
-        console.warn('⚠️ Invalid response format:', result);
-        return { success: true, message: 'Other payment deleted (response format issue)' };
-      }
-    } catch (error) {
-      console.error('❌ Error deleting other payment:', error);
-      if (error.name === 'AbortError') {
-        return { success: false, error: 'Request timeout - delete operation took too long' };
-      }
-      return { success: false, error: error.message };
-    }
-  }
-
-  // ======= FUEL PAYMENTS API METHODS =======
-
-  // Add Fuel Payment to Google Sheets
-  async addFuelPayment(data) {
-    try {
-      console.log('📝 Adding fuel payment to Google Sheets:', data);
-
-      const requestBody = JSON.stringify({
-        action: 'addFuelPayment',
-        entryId: data.entryId,
-        timestamp: data.timestamp,
-        date: data.date,
-        pumpName: data.pumpName || '',
-        liters: data.liters || '',
-        rate: data.rate || '',
-        cashAmount: data.cashAmount || 0,
-        bankAmount: data.bankAmount || 0,
-        totalAmount: data.totalAmount || 0,
-        remarks: data.remarks || '',
-        submittedBy: data.submittedBy || 'driver'
-      });
-
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
-
-      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
-        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
-        return { success: false, error: 'API temporarily unavailable - data saved locally' };
-      }
-
-      console.log('✅ Fuel payment response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error adding fuel payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Update Fuel Payment
-  async updateFuelPayment(data) {
-    try {
-      console.log('📝 Updating fuel payment in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'updateFuelPayment',
-          entryId: data.entryId,
-          updatedData: data.updatedData
-        })
-      });
-
-      const result = await response.json();
-      console.log('✅ Fuel payment update response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error updating fuel payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Delete Fuel Payment
-  async deleteFuelPayment(data) {
-    try {
-      console.log('🗑️ Deleting fuel payment in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'deleteFuelPayment',
-          entryId: data.entryId
-        })
-      });
-
-      const result = await response.json();
-      console.log('✅ Fuel payment delete response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error deleting fuel payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Update Fare Receipt
-  async updateFareReceipt(data) {
-    try {
-      console.log('📝 Updating fare receipt in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'updateFareReceipt',
-          entryId: data.entryId,
-          updatedData: data.updatedData
-        })
-      });
-
-      const result = await response.json();
-      console.log('✅ Fare receipt update response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error updating fare receipt:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Update Booking Entry
-  async updateBookingEntry(data) {
-    try {
-      console.log('📝 Updating booking entry in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'updateBookingEntry',
-          entryId: data.entryId,
-          updatedData: data.updatedData
-        })
-      });
-
-      const result = await response.json();
-      console.log('✅ Booking entry update response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error updating booking entry:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Update Off Day
-  async updateOffDay(data) {
-    try {
-      console.log('📝 Updating off day in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'updateOffDay',
-          entryId: data.entryId,
-          updatedData: data.updatedData
-        })
-      });
-
-      const result = await response.json();
-      console.log('✅ Off day update response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error updating off day:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Delete Fare Receipt
-  async deleteFareReceipt(data) {
-    try {
-      console.log('🗑️ Deleting fare receipt in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'deleteFareReceipt',
-          entryId: data.entryId
-        })
-      });
-
-      const result = await response.json();
-      console.log('✅ Fare receipt delete response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error deleting fare receipt:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Delete Booking Entry
-  async deleteBookingEntry(data) {
-    try {
-      console.log('🗑️ Deleting booking entry in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'deleteBookingEntry',
-          entryId: data.entryId
-        })
-      });
-
-      const result = await response.json();
-      console.log('✅ Booking entry delete response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error deleting booking entry:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Delete Off Day
-  async deleteOffDay(data) {
-    try {
-      console.log('🗑️ Deleting off day in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: 'deleteOffDay',
-          entryId: data.entryId
-        })
-      });
-
-      const result = await response.json();
-      console.log('✅ Off day delete response:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error deleting off day:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // ============================================================================
-  // APPROVAL WORKFLOW FUNCTIONS
-  // ============================================================================
-
-  // Helper method for approval API calls
-  async makeApprovalAPIRequest(action, data, timeout = 15000) {
-    try {
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: action,
-          ...data
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log(`✅ ${action} response:`, result);
-      return result;
-    } catch (error) {
-      console.error(`❌ Error in ${action}:`, error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Approve Other Payment
-  async approveOtherPayment(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('approveOtherPayment', data);
-      return response;
-    } catch (error) {
-      console.error('Error approving other payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Approve Adda Payment
-  async approveAddaPayment(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('approveAddaPayment', data);
-      return response;
-    } catch (error) {
-      console.error('Error approving adda payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Approve Service Payment
-  async approveServicePayment(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('approveServicePayment', data);
-      return response;
-    } catch (error) {
-      console.error('Error approving service payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Approve Union Payment
-  async approveUnionPayment(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('approveUnionPayment', data);
-      return response;
-    } catch (error) {
-      console.error('Error approving union payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Resend Other Payment
-  async resendOtherPayment(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('resendOtherPayment', data);
-      return response;
-    } catch (error) {
-      console.error('Error resending other payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Resend Adda Payment
-  async resendAddaPayment(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('resendAddaPayment', data);
-      return response;
-    } catch (error) {
-      console.error('Error resending adda payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Resend Service Payment
-  async resendServicePayment(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('resendServicePayment', data);
-      return response;
-    } catch (error) {
-      console.error('Error resending service payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Resend Union Payment
-  async resendUnionPayment(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('resendUnionPayment', data);
-      return response;
-    } catch (error) {
-      console.error('Error resending union payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Generic approval functions for other data types (to be implemented similarly)
-  async approveFareReceipt(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('approveFareReceipt', data);
-      return response;
-    } catch (error) {
-      console.error('Error approving fare receipt:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  async resendFareReceipt(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('resendFareReceipt', data);
-      return response;
-    } catch (error) {
-      console.error('Error resending fare receipt:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  async approveBookingEntry(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('approveBookingEntry', data);
-      return response;
-    } catch (error) {
-      console.error('Error approving booking entry:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  async resendBookingEntry(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('resendBookingEntry', data);
-      return response;
-    } catch (error) {
-      console.error('Error resending booking entry:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  async approveFuelPayment(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('approveFuelPayment', data);
-      return response;
-    } catch (error) {
-      console.error('Error approving fuel payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  async resendFuelPayment(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('resendFuelPayment', data);
-      return response;
-    } catch (error) {
-      console.error('Error resending fuel payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // ============================================================================
-  // STATUS UPDATE FUNCTIONS
-  // ============================================================================
-
-  // Update Fare Receipt Status
-  async updateFareReceiptStatus(entryId, newStatus, approverName) {
-    try {
-      const data = {
-        entryId: entryId,
-        newStatus: newStatus,
-        approverName: approverName
-      };
-      const response = await this.makeApprovalAPIRequest('updateFareReceiptStatus', data);
-      return response;
-    } catch (error) {
-      console.error('Error updating fare receipt status:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Update Booking Entry Status
-  async updateBookingEntryStatus(entryId, newStatus, approverName) {
-    try {
-      const data = {
-        entryId: entryId,
-        newStatus: newStatus,
-        approverName: approverName
-      };
-      const response = await this.makeApprovalAPIRequest('updateBookingEntryStatus', data);
-      return response;
-    } catch (error) {
-      console.error('Error updating booking entry status:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Update Fuel Payment Status
-  async updateFuelPaymentStatus(entryId, newStatus, approverName) {
-    try {
-      const data = {
-        entryId: entryId,
-        newStatus: newStatus,
-        approverName: approverName
-      };
-      const response = await this.makeApprovalAPIRequest('updateFuelPaymentStatus', data);
-      return response;
-    } catch (error) {
-      console.error('Error updating fuel payment status:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Update Adda Payment Status
-  async updateAddaPaymentStatus(entryId, newStatus, approverName) {
-    try {
-      const data = {
-        entryId: entryId,
-        newStatus: newStatus,
-        approverName: approverName
-      };
-      const response = await this.makeApprovalAPIRequest('updateAddaPaymentStatus', data);
-      return response;
-    } catch (error) {
-      console.error('Error updating adda payment status:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Update Union Payment Status
-  async updateUnionPaymentStatus(entryId, newStatus, approverName) {
-    try {
-      const data = {
-        entryId: entryId,
-        newStatus: newStatus,
-        approverName: approverName
-      };
-      const response = await this.makeApprovalAPIRequest('updateUnionPaymentStatus', data);
-      return response;
-    } catch (error) {
-      console.error('Error updating union payment status:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Update Service Payment Status
-  async updateServicePaymentStatus(entryId, newStatus, approverName) {
-    try {
-      const data = {
-        entryId: entryId,
-        newStatus: newStatus,
-        approverName: approverName
-      };
-      const response = await this.makeApprovalAPIRequest('updateServicePaymentStatus', data);
-      return response;
-    } catch (error) {
-      console.error('Error updating service payment status:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Update Other Payment Status
-  async updateOtherPaymentStatus(entryId, newStatus, approverName) {
-    try {
-      const data = {
-        entryId: entryId,
-        newStatus: newStatus,
-        approverName: approverName
-      };
-      const response = await this.makeApprovalAPIRequest('updateOtherPaymentStatus', data);
-      return response;
-    } catch (error) {
-      console.error('Error updating other payment status:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Update Off Day Status (if needed)
-  async updateOffDayStatus(entryId, newStatus, approverName) {
-    try {
-      const data = {
-        entryId: entryId,
-        newStatus: newStatus,
-        approverName: approverName
-      };
-      const response = await this.makeApprovalAPIRequest('updateOffDayStatus', data);
-      return response;
-    } catch (error) {
-      console.error('Error updating off day status:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Approve Off Day Entry
-  async approveOffDay(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('approveOffDay', data);
-      return response;
-    } catch (error) {
-      console.error('Error approving off day:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Resend Off Day Entry
-  async resendOffDay(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('resendOffDay', data);
-      return response;
-    } catch (error) {
-      console.error('Error resending off day:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // ============================================================================
-  // BATCH OPERATIONS FOR MULTIPLE ENTRIES
-  // ============================================================================
-
-  // Batch update multiple entries at once
-  async batchUpdateStatus(entries) {
-    try {
-      const results = [];
-      for (const entry of entries) {
-        let result;
-        switch (entry.dataType) {
-          case 'Fare Receipt':
-            result = await this.updateFareReceiptStatus(entry);
-            break;
-          case 'Booking Entry':
-            result = await this.updateBookingEntryStatus(entry);
-            break;
-          case 'Fuel Payment':
-            result = await this.updateFuelPaymentStatus(entry);
-            break;
-          case 'Adda Payment':
-            result = await this.updateAddaPaymentStatus(entry);
-            break;
-          case 'Union Payment':
-            result = await this.updateUnionPaymentStatus(entry);
-            break;
-          case 'Service Payment':
-            result = await this.updateServicePaymentStatus(entry);
-            break;
-          case 'Other Payment':
-            result = await this.updateOtherPaymentStatus(entry);
-            break;
-          default:
-            result = { success: false, error: `Unsupported data type: ${entry.dataType}` };
-        }
-        results.push({ entryId: entry.entryId, result });
-      }
-      return { success: true, results };
-    } catch (error) {
-      console.error('Error in batch update:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // ============================================================================
-  // CASH DEPOSIT FUNCTIONS
-  // ============================================================================
-
-  async addCashDeposit(data) {
-    try {
-      console.log('💰 Adding cash deposit via authService:', data);
-
-      const requestData = {
-        action: 'addCashDeposit',
-        entryId: data.entryId,
-        timestamp: data.timestamp,
-        date: data.date,
-        cashAmount: data.cashAmount,
-        depositedBy: data.depositedBy
-      };
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData)
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Cash deposit response:', result);
-
-      return result;
-    } catch (error) {
-      console.error('❌ Error adding cash deposit:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  async getCashDeposits() {
-    try {
-      console.log('📋 Fetching cash deposits via authService...');
-
-      const requestData = {
-        action: 'getCashDeposits'
-      };
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData)
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Cash deposits response:', result);
-
-      return result;
-    } catch (error) {
-      console.error('❌ Error fetching cash deposits:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // ============================================================================
-  // ANALYTICS FUNCTIONS
-  // ============================================================================
-
-  // Get analytics data for dashboard
-  async getAnalyticsData() {
-    try {
-      // This would fetch analytics data from Google Sheets
-      // For now, return empty structure
-      return {
-        success: true,
-        data: {
-          totalEntries: 0,
-          totalRevenue: 0,
-          totalExpenses: 0,
-          netProfit: 0
-        }
-      };
-    } catch (error) {
-      console.error('Error fetching analytics data:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Test connection method
-  async testConnection() {
-    const response = await this.makeRequest('test', {});
-    return response;
-  }
-
   // ==================== CASH DEPOSIT METHODS ====================
   async addCashDeposit(data) {
     console.log('💰 AuthService: Adding cash deposit:', data);
@@ -1936,7 +262,7 @@ throw new Error(`HTTP error! status: ${response.status}`);
       return response;
     } catch (error) {
       console.error('❌ AuthService: Cash deposit error:', error);
-      throw error;
+      return { success: false, error: error.message };
     }
   }
 
@@ -1948,7 +274,7 @@ throw new Error(`HTTP error! status: ${response.status}`);
       return response;
     } catch (error) {
       console.error('❌ AuthService: Get cash deposits error:', error);
-      throw error;
+      return { success: true, data: [] };
     }
   }
 
@@ -1960,7 +286,7 @@ throw new Error(`HTTP error! status: ${response.status}`);
       return response;
     } catch (error) {
       console.error('❌ AuthService: Update cash deposit error:', error);
-      throw error;
+      return { success: false, error: error.message };
     }
   }
 
@@ -1972,7 +298,470 @@ throw new Error(`HTTP error! status: ${response.status}`);
       return response;
     } catch (error) {
       console.error('❌ AuthService: Delete cash deposit error:', error);
-      throw error;
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==================== FARE RECEIPT METHODS ====================
+  async addFareReceipt(data) {
+    try {
+      const response = await this.makeRequest('addFareReceipt', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getFareReceipts() {
+    try {
+      const response = await this.makeRequest('getFareReceipts', {});
+      return response;
+    } catch (error) {
+      return { success: true, data: [] };
+    }
+  }
+
+  async updateFareReceipt(data) {
+    try {
+      const response = await this.makeRequest('updateFareReceipt', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteFareReceipt(data) {
+    try {
+      const response = await this.makeRequest('deleteFareReceipt', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==================== BOOKING ENTRY METHODS ====================
+  async addBookingEntry(data) {
+    try {
+      const response = await this.makeRequest('addBookingEntry', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getBookingEntries() {
+    try {
+      const response = await this.makeRequest('getBookingEntries', {});
+      return response;
+    } catch (error) {
+      return { success: true, data: [] };
+    }
+  }
+
+  async updateBookingEntry(data) {
+    try {
+      const response = await this.makeRequest('updateBookingEntry', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteBookingEntry(data) {
+    try {
+      const response = await this.makeRequest('deleteBookingEntry', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==================== OFF DAY METHODS ====================
+  async addOffDay(data) {
+    try {
+      const response = await this.makeRequest('addOffDay', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getOffDays() {
+    try {
+      const response = await this.makeRequest('getOffDays', {});
+      return response;
+    } catch (error) {
+      return { success: true, data: [] };
+    }
+  }
+
+  async updateOffDay(data) {
+    try {
+      const response = await this.makeRequest('updateOffDay', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteOffDay(data) {
+    try {
+      const response = await this.makeRequest('deleteOffDay', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==================== FUEL PAYMENT METHODS ====================
+  async addFuelPayment(data) {
+    try {
+      const response = await this.makeRequest('addFuelPayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getFuelPayments() {
+    try {
+      const response = await this.makeRequest('getFuelPayments', {});
+      return response;
+    } catch (error) {
+      return { success: true, data: [] };
+    }
+  }
+
+  async updateFuelPayment(data) {
+    try {
+      const response = await this.makeRequest('updateFuelPayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteFuelPayment(data) {
+    try {
+      const response = await this.makeRequest('deleteFuelPayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==================== ADDA PAYMENT METHODS ====================
+  async addAddaPayment(data) {
+    try {
+      const response = await this.makeRequest('addAddaPayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getAddaPayments() {
+    try {
+      const response = await this.makeRequest('getAddaPayments', {});
+      return response;
+    } catch (error) {
+      return { success: true, data: [] };
+    }
+  }
+
+  async updateAddaPayment(data) {
+    try {
+      const response = await this.makeRequest('updateAddaPayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteAddaPayment(data) {
+    try {
+      const response = await this.makeRequest('deleteAddaPayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==================== UNION PAYMENT METHODS ====================
+  async addUnionPayment(data) {
+    try {
+      const response = await this.makeRequest('addUnionPayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getUnionPayments() {
+    try {
+      const response = await this.makeRequest('getUnionPayments', {});
+      return response;
+    } catch (error) {
+      return { success: true, data: [] };
+    }
+  }
+
+  async updateUnionPayment(data) {
+    try {
+      const response = await this.makeRequest('updateUnionPayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteUnionPayment(data) {
+    try {
+      const response = await this.makeRequest('deleteUnionPayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==================== SERVICE PAYMENT METHODS ====================
+  async addServicePayment(data) {
+    try {
+      const response = await this.makeRequest('addServicePayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getServicePayments() {
+    try {
+      const response = await this.makeRequest('getServicePayments', {});
+      return response;
+    } catch (error) {
+      return { success: true, data: [] };
+    }
+  }
+
+  async updateServicePayment(data) {
+    try {
+      const response = await this.makeRequest('updateServicePayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteServicePayment(data) {
+    try {
+      const response = await this.makeRequest('deleteServicePayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==================== OTHER PAYMENT METHODS ====================
+  async addOtherPayment(data) {
+    try {
+      const response = await this.makeRequest('addOtherPayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getOtherPayments() {
+    try {
+      const response = await this.makeRequest('getOtherPayments', {});
+      return response;
+    } catch (error) {
+      return { success: true, data: [] };
+    }
+  }
+
+  async updateOtherPayment(data) {
+    try {
+      const response = await this.makeRequest('updateOtherPayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteOtherPayment(data) {
+    try {
+      const response = await this.makeRequest('deleteOtherPayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==================== APPROVAL METHODS ====================
+  async approveFareReceipt(data) {
+    try {
+      const response = await this.makeRequest('approveFareReceipt', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async approveBookingEntry(data) {
+    try {
+      const response = await this.makeRequest('approveBookingEntry', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async approveFuelPayment(data) {
+    try {
+      const response = await this.makeRequest('approveFuelPayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async approveAddaPayment(data) {
+    try {
+      const response = await this.makeRequest('approveAddaPayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async approveUnionPayment(data) {
+    try {
+      const response = await this.makeRequest('approveUnionPayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async approveServicePayment(data) {
+    try {
+      const response = await this.makeRequest('approveServicePayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async approveOtherPayment(data) {
+    try {
+      const response = await this.makeRequest('approveOtherPayment', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async approveOffDay(data) {
+    try {
+      const response = await this.makeRequest('approveOffDay', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==================== STATUS UPDATE METHODS ====================
+  async updateFareReceiptStatus(entryId, newStatus, approverName) {
+    try {
+      const data = { entryId, newStatus, approverName };
+      const response = await this.makeRequest('updateFareReceiptStatus', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateBookingEntryStatus(entryId, newStatus, approverName) {
+    try {
+      const data = { entryId, newStatus, approverName };
+      const response = await this.makeRequest('updateBookingEntryStatus', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateFuelPaymentStatus(entryId, newStatus, approverName) {
+    try {
+      const data = { entryId, newStatus, approverName };
+      const response = await this.makeRequest('updateFuelPaymentStatus', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateAddaPaymentStatus(entryId, newStatus, approverName) {
+    try {
+      const data = { entryId, newStatus, approverName };
+      const response = await this.makeRequest('updateAddaPaymentStatus', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateUnionPaymentStatus(entryId, newStatus, approverName) {
+    try {
+      const data = { entryId, newStatus, approverName };
+      const response = await this.makeRequest('updateUnionPaymentStatus', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateServicePaymentStatus(entryId, newStatus, approverName) {
+    try {
+      const data = { entryId, newStatus, approverName };
+      const response = await this.makeRequest('updateServicePaymentStatus', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateOtherPaymentStatus(entryId, newStatus, approverName) {
+    try {
+      const data = { entryId, newStatus, approverName };
+      const response = await this.makeRequest('updateOtherPaymentStatus', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateOffDayStatus(entryId, newStatus, approverName) {
+    try {
+      const data = { entryId, newStatus, approverName };
+      const response = await this.makeRequest('updateOffDayStatus', data);
+      return response;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==================== TEST CONNECTION ====================
+  async testConnection() {
+    try {
+      console.log('🔍 Testing Google Sheets database connection...');
+      const response = await this.makeRequest('test', {});
+      console.log('✅ Database connection successful:', response);
+      return true;
+    } catch (error) {
+      console.error('❌ Database connection error:', error);
+      return false;
     }
   }
 }
