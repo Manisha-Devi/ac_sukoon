@@ -10,8 +10,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
   const [approvedData, setApprovedData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEntries, setSelectedEntries] = useState([]);
-  const [showFilter, setShowFilter] = useState(false);
-  const [showSummary, setShowSummary] = useState(true);
+  const [showFilterCard, setShowFilterCard] = useState(true);
 
   // Log user data for debugging
   useEffect(() => {
@@ -510,22 +509,37 @@ function DataSummary({ fareData, expenseData, currentUser }) {
           <h2><i className="bi bi-clipboard-check"></i> Data Summary</h2>
           <p>Review and approve submitted entries</p>
 
-          {/* Toggle Buttons */}
+          {/* Toggle Button for Filter Card */}
           <div className="filter-toggle-section">
             <button 
-              className="btn btn-outline-primary btn-sm filter-toggle-btn me-2"
+              className="btn btn-outline-primary btn-sm filter-toggle-btn"
+              onClick={() => setShowFilterCard(!showFilterCard)}
             >
-              <i className="bi bi-funnel"></i>
-              Filter
-            </button>
-            <button 
-              className="btn btn-outline-info btn-sm filter-toggle-btn"
-            >
-              <i className="bi bi-bar-chart"></i>
-              Summary
+              <i className={`bi ${showFilterCard ? 'bi-eye-slash' : 'bi-funnel'}`}></i>
+              {showFilterCard ? 'Hide Filter' : 'Show Filter'}
             </button>
           </div>
         </div>
+
+        {/* Separate Filter Card */}
+        {showFilterCard && (
+          <div className="filter-card">
+            <div className="filter-card-content">
+              <button 
+                className="btn btn-outline-primary btn-sm filter-btn me-2"
+              >
+                <i className="bi bi-funnel"></i>
+                Filter
+              </button>
+              <button 
+                className="btn btn-outline-info btn-sm summary-btn"
+              >
+                <i className="bi bi-bar-chart"></i>
+                Summary
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Approval Tabs - Correct Order */}
         <div className="approval-tabs">
