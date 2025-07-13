@@ -167,7 +167,7 @@ function App() {
         servicePayments,
         otherPayments,
         allUsersData,
-      ] = await Promise.all([
+      ] = await Promise.allSettled([
         authService.getFareReceipts(),
         authService.getBookingEntries(),
         authService.getOffDays(),
@@ -177,33 +177,50 @@ function App() {
         authService.getServicePayments(),
         authService.getOtherPayments(),
         authService.getAllUsers(),
-      ]);
+      ]).then(results => results.map(result => 
+        result.status === 'fulfilled' ? result.value : { success: false, data: [], error: result.reason?.message }
+      ));
 
       // Process fare data (fare receipts + booking entries)
       let combinedFareData = [];
 
-      // Add fare receipts
-      if (fareReceipts?.data && Array.isArray(fareReceipts.data)) {
+      // Add fare receipts with error handling
+      if (fareReceipts?.success && fareReceipts?.data && Array.isArray(fareReceipts.data)) {
         combinedFareData.push(...fareReceipts.data.map(receipt => ({
           ...receipt,
-          type: 'daily'
+          type: 'daily',
+          entryType: 'daily',
+          totalAmount: receipt.totalAmount || (receipt.cashAmount || 0) + (receipt.bankAmount || 0)
         })));
+        console.log(`✅ Loaded ${fareReceipts.data.length} fare receipts`);
+      } else {
+        console.warn('⚠️ Failed to load fare receipts:', fareReceipts?.error);
       }
 
-      // Add booking entries
-      if (bookingEntries?.data && Array.isArray(bookingEntries.data)) {
+      // Add booking entries with error handling
+      if (bookingEntries?.success && bookingEntries?.data && Array.isArray(bookingEntries.data)) {
         combinedFareData.push(...bookingEntries.data.map(booking => ({
           ...booking,
-          type: 'booking'
+          type: 'booking',
+          entryType: 'booking',
+          totalAmount: booking.totalAmount || (booking.cashAmount || 0) + (booking.bankAmount || 0)
         })));
+        console.log(`✅ Loaded ${bookingEntries.data.length} booking entries`);
+      } else {
+        console.warn('⚠️ Failed to load booking entries:', bookingEntries?.error);
       }
 
-      // Add off days
-      if (offDays?.data && Array.isArray(offDays.data)) {
+      // Add off days with error handling
+      if (offDays?.success && offDays?.data && Array.isArray(offDays.data)) {
         combinedFareData.push(...offDays.data.map(offDay => ({
           ...offDay,
-          type: 'off'
+          type: 'off',
+          entryType: 'off',
+          totalAmount: 0 // Off days don't contribute to totals
         })));
+        console.log(`✅ Loaded ${offDays.data.length} off days`);
+      } else {
+        console.warn('⚠️ Failed to load off days:', offDays?.error);
       }
 
       // Process expense data

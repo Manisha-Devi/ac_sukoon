@@ -1010,7 +1010,8 @@ class AuthService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        ```tool_code
+throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
@@ -1917,6 +1918,61 @@ class AuthService {
     } catch (error) {
       console.error('Error fetching analytics data:', error);
       return { success: false, error: error.message };
+    }
+  }
+
+  // Test connection method
+  async testConnection() {
+    const response = await this.makeRequest('test', {});
+    return response;
+  }
+
+  // ==================== CASH DEPOSIT METHODS ====================
+  async addCashDeposit(data) {
+    console.log('💰 AuthService: Adding cash deposit:', data);
+    try {
+      const response = await this.makeRequest('addCashDeposit', data);
+      console.log('💰 AuthService: Cash deposit response:', response);
+      return response;
+    } catch (error) {
+      console.error('❌ AuthService: Cash deposit error:', error);
+      throw error;
+    }
+  }
+
+  async getCashDeposits() {
+    console.log('📋 AuthService: Fetching cash deposits...');
+    try {
+      const response = await this.makeRequest('getCashDeposits', {});
+      console.log('📋 AuthService: Cash deposits response:', response);
+      return response;
+    } catch (error) {
+      console.error('❌ AuthService: Get cash deposits error:', error);
+      throw error;
+    }
+  }
+
+  async updateCashDeposit(data) {
+    console.log('📝 AuthService: Updating cash deposit:', data);
+    try {
+      const response = await this.makeRequest('updateCashDeposit', data);
+      console.log('📝 AuthService: Update cash deposit response:', response);
+      return response;
+    } catch (error) {
+      console.error('❌ AuthService: Update cash deposit error:', error);
+      throw error;
+    }
+  }
+
+  async deleteCashDeposit(data) {
+    console.log('🗑️ AuthService: Deleting cash deposit:', data);
+    try {
+      const response = await this.makeRequest('deleteCashDeposit', data);
+      console.log('🗑️ AuthService: Delete cash deposit response:', response);
+      return response;
+    } catch (error) {
+      console.error('❌ AuthService: Delete cash deposit error:', error);
+      throw error;
     }
   }
 }
