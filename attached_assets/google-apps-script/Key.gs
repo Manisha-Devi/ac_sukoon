@@ -13,14 +13,6 @@ const API_KEYS = {
     permissions: ['read', 'write', 'delete'],
     created: '2025-01-13',
     active: true
-  },
-  
-  // Backup API key for emergency access
-  'backup-key-emergency-2025': {
-    name: 'Emergency Backup Key',
-    permissions: ['read', 'write'],
-    created: '2025-01-13',
-    active: true
   }
 };
 

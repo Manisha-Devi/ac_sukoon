@@ -9,7 +9,6 @@ class APIKeyService {
   constructor() {
     // Store API key securely - In production, use environment variables
     this.API_KEY = 'adsfsyieryieradafas123ew45';
-    this.BACKUP_KEY = 'backup-key-emergency-2025';
   }
 
   /**
@@ -20,13 +19,7 @@ class APIKeyService {
     return this.API_KEY;
   }
 
-  /**
-   * Get backup API key (for emergency situations)
-   * @returns {string} - The backup API key
-   */
-  getBackupAPIKey() {
-    return this.BACKUP_KEY;
-  }
+  
 
   /**
    * Validate API key format (frontend validation)
@@ -157,7 +150,6 @@ class APIKeyService {
     return {
       keyPreview: `${this.API_KEY.substring(0, 10)}...`,
       keyLength: this.API_KEY.length,
-      hasBackupKey: !!this.BACKUP_KEY,
       isValidFormat: this.validateKeyFormat(this.API_KEY)
     };
   }
