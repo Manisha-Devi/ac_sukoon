@@ -981,8 +981,18 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                               <tbody>
                                 {userCashDeposits.map((deposit) => (
                                   <tr key={deposit.id}>
-                                    <td>{formatDisplayDate(deposit.date)}</td>
-                                    <td>{formatDisplayTime(deposit.timestamp)}</td>
+                                    <td>
+                                      {deposit.date ? 
+                                        formatDisplayDate(deposit.date) : 
+                                        formatDisplayDate(deposit.timestamp)
+                                      }
+                                    </td>
+                                    <td>
+                                      {deposit.timestamp ? 
+                                        formatDisplayTime(deposit.timestamp) : 
+                                        '--:--:-- --'
+                                      }
+                                    </td>
                                     <td>
                                       <span className="badge bg-warning">
                                         {deposit.entryType}
