@@ -2,7 +2,6 @@
 class AuthService {
   constructor() {
     // Google Apps Script Web App URL - Updated to use the correct deployment URL
-    // IMPORTANT: Replace with your NEW deployment URL after redeploying the script
     this.API_URL = 'https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec';
   }
 
@@ -14,50 +13,21 @@ class AuthService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-      let response;
-      try {
-        // Try CORS mode first
-        response = await fetch(this.API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8',
-          },
-          signal: controller.signal,
-          redirect: 'follow',
-          mode: 'cors',
-          body: JSON.stringify({
-            action: 'login',
-            username: username,
-            password: password,
-            userType: userType
-          })
-        });
-      } catch (corsError) {
-        console.log('⚠️ CORS failed, trying no-cors mode for login...');
-        // Fallback to no-cors mode
-        response = await fetch(this.API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8',
-          },
-          signal: controller.signal,
-          redirect: 'follow',
-          mode: 'no-cors',
-          body: JSON.stringify({
-            action: 'login',
-            username: username,
-            password: password,
-            userType: userType
-          })
-        });
-        
-        // For no-cors mode, we can't read the response, so return a generic success
-        clearTimeout(timeoutId);
-        return {
-          success: false,
-          message: 'CORS issue - please redeploy Google Apps Script with proper CORS headers'
-        };
-      }
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        signal: controller.signal,
+        redirect: 'follow',
+        mode: 'cors',
+        body: JSON.stringify({
+          action: 'login',
+          username: username,
+          password: password,
+          userType: userType
+        })
+      });
 
       clearTimeout(timeoutId);
 
@@ -1376,49 +1346,28 @@ class AuthService {
       console.log('🔍 Testing Google Sheets database connection...');
       console.log('📍 API URL:', this.API_URL);
 
-      // First try with CORS mode
-      try {
-        const response = await fetch(this.API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8',
-          },
-          mode: 'cors',
-          redirect: 'follow',
-          body: JSON.stringify({
-            action: 'test'
-          })
-        });
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'test'
+        })
+      });
 
-        console.log('Response status:', response.status);
+      console.log('Response status:', response.status);
 
-        if (response.ok) {
-          const result = await response.json();
-          console.log('✅ Database connection successful:', result);
-          return true;
-        }
-      } catch (corsError) {
-        console.log('⚠️ CORS mode failed, trying no-cors mode...');
-        
-        // Fallback to no-cors mode
-        const response = await fetch(this.API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8',
-          },
-          mode: 'no-cors',
-          redirect: 'follow',
-          body: JSON.stringify({
-            action: 'test'
-          })
-        });
-
-        console.log('✅ Database connection successful (no-cors mode)');
-        return true; // no-cors mode doesn't allow reading response, but request went through
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Database connection successful:', result);
+        return true;
+      } else {
+        console.log('❌ Database connection failed');
+        return false;
       }
-
-      console.log('❌ Database connection failed');
-      return false;
     } catch (error) {
       console.error('❌ Database connection error:', error);
       return false;
