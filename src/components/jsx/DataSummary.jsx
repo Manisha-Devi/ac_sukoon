@@ -597,48 +597,56 @@ function DataSummary({ fareData, expenseData, currentUser }) {
               
               {/* Financial Summary Cards */}
               <div className="financial-summary-cards mb-4">
-                <div className="row">
-                  <div className="col-md-3">
+                <div className="row g-4">
+                  <div className="col-lg-3 col-md-6">
                     <div className="financial-card total-cash">
+                      <div className="card-gradient"></div>
                       <div className="financial-icon">
                         <i className="bi bi-cash-stack"></i>
                       </div>
                       <div className="financial-details">
                         <div className="financial-amount">₹{calculateTotalCash().toLocaleString('en-IN')}</div>
                         <div className="financial-label">Total Cash</div>
+                        <div className="financial-subtitle">From Approved Entries</div>
                       </div>
                     </div>
                   </div>
-                  <div className="col-md-3">
+                  <div className="col-lg-3 col-md-6">
                     <div className="financial-card total-bank">
+                      <div className="card-gradient"></div>
                       <div className="financial-icon">
                         <i className="bi bi-bank"></i>
                       </div>
                       <div className="financial-details">
                         <div className="financial-amount">₹{calculateTotalBank().toLocaleString('en-IN')}</div>
                         <div className="financial-label">Total Bank</div>
+                        <div className="financial-subtitle">From Approved Entries</div>
                       </div>
                     </div>
                   </div>
-                  <div className="col-md-3">
+                  <div className="col-lg-3 col-md-6">
                     <div className="financial-card fixed-cash">
+                      <div className="card-gradient"></div>
                       <div className="financial-icon">
                         <i className="bi bi-piggy-bank"></i>
                       </div>
                       <div className="financial-details">
                         <div className="financial-amount">₹{getFixedCash().toLocaleString('en-IN')}</div>
                         <div className="financial-label">Fixed Cash</div>
+                        <div className="financial-subtitle">User Fixed Amount</div>
                       </div>
                     </div>
                   </div>
-                  <div className="col-md-3">
+                  <div className="col-lg-3 col-md-6">
                     <div className="financial-card cash-in-hand">
+                      <div className="card-gradient"></div>
                       <div className="financial-icon">
                         <i className="bi bi-wallet2"></i>
                       </div>
                       <div className="financial-details">
                         <div className="financial-amount">₹{calculateCashInHand().toLocaleString('en-IN')}</div>
                         <div className="financial-label">Cash in Hand</div>
+                        <div className="financial-subtitle">Total + Fixed Cash</div>
                       </div>
                     </div>
                   </div>
@@ -691,35 +699,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                 )}
               </div>
 
-              {/* Entry Count Summary */}
-              <div className="summary-stats mt-4">
-                <div className="row">
-                  <div className="col-md-3">
-                    <div className="stat-card pending-stat">
-                      <div className="stat-number">{pendingData.length}</div>
-                      <div className="stat-label">Pending</div>
-                    </div>
-                  </div>
-                  <div className="col-md-3">
-                    <div className="stat-card bank-stat">
-                      <div className="stat-number">{bankApprovalData.length}</div>
-                      <div className="stat-label">Bank Approval</div>
-                    </div>
-                  </div>
-                  <div className="col-md-3">
-                    <div className="stat-card cash-stat">
-                      <div className="stat-number">{cashApprovalData.length}</div>
-                      <div className="stat-label">Cash Approval</div>
-                    </div>
-                  </div>
-                  <div className="col-md-3">
-                    <div className="stat-card approved-stat">
-                      <div className="stat-number">{approvedData.length}</div>
-                      <div className="stat-label">Approved</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              
             </div>
           </div>
         )}

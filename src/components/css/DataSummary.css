@@ -85,89 +85,138 @@
   justify-content: flex-start;
 }
 
-/* Summary Card */
+/* Summary Cards */
 .summary-card-container {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1.5rem;
-  border: 1px solid #e9ecef;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   animation: slideDown 0.3s ease-out;
+  overflow: hidden;
 }
 
 .summary-card-content {
-  padding: 1.5rem;
+  padding: 2rem;
 }
 
 .summary-card-content h5 {
-  color: #495057;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #e9ecef;
-}
-
-.summary-stats {
-  margin-top: 1rem;
-}
-
-.stat-card {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 1rem;
-  text-align: center;
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.stat-number {
-  font-size: 2rem;
+  color: #2c3e50;
   font-weight: 700;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 3px solid linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-size: 1.3rem;
+}
+
+/* Financial Cards */
+.financial-summary-cards {
+  margin-bottom: 2rem;
+}
+
+.financial-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 2rem 1.5rem;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: none;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.financial-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 16px 48px rgba(102, 126, 234, 0.4);
+}
+
+.financial-card.total-cash {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  box-shadow: 0 8px 32px rgba(17, 153, 142, 0.3);
+}
+
+.financial-card.total-cash:hover {
+  box-shadow: 0 16px 48px rgba(17, 153, 142, 0.4);
+}
+
+.financial-card.total-bank {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+}
+
+.financial-card.total-bank:hover {
+  box-shadow: 0 16px 48px rgba(102, 126, 234, 0.4);
+}
+
+.financial-card.fixed-cash {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  box-shadow: 0 8px 32px rgba(240, 147, 251, 0.3);
+}
+
+.financial-card.fixed-cash:hover {
+  box-shadow: 0 16px 48px rgba(240, 147, 251, 0.4);
+}
+
+.financial-card.cash-in-hand {
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  color: #2c3e50;
+  box-shadow: 0 8px 32px rgba(255, 236, 210, 0.3);
+}
+
+.financial-card.cash-in-hand:hover {
+  box-shadow: 0 16px 48px rgba(255, 236, 210, 0.4);
+}
+
+.card-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  pointer-events: none;
+}
+
+.financial-icon {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  font-size: 2.5rem;
+  opacity: 0.3;
+  z-index: 1;
+}
+
+.financial-details {
+  position: relative;
+  z-index: 2;
+}
+
+.financial-amount {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  letter-spacing: -1px;
+}
+
+.financial-label {
+  font-size: 1.1rem;
+  font-weight: 600;
   margin-bottom: 0.25rem;
-}
-
-.stat-label {
-  font-size: 0.875rem;
-  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
 }
 
-.pending-stat {
-  border-color: #ffc107;
-}
-
-.pending-stat .stat-number {
-  color: #ffc107;
-}
-
-.bank-stat {
-  border-color: #17a2b8;
-}
-
-.bank-stat .stat-number {
-  color: #17a2b8;
-}
-
-.cash-stat {
-  border-color: #fd7e14;
-}
-
-.cash-stat .stat-number {
-  color: #fd7e14;
-}
-
-.approved-stat {
-  border-color: #28a745;
-}
-
-.approved-stat .stat-number {
-  color: #28a745;
+.financial-subtitle {
+  font-size: 0.875rem;
+  opacity: 0.8;
+  font-weight: 400;
+  font-style: italic;
 }
 
 @keyframes slideDown {
