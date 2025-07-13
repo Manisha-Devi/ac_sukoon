@@ -884,49 +884,56 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                   ) : (
                     <div className="cash-deposits-section">
                       <h6><i className="bi bi-bank2"></i> Cash Deposits by You</h6>
-                      {cashDeposit.length > 0 ? (
-                        <div className="table-responsive">
-                          <table className="table table-striped table-sm cash-deposits-table">
-                            <thead>
-                              <tr>
-                                <th>Timestamp</th>
-                                <th>EntryType</th>
-                                <th>EntryId</th>
-                                <th>Date</th>
-                                <th>CashAmount</th>
-                                <th>Description</th>
-                                <th>DepositedBy</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {cashDeposit.map((deposit) => (
-                                <tr key={deposit.id}>
-                                  <td>{formatDisplayTime(deposit.timestamp)}</td>
-                                  <td>
-                                    <span className="badge bg-warning">
-                                      {deposit.entryType}
-                                    </span>
-                                  </td>
-                                  <td>{deposit.entryId}</td>
-                                  <td>{formatDisplayDate(deposit.date)}</td>
-                                  <td className="text-danger">₹{deposit.cashAmount.toLocaleString('en-IN')}</td>
-                                  <td>{deposit.description}</td>
-                                  <td>
-                                    <span className="badge bg-primary">
-                                      <i className="bi bi-person"></i> {deposit.depositedBy}
-                                    </span>
-                                  </td>
+                      {(() => {
+                        const currentUserName = currentUser?.fullName || currentUser?.username;
+                        const userCashDeposits = cashDeposit.filter(deposit => 
+                          deposit.depositedBy === currentUserName
+                        );
+                        
+                        return userCashDeposits.length > 0 ? (
+                          <div className="table-responsive">
+                            <table className="table table-striped table-sm cash-deposits-table">
+                              <thead>
+                                <tr>
+                                  <th>Timestamp</th>
+                                  <th>EntryType</th>
+                                  <th>EntryId</th>
+                                  <th>Date</th>
+                                  <th>CashAmount</th>
+                                  <th>Description</th>
+                                  <th>DepositedBy</th>
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      ) : (
-                        <div className="no-cash-deposits">
-                          <i className="bi bi-inbox"></i>
-                          <p>No cash deposits found that were made by you</p>
-                        </div>
-                      )}
+                              </thead>
+                              <tbody>
+                                {userCashDeposits.map((deposit) => (
+                                  <tr key={deposit.id}>
+                                    <td>{formatDisplayTime(deposit.timestamp)}</td>
+                                    <td>
+                                      <span className="badge bg-warning">
+                                        {deposit.entryType}
+                                      </span>
+                                    </td>
+                                    <td>{deposit.entryId}</td>
+                                    <td>{formatDisplayDate(deposit.date)}</td>
+                                    <td className="text-danger">₹{deposit.cashAmount.toLocaleString('en-IN')}</td>
+                                    <td>{deposit.description}</td>
+                                    <td>
+                                      <span className="badge bg-primary">
+                                        <i className="bi bi-person"></i> {deposit.depositedBy}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        ) : (
+                          <div className="no-cash-deposits">
+                            <i className="bi bi-inbox"></i>
+                            <p>No cash deposits found that were made by you</p>
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
                 </div>
