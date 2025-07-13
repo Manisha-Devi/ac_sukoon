@@ -48,27 +48,6 @@
   color: #28a745;
 }
 
-/* Filter Section */
-.filter-section {
-  margin-bottom: 1rem;
-  transition: all 0.3s ease;
-}
-
-/* Summary Section */
-.summary-section {
-  margin-bottom: 1rem;
-  transition: all 0.3s ease;
-}
-
-.summary-section .selection-controls {
-  background: white;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-
-
 .refresh-btn {
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
