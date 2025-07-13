@@ -172,6 +172,16 @@
   box-shadow: 0 16px 48px rgba(255, 236, 210, 0.4);
 }
 
+.financial-card.cash-deposit {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+}
+
+.financial-card.cash-deposit:hover {
+  box-shadow: 0 16px 48px rgba(102, 126, 234, 0.4);
+}
+
 .card-gradient {
   position: absolute;
   top: 0;
@@ -219,10 +229,43 @@
   font-style: italic;
 }
 
-/* Cash Deposit Button in Cash in Hand Card */
-.cash-deposit-container {
-  position: relative;
+/* Cash Deposit Add Button in Cash Deposit Card */
+.cash-deposit-add-container {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 1.5rem;
   z-index: 3;
+}
+
+.cash-deposit-add-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.cash-deposit-add-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
+  color: white;
+}
+
+.cash-deposit-add-btn:active {
+  transform: scale(0.95);
+}
+
+.cash-deposit-add-btn i {
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 
 .financial-card .cash-deposit-btn {

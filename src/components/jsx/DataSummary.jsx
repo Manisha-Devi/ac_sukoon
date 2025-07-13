@@ -309,9 +309,21 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
     return currentUser?.fixedCash || 0;
   };
 
-  // Calculate cash in hand (Only Income Cash)
+  // Calculate total cash deposits by current user
+  const calculateTotalCashDeposits = () => {
+    const currentUserName = currentUser?.fullName || currentUser?.username;
+    if (!currentUserName) return 0;
+
+    const userCashDeposits = cashDeposit.filter(deposit => 
+      deposit.depositedBy === currentUserName
+    );
+    
+    return userCashDeposits.reduce((total, deposit) => total + (deposit.cashAmount || 0), 0);
+  };
+
+  // Calculate cash in hand (Income Cash - Cash Deposits)
   const calculateCashInHand = () => {
-    return calculateIncomeCash();
+    return calculateIncomeCash() - calculateTotalCashDeposits();
   };
 
   // Handle approval action
@@ -779,19 +791,6 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                     </div>
                   </div>
                   <div className="col-lg-3 col-md-6">
-                    <div className="financial-card fixed-cash">
-                      <div className="card-gradient"></div>
-                      <div className="financial-icon">
-                        <i className="bi bi-piggy-bank"></i>
-                      </div>
-                      <div className="financial-details">
-                        <div className="financial-amount">₹{getFixedCash().toLocaleString('en-IN')}</div>
-                        <div className="financial-label">Fixed Cash</div>
-                        <div className="financial-subtitle">User Fixed Amount</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-lg-3 col-md-6">
                     <div className="financial-card cash-in-hand">
                       <div className="card-gradient"></div>
                       <div className="financial-icon">
@@ -800,15 +799,29 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                       <div className="financial-details">
                         <div className="financial-amount">₹{calculateCashInHand().toLocaleString('en-IN')}</div>
                         <div className="financial-label">Cash in Hand</div>
-                        <div className="financial-subtitle">Income Cash Only</div>
+                        <div className="financial-subtitle">Income - Cash Deposits</div>
                       </div>
-                      {/* Cash Deposit Button */}
-                      <div className="cash-deposit-container mt-3">
+                    </div>
+                  </div>
+                  <div className="col-lg-3 col-md-6">
+                    <div className="financial-card cash-deposit">
+                      <div className="card-gradient"></div>
+                      <div className="financial-icon">
+                        <i className="bi bi-bank2"></i>
+                      </div>
+                      <div className="financial-details">
+                        <div className="financial-amount">₹{calculateTotalCashDeposits().toLocaleString('en-IN')}</div>
+                        <div className="financial-label">Cash Deposits</div>
+                        <div className="financial-subtitle">Total Deposits by You</div>
+                      </div>
+                      {/* Cash Deposit Add Button */}
+                      <div className="cash-deposit-add-container">
                         <button 
-                          className="btn btn-success btn-sm cash-deposit-btn"
+                          className="btn btn-outline-light cash-deposit-add-btn"
                           onClick={() => setShowCashDepositModal(true)}
+                          title="Add Cash Deposit"
                         >
-                          <i className="bi bi-bank"></i> Cash Deposit
+                          <i className="bi bi-plus-lg"></i>
                         </button>
                       </div>
                     </div>
