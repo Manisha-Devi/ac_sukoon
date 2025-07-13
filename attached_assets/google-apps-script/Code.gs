@@ -54,7 +54,8 @@ function doPost(e) {
         result = handleLogin(data);
         break;
       case "getAllUsers":
-        result = getAllUsers();
+        console.log('📋 Processing getAllUsers request with data:', data);
+        result = getAllUsers(data);
         break;
       // Handle test connection with API key validation
       case "test":

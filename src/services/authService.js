@@ -117,6 +117,17 @@ class AuthService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
+      // Ensure API key is properly added to the request
+      const requestData = this.apiKeyService.addAPIKey({
+        action: 'getAllUsers'
+      });
+
+      console.log('🔐 getAllUsers request data:', { 
+        action: requestData.action, 
+        hasApiKey: !!requestData.apiKey,
+        apiKeyPreview: requestData.apiKey ? `${requestData.apiKey.substring(0, 10)}...` : 'none'
+      });
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -125,9 +136,7 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         signal: controller.signal,
-        body: JSON.stringify(this.apiKeyService.addAPIKey({
-          action: 'getAllUsers'
-        }))
+        body: JSON.stringify(requestData)
       });
 
       clearTimeout(timeoutId);

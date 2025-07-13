@@ -179,45 +179,31 @@ const SHEET_NAMES = {
 
 /**
  * Validate API key for authentication
- * This should match the key configured in the frontend
  */
 function validateAPIKey(providedKey) {
   try {
-    // Get the expected API key from script properties or hardcode it
-    const expectedKey = EXPECTED_API_KEY; // This should match the frontend key
-
-    console.log('🔐 Validating API key...');
-    console.log('📝 Provided key preview:', providedKey ? providedKey.substring(0, 10) + '...' : 'null');
-    console.log('📝 Expected key preview:', expectedKey ? expectedKey.substring(0, 10) + '...' : 'null');
+    console.log("🔐 Validating API key...", {
+      hasProvidedKey: !!providedKey,
+      providedKeyType: typeof providedKey,
+      providedKeyPreview: providedKey ? `${providedKey.substring(0, 10)}...` : 'none',
+      expectedKeyPreview: API_KEY ? `${API_KEY.substring(0, 10)}...` : 'none'
+    });
 
     if (!providedKey || typeof providedKey !== 'string') {
-      console.log('❌ Invalid API key format');
-      return {
-        valid: false,
-        error: 'API key is required and must be a string'
-      };
+      console.log("❌ API key validation failed: No key provided or invalid type");
+      return { valid: false, error: "API key is required" };
     }
 
-    if (providedKey !== expectedKey) {
-      console.log('❌ API key mismatch');
-      return {
-        valid: false,
-        error: 'Invalid API key'
-      };
+    if (providedKey !== API_KEY) {
+      console.log("❌ API key validation failed: Key mismatch");
+      return { valid: false, error: "Invalid API key" };
     }
 
-    console.log('✅ API key validation successful');
-    return {
-      valid: true,
-      message: 'API key is valid'
-    };
-
+    console.log("✅ API key validation successful");
+    return { valid: true };
   } catch (error) {
-    console.error('❌ API key validation error:', error);
-    return {
-      valid: false,
-      error: 'API key validation failed: ' + error.toString()
-    };
+    console.error("❌ API key validation error:", error);
+    return { valid: false, error: "API key validation failed" };
   }
 }
 
