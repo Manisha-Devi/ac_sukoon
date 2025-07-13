@@ -9,6 +9,41 @@ const CashBook = ({ cashBookEntries, setCashBookEntries, allUsers }) => {
   const [showFilter, setShowFilter] = useState(false);
   const [showSummary, setShowSummary] = useState(true);
 
+  // Helper function to format date properly for cash book
+  const formatDateForCashBook = (date) => {
+    if (!date) return '';
+
+    try {
+      // If date is already in DD/MM/YYYY format, return as is
+      if (typeof date === 'string' && date.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
+        return date;
+      }
+
+      // If date is in YYYY-MM-DD format, convert to DD/MM/YYYY
+      if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const parts = date.split('-');
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+
+      // If it's an ISO string or timestamp, parse and format
+      const dateObj = new Date(date);
+      if (isNaN(dateObj.getTime())) {
+        console.warn('Invalid date:', date);
+        return '';
+      }
+
+      // Format to DD/MM/YYYY
+      return dateObj.toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: '2-digit', 
+        year: 'numeric'
+      });
+    } catch (error) {
+      console.warn('Error formatting date:', date, error);
+      return '';
+    }
+  };
+
   useEffect(() => {
     console.log('📖 CashBook - Received cash book entries:', cashBookEntries.length);
 
@@ -276,7 +311,7 @@ const CashBook = ({ cashBookEntries, setCashBookEntries, allUsers }) => {
                         return (
                           <tr key={`row-${index}`}>
                             {/* Dr. Side */}
-                            <td>{drEntry ? new Date(drEntry.date).toLocaleDateString('en-IN') : ''}</td>
+                            <td>{drEntry ? formatDateForCashBook(drEntry.date) : ''}</td>
                             <td>{drEntry ? formatEntryParticulars(drEntry) : ''}</td>
                             <td className="text-success">
                               {drEntry && drEntry.cashAmount > 0 ? `₹${drEntry.cashAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}` : (drEntry ? '-' : '')}
@@ -286,7 +321,7 @@ const CashBook = ({ cashBookEntries, setCashBookEntries, allUsers }) => {
                             </td>
 
                             {/* Cr. Side */}
-                            <td>{crEntry ? new Date(crEntry.date).toLocaleDateString('en-IN') : ''}</td>
+                            <td>{crEntry ? formatDateForCashBook(crEntry.date) : ''}</td>
                             <td>{crEntry ? formatEntryParticulars(crEntry) : ''}</td>
                             <td className="text-danger">
                               {crEntry && crEntry.cashAmount > 0 ? `₹${crEntry.cashAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}` : (crEntry ? '-' : '')}
