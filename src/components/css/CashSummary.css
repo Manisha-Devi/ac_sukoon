@@ -183,6 +183,10 @@
   border-left: 4px solid #007bff;
 }
 
+.fixed-cash-card .card-body {
+  border-left: 4px solid #17a2b8;
+}
+
 .transactions-list {
   background: white;
   padding: 1.5rem;
