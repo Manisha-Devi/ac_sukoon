@@ -361,10 +361,10 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
 
   return (
     <div className="cash-summary-container">
-      <div className="summary-header">
-        <h3><i className="bi bi-cash-stack"></i> Cash Summary</h3>
-        <p className="text-muted">Personal cash transactions and balance overview</p>
-        
+      <div className="cash-book-header">
+        <h2><i className="bi bi-cash-stack"></i> Cash Summary</h2>
+        <p>Personal cash transactions and balance overview</p>
+
         {/* Toggle Buttons */}
         <div className="filter-toggle-section">
           <button 
@@ -382,7 +382,6 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
             {showSummary ? 'Hide Summary' : 'Show Summary'}
           </button>
         </div>
-        <small className="text-muted mt-2 d-block">Use navbar refresh icon to update data</small>
       </div>
 
       {/* Date Filter */}
