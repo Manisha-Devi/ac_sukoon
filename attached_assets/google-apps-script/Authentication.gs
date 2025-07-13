@@ -11,7 +11,7 @@
 function handleLogin(data) {
   try {
     console.log("🔐 Processing login attempt for user:", data.username);
-    
+
     // Validate API key first
     const keyValidation = validateAPIKey(data.apiKey);
     if (!keyValidation.valid) {
@@ -95,7 +95,7 @@ function handleLogin(data) {
 function getAllUsers(data) {
   try {
     console.log('👥 Fetching all users...');
-    
+
     // Validate API key first
     const keyValidation = validateAPIKey(data.apiKey);
     if (!keyValidation.valid) {
@@ -112,9 +112,9 @@ function getAllUsers(data) {
       throw new Error('Users sheet not found');
     }
 
-    const data = sheet.getDataRange().getValues();
-    
-    if (!data || data.length <= 1) {
+    const values = sheet.getDataRange().getValues();
+
+    if (!values || values.length <= 1) {
       console.log('⚠️ No users found in Users sheet');
       return {
         success: true,
@@ -124,8 +124,8 @@ function getAllUsers(data) {
       };
     }
 
-    const headers = data[0];
-    const users = [];
+    const headers = values[0];
+    const usersData = [];
 
     // Find exact column indices based on actual headers
     // Headers: Username, Password, UserType, FullName, Status, CreatedDate, LastLogin, FixedCash
@@ -137,8 +137,8 @@ function getAllUsers(data) {
     console.log('📋 Using fixed column indices:', { usernameIndex, fullNameIndex, createdDateIndex, fixedCashIndex });
 
     // Process each user row (skip header)
-    for (let i = 1; i < data.length; i++) {
-      const row = data[i];
+    for (let i = 1; i < values.length; i++) {
+      const row = values[i];
 
       if (row[usernameIndex] && row[usernameIndex].toString().trim()) { // Only include rows with username
         const user = {
@@ -149,18 +149,18 @@ function getAllUsers(data) {
                 new Date().toLocaleDateString('en-IN'),
           fixedCash: row[fixedCashIndex] ? (parseFloat(row[fixedCashIndex]) || 0) : 0
         };
-        
-        users.push(user);
+
+        usersData.push(user);
         console.log('👤 User processed:', user);
       }
     }
 
-    console.log(`✅ Retrieved ${users.length} users successfully`);
+    console.log(`✅ Found ${usersData.length} users in Google Sheets`);
 
     return {
       success: true,
-      data: users,
-      count: users.length,
+      data: usersData,
+      count: usersData.length,
       timestamp: formatISTTimestamp()
     };
 
@@ -183,7 +183,7 @@ function getAllUsers(data) {
 function testConnection(data) {
   try {
     console.log('🔍 Testing connection...');
-    
+
     // Validate API key first
     const keyValidation = validateAPIKey(data.apiKey);
     if (!keyValidation.valid) {

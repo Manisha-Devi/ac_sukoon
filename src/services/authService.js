@@ -2068,6 +2068,45 @@ class AuthService {
   // ============================================================================
   // ANALYTICS FUNCTIONS
   // ============================================================================
+
+  // Test API key validity with backend
+  async testAPIKey() {
+    try {
+      console.log('🔍 Testing API key validity...');
+      
+      const testData = this.apiKeyService.addAPIKey({
+        action: 'test'
+      });
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify(testData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('✅ API key is valid and working');
+        return true;
+      } else {
+        console.error('❌ API key test failed:', result.error);
+        return false;
+      }
+      
+    } catch (error) {
+      console.error('❌ Error testing API key:', error);
+      return false;
+    }
+  }
 }
 
 export default new AuthService();

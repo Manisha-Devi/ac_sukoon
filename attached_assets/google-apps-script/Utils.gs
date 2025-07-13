@@ -61,7 +61,7 @@ function formatDateForDisplay(dateValue) {
 function testConnection(data) {
   try {
     console.log("🔍 Testing connection to Google Apps Script...");
-    
+
     // Validate API key first
     const keyValidation = validateAPIKey(data.apiKey);
     if (!keyValidation.valid) {
@@ -132,6 +132,32 @@ function formatTimestampForDisplay(timestamp) {
     console.error('Error formatting timestamp:', error);
     return timestamp;
   }
+}
+
+/**
+ * Format IST Timestamp - Returns current IST timestamp
+ */
+function formatISTTimestamp() {
+  const now = new Date();
+  const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000)); // Add 5.5 hours for IST
+  return Utilities.formatDate(istTime, 'Asia/Kolkata', 'dd-MM-yyyy HH:mm:ss');
+}
+
+/**
+ * Format time for display - Returns formatted time string
+ */
+function formatTimeForDisplay(date) {
+  if (!date) {
+    return formatISTTimestamp();
+  }
+
+  if (typeof date === 'string') {
+    date = new Date(date);
+  }
+
+  // Convert to IST
+  const istTime = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
+  return Utilities.formatDate(istTime, 'Asia/Kolkata', 'dd-MM-yyyy HH:mm:ss');
 }
 
 // Properties are handled directly in Code.gs and LegacyFunctions.gs

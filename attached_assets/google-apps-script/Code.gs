@@ -1,4 +1,3 @@
-
 // ============================================================================
 // AC SUKOON TRANSPORT MANAGEMENT - MAIN FILE (Code.gs)
 // ============================================================================
@@ -28,9 +27,9 @@ function doPost(e) {
     const data = JSON.parse(e.postData.contents);
     const action = data.action;
     const apiKey = data.apiKey;
-    
+
     console.log(`📥 Incoming POST request - Action: ${action}`);
-    
+
     // Validate API key for all requests except test
     if (action !== 'test') {
       const keyValidation = validateAPIKey(apiKey);
@@ -42,7 +41,7 @@ function doPost(e) {
           timestamp: formatISTTimestamp()
         })).setMimeType(ContentService.MimeType.JSON);
       }
-      
+
       console.log('✅ API key validated for:', keyValidation.keyName);
     }
 
@@ -58,7 +57,7 @@ function doPost(e) {
         result = getAllUsers();
         break;
       case "test":
-        result = testConnection();
+        result = testConnection({});
         break;
 
       // ==================== FARE RECEIPTS ====================
@@ -316,9 +315,9 @@ function doGet(e) {
 
     const action = e.parameter.action;
     const apiKey = e.parameter.apiKey;
-    
+
     console.log(`📥 Incoming GET request - Action: ${action}`);
-    
+
     // Validate API key for all requests except test
     if (action !== 'test') {
       const keyValidation = validateAPIKey(apiKey);
@@ -330,7 +329,7 @@ function doGet(e) {
           timestamp: formatISTTimestamp()
         })).setMimeType(ContentService.MimeType.JSON);
       }
-      
+
       console.log('✅ API key validated for:', keyValidation.keyName);
     }
 
@@ -338,10 +337,10 @@ function doGet(e) {
 
     switch (action) {
       case "test":
-        result = testConnection();
+        result = testConnection({});
         break;
       case "getAllUsers":
-        result = getAllUsers();
+        result = getAllUsers({ apiKey: apiKey });
         break;
       case "getFareReceipts":
         result = getFareReceipts();
