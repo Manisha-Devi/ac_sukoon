@@ -57,10 +57,51 @@ function App() {
     }
   });
 
+  // Centralized function to fetch and log all users data
+  const fetchAllUsersData = async () => {
+    try {
+      console.log('🔄 Fetching all users data centrally...');
+
+      const response = await authService.getAllUsers();
+
+      if (response.success) {
+        console.log('✅ All Users Data Retrieved Successfully:');
+        console.log('📊 Total Users Count:', response.count);
+        console.log('👥 Complete Users List:', response.data);
+        console.log('⏰ Data Timestamp:', response.timestamp);
+
+        // Log each user individually for better readability
+        console.log('📝 Individual User Details:');
+        response.data.forEach((user, index) => {
+          console.log(`${index + 1}. User:`, {
+            username: user.username,
+            name: user.name,
+            date: user.date,
+            fixedCash: user.fixedCash
+          });
+        });
+
+        setAllUsers(response.data);
+        return response.data;
+      } else {
+        console.error('❌ Failed to fetch users:', response.error);
+        return [];
+      }
+    } catch (error) {
+      console.error('❌ Error fetching all users:', error);
+      return [];
+    }
+  };
+
+
   // Handle user login - Only React state, no localStorage
   const handleLogin = (userData) => {
     setUser(userData);
     console.log('👤 User logged in via React state:', userData);
+    
+    // Refresh users data after login
+    console.log('🔄 Refreshing users data after login...');
+    fetchAllUsersData();
   };
 
   // Handle user logout - Only clear React state
@@ -320,11 +361,20 @@ function App() {
       );
     };
 
+      // Fetch all users data centrally on app initialization
+    fetchAllUsersData();
+
+    // Expose function globally for manual testing
+    window.refreshUsersData = fetchAllUsersData;
+    window.getAllUsersData = () => allUsers;
+
     // Cleanup function
     return () => {
       delete window.updateEntryStatusInParent;
       delete window.updateExpenseDataState;
       delete window.updateFareDataState;
+        delete  window.refreshUsersData;
+        delete window.getAllUsersData;
     };
   }, []);
 
@@ -607,6 +657,7 @@ function App() {
             totalEarnings={totalEarnings}
             dataStatistics={dataStatistics}
             currentUser={user}
+              allUsers={allUsers}
           />
         )}
         {activeTab === "fare-entry" && (
