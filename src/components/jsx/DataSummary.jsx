@@ -12,8 +12,6 @@ function DataSummary({ fareData, expenseData, currentUser }) {
   const [selectedEntries, setSelectedEntries] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
-  const [showCashDepositModal, setShowCashDepositModal] = useState(false);
-  const [cashDepositAmount, setCashDepositAmount] = useState('');
 
   // Log user data for debugging
   useEffect(() => {
@@ -32,118 +30,86 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       setLoading(true);
       let allEntries = [];
 
-      // Process Fare Data with better error handling
-      if (Array.isArray(fareData) && fareData.length > 0) {
+      // Process Fare Data
+      if (fareData && fareData.length > 0) {
         fareData.forEach(entry => {
-          try {
-            // Ensure entry has required fields
-            if (!entry || !entry.entryId) {
-              console.warn('⚠️ Skipping invalid fare entry:', entry);
-              return;
-            }
+          // Include all entries including off days
+          let dataType = '';
+          let displayName = '';
+          let description = '';
 
-            let dataType = '';
-            let displayName = '';
-            let description = '';
-
-            if (entry.type === 'daily' || entry.entryType === 'daily') {
-              dataType = 'Fare Receipt';
-              displayName = `Fare: ${entry.route || 'Daily Collection'}`;
-              description = entry.route || 'Daily fare collection';
-            } else if (entry.type === 'booking' || entry.entryType === 'booking') {
-              dataType = 'Booking Entry';
-              displayName = `Booking: ${entry.bookingDetails || 'Booking Entry'}`;
-              description = entry.bookingDetails || 'Booking entry';
-            } else if (entry.type === 'off' || entry.entryType === 'off') {
-              dataType = 'Off Day';
-              displayName = `Off Day: ${entry.reason || 'Off Day Request'}`;
-              description = entry.reason || 'Off day request';
-            } else {
-              // Fallback for unknown types
-              dataType = 'Fare Entry';
-              displayName = `Entry: ${entry.description || 'Fare Entry'}`;
-              description = entry.description || 'Fare entry';
-            }
-
-            allEntries.push({
-              ...entry,
-              dataType: dataType,
-              entryStatus: entry.entryStatus || 'pending',
-              displayName: displayName,
-              description: description,
-              submittedBy: entry.submittedBy || 'Unknown',
-              totalAmount: entry.totalAmount || (entry.cashAmount || 0) + (entry.bankAmount || 0),
-              cashAmount: entry.cashAmount || 0,
-              bankAmount: entry.bankAmount || 0
-            });
-          } catch (entryError) {
-            console.error('❌ Error processing fare entry:', entryError, entry);
+          if (entry.type === 'daily') {
+            dataType = 'Fare Receipt';
+            displayName = `Fare: ${entry.route || 'Daily Collection'}`;
+            description = entry.route;
+          } else if (entry.type === 'booking') {
+            dataType = 'Booking Entry';
+            displayName = `Booking: ${entry.bookingDetails || 'Booking Entry'}`;
+            description = entry.bookingDetails;
+          } else if (entry.type === 'off') {
+            dataType = 'Off Day';
+            displayName = `Off Day: ${entry.reason || 'Off Day Request'}`;
+            description = entry.reason;
           }
+
+          allEntries.push({
+            ...entry,
+            dataType: dataType,
+            entryStatus: entry.entryStatus || 'pending',
+            displayName: displayName,
+            description: description,
+            submittedBy: entry.submittedBy
+          });
         });
       }
 
-      // Process Expense Data with better error handling
-      if (Array.isArray(expenseData) && expenseData.length > 0) {
+      // Process Expense Data
+      if (expenseData && expenseData.length > 0) {
         expenseData.forEach(entry => {
-          try {
-            // Ensure entry has required fields
-            if (!entry || !entry.entryId) {
-              console.warn('⚠️ Skipping invalid expense entry:', entry);
-              return;
-            }
+          let dataType = '';
+          let displayName = '';
+          let description = '';
 
-            let dataType = '';
-            let displayName = '';
-            let description = '';
-
-            const entryType = entry.type || entry.entryType;
-            
-            switch(entryType) {
-              case 'fuel':
-                dataType = 'Fuel Payment';
-                displayName = `Fuel: ${entry.pumpName || 'Fuel Station'}`;
-                description = entry.pumpName || 'Fuel payment';
-                break;
-              case 'adda':
-                dataType = 'Adda Payment';
-                displayName = `Adda: ${entry.addaName || entry.description || 'Adda Fees'}`;
-                description = entry.addaName || entry.description || 'Adda payment';
-                break;
-              case 'service':
-                dataType = 'Service Payment';
-                displayName = `Service: ${entry.serviceType || entry.serviceDetails || 'Service'}`;
-                description = entry.serviceDetails || entry.serviceType || 'Service payment';
-                break;
-              case 'union':
-                dataType = 'Union Payment';
-                displayName = `Union: ${entry.unionName || entry.description || 'Union Fees'}`;
-                description = entry.unionName || entry.description || 'Union payment';
-                break;
-              case 'other':
-                dataType = 'Other Payment';
-                displayName = `Other: ${entry.paymentType || entry.paymentDetails || 'Other Payment'}`;
-                description = entry.paymentDetails || entry.paymentType || 'Other payment';
-                break;
-              default:
-                dataType = 'Payment';
-                displayName = `Payment: ${entry.description || 'Payment Entry'}`;
-                description = entry.description || 'Payment';
-            }
-
-            allEntries.push({
-              ...entry,
-              dataType: dataType,
-              entryStatus: entry.entryStatus || 'pending',
-              displayName: displayName,
-              description: description,
-              submittedBy: entry.submittedBy || 'Unknown',
-              totalAmount: entry.totalAmount || (entry.cashAmount || 0) + (entry.bankAmount || 0),
-              cashAmount: entry.cashAmount || 0,
-              bankAmount: entry.bankAmount || 0
-            });
-          } catch (entryError) {
-            console.error('❌ Error processing expense entry:', entryError, entry);
+          switch(entry.type) {
+            case 'fuel':
+              dataType = 'Fuel Payment';
+              displayName = `Fuel: ${entry.pumpName || 'Fuel Station'}`;
+              description = entry.pumpName || 'Fuel payment';
+              break;
+            case 'adda':
+              dataType = 'Adda Payment';
+              displayName = `Adda: ${entry.addaName || entry.description || 'Adda Fees'}`;
+              description = entry.addaName || entry.description || 'Adda payment';
+              break;
+            case 'service':
+              dataType = 'Service Payment';
+              displayName = `Service: ${entry.serviceType || entry.serviceDetails || 'Service'}`;
+              description = entry.serviceDetails || entry.serviceType || 'Service payment';
+              break;
+            case 'union':
+              dataType = 'Union Payment';
+              displayName = `Union: ${entry.unionName || entry.description || 'Union Fees'}`;
+              description = entry.unionName || entry.description || 'Union payment';
+              break;
+            case 'other':
+              dataType = 'Other Payment';
+              displayName = `Other: ${entry.paymentType || entry.paymentDetails || 'Other Payment'}`;
+              description = entry.paymentDetails || entry.paymentType || 'Other payment';
+              break;
+            default:
+              dataType = 'Payment';
+              displayName = `Payment: ${entry.description || 'Payment Entry'}`;
+              description = entry.description || 'Payment';
           }
+
+          allEntries.push({
+            ...entry,
+            dataType: dataType,
+            entryStatus: entry.entryStatus || 'pending',
+            displayName: displayName,
+            description: description,
+            submittedBy: entry.submittedBy
+          });
         });
       }
 
@@ -230,14 +196,14 @@ function DataSummary({ fareData, expenseData, currentUser }) {
 
     // Search in all data sources, not just approvedData
     let allEntries = [];
-
+    
     // Process Fare Data
     if (fareData && fareData.length > 0) {
       fareData.forEach(entry => {
         if (entry.entryStatus === 'approved' && entry.approvedBy === currentUserName) {
           let dataType = '';
           let displayName = '';
-
+          
           if (entry.type === 'daily') {
             dataType = 'Fare Receipt';
             displayName = `Fare: ${entry.route || 'Daily Collection'}`;
@@ -601,11 +567,11 @@ function DataSummary({ fareData, expenseData, currentUser }) {
             <div className="entry-row">
               <span className="label">Date:</span>
               <span className="value">
-                {(entry.type === 'booking' || entry.entryType === 'booking') && entry.dateFrom ? 
-                  formatDisplayDate(entry.dateFrom) : 
-                  formatDisplayDate(entry.date)
-                }
-              </span>
+                        {entry.entryType === 'booking' && entry.dateFrom ? 
+                          formatDisplayDate(entry.dateFrom) : 
+                          formatDisplayDate(entry.date)
+                        }
+                      </span>
             </div>
             <div className="entry-row">
               <span className="label">Description:</span>
@@ -667,78 +633,6 @@ function DataSummary({ fareData, expenseData, currentUser }) {
   }
 
   const currentData = getCurrentTabData();
-
-  // Handle cash deposit submission
-  const handleCashDeposit = async () => {
-    if (!cashDepositAmount || parseFloat(cashDepositAmount) <= 0) {
-      alert('Please enter a valid deposit amount');
-      return;
-    }
-
-    if (parseFloat(cashDepositAmount) > calculateCashInHand()) {
-      alert('Deposit amount exceeds available cash in hand');
-      return;
-    }
-
-    try {
-      const depositedBy = currentUser?.fullName || currentUser?.username || 'Unknown User';
-      const entryId = Date.now();
-      const today = new Date().toISOString().split('T')[0];
-      const currentTime = new Date().toLocaleTimeString('en-US', { 
-        hour12: true, 
-        timeZone: 'Asia/Kolkata' 
-      });
-
-      console.log('💰 Submitting cash deposit:', {
-        entryId,
-        amount: parseFloat(cashDepositAmount),
-        depositedBy,
-        date: today,
-        timestamp: currentTime
-      });
-
-      const result = await authService.addCashDeposit({
-        entryId: entryId,
-        timestamp: currentTime,
-        date: today,
-        cashAmount: parseFloat(cashDepositAmount),
-        depositedBy: depositedBy
-      });
-
-      console.log('💰 Cash deposit API response:', result);
-
-      if (result && result.success) {
-        alert('Cash deposit submitted successfully');
-        setShowCashDepositModal(false);
-        setCashDepositAmount('');
-
-        // Refresh data to reflect changes
-        console.log('🔄 Refreshing data after cash deposit...');
-        processAllData();
-
-        // Trigger global refresh event for other components
-        window.dispatchEvent(new CustomEvent('dataRefreshed', {
-          detail: {
-            timestamp: new Date(),
-            source: 'cash-deposit',
-            entryId: entryId
-          }
-        }));
-
-        // Also refresh cash book entries if function exists
-        if (typeof window.refreshCashBookEntries === 'function') {
-          window.refreshCashBookEntries();
-        }
-      } else {
-        const errorMessage = result?.error || 'Unknown error occurred';
-        console.error('❌ Cash deposit failed:', errorMessage);
-        alert('Failed to submit cash deposit: ' + errorMessage);
-      }
-    } catch (error) {
-      console.error('❌ Error submitting cash deposit:', error);
-      alert('Error submitting cash deposit: ' + (error.message || 'Network error'));
-    }
-  };
 
   return (
     <div className="data-approval-container">
@@ -908,12 +802,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                 )}
               </div>
 
-              <button
-                className="btn btn-success"
-                onClick={() => setShowCashDepositModal(true)}
-              >
-                <i className="bi bi-plus-circle"></i> Cash Deposit
-              </button>
+
             </div>
           </div>
         )}
@@ -998,59 +887,6 @@ function DataSummary({ fareData, expenseData, currentUser }) {
             </div>
           )}
         </div>
-
-        {/* Cash Deposit Modal */}
-        {showCashDepositModal && (
-          <div className="modal-overlay">
-            <div className="modal-content cash-deposit-modal">
-              <div className="modal-header">
-                <h4><i className="bi bi-bank"></i> Cash Deposit</h4>
-                <button 
-                  className="close-btn"
-                  onClick={() => setShowCashDepositModal(false)}
-                >
-                  <i className="bi bi-x"></i>
-                </button>
-              </div>
-              <div className="modal-body">
-                <div className="deposit-info">
-                  <p><strong>Available Cash in Hand:</strong> ₹{calculateCashInHand().toLocaleString('en-IN')}</p>
-                  <p><strong>Deposited by:</strong> {currentUser?.fullName || currentUser?.username}</p>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Deposit Amount</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={cashDepositAmount}
-                    onChange={(e) => setCashDepositAmount(e.target.value)}
-                    placeholder="Enter amount to deposit"
-                    max={calculateCashInHand()}
-                    step="0.01"
-                  />
-                  <small className="text-muted">
-                    Maximum: ₹{calculateCashInHand().toLocaleString('en-IN')}
-                  </small>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button 
-                  className="btn btn-secondary"
-                  onClick={() => setShowCashDepositModal(false)}
-                >
-                  Cancel
-                </button>
-                <button 
-                  className="btn btn-primary"
-                  onClick={handleCashDeposit}
-                  disabled={!cashDepositAmount || parseFloat(cashDepositAmount) <= 0}
-                >
-                  <i className="bi bi-check-circle"></i> Submit Deposit
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

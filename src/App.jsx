@@ -21,11 +21,9 @@ function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [expenseData, setExpenseData] = useState([]);
   const [fareData, setFareData] = useState([]);
-  const [totalEarnings, setTotalEarnings] = useState(0);
   const [totalExpenses, setTotalExpenses] = useState(0);
-  const [allUsers, setAllUsers] = useState([]);
+  const [totalEarnings, setTotalEarnings] = useState(0);
   const [cashBookEntries, setCashBookEntries] = useState([]);
-  const [cashDepositData, setCashDepositData] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -36,6 +34,7 @@ function App() {
     expenseRecords: 0,
     lastSync: null
   });
+    const [allUsers, setAllUsers] = useState([]);
 
 
   // New detailed statistics state
@@ -96,7 +95,7 @@ function App() {
         const errorMessage = response?.error || response?.message || 'Unknown error';
         console.error('❌ Failed to fetch users:', errorMessage);
         console.error('❌ Full response:', response);
-
+        
         // For debugging: Try to call the API with GET method as fallback
         console.log('🔄 Trying fallback GET method...');
         try {
@@ -105,11 +104,11 @@ function App() {
             mode: 'cors',
             redirect: 'follow'
           });
-
+          
           if (fallbackResponse.ok) {
             const fallbackResult = await fallbackResponse.json();
             console.log('🔄 Fallback GET response:', fallbackResult);
-
+            
             if (fallbackResult.success && fallbackResult.data) {
               setAllUsers(fallbackResult.data);
               return fallbackResult.data;
@@ -118,7 +117,7 @@ function App() {
         } catch (fallbackError) {
           console.log('❌ Fallback method also failed:', fallbackError.message);
         }
-
+        
         setAllUsers([]);
         return [];
       }
@@ -135,7 +134,7 @@ function App() {
   const handleLogin = (userData) => {
     setUser(userData);
     console.log('👤 User logged in via React state:', userData);
-
+    
     // Refresh users data after login
     console.log('🔄 Refreshing users data after login...');
     fetchAllUsersData();
@@ -167,7 +166,7 @@ function App() {
         servicePayments,
         otherPayments,
         allUsersData,
-      ] = await Promise.allSettled([
+      ] = await Promise.all([
         authService.getFareReceipts(),
         authService.getBookingEntries(),
         authService.getOffDays(),
@@ -177,50 +176,33 @@ function App() {
         authService.getServicePayments(),
         authService.getOtherPayments(),
         authService.getAllUsers(),
-      ]).then(results => results.map(result => 
-        result.status === 'fulfilled' ? result.value : { success: false, data: [], error: result.reason?.message }
-      ));
+      ]);
 
       // Process fare data (fare receipts + booking entries)
       let combinedFareData = [];
 
-      // Add fare receipts with error handling
-      if (fareReceipts?.success && fareReceipts?.data && Array.isArray(fareReceipts.data)) {
+      // Add fare receipts
+      if (fareReceipts?.data && Array.isArray(fareReceipts.data)) {
         combinedFareData.push(...fareReceipts.data.map(receipt => ({
           ...receipt,
-          type: 'daily',
-          entryType: 'daily',
-          totalAmount: receipt.totalAmount || (receipt.cashAmount || 0) + (receipt.bankAmount || 0)
+          type: 'daily'
         })));
-        console.log(`✅ Loaded ${fareReceipts.data.length} fare receipts`);
-      } else {
-        console.warn('⚠️ Failed to load fare receipts:', fareReceipts?.error);
       }
 
-      // Add booking entries with error handling
-      if (bookingEntries?.success && bookingEntries?.data && Array.isArray(bookingEntries.data)) {
+      // Add booking entries
+      if (bookingEntries?.data && Array.isArray(bookingEntries.data)) {
         combinedFareData.push(...bookingEntries.data.map(booking => ({
           ...booking,
-          type: 'booking',
-          entryType: 'booking',
-          totalAmount: booking.totalAmount || (booking.cashAmount || 0) + (booking.bankAmount || 0)
+          type: 'booking'
         })));
-        console.log(`✅ Loaded ${bookingEntries.data.length} booking entries`);
-      } else {
-        console.warn('⚠️ Failed to load booking entries:', bookingEntries?.error);
       }
 
-      // Add off days with error handling
-      if (offDays?.success && offDays?.data && Array.isArray(offDays.data)) {
+      // Add off days
+      if (offDays?.data && Array.isArray(offDays.data)) {
         combinedFareData.push(...offDays.data.map(offDay => ({
           ...offDay,
-          type: 'off',
-          entryType: 'off',
-          totalAmount: 0 // Off days don't contribute to totals
+          type: 'off'
         })));
-        console.log(`✅ Loaded ${offDays.data.length} off days`);
-      } else {
-        console.warn('⚠️ Failed to load off days:', offDays?.error);
       }
 
       // Process expense data
@@ -462,145 +444,107 @@ function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Fetch cash deposits
-  const fetchCashDeposits = async () => {
-    try {
-      const result = await authService.getCashDeposits();
-      if (result.success) {
-        setCashDepositData(result.data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching cash deposits:', error);
-    }
-  };
-
-  // Fetch cash deposits on component mount
+  // Generate cash book entries whenever fareData or expenseData changes
   useEffect(() => {
-    fetchCashDeposits();
-  }, []);
+    const generateCashBookEntries = () => {
+      let entries = [];
 
-  // Generate cash book entries from fare, expense, and cash deposit data
-  const generateCashBookEntries = () => {
-    let entries = [];
-
-    // Add fare receipts as Dr. entries (Income)
-    fareData.forEach(fare => {
-      if (fare.entryStatus === 'approved') {
-        if (fare.type === 'daily' && (fare.cashAmount > 0 || fare.bankAmount > 0)) {
+      // Add fare receipt entries (Dr - income)
+      fareData.forEach(fareEntry => {
+        if (fareEntry.type !== 'off') { // Exclude off days
           entries.push({
-            id: `fare-${fare.entryId}`,
-            date: fare.date,
-            particulars: fare.route || 'Daily Fare',
-            description: `Daily fare collection - ${fare.route}`,
-            jfNo: `FARE-${fare.entryId}`,
-            cashAmount: fare.cashAmount || 0,
-            bankAmount: fare.bankAmount || 0,
-            type: 'dr',
-            timestamp: fare.timestamp,
-            source: 'fare-daily'
-          });
-        } else if (fare.type === 'booking' && (fare.cashAmount > 0 || fare.bankAmount > 0)) {
-          entries.push({
-            id: `booking-${fare.entryId}`,
-            date: fare.dateFrom,
-            particulars: fare.bookingDetails || 'Booking',
-            description: `Booking entry - ${fare.bookingDetails}`,
-            jfNo: `BOOK-${fare.entryId}`,
-            cashAmount: fare.cashAmount || 0,
-            bankAmount: fare.bankAmount || 0,
-            type: 'dr',
-            timestamp: fare.timestamp,
-            source: 'fare-booking'
+            id: `fare-${fareEntry.entryId}`,
+            date: fareEntry.date || fareEntry.dateFrom,
+            description: fareEntry.type === 'daily' ? 
+              `Daily Collection - ${fareEntry.route}` : 
+              `Booking - ${fareEntry.bookingDetails || 'Booking Entry'}`,
+            cashAmount: fareEntry.cashAmount || 0,
+            bankAmount: fareEntry.bankAmount || 0,
+            type: 'dr', // Debit (income)
+            source: fareEntry.type === 'daily' ? 'fare-daily' : 'fare-booking',
+            particulars: fareEntry.type === 'daily' ? fareEntry.route : fareEntry.bookingDetails,
+            jfNo: `JF-${fareEntry.entryId}`,
+            submittedBy: fareEntry.submittedBy
           });
         }
-      }
-    });
+      });
 
-    // Add expenses as Cr. entries (Payments)
-    expenseData.forEach(expense => {
-      if (expense.entryStatus === 'approved' && (expense.cashAmount > 0 || expense.bankAmount > 0)) {
-        let particulars = '';
+      // Add expense entries (Cr - payments)
+      expenseData.forEach(expenseEntry => {
+        // Handle different expense types properly
         let description = '';
-        let source = '';
+        let particulars = '';
 
-        switch(expense.type) {
+        switch(expenseEntry.type) {
           case 'fuel':
-            particulars = 'Fuel Payment';
-            description = `Fuel expense - ${expense.pumpName}`;
-            source = 'fuel-payment';
+            description = `Fuel Payment - ${expenseEntry.pumpName || 'Fuel Station'}`;
+            particulars = expenseEntry.pumpName || 'Fuel Station';
             break;
+          case 'fees':
           case 'adda':
-            particulars = 'Adda Payment';
-            description = `Adda payment - ${expense.addaName}`;
-            source = 'adda-payment';
-            break;
-          case 'union':
-            particulars = 'Union Payment';
-            description = `Union payment - ${expense.unionName}`;
-            source = 'union-payment';
+            description = `Adda Payment - ${expenseEntry.description || 'Adda Fees'}`;
+            particulars = expenseEntry.description || 'Adda Fees';
             break;
           case 'service':
-            particulars = 'Service Payment';
-            description = `Service payment - ${expense.serviceType || expense.serviceDetails}`;
-            source = 'service-payment';
+            description = `Service Payment - ${expenseEntry.serviceType || expenseEntry.description || 'Service'}`;
+            particulars = expenseEntry.serviceType || expenseEntry.description || 'Service';
+            break;
+          case 'union':
+            description = `Union Payment - ${expenseEntry.description || 'Union Fees'}`;
+            particulars = expenseEntry.description || 'Union Fees';
             break;
           case 'other':
-            particulars = 'Other Payment';
-            description = `Other payment - ${expense.paymentType || expense.paymentDetails}`;
-            source = 'other-payment';
+            description = `Other Payment - ${expenseEntry.paymentDetails || expenseEntry.description || 'Other'}`;
+            particulars = expenseEntry.paymentDetails || expenseEntry.description || 'Other';
             break;
+          default:
+            description = `${expenseEntry.type} - ${expenseEntry.description || 'Payment'}`;
+            particulars = expenseEntry.description || 'Payment';
         }
 
         entries.push({
-          id: `expense-${expense.entryId}`,
-          date: expense.date,
-          particulars: particulars,
+          id: `expense-${expenseEntry.entryId}`,
+          date: expenseEntry.date,
           description: description,
-          jfNo: `${expense.type.toUpperCase()}-${expense.entryId}`,
-          cashAmount: expense.cashAmount || 0,
-          bankAmount: expense.bankAmount || 0,
-          type: 'cr',
-          timestamp: expense.timestamp,
-          source: source
+          cashAmount: expenseEntry.cashAmount || 0,
+          bankAmount: expenseEntry.bankAmount || 0,
+          type: 'cr', // Credit (payment)
+          source: `${expenseEntry.type}-payment`,
+          particulars: particulars,
+          jfNo: `PV-${expenseEntry.entryId}`,
+          submittedBy: expenseEntry.submittedBy
+        });
+      });
+
+      // Add Fixed Cash entries for all users (Cr - payments)
+      if (allUsers && allUsers.length > 0) {
+        allUsers.forEach(user => {
+          if (user.fixedCash > 0) {
+            entries.push({
+              id: `fixed-cash-${user.username}`,
+              date: user.date,
+              description: `Fixed Cash - ${user.name}`,
+              cashAmount: user.fixedCash,
+              bankAmount: 0,
+              type: 'cr', // Credit (payment)
+              source: 'fixed-cash-payment',
+              particulars: user.name,
+              jfNo: `FC-${user.username}`,
+              submittedBy: user.name
+            });
+          }
         });
       }
-    });
 
-    // Add cash deposits as Cr. entries (Cash going to bank)
-    cashDepositData.forEach(deposit => {
-      entries.push({
-        id: `deposit-${deposit.entryId}`,
-        date: deposit.date,
-        particulars: 'Cash Deposit',
-        description: `Cash deposited by ${deposit.depositedBy}`,
-        jfNo: `CASH-${deposit.entryId}`,
-        cashAmount: 0, // No cash change (already moved to bank)
-        bankAmount: deposit.cashAmount || 0,
-        type: 'cr',
-        timestamp: deposit.timestamp,
-        source: 'cash-deposit'
-      });
-    });
+      // Sort by date (newest first)
+      entries.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    // Sort by date (newest first)
-    entries.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    console.log('📖 Generated cash book entries:', entries.length);
-    setCashBookEntries(entries);
-  };
-
-  // Generate cash book when fare, expense, or cash deposit data changes
-  useEffect(() => {
-    generateCashBookEntries();
-  }, [fareData, expenseData, cashDepositData]);
-
-  // Make setCashBookEntries available globally for cash deposits
-  useEffect(() => {
-    window.setCashBookEntries = setCashBookEntries;
-    return () => {
-      delete window.setCashBookEntries;
+      console.log('📖 Generated cash book entries:', entries.length);
+      setCashBookEntries(entries);
     };
-  }, []);
+
+    generateCashBookEntries();
+  }, [fareData, expenseData, allUsers, setCashBookEntries]);
 
   // If user is not logged in, show login component
   if (!user) {
