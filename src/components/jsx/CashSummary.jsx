@@ -331,9 +331,14 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
     .filter(entry => entry.type === 'expense')
     .reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
 
-  // Calculate approved cash income (only approved entries)
-  const approvedCashIncome = filteredData
-    .filter(entry => entry.type === 'income' && entry.entryStatus === 'approved')
+  // Calculate non-approved cash income (exclude approved entries)
+  const nonApprovedCashIncome = filteredData
+    .filter(entry => entry.type === 'income' && entry.entryStatus !== 'approved')
+    .reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
+
+  // Calculate non-approved cash expense (exclude approved entries)
+  const nonApprovedCashExpense = filteredData
+    .filter(entry => entry.type === 'expense' && entry.entryStatus !== 'approved')
     .reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
 
   // Get Fixed Cash for current user
@@ -348,8 +353,8 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
 
   const fixedCash = getCurrentUserFixedCash();
 
-  // Cash balance = Approved Income + Fixed Cash - Total Expenses
-  const cashBalance = approvedCashIncome + fixedCash - totalCashExpense;
+  // Cash balance = Non-Approved Income + Fixed Cash - Non-Approved Expenses
+  const cashBalance = nonApprovedCashIncome + fixedCash - nonApprovedCashExpense;
 
   useEffect(() => {
   }, []);
@@ -483,7 +488,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
                   ₹{Math.abs(cashBalance).toLocaleString()}
                   {cashBalance < 0 && ' (Deficit)'}
                 </h4>
-                <small className="text-muted">Approved + Fixed - Expense</small>
+                <small className="text-muted">Pending + Fixed - Pending Expense</small>
               </div>
             </div>
           </div>
