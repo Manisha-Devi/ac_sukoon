@@ -274,12 +274,18 @@ function App() {
       if (cashDepositsData?.success && cashDepositsData?.data) {
         console.log('💰 Setting cashDeposit data:', cashDepositsData.data.length, 'deposits');
         console.log('💰 Cash deposits fetched from Google Sheets:', cashDepositsData.data);
+        console.log('💰 Individual deposits:', cashDepositsData.data.map(d => ({
+          id: d.id || d.entryId,
+          date: d.date,
+          amount: d.cashAmount,
+          depositedBy: d.depositedBy
+        })));
         setCashDeposit(cashDepositsData.data);
       } else {
         console.warn('⚠️ Failed to load cash deposits data:', cashDepositsData?.error);
         console.warn('⚠️ Full cash deposits response:', cashDepositsData);
         // Keep existing data instead of clearing it
-        console.log('💰 Keeping existing cash deposits data');
+        console.log('💰 Keeping existing cash deposits data, current count:', cashDeposit.length);
       }
 
       // Calculate and update totals

@@ -28,8 +28,13 @@ const CashBook = ({ cashBookEntries, setCashBookEntries, allUsers }) => {
       // If it's an ISO string or timestamp, parse and format
       const dateObj = new Date(date);
       if (isNaN(dateObj.getTime())) {
-        console.warn('Invalid date:', date);
-        return '';
+        console.warn('Invalid date found:', date);
+        // Return current date instead of empty string
+        return new Date().toLocaleDateString('en-IN', {
+          day: '2-digit',
+          month: '2-digit', 
+          year: 'numeric'
+        });
       }
 
       // Format to DD/MM/YYYY
@@ -40,7 +45,12 @@ const CashBook = ({ cashBookEntries, setCashBookEntries, allUsers }) => {
       });
     } catch (error) {
       console.warn('Error formatting date:', date, error);
-      return '';
+      // Return current date as fallback
+      return new Date().toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: '2-digit', 
+        year: 'numeric'
+      });
     }
   };
 

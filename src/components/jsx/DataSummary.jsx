@@ -25,6 +25,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
     const loadCashDeposits = async () => {
       try {
         console.log('💰 DataSummary: Loading cash deposits...');
+        console.log('💰 DataSummary: Current cashDeposit state:', cashDeposit);
         const result = await authService.getCashDeposits();
 
         if (result.success && result.data) {
