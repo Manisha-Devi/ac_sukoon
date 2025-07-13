@@ -107,24 +107,14 @@ function getAllUsers() {
     const headers = data[0];
     const users = [];
 
-    // Find column indices - more flexible approach
-    const usernameIndex = headers.findIndex(header => 
-      header && header.toString().toLowerCase().includes('username')
-    );
-    const fullNameIndex = headers.findIndex(header => 
-      header && (header.toString().toLowerCase().includes('fullname') || 
-                 header.toString().toLowerCase().includes('name'))
-    );
-    const createdDateIndex = headers.findIndex(header => 
-      header && (header.toString().toLowerCase().includes('created') || 
-                 header.toString().toLowerCase().includes('date'))
-    );
-    const fixedCashIndex = headers.findIndex(header => 
-      header && (header.toString().toLowerCase().includes('fixed') || 
-                 header.toString().toLowerCase().includes('cash'))
-    );
+    // Find exact column indices based on actual headers
+    // Headers: Username, Password, UserType, FullName, Status, CreatedDate, LastLogin, FixedCash
+    const usernameIndex = 0;      // Username column
+    const fullNameIndex = 3;      // FullName column  
+    const createdDateIndex = 5;   // CreatedDate column
+    const fixedCashIndex = 7;     // FixedCash column
 
-    console.log('📋 Column indices found:', { usernameIndex, fullNameIndex, createdDateIndex, fixedCashIndex });
+    console.log('📋 Using fixed column indices:', { usernameIndex, fullNameIndex, createdDateIndex, fixedCashIndex });
 
     // Process each user row (skip header)
     for (let i = 1; i < data.length; i++) {
@@ -133,11 +123,11 @@ function getAllUsers() {
       if (row[usernameIndex] && row[usernameIndex].toString().trim()) { // Only include rows with username
         const user = {
           username: row[usernameIndex].toString().trim(),
-          name: fullNameIndex >= 0 ? (row[fullNameIndex] || '').toString().trim() : '',
-          date: createdDateIndex >= 0 && row[createdDateIndex] ? 
+          name: row[fullNameIndex] ? row[fullNameIndex].toString().trim() : '',
+          date: row[createdDateIndex] ? 
                 formatDateForDisplay(row[createdDateIndex]) : 
                 new Date().toLocaleDateString('en-IN'),
-          fixedCash: fixedCashIndex >= 0 ? (parseFloat(row[fixedCashIndex]) || 0) : 0
+          fixedCash: row[fixedCashIndex] ? (parseFloat(row[fixedCashIndex]) || 0) : 0
         };
         
         users.push(user);
