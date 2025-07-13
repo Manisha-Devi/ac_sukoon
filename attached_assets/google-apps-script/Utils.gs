@@ -96,6 +96,34 @@ function formatISTTimestamp() {
   return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
 }
 
+/**
+ * Format timestamp for display - IST format
+ */
+function formatTimestampForDisplay(timestamp) {
+  try {
+    if (!timestamp) return '';
+
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return timestamp;
+
+    // Format as DD-MM-YYYY HH:MM:SS in IST
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit', 
+      year: 'numeric',
+      timeZone: 'Asia/Kolkata'
+    }) + ' ' + date.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: 'Asia/Kolkata'
+    });
+  } catch (error) {
+    console.error('Error formatting timestamp:', error);
+    return timestamp;
+  }
+}
+
 // Properties are handled directly in Code.gs and LegacyFunctions.gs
 // No separate setup functions needed since fallback mechanism is already implemented
 
