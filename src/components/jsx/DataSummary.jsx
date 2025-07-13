@@ -530,7 +530,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
     }
   };
 
-  // Helper function to format time for display - simple format
+  // Helper function to format time for display - with seconds format
   const formatDisplayTime = (timestampStr) => {
     if (!timestampStr) return '';
 
@@ -538,11 +538,13 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
       const date = new Date(timestampStr);
       if (isNaN(date.getTime())) return timestampStr;
 
-      // Simple time format - HH:MM AM/PM
+      // Time format with seconds - HH:MM:SS AM/PM
       return date.toLocaleTimeString('en-US', {
-        hour: '2-digit',
+        hour: 'numeric',
         minute: '2-digit',
-        hour12: true
+        second: '2-digit',
+        hour12: true,
+        timeZone: 'Asia/Kolkata'
       });
     } catch (error) {
       return timestampStr;
