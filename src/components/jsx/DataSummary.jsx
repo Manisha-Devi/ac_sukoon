@@ -12,6 +12,8 @@ function DataSummary({ fareData, expenseData, currentUser }) {
   const [selectedEntries, setSelectedEntries] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
+  const [showCashDepositModal, setShowCashDepositModal] = useState(false);
+  const [cashDepositAmount, setCashDepositAmount] = useState('');
 
   // Log user data for debugging
   useEffect(() => {
@@ -196,14 +198,14 @@ function DataSummary({ fareData, expenseData, currentUser }) {
 
     // Search in all data sources, not just approvedData
     let allEntries = [];
-    
+
     // Process Fare Data
     if (fareData && fareData.length > 0) {
       fareData.forEach(entry => {
         if (entry.entryStatus === 'approved' && entry.approvedBy === currentUserName) {
           let dataType = '';
           let displayName = '';
-          
+
           if (entry.type === 'daily') {
             dataType = 'Fare Receipt';
             displayName = `Fare: ${entry.route || 'Daily Collection'}`;
@@ -634,6 +636,36 @@ function DataSummary({ fareData, expenseData, currentUser }) {
 
   const currentData = getCurrentTabData();
 
+  const handleCashDeposit = async () => {
+    if (!cashDepositAmount || parseFloat(cashDepositAmount) <= 0) {
+      alert('Please enter a valid deposit amount');
+      return;
+    }
+
+    if (parseFloat(cashDepositAmount) > calculateCashInHand()) {
+      alert('Deposit amount exceeds available cash in hand');
+      return;
+    }
+
+    try {
+      const depositedBy = currentUser?.fullName || currentUser?.username;
+      const result = await authService.createCashDeposit(parseFloat(cashDepositAmount), depositedBy);
+
+      if (result && result.success) {
+        alert('Cash deposit submitted successfully');
+        setShowCashDepositModal(false);
+        setCashDepositAmount('');
+        // Refresh data to reflect changes (optional)
+        processAllData();
+      } else {
+        alert('Failed to submit cash deposit: ' + (result?.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error submitting cash deposit:', error);
+      alert('Error submitting cash deposit: ' + error.message);
+    }
+  };
+
   return (
     <div className="data-approval-container">
       <div className="container-fluid">
@@ -802,7 +834,12 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                 )}
               </div>
 
-
+              <button
+                className="btn btn-success"
+                onClick={() => setShowCashDepositModal(true)}
+              >
+                <i className="bi bi-plus-circle"></i> Cash Deposit
+              </button>
             </div>
           </div>
         )}
@@ -887,6 +924,59 @@ function DataSummary({ fareData, expenseData, currentUser }) {
             </div>
           )}
         </div>
+
+        {/* Cash Deposit Modal */}
+        {showCashDepositModal && (
+          <div className="modal-overlay">
+            <div className="modal-content cash-deposit-modal">
+              <div className="modal-header">
+                <h4><i className="bi bi-bank"></i> Cash Deposit</h4>
+                <button 
+                  className="close-btn"
+                  onClick={() => setShowCashDepositModal(false)}
+                >
+                  <i className="bi bi-x"></i>
+                </button>
+              </div>
+              <div className="modal-body">
+                <div className="deposit-info">
+                  <p><strong>Available Cash in Hand:</strong> ₹{calculateCashInHand().toLocaleString('en-IN')}</p>
+                  <p><strong>Deposited by:</strong> {currentUser?.fullName || currentUser?.username}</p>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Deposit Amount</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={cashDepositAmount}
+                    onChange={(e) => setCashDepositAmount(e.target.value)}
+                    placeholder="Enter amount to deposit"
+                    max={calculateCashInHand()}
+                    step="0.01"
+                  />
+                  <small className="text-muted">
+                    Maximum: ₹{calculateCashInHand().toLocaleString('en-IN')}
+                  </small>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button 
+                  className="btn btn-secondary"
+                  onClick={() => setShowCashDepositModal(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="btn btn-primary"
+                  onClick={handleCashDeposit}
+                  disabled={!cashDepositAmount || parseFloat(cashDepositAmount) <= 0}
+                >
+                  <i className="bi bi-check-circle"></i> Submit Deposit
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

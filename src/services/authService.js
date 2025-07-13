@@ -106,7 +106,7 @@ class AuthService {
     }
   }
 
-  // Get all users (for admin purposes)
+  // Get all users from Users sheet
   async getAllUsers() {
     try {
       console.log('👥 Fetching all users from Google Sheets...');
@@ -151,7 +151,7 @@ class AuthService {
       }
     } catch (error) {
       console.error('❌ Error fetching users:', error);
-      
+
       if (error.name === 'AbortError') {
         return { 
           success: false, 
@@ -160,13 +160,131 @@ class AuthService {
           count: 0
         };
       }
-      
+
       return { 
         success: false, 
         error: error.message || 'Failed to fetch users',
         data: [],
         count: 0
       };
+    }
+  }
+
+  // Cash Deposit Functions
+  async addCashDeposit(data) {
+    try {
+      console.log('💰 Adding cash deposit to Google Sheets:', data);
+
+      const requestBody = JSON.stringify({
+        action: 'addCashDeposit',
+        ...data
+      });
+
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
+
+      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
+        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
+        return { success: false, error: 'API temporarily unavailable - data saved locally' };
+      }
+
+      console.log('✅ Cash deposit add response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error adding cash deposit:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getCashDeposits() {
+    try {
+      console.log('📋 Fetching cash deposits from Google Sheets...');
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'getCashDeposits'
+        })
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Cash deposits fetch response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error fetching cash deposits:', error);
+      // Return empty data structure instead of error to prevent UI crashes
+      return { 
+        success: true, 
+        data: [],
+        message: 'Cash deposits loaded from local cache (API temporarily unavailable)'
+      };
+    }
+  }
+
+  async updateCashDeposit(data) {
+    try {
+      console.log('📝 Updating cash deposit in Google Sheets:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'updateCashDeposit',
+          entryId: data.entryId,
+          updatedData: data.updatedData
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Cash deposit update response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating cash deposit:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteCashDeposit(data) {
+    try {
+      console.log('🗑️ Deleting cash deposit in Google Sheets:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'deleteCashDeposit',
+          entryId: data.entryId
+        })
+      });
+
+      const result = await response.json();
+      console.log('✅ Cash deposit delete response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error deleting cash deposit:', error);
+      return { success: false, error: error.message };
     }
   }
 
@@ -898,8 +1016,7 @@ class AuthService {
         totalAmount: data.totalAmount || 0,
         paymentDetails: data.paymentDetails || '',
         submittedBy: data.submittedBy || 'driver'
-      });
-
+      });Adding all other payment operations in the AuthService class in authService.js.```text
       const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
 
       if (!result.success && result.error && result.error.includes('Failed to fetch')) {

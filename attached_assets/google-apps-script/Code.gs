@@ -1,4 +1,3 @@
-
 // ============================================================================
 // AC SUKOON TRANSPORT MANAGEMENT - MAIN FILE (Code.gs)
 // ============================================================================
@@ -246,6 +245,20 @@ function doPost(e) {
         break;
       case "deleteFareEntry":
         result = deleteFareEntryLegacy(data);
+        break;
+        
+      // ==================== CASH DEPOSITS ====================
+      case "addCashDeposit":
+        result = addCashDeposit(data);
+        break;
+      case "getCashDeposits":
+        result = getCashDeposits();
+        break;
+      case "updateCashDeposit":
+        result = updateCashDeposit(data);
+        break;
+      case "deleteCashDeposit":
+        result = deleteCashDeposit(data);
         break;
 
       default:

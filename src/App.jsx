@@ -20,10 +20,9 @@ import authService from "./services/authService";
 function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [expenseData, setExpenseData] = useState([]);
-  const [fareData, setFareData] = useState([]);
-  const [totalExpenses, setTotalExpenses] = useState(0);
-  const [totalEarnings, setTotalEarnings] = useState(0);
+  const [allUsers, setAllUsers] = useState([]);
   const [cashBookEntries, setCashBookEntries] = useState([]);
+  const [cashDepositData, setCashDepositData] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -95,7 +94,7 @@ function App() {
         const errorMessage = response?.error || response?.message || 'Unknown error';
         console.error('❌ Failed to fetch users:', errorMessage);
         console.error('❌ Full response:', response);
-        
+
         // For debugging: Try to call the API with GET method as fallback
         console.log('🔄 Trying fallback GET method...');
         try {
@@ -104,11 +103,11 @@ function App() {
             mode: 'cors',
             redirect: 'follow'
           });
-          
+
           if (fallbackResponse.ok) {
             const fallbackResult = await fallbackResponse.json();
             console.log('🔄 Fallback GET response:', fallbackResult);
-            
+
             if (fallbackResult.success && fallbackResult.data) {
               setAllUsers(fallbackResult.data);
               return fallbackResult.data;
@@ -117,7 +116,7 @@ function App() {
         } catch (fallbackError) {
           console.log('❌ Fallback method also failed:', fallbackError.message);
         }
-        
+
         setAllUsers([]);
         return [];
       }
@@ -134,7 +133,7 @@ function App() {
   const handleLogin = (userData) => {
     setUser(userData);
     console.log('👤 User logged in via React state:', userData);
-    
+
     // Refresh users data after login
     console.log('🔄 Refreshing users data after login...');
     fetchAllUsersData();
@@ -444,107 +443,140 @@ function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Generate cash book entries whenever fareData or expenseData changes
-  useEffect(() => {
-    const generateCashBookEntries = () => {
-      let entries = [];
+  // Fetch cash deposits
+  const fetchCashDeposits = async () => {
+    try {
+      const result = await authService.getCashDeposits();
+      if (result.success) {
+        setCashDepositData(result.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching cash deposits:', error);
+    }
+  };
 
-      // Add fare receipt entries (Dr - income)
-      fareData.forEach(fareEntry => {
-        if (fareEntry.type !== 'off') { // Exclude off days
+  // Generate cash book entries from fare, expense, and cash deposit data
+  const generateCashBookEntries = () => {
+    let entries = [];
+
+    // Add fare receipts as Dr. entries (Income)
+    fareData.forEach(fare => {
+      if (fare.entryStatus === 'approved') {
+        if (fare.type === 'daily' && (fare.cashAmount > 0 || fare.bankAmount > 0)) {
           entries.push({
-            id: `fare-${fareEntry.entryId}`,
-            date: fareEntry.date || fareEntry.dateFrom,
-            description: fareEntry.type === 'daily' ? 
-              `Daily Collection - ${fareEntry.route}` : 
-              `Booking - ${fareEntry.bookingDetails || 'Booking Entry'}`,
-            cashAmount: fareEntry.cashAmount || 0,
-            bankAmount: fareEntry.bankAmount || 0,
-            type: 'dr', // Debit (income)
-            source: fareEntry.type === 'daily' ? 'fare-daily' : 'fare-booking',
-            particulars: fareEntry.type === 'daily' ? fareEntry.route : fareEntry.bookingDetails,
-            jfNo: `JF-${fareEntry.entryId}`,
-            submittedBy: fareEntry.submittedBy
+            id: `fare-${fare.entryId}`,
+            date: fare.date,
+            particulars: fare.route || 'Daily Fare',
+            description: `Daily fare collection - ${fare.route}`,
+            jfNo: `FARE-${fare.entryId}`,
+            cashAmount: fare.cashAmount || 0,
+            bankAmount: fare.bankAmount || 0,
+            type: 'dr',
+            timestamp: fare.timestamp,
+            source: 'fare-daily'
+          });
+        } else if (fare.type === 'booking' && (fare.cashAmount > 0 || fare.bankAmount > 0)) {
+          entries.push({
+            id: `booking-${fare.entryId}`,
+            date: fare.dateFrom,
+            particulars: fare.bookingDetails || 'Booking',
+            description: `Booking entry - ${fare.bookingDetails}`,
+            jfNo: `BOOK-${fare.entryId}`,
+            cashAmount: fare.cashAmount || 0,
+            bankAmount: fare.bankAmount || 0,
+            type: 'dr',
+            timestamp: fare.timestamp,
+            source: 'fare-booking'
           });
         }
-      });
+      }
+    });
 
-      // Add expense entries (Cr - payments)
-      expenseData.forEach(expenseEntry => {
-        // Handle different expense types properly
-        let description = '';
+    // Add expenses as Cr. entries (Payments)
+    expenseData.forEach(expense => {
+      if (expense.entryStatus === 'approved' && (expense.cashAmount > 0 || expense.bankAmount > 0)) {
         let particulars = '';
+        let description = '';
+        let source = '';
 
-        switch(expenseEntry.type) {
+        switch(expense.type) {
           case 'fuel':
-            description = `Fuel Payment - ${expenseEntry.pumpName || 'Fuel Station'}`;
-            particulars = expenseEntry.pumpName || 'Fuel Station';
+            particulars = 'Fuel Payment';
+            description = `Fuel expense - ${expense.pumpName}`;
+            source = 'fuel-payment';
             break;
-          case 'fees':
           case 'adda':
-            description = `Adda Payment - ${expenseEntry.description || 'Adda Fees'}`;
-            particulars = expenseEntry.description || 'Adda Fees';
-            break;
-          case 'service':
-            description = `Service Payment - ${expenseEntry.serviceType || expenseEntry.description || 'Service'}`;
-            particulars = expenseEntry.serviceType || expenseEntry.description || 'Service';
+            particulars = 'Adda Payment';
+            description = `Adda payment - ${expense.addaName}`;
+            source = 'adda-payment';
             break;
           case 'union':
-            description = `Union Payment - ${expenseEntry.description || 'Union Fees'}`;
-            particulars = expenseEntry.description || 'Union Fees';
+            particulars = 'Union Payment';
+            description = `Union payment - ${expense.unionName}`;
+            source = 'union-payment';
+            break;
+          case 'service':
+            particulars = 'Service Payment';
+            description = `Service payment - ${expense.serviceType || expense.serviceDetails}`;
+            source = 'service-payment';
             break;
           case 'other':
-            description = `Other Payment - ${expenseEntry.paymentDetails || expenseEntry.description || 'Other'}`;
-            particulars = expenseEntry.paymentDetails || expenseEntry.description || 'Other';
+            particulars = 'Other Payment';
+            description = `Other payment - ${expense.paymentType || expense.paymentDetails}`;
+            source = 'other-payment';
             break;
-          default:
-            description = `${expenseEntry.type} - ${expenseEntry.description || 'Payment'}`;
-            particulars = expenseEntry.description || 'Payment';
         }
 
         entries.push({
-          id: `expense-${expenseEntry.entryId}`,
-          date: expenseEntry.date,
-          description: description,
-          cashAmount: expenseEntry.cashAmount || 0,
-          bankAmount: expenseEntry.bankAmount || 0,
-          type: 'cr', // Credit (payment)
-          source: `${expenseEntry.type}-payment`,
+          id: `expense-${expense.entryId}`,
+          date: expense.date,
           particulars: particulars,
-          jfNo: `PV-${expenseEntry.entryId}`,
-          submittedBy: expenseEntry.submittedBy
-        });
-      });
-
-      // Add Fixed Cash entries for all users (Cr - payments)
-      if (allUsers && allUsers.length > 0) {
-        allUsers.forEach(user => {
-          if (user.fixedCash > 0) {
-            entries.push({
-              id: `fixed-cash-${user.username}`,
-              date: user.date,
-              description: `Fixed Cash - ${user.name}`,
-              cashAmount: user.fixedCash,
-              bankAmount: 0,
-              type: 'cr', // Credit (payment)
-              source: 'fixed-cash-payment',
-              particulars: user.name,
-              jfNo: `FC-${user.username}`,
-              submittedBy: user.name
-            });
-          }
+          description: description,
+          jfNo: `${expense.type.toUpperCase()}-${expense.entryId}`,
+          cashAmount: expense.cashAmount || 0,
+          bankAmount: expense.bankAmount || 0,
+          type: 'cr',
+          timestamp: expense.timestamp,
+          source: source
         });
       }
+    });
 
-      // Sort by date (newest first)
-      entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Add cash deposits as Cr. entries (Cash going to bank)
+    cashDepositData.forEach(deposit => {
+      entries.push({
+        id: `deposit-${deposit.entryId}`,
+        date: deposit.date,
+        particulars: 'Cash Deposit',
+        description: `Cash deposited by ${deposit.depositedBy}`,
+        jfNo: `CASH-${deposit.entryId}`,
+        cashAmount: 0, // No cash change (already moved to bank)
+        bankAmount: deposit.cashAmount || 0,
+        type: 'cr',
+        timestamp: deposit.timestamp,
+        source: 'cash-deposit'
+      });
+    });
 
-      console.log('📖 Generated cash book entries:', entries.length);
-      setCashBookEntries(entries);
-    };
+    // Sort by date (newest first)
+    entries.sort((a, b) => new Date(b.date) - new Date(a.date));
 
+    console.log('📖 Generated cash book entries:', entries.length);
+    setCashBookEntries(entries);
+  };
+
+  // Generate cash book when fare, expense, or cash deposit data changes
+  useEffect(() => {
     generateCashBookEntries();
-  }, [fareData, expenseData, allUsers, setCashBookEntries]);
+  }, [fareData, expenseData, cashDepositData]);
+
+  // Make setCashBookEntries available globally for cash deposits
+  useEffect(() => {
+    window.setCashBookEntries = setCashBookEntries;
+    return () => {
+      delete window.setCashBookEntries;
+    };
+  }, []);
 
   // If user is not logged in, show login component
   if (!user) {
