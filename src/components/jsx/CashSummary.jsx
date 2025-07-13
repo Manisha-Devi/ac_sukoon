@@ -158,11 +158,11 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
   const handleSelectEntry = (entryId) => {
     const entry = currentEntries.find(e => e.entryId === entryId);
     // Show checkbox only for:
-    // 1. status = 'approvedBank' (regardless of bankAmount)
-    // 2. status = 'pending' AND bankAmount = 0
+    // 1. status = 'approvedBank' (regardless of bankAmount)  
+    // 2. status = 'pending' AND entry doesn't have bankAmount or bankAmount = 0
     if (entry && (
       entry.entryStatus === 'approvedBank' || 
-      (entry.entryStatus === 'pending' && (entry.bankAmount || 0) === 0)
+      (entry.entryStatus === 'pending' && (!entry.bankAmount || entry.bankAmount === 0))
     )) {
       setSelectedEntries(prev => {
         if (prev.includes(entryId)) {
@@ -178,7 +178,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
   const handleSelectAll = () => {
     const selectableEntries = currentEntries.filter(entry => 
       entry.entryStatus === 'approvedBank' || 
-      (entry.entryStatus === 'pending' && (entry.bankAmount || 0) === 0)
+      (entry.entryStatus === 'pending' && (!entry.bankAmount || entry.bankAmount === 0))
     );
     const selectableEntryIds = selectableEntries.map(entry => entry.entryId);
 
@@ -192,7 +192,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
   // Check if all visible selectable entries are selected
   const selectableEntries = currentEntries.filter(entry => 
     entry.entryStatus === 'approvedBank' || 
-    (entry.entryStatus === 'pending' && (entry.bankAmount || 0) === 0)
+    (entry.entryStatus === 'pending' && (!entry.bankAmount || entry.bankAmount === 0))
   );
   const isAllSelected = selectableEntries.length > 0 && 
     selectableEntries.every(entry => selectedEntries.includes(entry.entryId));
@@ -568,7 +568,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
                       </td>
                       <td>
                         {(entry.entryStatus === 'approvedBank' || 
-                          (entry.entryStatus === 'pending' && (entry.bankAmount || 0) === 0)) ? (
+                          (entry.entryStatus === 'pending' && (!entry.bankAmount || entry.bankAmount === 0))) ? (
                           <input 
                             type="checkbox" 
                             className="form-check-input"
