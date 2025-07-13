@@ -7,13 +7,44 @@
 
 **Method**: `POST`
 
-**Content-Type**: `application/json`
+**Content-Type**: `text/plain;charset=utf-8`
+
+**API Key**: `adsfsyieryieradafas123ew45` (automatically added by APIKeyService)
 
 ---
 
 ## 🔐 **AUTHENTICATION ENDPOINTS**
 
-### **1. User Login**
+### **1. Test Connection**
+**Action**: `test`
+
+**Request Body**:
+```json
+{
+  "action": "test",
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "message": "Google Apps Script is working!",
+  "timestamp": "13-07-2025 23:17:09",
+  "version": "2.0.0"
+}
+```
+
+**Error Response**:
+```json
+{
+  "success": false,
+  "error": "Invalid API key"
+}
+```
+
+### **2. User Login**
 **Action**: `login`
 
 **Request Body**:
@@ -22,7 +53,7 @@
   "action": "login",
   "username": "testdriver",
   "password": "password123",
-  "userType": "driver"
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -37,9 +68,9 @@
     "fullName": "Test Driver",
     "status": "active",
     "fixedCash": 5000,
-    "lastLogin": "09/07/2025, 06:18:13 pm"
+    "lastLogin": "13-07-2025 23:17:09"
   },
-  "timestamp": "09/07/2025, 06:18:13 pm"
+  "timestamp": "13-07-2025 23:17:09"
 }
 ```
 
@@ -48,6 +79,46 @@
 {
   "success": false,
   "error": "Invalid username or password"
+}
+```
+
+### **3. Get All Users**
+**Action**: `getAllUsers`
+
+**Request Body**:
+```json
+{
+  "action": "getAllUsers",
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "username": "Admin",
+      "name": "Pankaj Singh",
+      "date": "01-01-2024",
+      "fixedCash": 100
+    },
+    {
+      "username": "manager",
+      "name": "Ashish Parihar",
+      "date": "01-01-2024",
+      "fixedCash": 100
+    },
+    {
+      "username": "conductor",
+      "name": "Akshay Kumar",
+      "date": "01-01-2024",
+      "fixedCash": 2000
+    }
+  ],
+  "count": 3,
+  "timestamp": "13-07-2025 21:48:35"
 }
 ```
 
@@ -69,7 +140,8 @@
   "cashAmount": 3000,
   "bankAmount": 2000,
   "totalAmount": 5000,
-  "submittedBy": "testdriver"
+  "submittedBy": "testdriver",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -89,7 +161,8 @@
 **Request Body**:
 ```json
 {
-  "action": "getFareReceipts"
+  "action": "getFareReceipts",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -129,7 +202,8 @@
     "cashAmount": 3500,
     "bankAmount": 2500,
     "totalAmount": 6000
-  }
+  },
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -150,7 +224,8 @@
 ```json
 {
   "action": "deleteFareReceipt",
-  "entryId": "1704726185847"
+  "entryId": "1704726185847",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -164,30 +239,7 @@
 }
 ```
 
-### **5. Update Fare Receipt Status**
-**Action**: `updateFareReceiptStatus`
-
-**Request Body**:
-```json
-{
-  "action": "updateFareReceiptStatus",
-  "entryId": "1704726185847",
-  "newStatus": "approved",
-  "approverName": "Manager Name"
-}
-```
-
-**Success Response**:
-```json
-{
-  "success": true,
-  "message": "Fare receipt status updated to approved",
-  "entryId": "1704726185847",
-  "newStatus": "approved"
-}
-```
-
-### **6. Approve Fare Receipt**
+### **5. Approve Fare Receipt**
 **Action**: `approveFareReceipt`
 
 **Request Body**:
@@ -195,7 +247,8 @@
 {
   "action": "approveFareReceipt",
   "entryId": "1704726185847",
-  "approverName": "Manager Name"
+  "approverName": "Manager Name",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -228,7 +281,8 @@
   "cashAmount": 5000,
   "bankAmount": 10000,
   "totalAmount": 15000,
-  "submittedBy": "testdriver"
+  "submittedBy": "testdriver",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -248,7 +302,8 @@
 **Request Body**:
 ```json
 {
-  "action": "getBookingEntries"
+  "action": "getBookingEntries",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -289,7 +344,8 @@
     "cashAmount": 6000,
     "bankAmount": 12000,
     "totalAmount": 18000
-  }
+  },
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -300,24 +356,12 @@
 ```json
 {
   "action": "deleteBookingEntry",
-  "entryId": "1704726185848"
-}
-```
-
-### **5. Update Booking Entry Status**
-**Action**: `updateBookingEntryStatus`
-
-**Request Body**:
-```json
-{
-  "action": "updateBookingEntryStatus",
   "entryId": "1704726185848",
-  "newStatus": "approved",
-  "approverName": "Manager Name"
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
-### **6. Approve Booking Entry**
+### **5. Approve Booking Entry**
 **Action**: `approveBookingEntry`
 
 **Request Body**:
@@ -325,7 +369,18 @@
 {
   "action": "approveBookingEntry",
   "entryId": "1704726185848",
-  "approverName": "Manager Name"
+  "approverName": "Manager Name",
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "message": "Booking entry status updated to approved",
+  "entryId": "1704726185848",
+  "newStatus": "approved"
 }
 ```
 
@@ -350,7 +405,8 @@
   "bankAmount": 2275,
   "totalAmount": 4275,
   "remarks": "Full tank for long route",
-  "submittedBy": "testdriver"
+  "submittedBy": "testdriver",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -370,7 +426,8 @@
 **Request Body**:
 ```json
 {
-  "action": "getFuelPayments"
+  "action": "getFuelPayments",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -414,7 +471,8 @@
     "liters": 55,
     "rate": 86.00,
     "totalAmount": 4730
-  }
+  },
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -425,24 +483,12 @@
 ```json
 {
   "action": "deleteFuelPayment",
-  "entryId": "1704726185849"
-}
-```
-
-### **5. Update Fuel Payment Status**
-**Action**: `updateFuelPaymentStatus`
-
-**Request Body**:
-```json
-{
-  "action": "updateFuelPaymentStatus",
   "entryId": "1704726185849",
-  "newStatus": "approved",
-  "approverName": "Manager Name"
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
-### **6. Approve Fuel Payment**
+### **5. Approve Fuel Payment**
 **Action**: `approveFuelPayment`
 
 **Request Body**:
@@ -450,7 +496,18 @@
 {
   "action": "approveFuelPayment",
   "entryId": "1704726185849",
-  "approverName": "Manager Name"
+  "approverName": "Manager Name",
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "message": "Fuel payment status updated to approved",
+  "entryId": "1704726185849",
+  "newStatus": "approved"
 }
 ```
 
@@ -473,7 +530,8 @@
   "bankAmount": 0,
   "totalAmount": 500,
   "remarks": "Daily adda charges",
-  "submittedBy": "testdriver"
+  "submittedBy": "testdriver",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -493,7 +551,8 @@
 **Request Body**:
 ```json
 {
-  "action": "getAddaPayments"
+  "action": "getAddaPayments",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -535,7 +594,8 @@
     "cashAmount": 600,
     "totalAmount": 600,
     "remarks": "Updated remarks"
-  }
+  },
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -546,24 +606,12 @@
 ```json
 {
   "action": "deleteAddaPayment",
-  "entryId": "1704726185850"
-}
-```
-
-### **5. Update Adda Payment Status**
-**Action**: `updateAddaPaymentStatus`
-
-**Request Body**:
-```json
-{
-  "action": "updateAddaPaymentStatus",
   "entryId": "1704726185850",
-  "newStatus": "approved",
-  "approverName": "Manager Name"
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
-### **6. Approve Adda Payment**
+### **5. Approve Adda Payment**
 **Action**: `approveAddaPayment`
 
 **Request Body**:
@@ -571,7 +619,8 @@
 {
   "action": "approveAddaPayment",
   "entryId": "1704726185850",
-  "approverName": "Manager Name"
+  "approverName": "Manager Name",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -594,7 +643,8 @@
   "bankAmount": 0,
   "totalAmount": 1000,
   "remarks": "Monthly union fees",
-  "submittedBy": "testdriver"
+  "submittedBy": "testdriver",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -614,7 +664,8 @@
 **Request Body**:
 ```json
 {
-  "action": "getUnionPayments"
+  "action": "getUnionPayments",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -646,14 +697,45 @@
 ### **3. Update Union Payment**
 **Action**: `updateUnionPayment`
 
+**Request Body**:
+```json
+{
+  "action": "updateUnionPayment",
+  "entryId": "1704726185851",
+  "updatedData": {
+    "unionName": "Updated Union Name",
+    "cashAmount": 1200,
+    "totalAmount": 1200,
+    "remarks": "Updated union fees"
+  },
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
+
 ### **4. Delete Union Payment**
 **Action**: `deleteUnionPayment`
 
-### **5. Update Union Payment Status**
-**Action**: `updateUnionPaymentStatus`
+**Request Body**:
+```json
+{
+  "action": "deleteUnionPayment",
+  "entryId": "1704726185851",
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
 
-### **6. Approve Union Payment**
+### **5. Approve Union Payment**
 **Action**: `approveUnionPayment`
+
+**Request Body**:
+```json
+{
+  "action": "approveUnionPayment",
+  "entryId": "1704726185851",
+  "approverName": "Manager Name",
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
 
 ---
 
@@ -674,7 +756,8 @@
   "bankAmount": 1500,
   "totalAmount": 4000,
   "serviceDetails": "Engine oil change and filter replacement",
-  "submittedBy": "testdriver"
+  "submittedBy": "testdriver",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -694,7 +777,8 @@
 **Request Body**:
 ```json
 {
-  "action": "getServicePayments"
+  "action": "getServicePayments",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -726,14 +810,46 @@
 ### **3. Update Service Payment**
 **Action**: `updateServicePayment`
 
+**Request Body**:
+```json
+{
+  "action": "updateServicePayment",
+  "entryId": "1704726185852",
+  "updatedData": {
+    "serviceType": "Updated Service Type",
+    "cashAmount": 3000,
+    "bankAmount": 2000,
+    "totalAmount": 5000,
+    "serviceDetails": "Updated service details"
+  },
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
+
 ### **4. Delete Service Payment**
 **Action**: `deleteServicePayment`
 
-### **5. Update Service Payment Status**
-**Action**: `updateServicePaymentStatus`
+**Request Body**:
+```json
+{
+  "action": "deleteServicePayment",
+  "entryId": "1704726185852",
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
 
-### **6. Approve Service Payment**
+### **5. Approve Service Payment**
 **Action**: `approveServicePayment`
+
+**Request Body**:
+```json
+{
+  "action": "approveServicePayment",
+  "entryId": "1704726185852",
+  "approverName": "Manager Name",
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
 
 ---
 
@@ -754,7 +870,8 @@
   "bankAmount": 200,
   "totalAmount": 1000,
   "paymentDetails": "Cleaning and maintenance supplies",
-  "submittedBy": "testdriver"
+  "submittedBy": "testdriver",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -774,7 +891,8 @@
 **Request Body**:
 ```json
 {
-  "action": "getOtherPayments"
+  "action": "getOtherPayments",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -806,14 +924,46 @@
 ### **3. Update Other Payment**
 **Action**: `updateOtherPayment`
 
+**Request Body**:
+```json
+{
+  "action": "updateOtherPayment",
+  "entryId": "1704726185853",
+  "updatedData": {
+    "paymentType": "Updated Payment Type",
+    "cashAmount": 1000,
+    "bankAmount": 500,
+    "totalAmount": 1500,
+    "paymentDetails": "Updated payment details"
+  },
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
+
 ### **4. Delete Other Payment**
 **Action**: `deleteOtherPayment`
 
-### **5. Update Other Payment Status**
-**Action**: `updateOtherPaymentStatus`
+**Request Body**:
+```json
+{
+  "action": "deleteOtherPayment",
+  "entryId": "1704726185853",
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
 
-### **6. Approve Other Payment**
+### **5. Approve Other Payment**
 **Action**: `approveOtherPayment`
+
+**Request Body**:
+```json
+{
+  "action": "approveOtherPayment",
+  "entryId": "1704726185853",
+  "approverName": "Manager Name",
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
 
 ---
 
@@ -832,7 +982,8 @@
   "offDate": "2024-01-10",
   "reason": "Personal emergency",
   "offType": "Emergency Leave",
-  "submittedBy": "testdriver"
+  "submittedBy": "testdriver",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -852,7 +1003,8 @@
 **Request Body**:
 ```json
 {
-  "action": "getOffDays"
+  "action": "getOffDays",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -881,26 +1033,63 @@
 ### **3. Update Off Day**
 **Action**: `updateOffDay`
 
+**Request Body**:
+```json
+{
+  "action": "updateOffDay",
+  "entryId": "1704726185854",
+  "updatedData": {
+    "offDate": "2024-01-11",
+    "reason": "Updated reason",
+    "offType": "Sick Leave"
+  },
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
+
 ### **4. Delete Off Day**
 **Action**: `deleteOffDay`
-
-### **5. Update Off Day Status**
-**Action**: `updateOffDayStatus`
-
-### **6. Approve Off Day**
-**Action**: `approveOffDay`
-
----
-
-## 🧪 **UTILITY ENDPOINTS**
-
-### **1. Test Connection**
-**Action**: `test`
 
 **Request Body**:
 ```json
 {
-  "action": "test"
+  "action": "deleteOffDay",
+  "entryId": "1704726185854",
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
+
+### **5. Approve Off Day**
+**Action**: `approveOffDay`
+
+**Request Body**:
+```json
+{
+  "action": "approveOffDay",
+  "entryId": "1704726185854",
+  "approverName": "Manager Name",
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
+
+---
+
+## 💰 **CASH DEPOSITS ENDPOINTS**
+
+### **1. Add Cash Deposit**
+**Action**: `addCashDeposit`
+
+**Request Body**:
+```json
+{
+  "action": "addCashDeposit",
+  "entryId": "1704726185855",
+  "timestamp": "22:30:10 PM",
+  "date": "2024-01-08",
+  "cashAmount": 15000,
+  "description": "Daily cash deposit",
+  "depositedBy": "testdriver",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -908,9 +1097,83 @@
 ```json
 {
   "success": true,
-  "message": "Google Apps Script is working!",
-  "timestamp": "09/07/2025, 06:20:18 pm",
-  "version": "2.0.0"
+  "message": "Cash deposit added successfully",
+  "entryId": "1704726185855",
+  "timestamp": "22:30:10 PM"
+}
+```
+
+### **2. Get All Cash Deposits**
+**Action**: `getCashDeposits`
+
+**Request Body**:
+```json
+{
+  "action": "getCashDeposits",
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "entryId": "1704726185855",
+      "timestamp": "22:30:10 PM",
+      "date": "2024-01-08",
+      "cashAmount": 15000,
+      "description": "Daily cash deposit",
+      "depositedBy": "testdriver",
+      "entryType": "cash_deposit",
+      "entryStatus": "pending",
+      "approvedBy": "",
+      "rowIndex": 2
+    }
+  ],
+  "count": 1
+}
+```
+
+### **3. Update Cash Deposit**
+**Action**: `updateCashDeposit`
+
+**Request Body**:
+```json
+{
+  "action": "updateCashDeposit",
+  "entryId": "1704726185855",
+  "updatedData": {
+    "cashAmount": 18000,
+    "description": "Updated daily cash deposit"
+  },
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
+
+### **4. Delete Cash Deposit**
+**Action**: `deleteCashDeposit`
+
+**Request Body**:
+```json
+{
+  "action": "deleteCashDeposit",
+  "entryId": "1704726185855",
+  "apiKey": "adsfsyieryieradafas123ew45"
+}
+```
+
+### **5. Approve Cash Deposit**
+**Action**: `approveCashDeposit`
+
+**Request Body**:
+```json
+{
+  "action": "approveCashDeposit",
+  "entryId": "1704726185855",
+  "approverName": "Manager Name",
+  "apiKey": "adsfsyieryieradafas123ew45"
 }
 ```
 
@@ -942,6 +1205,8 @@
 ## ⚠️ **ERROR CODES & MESSAGES**
 
 ### **Authentication Errors**:
+- `"Invalid API key"`
+- `"API key is required"`
 - `"Invalid username or password"`
 - `"Users sheet not found. Please check sheet configuration."`
 - `"No users configured in the system"`
@@ -955,6 +1220,7 @@
 - `"Service payment not found with ID: {entryId}"`
 - `"Other payment not found with ID: {entryId}"`
 - `"Off day not found with ID: {entryId}"`
+- `"Cash deposit not found with ID: {entryId}"`
 
 ### **Sheet Errors**:
 - `"FareReceipts sheet not found"`
@@ -965,6 +1231,7 @@
 - `"ServicePayments sheet not found"`
 - `"OtherPayments sheet not found"`
 - `"OffDays sheet not found"`
+- `"CashDeposits sheet not found"`
 
 ---
 
@@ -977,8 +1244,10 @@
 const response = await fetch(API_URL, {
   method: 'POST',
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': 'text/plain;charset=utf-8',
   },
+  mode: 'cors',
+  redirect: 'follow',
   body: JSON.stringify({
     action: 'addFareReceipt',
     entryId: '1704726185847',
@@ -988,13 +1257,15 @@ const response = await fetch(API_URL, {
     cashAmount: 3000,
     bankAmount: 2000,
     totalAmount: 5000,
-    submittedBy: 'testdriver'
+    submittedBy: 'testdriver',
+    apiKey: 'adsfsyieryieradafas123ew45'
   })
 });
 ```
 
 **2. Backend Processing**:
 - Code.gs routes to FareReceipts.addFareReceipt()
+- Function validates API key using Key.gs
 - Function validates data
 - Creates/gets FareReceipts sheet
 - Inserts new row with data
@@ -1014,19 +1285,79 @@ if (result.success) {
 
 ---
 
-## 📝 **NOTES**
+## 🔐 **API KEY AUTHENTICATION**
 
-1. **EntryId**: Always generated by frontend using `Date.now()` for uniqueness
-2. **Timestamps**: Stored in IST format as time-only strings
-3. **Status Values**: `"pending"`, `"approved"`, `"waiting"`, `"cash"`, `"bank"`
-4. **Sheet Auto-Creation**: All sheets are created automatically if they don't exist
-5. **Error Handling**: All functions include comprehensive try-catch blocks
-6. **Legacy Support**: Old function names are supported through LegacyFunctions.gs
-7. **Data Consistency**: All modules follow the same 6-function pattern
-8. **Row Indexing**: Sheet rows are 1-indexed, data rows start from row 2
+All API requests must include the API key for authentication:
+
+**API Key**: `adsfsyieryieradafas123ew45`
+
+The API key is automatically added by the `APIKeyService` class in the frontend:
+
+```javascript
+// Example usage in frontend
+import APIKeyService from './services/key.js';
+
+const requestData = APIKeyService.addAPIKey({
+  action: 'getFareReceipts'
+});
+
+// requestData will now contain:
+// {
+//   "action": "getFareReceipts",
+//   "apiKey": "adsfsyieryieradafas123ew45"
+// }
+```
+
+### **API Key Validation**:
+- All endpoints validate the API key before processing
+- Invalid or missing API key returns: `{"success": false, "error": "Invalid API key"}`
+- API key validation is handled by `validateAPIKey()` function in Key.gs
 
 ---
 
-**Last Updated**: January 9, 2025  
-**Version**: 2.0.0  
-**Status**: Production Ready 🚀
+## 📝 **NOTES**
+
+1. **EntryId**: Always generated by frontend using `Date.now()` for uniqueness
+2. **Timestamps**: Stored in IST format as time-only strings (e.g., "14:30:15 PM")
+3. **Dates**: Stored in format "2024-01-08" or "01-01-2024" depending on context
+4. **Status Values**: `"pending"`, `"approved"`, `"waiting"`, `"cash"`, `"bank"`
+5. **Sheet Auto-Creation**: All sheets are created automatically if they don't exist
+6. **Error Handling**: All functions include comprehensive try-catch blocks
+7. **Legacy Support**: Old function names are supported through LegacyFunctions.gs
+8. **Data Consistency**: All modules follow the same 6-function pattern (add, get, update, delete, approve, status)
+9. **Row Indexing**: Sheet rows are 1-indexed, data rows start from row 2
+10. **Content-Type**: Always use `text/plain;charset=utf-8` for POST requests
+11. **CORS**: All endpoints support CORS for cross-origin requests
+12. **Authentication**: API key validation is mandatory for all operations
+
+---
+
+## 🚀 **QUICK START GUIDE**
+
+### **Test API Connection**:
+```bash
+curl -X POST "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec" \
+  -H "Content-Type: text/plain;charset=utf-8" \
+  -d '{"action":"test","apiKey":"adsfsyieryieradafas123ew45"}'
+```
+
+### **Login User**:
+```bash
+curl -X POST "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec" \
+  -H "Content-Type: text/plain;charset=utf-8" \
+  -d '{"action":"login","username":"Admin","password":"password123","apiKey":"adsfsyieryieradafas123ew45"}'
+```
+
+### **Get All Users**:
+```bash
+curl -X POST "https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec" \
+  -H "Content-Type: text/plain;charset=utf-8" \
+  -d '{"action":"getAllUsers","apiKey":"adsfsyieryieradafas123ew45"}'
+```
+
+---
+
+**Last Updated**: January 13, 2025  
+**Version**: 2.1.0  
+**Status**: Production Ready 🚀  
+**API Key**: `adsfsyieryieradafas123ew45`
