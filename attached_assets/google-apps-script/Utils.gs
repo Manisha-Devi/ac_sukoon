@@ -176,3 +176,81 @@ const SHEET_NAMES = {
   OTHER_PAYMENTS: "OtherPayments",
   CASH_DEPOSITS: "CashDeposits"
 };
+
+/**
+ * Validate API key for authentication
+ * This should match the key configured in the frontend
+ */
+function validateAPIKey(providedKey) {
+  try {
+    // Get the expected API key from script properties or hardcode it
+    const expectedKey = EXPECTED_API_KEY; // This should match the frontend key
+
+    console.log('🔐 Validating API key...');
+    console.log('📝 Provided key preview:', providedKey ? providedKey.substring(0, 10) + '...' : 'null');
+    console.log('📝 Expected key preview:', expectedKey ? expectedKey.substring(0, 10) + '...' : 'null');
+
+    if (!providedKey || typeof providedKey !== 'string') {
+      console.log('❌ Invalid API key format');
+      return {
+        valid: false,
+        error: 'API key is required and must be a string'
+      };
+    }
+
+    if (providedKey !== expectedKey) {
+      console.log('❌ API key mismatch');
+      return {
+        valid: false,
+        error: 'Invalid API key'
+      };
+    }
+
+    console.log('✅ API key validation successful');
+    return {
+      valid: true,
+      message: 'API key is valid'
+    };
+
+  } catch (error) {
+    console.error('❌ API key validation error:', error);
+    return {
+      valid: false,
+      error: 'API key validation failed: ' + error.toString()
+    };
+  }
+}
+
+/**
+ * Test function for API key validation - handles both test and regular actions
+ */
+function testAPIKeyConnection(data) {
+  try {
+    console.log('🔍 Testing API key connection...');
+
+    // Validate API key first
+    const keyValidation = validateAPIKey(data.apiKey);
+    if (!keyValidation.valid) {
+      console.log("❌ Invalid API key for test connection");
+      return {
+        success: false,
+        error: "Authentication failed: " + keyValidation.error
+      };
+    }
+
+    return {
+      success: true,
+      message: "API key authentication successful",
+      timestamp: formatISTTimestamp(),
+      version: "2.0.0"
+    };
+  } catch (error) {
+    console.error('❌ Test API key connection error:', error);
+
+    return {
+      success: false,
+      error: "API key test failed: " + error.toString(),
+      timestamp: formatISTTimestamp()
+    };
+  }
+}

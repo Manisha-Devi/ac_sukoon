@@ -2107,6 +2107,11 @@ class AuthService {
       return false;
     }
   }
+
+  // Delegate API key testing to the API key service
+  async testAPIKeyValidity() {
+    return await this.apiKeyService.testAPIKey();
+  }
 }
 
 export default new AuthService();

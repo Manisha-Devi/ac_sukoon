@@ -56,8 +56,9 @@ function doPost(e) {
       case "getAllUsers":
         result = getAllUsers();
         break;
+      // Handle test connection with API key validation
       case "test":
-        result = testConnection({});
+        result = testAPIKeyConnection(data);
         break;
 
       // ==================== FARE RECEIPTS ====================
