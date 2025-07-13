@@ -344,9 +344,6 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
   // Cash balance = Non-Approved Income - Non-Approved Expenses (Fixed Cash excluded)
   const cashBalance = nonApprovedCashIncome - nonApprovedCashExpense;
 
-  useEffect(() => {
-  }, []);
-
   // Listen for centralized refresh events
   useEffect(() => {
     const handleDataRefresh = () => {
