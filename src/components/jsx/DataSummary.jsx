@@ -755,22 +755,18 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                       <thead>
                         <tr>
                           <th>Date</th>
-                          <th>Type</th>
                           <th>I/E</th>
                           <th>Description</th>
                           <th>Cash</th>
                           <th>Bank</th>
                           <th>Total</th>
-                          <th>Status</th>
+                          <th>SubmittedBy</th>
                         </tr>
                       </thead>
                       <tbody>
                         {getFinalApprovedEntriesForTable().map((entry) => (
                           <tr key={entry.entryId}>
                             <td>{formatDisplayDate(entry.date)}</td>
-                            <td>
-                              <span className="badge bg-info">{entry.dataType}</span>
-                            </td>
                             <td>
                               <span className={`badge ${entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'bg-success' : 'bg-danger'}`}>
                                 {entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'I' : 'E'}
