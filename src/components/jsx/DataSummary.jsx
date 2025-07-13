@@ -912,17 +912,6 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                       {getFinalApprovedEntriesForTable().length > 0 ? (
                         <div className="table-responsive">
                           <table className="table table-striped table-sm approved-entries-table">
-                            <thead>
-                              <tr>
-                                <th>Date</th>
-                                <th>I/E</th>
-                                <th>Description</th>
-                                <th>Cash</th>
-                                <th>Bank</th>
-                                <th>Total</th>
-                                <th>SubmittedBy</th>
-                              </tr>
-                            </thead>
 ```text
                               <tbody>
                                 {getFinalApprovedEntriesForTable().map((entry) => (
