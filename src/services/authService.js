@@ -151,7 +151,7 @@ class AuthService {
       }
     } catch (error) {
       console.error('❌ Error fetching users:', error);
-
+      
       if (error.name === 'AbortError') {
         return { 
           success: false, 
@@ -160,7 +160,7 @@ class AuthService {
           count: 0
         };
       }
-
+      
       return { 
         success: false, 
         error: error.message || 'Failed to fetch users',
@@ -1943,7 +1943,7 @@ class AuthService {
 
       const result = await response.json();
       console.log('✅ Cash deposits API response:', result);
-
+      
       if (result.success && result.data) {
         console.log(`💰 Successfully fetched ${result.data.length} cash deposits from Google Sheets`);
         result.data.forEach((deposit, index) => {
@@ -1957,7 +1957,7 @@ class AuthService {
       } else {
         console.warn('⚠️ Cash deposits API returned error:', result.error || 'Unknown error');
       }
-
+      
       return result;
     } catch (error) {
       console.error('❌ Error fetching cash deposits:', error);
@@ -2052,6 +2052,9 @@ class AuthService {
     }
   }
 
+  // ============================================================================
+  // ANALYTICS FUNCTIONS
+  // ============================================================================
 }
 
 export default new AuthService();

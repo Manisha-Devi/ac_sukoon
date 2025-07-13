@@ -118,7 +118,6 @@ function getCashDeposits() {
         const deposit = {
           id: row[entryIdIndex],
           timestamp: row[timestampIndex] ? formatTimestampForDisplay(row[timestampIndex]) : '',
-          timeOnly: row[timestampIndex] ? formatTimeForDisplay(row[timestampIndex]) : '',
           entryType: row[entryTypeIndex] || 'Cash Deposit',
           entryId: row[entryIdIndex].toString().trim(),
           date: row[dateIndex] ? formatDateForDisplay(row[dateIndex]) : '',
