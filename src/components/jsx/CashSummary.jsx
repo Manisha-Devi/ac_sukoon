@@ -111,25 +111,9 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
       }))];
     }
 
-    // 💰 Add Fixed Cash entries for all users (as expense)
-    if (allUsers && allUsers.length > 0) {
-      const fixedCashEntries = allUsers
-        .filter(user => user.fixedCash > 0)
-        .map(user => ({
-          entryId: `fixed-cash-${user.username}`,
-          date: user.date,
-          cashAmount: user.fixedCash,
-          type: 'expense',
-          entryType: 'fixed-cash',
-          submittedBy: user.name,
-          entryStatus: 'approved',
-          approvedBy: 'System',
-          description: `Fixed Cash - ${user.name}`
-        }));
-
-      console.log('💰 Fixed Cash entries added:', fixedCashEntries.length);
-      allData = [...allData, ...fixedCashEntries];
-    }
+    // 💰 Fixed Cash entries are now excluded from Cash Summary
+    // They will only appear in Cash Book for proper accounting
+    console.log('💰 Fixed Cash entries excluded from Cash Summary display');
 
     // Apply date filter if dates are selected
     if (dateFrom && dateTo) {
