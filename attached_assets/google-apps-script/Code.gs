@@ -1,3 +1,4 @@
+
 // ============================================================================
 // AC SUKOON TRANSPORT MANAGEMENT - MAIN FILE (Code.gs)
 // ============================================================================
@@ -14,14 +15,6 @@ const SPREADSHEET_ID = spreadsheetId || "1bM61ei_kP2QdBQQyRN_d00aOAu0qcWACleOidE
 // ============================================================================
 // MAIN REQUEST HANDLERS
 // ============================================================================
-
-/**
- * Handle OPTIONS requests for CORS (Cross-Origin Resource Sharing)
- */
-function doOptions() {
-  return ContentService.createTextOutput("")
-    .setMimeType(ContentService.MimeType.TEXT);
-}
 
 /**
  * Main POST request handler - Routes to appropriate functions
@@ -199,7 +192,6 @@ function doPost(e) {
         result = resendFareReceipt(data);
         break;
 
-
       // Fuel Payments Approval
       case 'approveFuelPayment':
         result = approveFuelPayment(data);
@@ -207,7 +199,6 @@ function doPost(e) {
       case 'resendFuelPayment':
         result = resendFuelPayment(data);
         break;
-
 
       // Other Payments Approval
       case 'approveOtherPayment':
@@ -217,7 +208,6 @@ function doPost(e) {
         result = resendOtherPayment(data);
         break;
 
-
       // Adda Payments Approval
       case 'approveAddaPayment':
         result = approveAddaPayment(data);
@@ -225,7 +215,6 @@ function doPost(e) {
       case 'resendAddaPayment':
         result = resendAddaPayment(data);
         break;
-
 
       // Service Payments Approval
       case 'approveServicePayment':
@@ -235,7 +224,6 @@ function doPost(e) {
         result = resendServicePayment(data);
         break;
 
-
       // Union Payments Approval
       case 'approveUnionPayment':
         result = approveUnionPayment(data);
@@ -243,7 +231,6 @@ function doPost(e) {
       case 'resendUnionPayment':
         result = resendUnionPayment(data);
         break;
-
 
       // Booking Entries Approval
       case 'approveBookingEntry':
@@ -253,18 +240,12 @@ function doPost(e) {
         result = resendBookingEntry(data);
         break;
 
-
       // ==================== LEGACY SUPPORT ====================
       case "updateFareEntry":
         result = updateFareEntryLegacy(data);
         break;
       case "deleteFareEntry":
         result = deleteFareEntryLegacy(data);
-        break;
-
-      // ==================== TESTING OPERATIONS ====================
-      case "test":
-        result = testConnection();
         break;
 
       default:
@@ -310,6 +291,9 @@ function doGet(e) {
     switch (action) {
       case "test":
         result = testConnection();
+        break;
+      case "getAllUsers":
+        result = getAllUsers();
         break;
       case "getFareReceipts":
         result = getFareReceipts();
