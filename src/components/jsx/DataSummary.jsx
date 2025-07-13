@@ -529,74 +529,76 @@ function DataSummary({ fareData, expenseData, currentUser }) {
           </div>
         </div>
 
-        {/* Approval Tabs - Correct Order */}
-        {showFilter && (
-        <div className="approval-tabs">
-          <button 
-            className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('pending');
-              setSelectedEntries([]);
-            }}
-          >
-            <i className="bi bi-clock"></i> Pending ({pendingData.length})
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'bankApproval' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('bankApproval');
-              setSelectedEntries([]);
-            }}
-          >
-            <i className="bi bi-bank"></i> Bank Approval ({bankApprovalData.length})
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'cashApproval' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('cashApproval');
-              setSelectedEntries([]);
-            }}
-          >
-            <i className="bi bi-cash-stack"></i> Cash Approval ({cashApprovalData.length})
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'approved' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('approved');
-              setSelectedEntries([]);
-            }}
-          >
-            <i className="bi bi-check-circle"></i> Approved ({approvedData.length})
-          </button>
-        </div>
-        )}
-
-        {/* Selection Controls */}
-        {showSummary && currentData.length > 0 && (
-          <div className="selection-controls">
-            <div className="select-all-container">
-              <input
-                type="checkbox"
-                id="selectAll"
-                checked={isAllSelected()}
-                onChange={handleSelectAll}
-              />
-              <label htmlFor="selectAll">
-                Select All ({selectedEntries.length}/{currentData.length})
-              </label>
-            </div>
-
-            {selectedEntries.length > 0 && (
-              <button 
-                className="btn btn-success approve-btn"
-                onClick={handleApproval}
-              >
-                <i className="bi bi-check-circle"></i> 
-                Approve Selected ({selectedEntries.length})
-              </button>
-            )}
+        {/* Filter Section */}
+        <div className="filter-section" style={{ display: showFilter ? 'block' : 'none' }}>
+          <div className="approval-tabs">
+            <button 
+              className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('pending');
+                setSelectedEntries([]);
+              }}
+            >
+              <i className="bi bi-clock"></i> Pending ({pendingData.length})
+            </button>
+            <button 
+              className={`tab-btn ${activeTab === 'bankApproval' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('bankApproval');
+                setSelectedEntries([]);
+              }}
+            >
+              <i className="bi bi-bank"></i> Bank Approval ({bankApprovalData.length})
+            </button>
+            <button 
+              className={`tab-btn ${activeTab === 'cashApproval' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('cashApproval');
+                setSelectedEntries([]);
+              }}
+            >
+              <i className="bi bi-cash-stack"></i> Cash Approval ({cashApprovalData.length})
+            </button>
+            <button 
+              className={`tab-btn ${activeTab === 'approved' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('approved');
+                setSelectedEntries([]);
+              }}
+            >
+              <i className="bi bi-check-circle"></i> Approved ({approvedData.length})
+            </button>
           </div>
-        )}
+        </div>
+
+        {/* Summary Section */}
+        <div className="summary-section" style={{ display: showSummary ? 'block' : 'none' }}>
+          {currentData.length > 0 && (
+            <div className="selection-controls">
+              <div className="select-all-container">
+                <input
+                  type="checkbox"
+                  id="selectAll"
+                  checked={isAllSelected()}
+                  onChange={handleSelectAll}
+                />
+                <label htmlFor="selectAll">
+                  Select All ({selectedEntries.length}/{currentData.length})
+                </label>
+              </div>
+
+              {selectedEntries.length > 0 && (
+                <button 
+                  className="btn btn-success approve-btn"
+                  onClick={handleApproval}
+                >
+                  <i className="bi bi-check-circle"></i> 
+                  Approve Selected ({selectedEntries.length})
+                </button>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Tab Content */}
         <div className="tab-content">
