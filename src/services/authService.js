@@ -1,14 +1,11 @@
-import { API_KEY, API_URL, DEBUG_MODE } from './key.js';
+import APIKeyService from './key.js';
 
 // Authentication service for Google Sheets database
 class AuthService {
   constructor() {
     // Google Apps Script Web App URL - Updated to use the correct deployment URL
-    // API_URL is now imported from environment configuration
-    this.API_URL = API_URL;
-    this.apiKeyService = {addAPIKey: (obj) => {
-      return {...obj, apiKey: API_KEY}
-    }};
+    this.API_URL = 'https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec';
+    this.apiKeyService = APIKeyService;
   }
 
   // Authenticate user against Google Sheets database
@@ -2085,7 +2082,7 @@ class AuthService {
   async testAPIKey() {
     try {
       console.log('🔍 Testing API key validity...');
-
+      
       const testData = this.apiKeyService.addAPIKey({
         action: 'test'
       });
@@ -2105,7 +2102,7 @@ class AuthService {
       }
 
       const result = await response.json();
-
+      
       if (result.success) {
         console.log('✅ API key is valid and working');
         return true;
@@ -2113,7 +2110,7 @@ class AuthService {
         console.error('❌ API key test failed:', result.error);
         return false;
       }
-
+      
     } catch (error) {
       console.error('❌ Error testing API key:', error);
       return false;
