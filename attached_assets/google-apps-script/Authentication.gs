@@ -93,34 +93,59 @@ function getAllUsers() {
     }
 
     const data = sheet.getDataRange().getValues();
+    
+    if (!data || data.length <= 1) {
+      console.log('⚠️ No users found in Users sheet');
+      return {
+        success: true,
+        data: [],
+        count: 0,
+        timestamp: formatISTTimestamp()
+      };
+    }
+
     const headers = data[0];
     const users = [];
 
-    // Find column indices
-    const usernameIndex = headers.indexOf('Username');
-    const fullNameIndex = headers.indexOf('FullName');
-    const createdDateIndex = headers.indexOf('CreatedDate');
-    const fixedCashIndex = headers.indexOf('FixedCash');
+    // Find column indices - more flexible approach
+    const usernameIndex = headers.findIndex(header => 
+      header && header.toString().toLowerCase().includes('username')
+    );
+    const fullNameIndex = headers.findIndex(header => 
+      header && (header.toString().toLowerCase().includes('fullname') || 
+                 header.toString().toLowerCase().includes('name'))
+    );
+    const createdDateIndex = headers.findIndex(header => 
+      header && (header.toString().toLowerCase().includes('created') || 
+                 header.toString().toLowerCase().includes('date'))
+    );
+    const fixedCashIndex = headers.findIndex(header => 
+      header && (header.toString().toLowerCase().includes('fixed') || 
+                 header.toString().toLowerCase().includes('cash'))
+    );
 
-    if (usernameIndex === -1 || fullNameIndex === -1 || createdDateIndex === -1 || fixedCashIndex === -1) {
-      throw new Error('Required columns not found in Users sheet');
-    }
+    console.log('📋 Column indices found:', { usernameIndex, fullNameIndex, createdDateIndex, fixedCashIndex });
 
     // Process each user row (skip header)
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
 
-      if (row[usernameIndex]) { // Only include rows with username
-        users.push({
-          username: row[usernameIndex],
-          name: row[fullNameIndex] || '',
-          date: row[createdDateIndex] ? formatDateForDisplay(row[createdDateIndex]) : '',
-          fixedCash: parseFloat(row[fixedCashIndex]) || 0
-        });
+      if (row[usernameIndex] && row[usernameIndex].toString().trim()) { // Only include rows with username
+        const user = {
+          username: row[usernameIndex].toString().trim(),
+          name: fullNameIndex >= 0 ? (row[fullNameIndex] || '').toString().trim() : '',
+          date: createdDateIndex >= 0 && row[createdDateIndex] ? 
+                formatDateForDisplay(row[createdDateIndex]) : 
+                new Date().toLocaleDateString('en-IN'),
+          fixedCash: fixedCashIndex >= 0 ? (parseFloat(row[fixedCashIndex]) || 0) : 0
+        };
+        
+        users.push(user);
+        console.log('👤 User processed:', user);
       }
     }
 
-    console.log(`✅ Retrieved ${users.length} users`);
+    console.log(`✅ Retrieved ${users.length} users successfully`);
 
     return {
       success: true,
@@ -135,7 +160,9 @@ function getAllUsers() {
     return {
       success: false,
       error: "Failed to fetch users: " + error.toString(),
-      timestamp: formatISTTimestamp()
+      timestamp: formatISTTimestamp(),
+      data: [],
+      count: 0
     };
   }
 }

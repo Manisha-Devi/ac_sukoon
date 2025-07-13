@@ -64,31 +64,43 @@ function App() {
 
       const response = await authService.getAllUsers();
 
-      if (response.success) {
+      console.log('🔍 getAllUsers response:', response);
+
+      if (response && response.success) {
         console.log('✅ All Users Data Retrieved Successfully:');
-        console.log('📊 Total Users Count:', response.count);
-        console.log('👥 Complete Users List:', response.data);
+        console.log('📊 Total Users Count:', response.count || 0);
+        console.log('👥 Complete Users List:', response.data || []);
         console.log('⏰ Data Timestamp:', response.timestamp);
 
         // Log each user individually for better readability
-        console.log('📝 Individual User Details:');
-        response.data.forEach((user, index) => {
-          console.log(`${index + 1}. User:`, {
-            username: user.username,
-            name: user.name,
-            date: user.date,
-            fixedCash: user.fixedCash
+        if (response.data && Array.isArray(response.data)) {
+          console.log('📝 Individual User Details:');
+          response.data.forEach((user, index) => {
+            console.log(`${index + 1}. User:`, {
+              username: user.username,
+              name: user.name,
+              date: user.date,
+              fixedCash: user.fixedCash
+            });
           });
-        });
 
-        setAllUsers(response.data);
-        return response.data;
+          setAllUsers(response.data);
+          return response.data;
+        } else {
+          console.warn('⚠️ No users data found in response');
+          setAllUsers([]);
+          return [];
+        }
       } else {
-        console.error('❌ Failed to fetch users:', response.error);
+        console.error('❌ Failed to fetch users:', response?.error || 'Unknown error');
+        console.error('❌ Full response:', response);
+        setAllUsers([]);
         return [];
       }
     } catch (error) {
       console.error('❌ Error fetching all users:', error);
+      console.error('❌ Error details:', error.message, error.stack);
+      setAllUsers([]);
       return [];
     }
   };
