@@ -15,6 +15,8 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
   const [entriesPerPage] = useState(10);
   const [showDialog, setShowDialog] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
+  const [showFilter, setShowFilter] = useState(false);
+  const [showSummary, setShowSummary] = useState(true);
 
 
   useEffect(() => {
@@ -361,77 +363,103 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
     <div className="cash-summary-container">
       <div className="summary-header">
         <h3><i className="bi bi-cash-stack"></i> Cash Summary</h3>
-        <small className="text-muted">Use navbar refresh icon to update data</small>
+        <p className="text-muted">Personal cash transactions and balance overview</p>
+        
+        {/* Toggle Buttons */}
+        <div className="filter-toggle-section">
+          <button 
+            className="btn btn-outline-primary btn-sm filter-toggle-btn me-2"
+            onClick={() => setShowFilter(!showFilter)}
+          >
+            <i className={`bi ${showFilter ? 'bi-eye-slash' : 'bi-funnel'}`}></i>
+            {showFilter ? 'Hide Filter' : 'Show Filter'}
+          </button>
+          <button 
+            className="btn btn-outline-info btn-sm filter-toggle-btn"
+            onClick={() => setShowSummary(!showSummary)}
+          >
+            <i className={`bi ${showSummary ? 'bi-eye-slash' : 'bi-bar-chart'}`}></i>
+            {showSummary ? 'Hide Summary' : 'Show Summary'}
+          </button>
+        </div>
+        <small className="text-muted mt-2 d-block">Use navbar refresh icon to update data</small>
       </div>
 
       {/* Date Filter */}
-      <div className="date-filter mb-3">
-        <div className="row align-items-end">
-          <div className="col-md-3">
-            <label className="form-label">From Date</label>
-            <input
-              type="date"
-              className="form-control"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-            />
-          </div>
-          <div className="col-md-3">
-            <label className="form-label">To Date</label>
-            <input
-              type="date"
-              className="form-control"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-            />
-          </div>
-          <div className="col-md-3">
-            <button 
-              className="btn btn-outline-secondary btn-sm"
-              onClick={clearFilter}
-              disabled={!dateFrom && !dateTo}
-            >
-              <i className="bi bi-x-circle"></i> Clear
-            </button>
-          </div>
-          <div className="col-md-3">
-            <small className="text-muted">
-              {filteredData.length} entries
-            </small>
+      {showFilter && (
+        <div className="simple-date-filter">
+          <div className="row align-items-end">
+            <div className="col-md-3">
+              <label className="form-label">From Date</label>
+              <input
+                type="date"
+                className="form-control"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+              />
+            </div>
+            <div className="col-md-3">
+              <label className="form-label">To Date</label>
+              <input
+                type="date"
+                className="form-control"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+              />
+            </div>
+            <div className="col-md-3">
+              <button 
+                className="btn btn-outline-secondary btn-sm clear-filter-btn"
+                onClick={clearFilter}
+                disabled={!dateFrom && !dateTo}
+              >
+                <i className="bi bi-x-circle"></i> Clear
+              </button>
+            </div>
+            <div className="col-md-3">
+              <small className="text-muted filter-info">
+                {dateFrom || dateTo ? 
+                  `${filteredData.length} of ${filteredData.length} entries` :
+                  `${filteredData.length} total entries`
+                }
+              </small>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Summary Cards */}
-      <div className="row mb-4">
-        <div className="col-md-4">
-          <div className="summary-card income-card">
-            <div className="card-body">
-              <h6><i className="bi bi-arrow-up-circle"></i> Cash Income</h6>
-              <h4 className="text-success">₹{totalCashIncome.toLocaleString()}</h4>
+      {filteredData.length > 0 && showSummary && (
+        <div className="row mb-4">
+          <div className="col-md-4">
+            <div className="summary-card income-card">
+              <div className="card-body">
+                <h6><i className="bi bi-arrow-up-circle"></i> Cash Income</h6>
+                <h4 className="text-success">₹{totalCashIncome.toLocaleString()}</h4>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-4">
+            <div className="summary-card expense-card">
+              <div className="card-body">
+                <h6><i className="bi bi-arrow-down-circle"></i> Cash Expense</h6>
+                <h4 className="text-danger">₹{totalCashExpense.toLocaleString()}</h4>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-4">
+            <div className="summary-card balance-card">
+              <div className="card-body">
+                <h6><i className="bi bi-calculator"></i> Cash Balance</h6>
+                <h4 className={cashBalance >= 0 ? 'text-success' : 'text-danger'}>
+                  ₹{Math.abs(cashBalance).toLocaleString()}
+                  {cashBalance < 0 && ' (Deficit)'}
+                </h4>
+              </div>
             </div>
           </div>
         </div>
-        <div className="col-md-4">
-          <div className="summary-card expense-card">
-            <div className="card-body">
-              <h6><i className="bi bi-arrow-down-circle"></i> Cash Expense</h6>
-              <h4 className="text-danger">₹{totalCashExpense.toLocaleString()}</h4>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="summary-card balance-card">
-            <div className="card-body">
-              <h6><i className="bi bi-calculator"></i> Cash Balance</h6>
-              <h4 className={cashBalance >= 0 ? 'text-success' : 'text-danger'}>
-                ₹{Math.abs(cashBalance).toLocaleString()}
-                {cashBalance < 0 && ' (Deficit)'}
-              </h4>
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Transactions List with Pagination */}
       <div className="transactions-list">
