@@ -177,8 +177,8 @@ function DataSummary({ fareData, expenseData, currentUser }) {
   const getApprovedEntriesForCurrentUser = () => {
     const currentUserName = currentUser?.fullName || currentUser?.username;
     if (!currentUserName) return [];
-    
-    return approvedData.filter(entry => entry.submittedBy === currentUserName);
+
+    return approvedData.filter(entry => entry.approvedBy === currentUserName);
   };
 
   // Calculate total cash from approved entries of current user
@@ -594,7 +594,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
           <div className="summary-card-container">
             <div className="summary-card-content">
               <h5><i className="bi bi-bar-chart"></i> Data Summary</h5>
-              
+
               {/* Financial Summary Cards */}
               <div className="financial-summary-cards mb-4">
                 <div className="row g-4">
@@ -607,7 +607,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                       <div className="financial-details">
                         <div className="financial-amount">₹{calculateTotalCash().toLocaleString('en-IN')}</div>
                         <div className="financial-label">Total Cash</div>
-                        <div className="financial-subtitle">From Approved Entries</div>
+                        <div className="financial-subtitle">From Entries You Approved</div>
                       </div>
                     </div>
                   </div>
@@ -620,7 +620,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                       <div className="financial-details">
                         <div className="financial-amount">₹{calculateTotalBank().toLocaleString('en-IN')}</div>
                         <div className="financial-label">Total Bank</div>
-                        <div className="financial-subtitle">From Approved Entries</div>
+                        <div className="financial-subtitle">From Entries You Approved</div>
                       </div>
                     </div>
                   </div>
@@ -699,7 +699,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                 )}
               </div>
 
-              
+
             </div>
           </div>
         )}
