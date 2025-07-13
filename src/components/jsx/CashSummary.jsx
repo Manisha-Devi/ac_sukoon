@@ -157,12 +157,24 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
   // Handle checkbox selection for individual rows (only for specific conditions)
   const handleSelectEntry = (entryId) => {
     const entry = currentEntries.find(e => e.entryId === entryId);
+    const bankAmount = entry?.bankAmount || 0;
+    
+    console.log('🎯 handleSelectEntry called:', {
+      entryId: entryId,
+      entryStatus: entry?.entryStatus,
+      bankAmount: bankAmount,
+      shouldShowCheckbox: entry && (
+        entry.entryStatus === 'approvedBank' || 
+        (entry.entryStatus === 'pending' && bankAmount === 0)
+      )
+    });
+    
     // Show checkbox only for:
     // 1. status = 'approvedBank' (regardless of bankAmount)  
-    // 2. status = 'pending' AND entry doesn't have bankAmount or bankAmount = 0
+    // 2. status = 'pending' AND bankAmount = 0
     if (entry && (
       entry.entryStatus === 'approvedBank' || 
-      (entry.entryStatus === 'pending' && (!entry.bankAmount || entry.bankAmount === 0))
+      (entry.entryStatus === 'pending' && bankAmount === 0)
     )) {
       setSelectedEntries(prev => {
         if (prev.includes(entryId)) {
@@ -176,11 +188,18 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
 
   // Handle select all checkbox (for selectable entries only)
   const handleSelectAll = () => {
-    const selectableEntries = currentEntries.filter(entry => 
-      entry.entryStatus === 'approvedBank' || 
-      (entry.entryStatus === 'pending' && (!entry.bankAmount || entry.bankAmount === 0))
-    );
+    const selectableEntries = currentEntries.filter(entry => {
+      const bankAmount = entry.bankAmount || 0;
+      return entry.entryStatus === 'approvedBank' || 
+             (entry.entryStatus === 'pending' && bankAmount === 0);
+    });
     const selectableEntryIds = selectableEntries.map(entry => entry.entryId);
+
+    console.log('📋 handleSelectAll called:', {
+      totalEntries: currentEntries.length,
+      selectableEntries: selectableEntries.length,
+      selectableEntryIds: selectableEntryIds
+    });
 
     if (selectedEntries.length === selectableEntryIds.length && selectableEntryIds.length > 0) {
       setSelectedEntries([]);
@@ -190,10 +209,11 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
   };
 
   // Check if all visible selectable entries are selected
-  const selectableEntries = currentEntries.filter(entry => 
-    entry.entryStatus === 'approvedBank' || 
-    (entry.entryStatus === 'pending' && (!entry.bankAmount || entry.bankAmount === 0))
-  );
+  const selectableEntries = currentEntries.filter(entry => {
+    const bankAmount = entry.bankAmount || 0;
+    return entry.entryStatus === 'approvedBank' || 
+           (entry.entryStatus === 'pending' && bankAmount === 0);
+  });
   const isAllSelected = selectableEntries.length > 0 && 
     selectableEntries.every(entry => selectedEntries.includes(entry.entryId));
 
@@ -211,20 +231,33 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
 
   // Get status icon for entry based on status and bankAmount
   const getStatusIcon = (entry) => {
-    const { entryStatus, bankAmount } = entry;
+    const entryStatus = entry.entryStatus;
+    const bankAmount = entry.bankAmount || 0;
+    
+    console.log('🔍 getStatusIcon called for entry:', {
+      entryId: entry.entryId,
+      entryStatus: entryStatus,
+      bankAmount: bankAmount,
+      type: entry.type
+    });
     
     switch (entryStatus) {
       case 'pending':
-        if (!bankAmount || bankAmount === 0) {
+        if (bankAmount === 0) {
+          console.log('✅ Showing checkbox for pending entry with bankAmount = 0');
           return null; // Show checkbox
         } else {
+          console.log('➖ Showing dash for pending entry with bankAmount > 0');
           return <i className="bi bi-dash text-muted" title="Pending with Bank Amount"></i>; // - icon
         }
       case 'forwardedBank':
+        console.log('➖ Showing dash for forwardedBank entry');
         return <i className="bi bi-dash text-muted" title="Forwarded to Bank"></i>; // - icon
       case 'approved':
+        console.log('✅ Showing green tick for approved entry');
         return <i className="bi bi-check-circle-fill text-success" title="Final Approved"></i>; // green tick icon
       default:
+        console.log('🔒 Showing lock for other status:', entryStatus);
         return <i className="bi bi-lock-fill text-warning" title={`Status: ${entryStatus}`}></i>; // lock icon for all other statuses
     }
   };
@@ -567,17 +600,31 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
                         ₹{(entry.cashAmount || 0).toLocaleString()}
                       </td>
                       <td>
-                        {(entry.entryStatus === 'approvedBank' || 
-                          (entry.entryStatus === 'pending' && (!entry.bankAmount || entry.bankAmount === 0))) ? (
-                          <input 
-                            type="checkbox" 
-                            className="form-check-input"
-                            checked={selectedEntries.includes(entry.entryId)}
-                            onChange={() => handleSelectEntry(entry.entryId)}
-                          />
-                        ) : (
-                          getStatusIcon(entry)
-                        )}
+                        {(() => {
+                          const bankAmount = entry.bankAmount || 0;
+                          const shouldShowCheckbox = entry.entryStatus === 'approvedBank' || 
+                                                   (entry.entryStatus === 'pending' && bankAmount === 0);
+                          
+                          console.log('🎛️ Table cell render for entry:', {
+                            entryId: entry.entryId,
+                            entryStatus: entry.entryStatus,
+                            bankAmount: bankAmount,
+                            shouldShowCheckbox: shouldShowCheckbox
+                          });
+                          
+                          if (shouldShowCheckbox) {
+                            return (
+                              <input 
+                                type="checkbox" 
+                                className="form-check-input"
+                                checked={selectedEntries.includes(entry.entryId)}
+                                onChange={() => handleSelectEntry(entry.entryId)}
+                              />
+                            );
+                          } else {
+                            return getStatusIcon(entry);
+                          }
+                        })()}
                       </td>
                     </tr>
                   ))}
