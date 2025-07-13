@@ -11,8 +11,9 @@ import {
   Tooltip,
   Legend,
   ArcElement,
+  BarElement,
 } from "chart.js";
-import { Line, Doughnut } from "react-chartjs-2";
+import { Line, Doughnut, Bar } from "react-chartjs-2";
 
 ChartJS.register(
   CategoryScale,
@@ -23,11 +24,14 @@ ChartJS.register(
   Tooltip,
   Legend,
   ArcElement,
+  BarElement,
 );
 
 function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, setFareData, setExpenseData, setCashBookEntries, isRefreshing, dataStats, dataStatistics, onRefreshComplete }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showDataBreakdown, setShowDataBreakdown] = useState(false);
+  const [activeMetric, setActiveMetric] = useState('earnings');
+  const [selectedTimeRange, setSelectedTimeRange] = useState('monthly');
   const [allData, setAllData] = useState({
     fareReceipts: [],
     bookingEntries: [],
@@ -586,35 +590,52 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
   };
 
   return (
-    <div className="dashboard-container fade-in">
-      {/* Header Section */}
-      <div className="dashboard-header mb-4">
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
-          <div>
-            <h1 className="dashboard-title mb-2">
-              <i className="bi bi-speedometer2 me-3"></i>
-              Dashboard Overview
-              {isLoading && <span className="spinner-border spinner-border-sm ms-3" role="status"></span>}
-            </h1>
-            <p className="dashboard-subtitle mb-0">
-              Welcome back! Here's what's happening with your business today.
-              {allData.totalRecords > 0 && (
-                <small className="text-success ms-2">
-                  <i className="bi bi-check-circle-fill me-1"></i>
-                  {allData.totalRecords} records loaded
-                </small>
-              )}
-            </p>
+    <div className="modern-dashboard-container">
+      {/* Modern Header Section */}
+      <div className="modern-dashboard-header">
+        <div className="header-content">
+          <div className="header-main">
+            <div className="header-icon">
+              <i className="bi bi-graph-up-arrow"></i>
+            </div>
+            <div className="header-text">
+              <h1 className="header-title">
+                Business Analytics
+                {isLoading && <div className="loading-pulse"></div>}
+              </h1>
+              <p className="header-subtitle">
+                Real-time insights into your transport business performance
+              </p>
+            </div>
           </div>
-          <div className="mt-3 mt-md-0">
-            <div className="dashboard-date">
-              <i className="bi bi-calendar3 me-2"></i>
-              {new Date().toLocaleDateString('en-IN', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}
+          <div className="header-actions">
+            <div className="time-selector">
+              <button 
+                className={`time-btn ${selectedTimeRange === 'weekly' ? 'active' : ''}`}
+                onClick={() => setSelectedTimeRange('weekly')}
+              >
+                Week
+              </button>
+              <button 
+                className={`time-btn ${selectedTimeRange === 'monthly' ? 'active' : ''}`}
+                onClick={() => setSelectedTimeRange('monthly')}
+              >
+                Month
+              </button>
+              <button 
+                className={`time-btn ${selectedTimeRange === 'yearly' ? 'active' : ''}`}
+                onClick={() => setSelectedTimeRange('yearly')}
+              >
+                Year
+              </button>
+            </div>
+            <div className="header-date">
+              <i className="bi bi-calendar-event"></i>
+              <span>{new Date().toLocaleDateString('en-IN', { 
+                day: 'numeric', 
+                month: 'short', 
+                year: 'numeric' 
+              })}</span>
             </div>
           </div>
         </div>
@@ -780,210 +801,344 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         </div>
       )}
 
-      {/* Quick Stats Overview */}
-      <div className="quick-stats-grid mb-5">
-        <div className="quick-stat-card earnings">
-          <div className="stat-content">
-            <div className="stat-icon-wrapper">
-              <i className="bi bi-currency-rupee"></i>
-            </div>
-            <div className="stat-details">
-              <h3 className="stat-number">₹{(totalEarnings || 0).toLocaleString()}</h3>
-              <p className="stat-title">Total Earnings</p>
-              <div className="stat-trend positive">
-                <i className="bi bi-trending-up"></i>
-                <span>+10% from last month</span>
+      {/* Modern Metrics Cards */}
+      <div className="modern-metrics-grid">
+        <div 
+          className={`metric-card earnings ${activeMetric === 'earnings' ? 'active' : ''}`}
+          onClick={() => setActiveMetric('earnings')}
+        >
+          <div className="metric-background">
+            <div className="metric-pattern"></div>
+          </div>
+          <div className="metric-content">
+            <div className="metric-header">
+              <div className="metric-icon earnings-icon">
+                <i className="bi bi-currency-rupee"></i>
+              </div>
+              <div className="metric-trend positive">
+                <i className="bi bi-arrow-up"></i>
+                <span>+12.5%</span>
               </div>
             </div>
-          </div>
-          <div className="stat-chart-mini">
-            <div className="mini-chart-line earnings-line"></div>
+            <div className="metric-body">
+              <h3 className="metric-value">₹{(totalEarnings || 0).toLocaleString()}</h3>
+              <p className="metric-label">Total Earnings</p>
+              <div className="metric-progress">
+                <div className="progress-bar earnings-progress" style={{width: '75%'}}></div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="quick-stat-card expenses">
-          <div className="stat-content">
-            <div className="stat-icon-wrapper">
-              <i className="bi bi-graph-down-arrow"></i>
-            </div>
-            <div className="stat-details">
-              <h3 className="stat-number">₹{(totalExpenses || 0).toLocaleString()}</h3>
-              <p className="stat-title">Total Expenses</p>
-              <div className="stat-trend negative">
-                <i className="bi bi-trending-up"></i>
-                <span>+5% from last month</span>
+        <div 
+          className={`metric-card expenses ${activeMetric === 'expenses' ? 'active' : ''}`}
+          onClick={() => setActiveMetric('expenses')}
+        >
+          <div className="metric-background">
+            <div className="metric-pattern"></div>
+          </div>
+          <div className="metric-content">
+            <div className="metric-header">
+              <div className="metric-icon expenses-icon">
+                <i className="bi bi-graph-down-arrow"></i>
+              </div>
+              <div className="metric-trend negative">
+                <i className="bi bi-arrow-up"></i>
+                <span>+8.3%</span>
               </div>
             </div>
-          </div>
-          <div className="stat-chart-mini">
-            <div className="mini-chart-line expenses-line"></div>
+            <div className="metric-body">
+              <h3 className="metric-value">₹{(totalExpenses || 0).toLocaleString()}</h3>
+              <p className="metric-label">Total Expenses</p>
+              <div className="metric-progress">
+                <div className="progress-bar expenses-progress" style={{width: '60%'}}></div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="quick-stat-card profit">
-          <div className="stat-content">
-            <div className="stat-icon-wrapper">
-              <i className="bi bi-graph-up-arrow"></i>
-            </div>
-            <div className="stat-details">
-              <h3 className="stat-number">₹{(profit || 0).toLocaleString()}</h3>
-              <p className="stat-title">Net Profit</p>
-              <div className="stat-trend positive">
-                <i className="bi bi-trending-up"></i>
-                <span>+{profitPercentage || 0}% margin</span>
+        <div 
+          className={`metric-card profit ${activeMetric === 'profit' ? 'active' : ''}`}
+          onClick={() => setActiveMetric('profit')}
+        >
+          <div className="metric-background">
+            <div className="metric-pattern"></div>
+          </div>
+          <div className="metric-content">
+            <div className="metric-header">
+              <div className="metric-icon profit-icon">
+                <i className="bi bi-trophy"></i>
+              </div>
+              <div className="metric-trend positive">
+                <i className="bi bi-arrow-up"></i>
+                <span>+{profitPercentage || 0}%</span>
               </div>
             </div>
-          </div>
-          <div className="stat-chart-mini">
-            <div className="mini-chart-line profit-line"></div>
+            <div className="metric-body">
+              <h3 className="metric-value">₹{(profit || 0).toLocaleString()}</h3>
+              <p className="metric-label">Net Profit</p>
+              <div className="metric-progress">
+                <div className="progress-bar profit-progress" style={{width: '85%'}}></div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="quick-stat-card routes">
-          <div className="stat-content">
-            <div className="stat-icon-wrapper">
-              <i className="bi bi-bus-front"></i>
-            </div>
-            <div className="stat-details">
-              <h3 className="stat-number">12</h3>
-              <p className="stat-title">Active Routes</p>
-              <div className="stat-trend neutral">
-                <i className="bi bi-clock"></i>
-                <span>Daily operations</span>
+        <div 
+          className={`metric-card routes ${activeMetric === 'routes' ? 'active' : ''}`}
+          onClick={() => setActiveMetric('routes')}
+        >
+          <div className="metric-background">
+            <div className="metric-pattern"></div>
+          </div>
+          <div className="metric-content">
+            <div className="metric-header">
+              <div className="metric-icon routes-icon">
+                <i className="bi bi-bus-front"></i>
+              </div>
+              <div className="metric-trend neutral">
+                <i className="bi bi-dash"></i>
+                <span>Active</span>
               </div>
             </div>
-          </div>
-          <div className="stat-chart-mini">
-            <div className="mini-chart-line routes-line"></div>
+            <div className="metric-body">
+              <h3 className="metric-value">12</h3>
+              <p className="metric-label">Active Routes</p>
+              <div className="metric-progress">
+                <div className="progress-bar routes-progress" style={{width: '90%'}}></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Analytics Section */}
-      <div className="analytics-section mb-5">
-        <div className="row g-4">
-          <div className="col-12 col-xl-8">
-            <div className="analytics-card">
-              <div className="card-header">
-                <h5 className="card-title">
-                  <i className="bi bi-graph-up me-2"></i>
-                  Monthly Earnings Trend
-                </h5>
-                <div className="card-actions">
-                  <button className="btn btn-sm btn-outline-primary">
-                    <i className="bi bi-download"></i>
-                  </button>
-                </div>
+      {/* Modern Analytics Section */}
+      <div className="modern-analytics-section">
+        <div className="analytics-grid">
+          <div className="main-chart-card">
+            <div className="chart-header">
+              <div className="chart-title">
+                <h4>Performance Overview</h4>
+                <p>Real-time business metrics and trends</p>
               </div>
-              <div className="chart-container">
-                <Line data={lineData} options={chartOptions} />
+              <div className="chart-controls">
+                <button className="chart-btn">
+                  <i className="bi bi-fullscreen"></i>
+                </button>
+                <button className="chart-btn">
+                  <i className="bi bi-download"></i>
+                </button>
+                <button className="chart-btn">
+                  <i className="bi bi-gear"></i>
+                </button>
               </div>
+            </div>
+            <div className="chart-body">
+              <Line data={lineData} options={chartOptions} />
             </div>
           </div>
 
-          <div className="col-12 col-xl-4">
-            <div className="analytics-card">
-              <div className="card-header">
-                <h5 className="card-title">
+          <div className="side-charts">
+            <div className="mini-chart-card">
+              <div className="mini-chart-header">
+                <h5>
                   <i className="bi bi-pie-chart me-2"></i>
-                  Expense Breakdown
+                  Revenue Sources
                 </h5>
               </div>
-              <div className="chart-container">
+              <div className="mini-chart-body">
                 <Doughnut data={doughnutData} options={doughnutOptions} />
               </div>
             </div>
+
+            <div className="mini-chart-card">
+              <div className="mini-chart-header">
+                <h5>
+                  <i className="bi bi-bar-chart me-2"></i>
+                  Monthly Comparison
+                </h5>
+              </div>
+              <div className="mini-chart-body">
+                <Bar data={{
+                  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                  datasets: [{
+                    label: 'Earnings',
+                    data: [12000, 19000, 15000, 25000, 22000],
+                    backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                    borderColor: '#667eea',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                  }]
+                }} options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: false }
+                  },
+                  scales: {
+                    y: { beginAtZero: true, grid: { display: false } },
+                    x: { grid: { display: false } }
+                  }
+                }} />
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Activity and Insights */}
-      <div className="row g-4">
-        <div className="col-12 col-lg-7">
-          <div className="activity-card">
-            <div className="card-header">
-              <h5 className="card-title">
-                <i className="bi bi-clock-history me-2"></i>
-                Recent Activity
-              </h5>
-              <button className="btn btn-sm btn-link">View All</button>
+      {/* Modern Activity and Insights */}
+      <div className="modern-widgets-section">
+        <div className="widgets-grid">
+          <div className="activity-widget">
+            <div className="widget-header">
+              <div className="widget-title">
+                <i className="bi bi-activity"></i>
+                <h4>Live Activity</h4>
+              </div>
+              <div className="widget-actions">
+                <button className="widget-btn">
+                  <i className="bi bi-arrow-clockwise"></i>
+                </button>
+                <button className="widget-btn">
+                  <i className="bi bi-three-dots"></i>
+                </button>
+              </div>
             </div>
-            <div className="activity-list">
-              <div className="activity-item">
-                <div className="activity-icon success">
-                  <i className="bi bi-ticket-perforated"></i>
+            <div className="widget-body">
+              <div className="activity-timeline">
+                <div className="timeline-item success">
+                  <div className="timeline-marker">
+                    <i className="bi bi-check-circle"></i>
+                  </div>
+                  <div className="timeline-content">
+                    <h6>Fare Collection</h6>
+                    <p>Ghuraka to Bhaderwah - ₹2,500</p>
+                    <span className="timeline-time">2h ago</span>
+                  </div>
+                  <div className="timeline-amount positive">+₹2,500</div>
                 </div>
-                <div className="activity-content">
-                  <h6 className="activity-title">Fare Collection Completed</h6>
-                  <p className="activity-description">Ghuraka to Bhaderwah route - ₹2,500</p>
-                  <small className="activity-time">2 hours ago</small>
-                </div>
-                <div className="activity-amount positive">+₹2,500</div>
-              </div>
 
-              <div className="activity-item">
-                <div className="activity-icon danger">
-                  <i className="bi bi-fuel-pump"></i>
+                <div className="timeline-item warning">
+                  <div className="timeline-marker">
+                    <i className="bi bi-fuel-pump"></i>
+                  </div>
+                  <div className="timeline-content">
+                    <h6>Fuel Expense</h6>
+                    <p>Local pump station</p>
+                    <span className="timeline-time">4h ago</span>
+                  </div>
+                  <div className="timeline-amount negative">-₹3,200</div>
                 </div>
-                <div className="activity-content">
-                  <h6 className="activity-title">Fuel Expense Added</h6>
-                  <p className="activity-description">Fuel purchase at local pump</p>
-                  <small className="activity-time">4 hours ago</small>
-                </div>
-                <div className="activity-amount negative">-₹3,200</div>
-              </div>
 
-              <div className="activity-item">
-                <div className="activity-icon info">
-                  <i className="bi bi-tools"></i>
+                <div className="timeline-item info">
+                  <div className="timeline-marker">
+                    <i className="bi bi-tools"></i>
+                  </div>
+                  <div className="timeline-content">
+                    <h6>Maintenance</h6>
+                    <p>Engine checkup completed</p>
+                    <span className="timeline-time">1d ago</span>
+                  </div>
+                  <div className="timeline-amount negative">-₹1,800</div>
                 </div>
-                <div className="activity-content">
-                  <h6 className="activity-title">Service Maintenance</h6>
-                  <p className="activity-description">Regular engine checkup completed</p>
-                  <small className="activity-time">1 day ago</small>
-                </div>
-                <div className="activity-amount negative">-₹1,800</div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="col-12 col-lg-5">
-          <div className="insights-card">
-            <div className="card-header">
-              <h5 className="card-title">
-                <i className="bi bi-lightbulb me-2"></i>
-                Business Insights
-              </h5>
+          <div className="insights-widget">
+            <div className="widget-header">
+              <div className="widget-title">
+                <i className="bi bi-lightbulb"></i>
+                <h4>Smart Insights</h4>
+              </div>
+              <div className="widget-actions">
+                <button className="widget-btn">
+                  <i className="bi bi-gear"></i>
+                </button>
+              </div>
             </div>
-            <div className="insight-list">
-              <div className="insight-item">
-                <div className="insight-icon">
-                  <i className="bi bi-arrow-up-circle-fill text-success"></i>
+            <div className="widget-body">
+              <div className="insights-list">
+                <div className="insight-card success">
+                  <div className="insight-icon">
+                    <i className="bi bi-trending-up"></i>
+                  </div>
+                  <div className="insight-content">
+                    <h6>Top Route Performance</h6>
+                    <p>Ghuraka-Bhaderwah route showing 15% increase in revenue</p>
+                  </div>
                 </div>
-                <div className="insight-content">
-                  <h6>Peak Performance Route</h6>
-                  <p>Ghuraka to Bhaderwah is your most profitable route this month</p>
+
+                <div className="insight-card warning">
+                  <div className="insight-icon">
+                    <i className="bi bi-exclamation-triangle"></i>
+                  </div>
+                  <div className="insight-content">
+                    <h6>Fuel Cost Alert</h6>
+                    <p>Fuel expenses up by 8% - consider route optimization</p>
+                  </div>
+                </div>
+
+                <div className="insight-card info">
+                  <div className="insight-icon">
+                    <i className="bi bi-calendar-check"></i>
+                  </div>
+                  <div className="insight-content">
+                    <h6>Maintenance Reminder</h6>
+                    <p>2 vehicles due for service next week</p>
+                  </div>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div className="insight-item">
-                <div className="insight-icon">
-                  <i className="bi bi-fuel-pump-fill text-warning"></i>
-                </div>
-                <div className="insight-content">
-                  <h6>Fuel Efficiency Alert</h6>
-                  <p>Consider optimizing routes to reduce fuel consumption</p>
-                </div>
+          <div className="stats-widget">
+            <div className="widget-header">
+              <div className="widget-title">
+                <i className="bi bi-graph-up"></i>
+                <h4>Quick Stats</h4>
               </div>
-
-              <div className="insight-item">
-                <div className="insight-icon">
-                  <i className="bi bi-calendar-check-fill text-info"></i>
+            </div>
+            <div className="widget-body">
+              <div className="stats-grid">
+                <div className="stat-item">
+                  <div className="stat-icon">
+                    <i className="bi bi-people"></i>
+                  </div>
+                  <div className="stat-content">
+                    <h3>1,247</h3>
+                    <p>Total Passengers</p>
+                  </div>
                 </div>
-                <div className="insight-content">
-                  <h6>Maintenance Due</h6>
-                  <p>Schedule service for vehicles within next week</p>
+
+                <div className="stat-item">
+                  <div className="stat-icon">
+                    <i className="bi bi-speedometer2"></i>
+                  </div>
+                  <div className="stat-content">
+                    <h3>2,847</h3>
+                    <p>KM Travelled</p>
+                  </div>
+                </div>
+
+                <div className="stat-item">
+                  <div className="stat-icon">
+                    <i className="bi bi-clock"></i>
+                  </div>
+                  <div className="stat-content">
+                    <h3>98.5%</h3>
+                    <p>On-Time Rate</p>
+                  </div>
+                </div>
+
+                <div className="stat-item">
+                  <div className="stat-icon">
+                    <i className="bi bi-star"></i>
+                  </div>
+                  <div className="stat-content">
+                    <h3>4.8</h3>
+                    <p>Avg Rating</p>
+                  </div>
                 </div>
               </div>
             </div>
