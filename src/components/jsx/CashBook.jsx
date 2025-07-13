@@ -292,25 +292,27 @@ const CashBook = ({ cashBookEntries, setCashBookEntries, allUsers }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {/* Balance b/d row */}
-                    <tr>
-                      <td></td>
-                      <td><strong>To Balance b/d</strong></td>
-                      <td className="text-success">
-                        {cashBalance > 0 ? `₹${cashBalance.toLocaleString('en-IN', {minimumFractionDigits: 2})}` : '-'}
-                      </td>
-                      <td className="text-success">
-                        {bankBalance > 0 ? `₹${bankBalance.toLocaleString('en-IN', {minimumFractionDigits: 2})}` : '-'}
-                      </td>
-                      <td></td>
-                      <td><strong>By Balance b/d</strong></td>
-                      <td className="text-danger">
-                        {cashBalance < 0 ? `₹${Math.abs(cashBalance).toLocaleString('en-IN', {minimumFractionDigits: 2})}` : '-'}
-                      </td>
-                      <td className="text-danger">
-                        {bankBalance < 0 ? `₹${Math.abs(bankBalance).toLocaleString('en-IN', {minimumFractionDigits: 2})}` : '-'}
-                      </td>
-                    </tr>
+                    {/* Balance b/d row - only show if there's a balance */}
+                    {(Math.abs(cashBalance) > 0 || Math.abs(bankBalance) > 0) && (
+                      <tr>
+                        <td></td>
+                        <td><strong>To Balance b/d</strong></td>
+                        <td className="text-success">
+                          {cashBalance > 0 ? `₹${cashBalance.toLocaleString('en-IN', {minimumFractionDigits: 2})}` : '-'}
+                        </td>
+                        <td className="text-success">
+                          {bankBalance > 0 ? `₹${bankBalance.toLocaleString('en-IN', {minimumFractionDigits: 2})}` : '-'}
+                        </td>
+                        <td></td>
+                        <td><strong>By Balance b/d</strong></td>
+                        <td className="text-danger">
+                          {cashBalance < 0 ? `₹${Math.abs(cashBalance).toLocaleString('en-IN', {minimumFractionDigits: 2})}` : '-'}
+                        </td>
+                        <td className="text-danger">
+                          {bankBalance < 0 ? `₹${Math.abs(bankBalance).toLocaleString('en-IN', {minimumFractionDigits: 2})}` : '-'}
+                        </td>
+                      </tr>
+                    )}
 
                     {/* Render entries side by side */}
                     {Math.max(drEntries.length, crEntries.length) > 0 && 
@@ -343,36 +345,38 @@ const CashBook = ({ cashBookEntries, setCashBookEntries, allUsers }) => {
                         );
                       })}
 
-                    {/* Totals row */}
-                    <tr className="totals-row">
-                      <td></td>
-                      <td><strong>To Balance c/d</strong></td>
-                      <td className="text-success">
-                        {cashBalance < 0 ? `₹${Math.abs(cashBalance).toLocaleString('en-IN', {minimumFractionDigits: 2})}` : '-'}
-                      </td>
-                      <td className="text-success">
-                        {bankBalance < 0 ? `₹${Math.abs(bankBalance).toLocaleString('en-IN', {minimumFractionDigits: 2})}` : '-'}
-                      </td>
-                      <td></td>
-                      <td><strong>By Balance c/d</strong></td>
-                      <td className="text-danger">
-                        {cashBalance > 0 ? `₹${cashBalance.toLocaleString('en-IN', {minimumFractionDigits: 2})}` : '-'}
-                      </td>
-                      <td className="text-danger">
-                        {bankBalance > 0 ? `₹${bankBalance.toLocaleString('en-IN', {minimumFractionDigits: 2})}` : '-'}
-                      </td>
-                    </tr>
+                    {/* Totals row - only show if there's a balance */}
+                    {(Math.abs(cashBalance) > 0 || Math.abs(bankBalance) > 0) && (
+                      <tr className="totals-row">
+                        <td></td>
+                        <td><strong>To Balance c/d</strong></td>
+                        <td className="text-success">
+                          {cashBalance < 0 ? `₹${Math.abs(cashBalance).toLocaleString('en-IN', {minimumFractionDigits: 2})}` : '-'}
+                        </td>
+                        <td className="text-success">
+                          {bankBalance < 0 ? `₹${Math.abs(bankBalance).toLocaleString('en-IN', {minimumFractionDigits: 2})}` : '-'}
+                        </td>
+                        <td></td>
+                        <td><strong>By Balance c/d</strong></td>
+                        <td className="text-danger">
+                          {cashBalance > 0 ? `₹${cashBalance.toLocaleString('en-IN', {minimumFractionDigits: 2})}` : '-'}
+                        </td>
+                        <td className="text-danger">
+                          {bankBalance > 0 ? `₹${bankBalance.toLocaleString('en-IN', {minimumFractionDigits: 2})}` : '-'}
+                        </td>
+                      </tr>
+                    )}
 
-                    {/* Final totals */}
+                    {/* Final totals - show actual totals */}
                     <tr className="final-totals-row">
                       <td></td>
+                      <td><strong>TOTAL</strong></td>
+                      <td className="total-cell">₹{(totalDrCash + (cashBalance > 0 ? cashBalance : 0)).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                      <td className="total-cell">₹{(totalDrBank + (bankBalance > 0 ? bankBalance : 0)).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
                       <td></td>
-                      <td className="total-cell">₹{(totalDrCash + Math.abs(cashBalance < 0 ? cashBalance : 0)).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-                      <td className="total-cell">₹{(totalDrBank + Math.abs(bankBalance < 0 ? bankBalance : 0)).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-                      <td></td>
-                      <td></td>
-                      <td className="total-cell">₹{(totalCrCash + (cashBalance > 0 ? cashBalance : 0)).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-                      <td className="total-cell">₹{(totalCrBank + (bankBalance > 0 ? bankBalance : 0)).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                      <td><strong>TOTAL</strong></td>
+                      <td className="total-cell">₹{(totalCrCash + (cashBalance < 0 ? Math.abs(cashBalance) : 0)).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                      <td className="total-cell">₹{(totalCrBank + (bankBalance < 0 ? Math.abs(bankBalance) : 0)).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
                     </tr>
                   </tbody>
                 </table>
