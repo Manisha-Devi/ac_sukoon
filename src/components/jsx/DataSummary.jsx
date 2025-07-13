@@ -120,13 +120,8 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       setPendingData(allEntries.filter(entry => entry.entryStatus === 'pending'));
       setBankApprovalData(allEntries.filter(entry => entry.entryStatus === 'forwardedBank'));
       setCashApprovalData(allEntries.filter(entry => entry.entryStatus === 'forwardedCash'));
-      setApprovedData(allEntries.filter(entry => 
-        entry.entryStatus === 'approvedCash' || 
-        entry.entryStatus === 'approvedBank' ||
-        entry.entryStatus === 'cashApproved' ||
-        entry.entryStatus === 'bankApproved' ||
-        entry.entryStatus === 'approved'
-      ));
+      // Approved tab should only show approvedCash entries (ready for final approval)
+      setApprovedData(allEntries.filter(entry => entry.entryStatus === 'approvedCash'));
 
       setLoading(false);
     } catch (error) {
@@ -256,7 +251,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
           newStatus = 'approvedCash'; // forwardedCash -> approvedCash
           break;
         case 'approved':
-          newStatus = 'approved'; // Final approval (approvedCash/approvedBank -> approved)
+          newStatus = 'approved'; // Final approval (approvedCash -> approved)
           break;
         default:
           throw new Error('Invalid tab for approval');
