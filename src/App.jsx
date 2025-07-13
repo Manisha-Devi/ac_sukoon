@@ -33,7 +33,6 @@ function App() {
     expenseRecords: 0,
     lastSync: null
   });
-    const [allUsers, setAllUsers] = useState([]);
 
 
   // New detailed statistics state
