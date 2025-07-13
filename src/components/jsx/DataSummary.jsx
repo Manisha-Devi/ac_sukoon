@@ -12,6 +12,8 @@ function DataSummary({ fareData, expenseData, currentUser }) {
   const [selectedEntries, setSelectedEntries] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
   const [showSummary, setShowSummary] = useState(true);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   // Log user data for debugging
   useEffect(() => {
@@ -132,15 +134,43 @@ function DataSummary({ fareData, expenseData, currentUser }) {
     }
   };
 
-  // Get current tab data
+  // Get current tab data with date filtering
   const getCurrentTabData = () => {
+    let data = [];
+    
     switch (activeTab) {
-      case 'pending': return pendingData;
-      case 'bankApproval': return bankApprovalData;
-      case 'cashApproval': return cashApprovalData;
-      case 'approved': return approvedData;
-      default: return [];
+      case 'pending': 
+        data = pendingData;
+        break;
+      case 'bankApproval': 
+        data = bankApprovalData;
+        break;
+      case 'cashApproval': 
+        data = cashApprovalData;
+        break;
+      case 'approved': 
+        data = approvedData;
+        break;
+      case 'all':
+      default: 
+        data = [...pendingData, ...bankApprovalData, ...cashApprovalData, ...approvedData];
+        break;
     }
+
+    // Apply date filter if dates are selected
+    if (dateFrom && dateTo) {
+      data = data.filter(entry => {
+        const entryDate = entry.entryType === 'booking' && entry.dateFrom ? 
+                         new Date(entry.dateFrom) : 
+                         new Date(entry.date);
+        const fromDate = new Date(dateFrom);
+        const toDate = new Date(dateTo);
+        
+        return entryDate >= fromDate && entryDate <= toDate;
+      });
+    }
+
+    return data;
   };
 
   // Handle entry selection
@@ -529,85 +559,186 @@ function DataSummary({ fareData, expenseData, currentUser }) {
           </div>
         </div>
 
-        {/* Approval Tabs - Correct Order */}
+        {/* Date Filter */}
         {showFilter && (
-        <div className="approval-tabs">
-          <button 
-            className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('pending');
-              setSelectedEntries([]);
-            }}
-          >
-            <i className="bi bi-clock"></i> Pending ({pendingData.length})
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'bankApproval' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('bankApproval');
-              setSelectedEntries([]);
-            }}
-          >
-            <i className="bi bi-bank"></i> Bank Approval ({bankApprovalData.length})
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'cashApproval' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('cashApproval');
-              setSelectedEntries([]);
-            }}
-          >
-            <i className="bi bi-cash-stack"></i> Cash Approval ({cashApprovalData.length})
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'approved' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('approved');
-              setSelectedEntries([]);
-            }}
-          >
-            <i className="bi bi-check-circle"></i> Approved ({approvedData.length})
-          </button>
-        </div>
-        )}
-
-        {/* Selection Controls */}
-        {showSummary && currentData.length > 0 && (
-          <div className="selection-controls">
-            <div className="select-all-container">
-              <input
-                type="checkbox"
-                id="selectAll"
-                checked={isAllSelected()}
-                onChange={handleSelectAll}
-              />
-              <label htmlFor="selectAll">
-                Select All ({selectedEntries.length}/{currentData.length})
-              </label>
+          <div className="date-filter-section">
+            <div className="row">
+              <div className="col-md-4">
+                <label className="form-label">From Date</label>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                />
+              </div>
+              <div className="col-md-4">
+                <label className="form-label">To Date</label>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                />
+              </div>
+              <div className="col-md-4">
+                <label className="form-label">Status Filter</label>
+                <select 
+                  className="form-control"
+                  value={activeTab}
+                  onChange={(e) => setActiveTab(e.target.value)}
+                >
+                  <option value="all">All Entries</option>
+                  <option value="pending">Pending</option>
+                  <option value="bankApproval">Bank Approval</option>
+                  <option value="cashApproval">Cash Approval</option>
+                  <option value="approved">Approved</option>
+                </select>
+              </div>
             </div>
-
-            {selectedEntries.length > 0 && (
-              <button 
-                className="btn btn-success approve-btn"
-                onClick={handleApproval}
-              >
-                <i className="bi bi-check-circle"></i> 
-                Approve Selected ({selectedEntries.length})
-              </button>
-            )}
           </div>
         )}
 
-        {/* Tab Content */}
-        <div className="tab-content">
+        {/* Summary Cards */}
+        {showSummary && (
+          <div className="summary-cards-section">
+            <div className="row mb-4">
+              <div className="col-md-3 col-sm-6 mb-3">
+                <div className="summary-card pending-card">
+                  <div className="card-body">
+                    <h6><i className="bi bi-clock"></i> Pending</h6>
+                    <h4>{pendingData.length}</h4>
+                    <small>₹{pendingData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</small>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-3 col-sm-6 mb-3">
+                <div className="summary-card bank-approval-card">
+                  <div className="card-body">
+                    <h6><i className="bi bi-bank"></i> Bank Approval</h6>
+                    <h4>{bankApprovalData.length}</h4>
+                    <small>₹{bankApprovalData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</small>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-3 col-sm-6 mb-3">
+                <div className="summary-card cash-approval-card">
+                  <div className="card-body">
+                    <h6><i className="bi bi-cash-stack"></i> Cash Approval</h6>
+                    <h4>{cashApprovalData.length}</h4>
+                    <small>₹{cashApprovalData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</small>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-3 col-sm-6 mb-3">
+                <div className="summary-card approved-card">
+                  <div className="card-body">
+                    <h6><i className="bi bi-check-circle"></i> Approved</h6>
+                    <h4>{approvedData.length}</h4>
+                    <small>₹{approvedData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Data Table */}
+        <div className="data-table-section">
+          <div className="table-header">
+            <h5>Data Entries</h5>
+            {currentData.length > 0 && (
+              <div className="selection-controls">
+                <div className="select-all-container">
+                  <input
+                    type="checkbox"
+                    id="selectAll"
+                    checked={isAllSelected()}
+                    onChange={handleSelectAll}
+                  />
+                  <label htmlFor="selectAll">
+                    Select All ({selectedEntries.length}/{currentData.length})
+                  </label>
+                </div>
+
+                {selectedEntries.length > 0 && (
+                  <button 
+                    className="btn btn-success approve-btn"
+                    onClick={handleApproval}
+                  >
+                    <i className="bi bi-check-circle"></i> 
+                    Approve Selected ({selectedEntries.length})
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
           {currentData.length === 0 ? (
             <div className="no-data">
               <i className="bi bi-inbox"></i>
-              <p>No entries in this category</p>
+              <p>No entries found</p>
             </div>
           ) : (
-            <div className="recent-entries-grid">
-              {currentData.map(renderEntryCard)}
+            <div className="table-responsive">
+              <table className="table table-hover data-entries-table">
+                <thead>
+                  <tr>
+                    <th width="5%">Select</th>
+                    <th width="15%">Entry ID</th>
+                    <th width="15%">Date</th>
+                    <th width="15%">Type</th>
+                    <th width="20%">Description</th>
+                    <th width="10%">Amount</th>
+                    <th width="10%">Status</th>
+                    <th width="10%">Submitted By</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentData.map(entry => (
+                    <tr 
+                      key={entry.entryId}
+                      className={selectedEntries.includes(entry.entryId) ? 'table-primary' : ''}
+                      onClick={() => handleEntrySelect(entry.entryId)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={selectedEntries.includes(entry.entryId)}
+                          onChange={() => handleEntrySelect(entry.entryId)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </td>
+                      <td><small>{entry.entryId}</small></td>
+                      <td>
+                        {entry.entryType === 'booking' && entry.dateFrom ? 
+                          formatDisplayDate(entry.dateFrom) : 
+                          formatDisplayDate(entry.date)
+                        }
+                      </td>
+                      <td>
+                        <span className="entry-type-badge">
+                          {entry.dataType}
+                        </span>
+                      </td>
+                      <td><small>{entry.displayName}</small></td>
+                      <td>₹{(entry.totalAmount || 0).toLocaleString('en-IN')}</td>
+                      <td>
+                        <span className="entry-status-badge" data-status={entry.entryStatus}>
+                          {entry.entryStatus === 'pending' && 'PENDING'}
+                          {entry.entryStatus === 'forwardedBank' && 'BANK APPROVAL'}
+                          {entry.entryStatus === 'forwardedCash' && 'CASH APPROVAL'}
+                          {(entry.entryStatus === 'approvedCash' || entry.entryStatus === 'cashApproved') && 'CASH APPROVED'}
+                          {(entry.entryStatus === 'approvedBank' || entry.entryStatus === 'bankApproved') && 'BANK APPROVED'}
+                          {entry.entryStatus === 'approved' && 'APPROVED'}
+                        </span>
+                      </td>
+                      <td><small>{entry.submittedBy}</small></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

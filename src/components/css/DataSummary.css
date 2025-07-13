@@ -48,6 +48,200 @@
   color: #28a745;
 }
 
+/* Date Filter Section */
+.date-filter-section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.date-filter-section .form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.date-filter-section .form-control {
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.date-filter-section .form-control:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Summary Cards Section */
+.summary-cards-section {
+  margin-bottom: 2rem;
+}
+
+.summary-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: none;
+  overflow: hidden;
+}
+
+.summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.summary-card .card-body {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.summary-card h6 {
+  color: #6c757d;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.summary-card h4 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.summary-card small {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.pending-card {
+  border-left: 4px solid #ffc107;
+}
+
+.pending-card h4 {
+  color: #ffc107;
+}
+
+.bank-approval-card {
+  border-left: 4px solid #17a2b8;
+}
+
+.bank-approval-card h4 {
+  color: #17a2b8;
+}
+
+.cash-approval-card {
+  border-left: 4px solid #fd7e14;
+}
+
+.cash-approval-card h4 {
+  color: #fd7e14;
+}
+
+.approved-card {
+  border-left: 4px solid #28a745;
+}
+
+.approved-card h4 {
+  color: #28a745;
+}
+
+/* Data Table Section */
+.data-table-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.table-header h5 {
+  margin: 0;
+  color: #495057;
+  font-weight: 600;
+}
+
+.data-entries-table {
+  margin: 0;
+}
+
+.data-entries-table thead th {
+  background: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.875rem;
+  padding: 1rem 0.75rem;
+}
+
+.data-entries-table tbody td {
+  padding: 1rem 0.75rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.data-entries-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.data-entries-table tbody tr.table-primary {
+  background: #e3f2fd;
+}
+
+.data-entries-table .entry-type-badge {
+  background: #007bff;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.data-entries-table .entry-status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.data-entries-table .entry-status-badge[data-status="pending"] {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.data-entries-table .entry-status-badge[data-status="forwardedBank"] {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.data-entries-table .entry-status-badge[data-status="forwardedCash"] {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.data-entries-table .entry-status-badge[data-status="approvedBank"],
+.data-entries-table .entry-status-badge[data-status="approvedCash"] {
+  background: #d4edda;
+  color: #155724;
+}
+
+.data-entries-table .entry-status-badge[data-status="approved"] {
+  background: #d4edda;
+  color: #155724;
+}
+
 .refresh-btn {
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
