@@ -1,18 +1,15 @@
+
 import React, { useState, useEffect } from "react";
 import "../css/DataSummary.css";
 import authService from "../../services/authService.js";
 
 function DataSummary({ fareData, expenseData, currentUser }) {
-  const [activeTab, setActiveTab] = useState('cashApproval');
+  const [activeTab, setActiveTab] = useState('pending');
   const [pendingData, setPendingData] = useState([]);
-  const [bankApprovalData, setBankApprovalData] = useState([]);
-  const [cashApprovalData, setCashApprovalData] = useState([]);
+  const [waitingData, setWaitingData] = useState([]);
   const [approvedData, setApprovedData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showFilter, setShowFilter] = useState(false);
-  const [showSummary, setShowSummary] = useState(true);
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [selectedEntries, setSelectedEntries] = useState([]);
 
   // Log user data for debugging
   useEffect(() => {
@@ -116,14 +113,17 @@ function DataSummary({ fareData, expenseData, currentUser }) {
 
       // Separate by status
       setPendingData(allEntries.filter(entry => entry.entryStatus === 'pending'));
-      setBankApprovalData(allEntries.filter(entry => entry.entryStatus === 'forwardedBank'));
-      setCashApprovalData(allEntries.filter(entry => entry.entryStatus === 'forwardedCash'));
+      setWaitingData(allEntries.filter(entry => 
+        entry.entryStatus === 'waiting' || 
+        entry.entryStatus === 'forwardedBank' || 
+        entry.entryStatus === 'forwardedCash'
+      ));
       setApprovedData(allEntries.filter(entry => 
+        entry.entryStatus === 'approved' || 
         entry.entryStatus === 'approvedCash' || 
         entry.entryStatus === 'approvedBank' ||
         entry.entryStatus === 'cashApproved' ||
-        entry.entryStatus === 'bankApproved' ||
-        entry.entryStatus === 'approved'
+        entry.entryStatus === 'bankApproved'
       ));
 
       setLoading(false);
@@ -133,39 +133,33 @@ function DataSummary({ fareData, expenseData, currentUser }) {
     }
   };
 
-  // Get current tab data with date filtering
+  // Get current tab data
   const getCurrentTabData = () => {
-    let data = [];
-
     switch (activeTab) {
-      case 'cashApproval': 
-        data = cashApprovalData;
-        break;
-      case 'bankApproval': 
-        data = bankApprovalData;
-        break;
-      case 'approved': 
-        data = approvedData;
-        break;
-      default: 
-        data = approvedData;
-        break;
+      case 'pending': return pendingData;
+      case 'waiting': return waitingData;
+      case 'approved': return approvedData;
+      default: return pendingData;
     }
+  };
 
-    // Apply date filter if dates are selected
-    if (dateFrom && dateTo) {
-      data = data.filter(entry => {
-        const entryDate = entry.entryType === 'booking' && entry.dateFrom ? 
-                         new Date(entry.dateFrom) : 
-                         new Date(entry.date);
-        const fromDate = new Date(dateFrom);
-        const toDate = new Date(dateTo);
-
-        return entryDate >= fromDate && entryDate <= toDate;
-      });
+  // Handle checkbox selection
+  const handleEntrySelection = (entryId, isSelected) => {
+    if (isSelected) {
+      setSelectedEntries(prev => [...prev, entryId]);
+    } else {
+      setSelectedEntries(prev => prev.filter(id => id !== entryId));
     }
+  };
 
-    return data;
+  // Handle select all checkbox
+  const handleSelectAll = (isSelected) => {
+    const currentData = getCurrentTabData();
+    if (isSelected) {
+      setSelectedEntries(currentData.map(entry => entry.entryId));
+    } else {
+      setSelectedEntries([]);
+    }
   };
 
   // Helper function to format date for display
@@ -247,89 +241,29 @@ function DataSummary({ fareData, expenseData, currentUser }) {
 
   const currentData = getCurrentTabData();
 
-  // Calculate summary totals
-  const totalCashApproval = cashApprovalData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
-  const totalBankApproval = bankApprovalData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
-  const cashInHand = approvedData
-    .filter(entry => entry.cashAmount > 0)
-    .reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
-
   return (
     <div className="data-approval-container">
       <div className="container-fluid">
-        <div className="cash-book-header">
+        <div className="approval-header">
           <h2><i className="bi bi-clipboard-check"></i> Data Summary</h2>
           <p>Review and approve submitted entries</p>
-
-          {/* Toggle Buttons */}
-          <div className="filter-toggle-section">
-            <button 
-              className="btn btn-outline-primary btn-sm filter-toggle-btn me-2"
-              onClick={() => setShowFilter(!showFilter)}
-            >
-              <i className={`bi ${showFilter ? 'bi-eye-slash' : 'bi-funnel'}`}></i>
-              {showFilter ? 'Hide Filter' : 'Show Filter'}
-            </button>
-            <button 
-              className="btn btn-outline-info btn-sm filter-toggle-btn"
-              onClick={() => setShowSummary(!showSummary)}
-            >
-              <i className={`bi ${showSummary ? 'bi-eye-slash' : 'bi-bar-chart'}`}></i>
-              {showSummary ? 'Hide Summary' : 'Show Summary'}
-            </button>
-          </div>
         </div>
-
-        {/* Summary Cards */}
-        {showSummary && (
-          <div className="summary-cards-section">
-            <div className="row mb-4">
-              <div className="col-md-4 col-sm-6 mb-3">
-                <div className="summary-card cash-approval-card">
-                  <div className="card-body">
-                    <h6><i className="bi bi-cash-stack"></i> Total Cash Approval</h6>
-                    <h4>{cashApprovalData.length}</h4>
-                    <small>₹{totalCashApproval.toLocaleString()}</small>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-4 col-sm-6 mb-3">
-                <div className="summary-card bank-approval-card">
-                  <div className="card-body">
-                    <h6><i className="bi bi-bank"></i> Total Bank Approval</h6>
-                    <h4>{bankApprovalData.length}</h4>
-                    <small>₹{totalBankApproval.toLocaleString()}</small>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-4 col-sm-6 mb-3">
-                <div className="summary-card cash-in-hand-card">
-                  <div className="card-body">
-                    <h6><i className="bi bi-wallet2"></i> Cash in Hand</h6>
-                    <h4>₹{cashInHand.toLocaleString()}</h4>
-                    <small>From approved entries</small>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Approval Tabs */}
         <div className="approval-tabs">
           <button
-            className={`tab-btn ${activeTab === 'cashApproval' ? 'active' : ''}`}
-            onClick={() => setActiveTab('cashApproval')}
+            className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
+            onClick={() => setActiveTab('pending')}
           >
-            <i className="bi bi-cash-stack"></i>
-            Cash Approval ({cashApprovalData.length})
+            <i className="bi bi-clock"></i>
+            Pending ({pendingData.length})
           </button>
           <button
-            className={`tab-btn ${activeTab === 'bankApproval' ? 'active' : ''}`}
-            onClick={() => setActiveTab('bankApproval')}
+            className={`tab-btn ${activeTab === 'waiting' ? 'active' : ''}`}
+            onClick={() => setActiveTab('waiting')}
           >
-            <i className="bi bi-bank"></i>
-            Bank Approval ({bankApprovalData.length})
+            <i className="bi bi-hourglass-split"></i>
+            Waiting ({waitingData.length})
           </button>
           <button
             className={`tab-btn ${activeTab === 'approved' ? 'active' : ''}`}
@@ -340,93 +274,115 @@ function DataSummary({ fareData, expenseData, currentUser }) {
           </button>
         </div>
 
-        {/* Date Filter */}
-        {showFilter && (
-          <div className="date-filter-section">
-            <div className="row">
-              <div className="col-md-6">
-                <label className="form-label">From Date</label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">To Date</label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                />
-              </div>
+        {/* Selection Controls */}
+        {activeTab !== 'approved' && currentData.length > 0 && (
+          <div className="selection-controls">
+            <div className="select-all-container">
+              <input
+                type="checkbox"
+                id="selectAll"
+                checked={selectedEntries.length === currentData.length && currentData.length > 0}
+                onChange={(e) => handleSelectAll(e.target.checked)}
+              />
+              <label htmlFor="selectAll">
+                Select All ({selectedEntries.length}/{currentData.length})
+              </label>
             </div>
+            
+            {selectedEntries.length > 0 && (
+              <button className="btn approve-btn">
+                <i className="bi bi-check-circle"></i>
+                Approve Selected ({selectedEntries.length})
+              </button>
+            )}
           </div>
         )}
 
-        {/* Data Table */}
-        <div className="data-table-section">
-          <div className="table-header">
-            <h5>
-              {activeTab === 'cashApproval' && 'Cash Approval Entries'}
-              {activeTab === 'bankApproval' && 'Bank Approval Entries'}
-              {activeTab === 'approved' && 'Approved Entries'}
-            </h5>
-          </div>
-
+        {/* Data Entries */}
+        <div className="tab-content">
           {currentData.length === 0 ? (
             <div className="no-data">
               <i className="bi bi-inbox"></i>
-              <p>No entries found</p>
+              <p>No {activeTab} entries found</p>
             </div>
           ) : (
-            <div className="table-responsive">
-              <table className="table table-hover data-entries-table">
-                <thead>
-                  <tr>
-                    <th width="15%">Entry ID</th>
-                    <th width="15%">Date</th>
-                    <th width="15%">Type</th>
-                    <th width="25%">Description</th>
-                    <th width="10%">Amount</th>
-                    <th width="10%">Status</th>
-                    <th width="10%">Submitted By</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentData.map(entry => (
-                    <tr key={entry.entryId}>
-                      <td><small>{entry.entryId}</small></td>
-                      <td>
-                        {entry.entryType === 'booking' && entry.dateFrom ? 
-                          formatDisplayDate(entry.dateFrom) : 
-                          formatDisplayDate(entry.date)
-                        }
-                      </td>
-                      <td>
-                        <span className="entry-type-badge">
-                          {entry.dataType}
+            <div className="recent-entries-grid">
+              {currentData.map(entry => (
+                <div
+                  key={entry.entryId}
+                  className={`recent-entry-card ${selectedEntries.includes(entry.entryId) ? 'selected' : ''}`}
+                  onClick={() => {
+                    if (activeTab !== 'approved') {
+                      handleEntrySelection(entry.entryId, !selectedEntries.includes(entry.entryId));
+                    }
+                  }}
+                >
+                  {activeTab !== 'approved' && (
+                    <div className="entry-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={selectedEntries.includes(entry.entryId)}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          handleEntrySelection(entry.entryId, e.target.checked);
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  <div className="entry-content">
+                    <div className="entry-header">
+                      <span className="entry-type-badge">
+                        {entry.dataType}
+                      </span>
+                      <span className="entry-status-badge" data-status={entry.entryStatus}>
+                        {entry.entryStatus === 'pending' && 'PENDING'}
+                        {entry.entryStatus === 'waiting' && 'WAITING'}
+                        {entry.entryStatus === 'forwardedBank' && 'FORWARDED TO BANK'}
+                        {entry.entryStatus === 'forwardedCash' && 'FORWARDED TO CASH'}
+                        {(entry.entryStatus === 'approved' || entry.entryStatus === 'approvedCash' || entry.entryStatus === 'approvedBank') && 'APPROVED'}
+                      </span>
+                    </div>
+
+                    <div className="entry-details">
+                      <div className="entry-row">
+                        <span className="label">Entry ID:</span>
+                        <span className="value">{entry.entryId}</span>
+                      </div>
+                      
+                      <div className="entry-row">
+                        <span className="label">Date:</span>
+                        <span className="value">
+                          {entry.entryType === 'booking' && entry.dateFrom ? 
+                            formatDisplayDate(entry.dateFrom) : 
+                            formatDisplayDate(entry.date)
+                          }
                         </span>
-                      </td>
-                      <td><small>{entry.displayName}</small></td>
-                      <td>₹{(entry.totalAmount || 0).toLocaleString('en-IN')}</td>
-                      <td>
-                        <span className="entry-status-badge" data-status={entry.entryStatus}>
-                          {entry.entryStatus === 'pending' && 'PENDING'}
-                          {entry.entryStatus === 'forwardedBank' && 'BANK APPROVAL'}
-                          {entry.entryStatus === 'forwardedCash' && 'CASH APPROVAL'}
-                          {(entry.entryStatus === 'approvedCash' || entry.entryStatus === 'cashApproved') && 'CASH APPROVED'}
-                          {(entry.entryStatus === 'approvedBank' || entry.entryStatus === 'bankApproved') && 'BANK APPROVED'}
-                          {entry.entryStatus === 'approved' && 'APPROVED'}
-                        </span>
-                      </td>
-                      <td><small>{entry.submittedBy}</small></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+
+                      <div className="entry-row">
+                        <span className="label">Description:</span>
+                        <span className="value">{entry.displayName}</span>
+                      </div>
+
+                      <div className="entry-row">
+                        <span className="label">Amount:</span>
+                        <span className="value">₹{(entry.totalAmount || 0).toLocaleString('en-IN')}</span>
+                      </div>
+
+                      <div className="entry-row">
+                        <span className="label">Submitted By:</span>
+                        <span className="value">{entry.submittedBy}</span>
+                      </div>
+
+                      <div className="entry-row">
+                        <span className="label">Time:</span>
+                        <span className="value">{formatDisplayTime(entry.timestamp)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
