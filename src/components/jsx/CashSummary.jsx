@@ -467,7 +467,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
                   ₹{Math.abs(cashBalance).toLocaleString()}
                   {cashBalance < 0 && ' (Deficit)'}
                 </h4>
-                <small className="text-muted">Pending Income - Pending Expense</small>
+                <small className="text-muted">Unapproved Income</small>
               </div>
             </div>
           </div>
