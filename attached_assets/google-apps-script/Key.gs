@@ -10,7 +10,7 @@ const API_KEYS = {
   // Main application API key
   'adsfsyieryieradafas123ew45': {
     name: 'AC Sukoon Transport App',
-    permissions: ['read', 'write', 'delete'],
+    permissions: 'all',
     created: '2025-01-13',
     active: true
   }
@@ -74,7 +74,7 @@ function validateAPIKey(apiKey) {
  */
 function hasPermission(apiKey, permission) {
   const validation = validateAPIKey(apiKey);
-  return validation.valid && validation.permissions.includes(permission);
+  return validation.valid && (validation.permissions === 'all' || validation.permissions.includes(permission));
 }
 
 /**
