@@ -106,46 +106,66 @@ function Analytics({ fareData = [], expenseData = [], totalEarnings = 0, totalEx
     };
   }, [fareData, expenseData, dateRange]);
 
-  // Monthly trends chart data
+  // Monthly trends chart data with enhanced styling
   const monthlyTrendsData = useMemo(() => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     
-    const earningsData = months.map(() => {
-      const baseAmount = Math.floor(totalEarnings / 6);
-      const variance = Math.floor(Math.random() * 10000) - 5000;
-      return Math.max(0, baseAmount + variance);
+    const earningsData = months.map((_, index) => {
+      const baseAmount = Math.floor(totalEarnings / 12);
+      const variance = Math.floor(Math.random() * 8000) - 4000;
+      const seasonalFactor = 1 + 0.3 * Math.sin((index / 12) * 2 * Math.PI);
+      return Math.max(0, Math.floor((baseAmount + variance) * seasonalFactor));
     });
     
-    const expensesData = months.map(() => {
-      const baseAmount = Math.floor(totalExpenses / 6);
-      const variance = Math.floor(Math.random() * 5000) - 2500;
-      return Math.max(0, baseAmount + variance);
+    const expensesData = months.map((_, index) => {
+      const baseAmount = Math.floor(totalExpenses / 12);
+      const variance = Math.floor(Math.random() * 4000) - 2000;
+      const seasonalFactor = 1 + 0.2 * Math.sin((index / 12) * 2 * Math.PI);
+      return Math.max(0, Math.floor((baseAmount + variance) * seasonalFactor));
     });
 
     return {
       labels: months,
       datasets: [
         {
-          label: 'Earnings',
+          label: '💰 Earnings',
           data: earningsData,
-          backgroundColor: 'rgba(38, 222, 129, 0.8)',
-          borderColor: 'rgba(38, 222, 129, 1)',
-          borderWidth: 2,
+          backgroundColor: (ctx) => {
+            const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(46, 213, 115, 0.9)');
+            gradient.addColorStop(1, 'rgba(46, 213, 115, 0.1)');
+            return gradient;
+          },
+          borderColor: '#2ed573',
+          borderWidth: 3,
+          borderRadius: 8,
+          borderSkipped: false,
+          hoverBackgroundColor: 'rgba(46, 213, 115, 1)',
+          hoverBorderWidth: 4,
         },
         {
-          label: 'Expenses',
+          label: '💸 Expenses',
           data: expensesData,
-          backgroundColor: 'rgba(255, 107, 107, 0.8)',
-          borderColor: 'rgba(255, 107, 107, 1)',
-          borderWidth: 2,
+          backgroundColor: (ctx) => {
+            const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(255, 107, 107, 0.9)');
+            gradient.addColorStop(1, 'rgba(255, 107, 107, 0.1)');
+            return gradient;
+          },
+          borderColor: '#ff6b6b',
+          borderWidth: 3,
+          borderRadius: 8,
+          borderSkipped: false,
+          hoverBackgroundColor: 'rgba(255, 107, 107, 1)',
+          hoverBorderWidth: 4,
         },
       ],
     };
   }, [totalEarnings, totalExpenses]);
 
-  // Expense breakdown pie chart
+  // Enhanced expense breakdown pie chart
   const expenseBreakdownData = useMemo(() => ({
-    labels: ['Fuel', 'Adda Payments', 'Union Payments', 'Service', 'Other'],
+    labels: ['⛽ Fuel', '🏪 Adda Payments', '🤝 Union Payments', '🔧 Service', '📦 Other'],
     datasets: [
       {
         data: [
@@ -156,74 +176,160 @@ function Analytics({ fareData = [], expenseData = [], totalEarnings = 0, totalEx
           analytics.breakdown.other
         ],
         backgroundColor: [
-          '#FF6384',
-          '#36A2EB',
-          '#FFCE56',
-          '#4BC0C0',
-          '#9966FF'
+          '#e74c3c', // Red for fuel
+          '#3498db', // Blue for adda
+          '#f39c12', // Orange for union
+          '#2ecc71', // Green for service
+          '#9b59b6'  // Purple for other
         ],
-        borderWidth: 2,
+        borderWidth: 4,
         borderColor: '#ffffff',
+        hoverBorderWidth: 6,
+        hoverOffset: 15,
+        hoverBorderColor: '#2c3e50',
+        cutout: '40%',
+        radius: '90%',
+        animation: {
+          animateRotate: true,
+          animateScale: true,
+        },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              usePointStyle: true,
+              pointStyle: 'circle',
+              padding: 20,
+              font: {
+                size: 12,
+                weight: 'bold'
+              }
+            }
+          }
+        }
       },
     ],
   }), [analytics.breakdown]);
 
-  // Weekly profit trend
+  // Enhanced weekly profit trend
   const weeklyProfitData = useMemo(() => {
-    const days = Array.from({length: 7}, (_, i) => {
+    const days = Array.from({length: 14}, (_, i) => {
       const date = new Date();
-      date.setDate(date.getDate() - (6 - i));
-      return date.toLocaleDateString('en-US', { weekday: 'short' });
+      date.setDate(date.getDate() - (13 - i));
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     });
 
     const avgDailyProfit = Math.floor(netProfit / 30);
-    const profitData = days.map(() => {
-      const variance = Math.floor(Math.random() * 2000) - 1000;
-      return Math.max(0, avgDailyProfit + variance);
+    const profitData = days.map((_, index) => {
+      const variance = Math.floor(Math.random() * 3000) - 1500;
+      const trendFactor = 1 + (index / 14) * 0.2; // Slight upward trend
+      return Math.max(0, Math.floor((avgDailyProfit + variance) * trendFactor));
     });
 
     return {
       labels: days,
       datasets: [
         {
-          label: 'Daily Profit',
+          label: '📈 Daily Profit Trend',
           data: profitData,
-          borderColor: 'rgba(102, 126, 234, 1)',
-          backgroundColor: 'rgba(102, 126, 234, 0.1)',
-          borderWidth: 3,
+          borderColor: '#667eea',
+          backgroundColor: (ctx) => {
+            const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(102, 126, 234, 0.3)');
+            gradient.addColorStop(1, 'rgba(102, 126, 234, 0.05)');
+            return gradient;
+          },
+          borderWidth: 4,
           fill: true,
           tension: 0.4,
-          pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+          pointBackgroundColor: '#667eea',
           pointBorderColor: '#ffffff',
-          pointBorderWidth: 2,
-          pointRadius: 6,
+          pointBorderWidth: 3,
+          pointRadius: 8,
+          pointHoverRadius: 12,
+          pointHoverBackgroundColor: '#5a67d8',
+          pointHoverBorderColor: '#ffffff',
+          pointHoverBorderWidth: 4,
+          shadowOffsetX: 3,
+          shadowOffsetY: 3,
+          shadowBlur: 10,
+          shadowColor: 'rgba(102, 126, 234, 0.3)',
         },
       ],
     };
   }, [netProfit]);
 
-  // Chart options
+  // Enhanced chart options
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
     plugins: {
       legend: {
         position: 'top',
+        labels: {
+          usePointStyle: true,
+          padding: 20,
+          font: {
+            size: 13,
+            weight: 'bold'
+          }
+        }
       },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: '#ffffff',
+        bodyColor: '#ffffff',
+        borderColor: '#667eea',
+        borderWidth: 2,
+        cornerRadius: 10,
+        displayColors: true,
+        callbacks: {
+          label: function(context) {
+            return `${context.dataset.label}: ₹${context.parsed.y.toLocaleString('en-IN')}`;
+          }
+        }
+      }
     },
     scales: {
       y: {
         beginAtZero: true,
         grid: {
-          color: 'rgba(0, 0, 0, 0.1)',
+          color: 'rgba(0, 0, 0, 0.05)',
+          drawBorder: false,
         },
+        ticks: {
+          font: {
+            size: 11,
+            weight: 'bold'
+          },
+          color: '#6b7280',
+          callback: function(value) {
+            return '₹' + value.toLocaleString('en-IN');
+          }
+        }
       },
       x: {
         grid: {
-          color: 'rgba(0, 0, 0, 0.1)',
+          color: 'rgba(0, 0, 0, 0.05)',
+          drawBorder: false,
         },
+        ticks: {
+          font: {
+            size: 11,
+            weight: 'bold'
+          },
+          color: '#6b7280'
+        }
       },
     },
+    animation: {
+      duration: 2000,
+      easing: 'easeInOutQuart',
+    }
   };
 
   const doughnutOptions = {
@@ -232,31 +338,107 @@ function Analytics({ fareData = [], expenseData = [], totalEarnings = 0, totalEx
     plugins: {
       legend: {
         position: 'bottom',
+        labels: {
+          usePointStyle: true,
+          padding: 15,
+          font: {
+            size: 12,
+            weight: 'bold'
+          }
+        }
       },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: '#ffffff',
+        bodyColor: '#ffffff',
+        borderColor: '#667eea',
+        borderWidth: 2,
+        cornerRadius: 10,
+        callbacks: {
+          label: function(context) {
+            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+            const percentage = ((context.parsed / total) * 100).toFixed(1);
+            return `${context.label}: ₹${context.parsed.toLocaleString('en-IN')} (${percentage}%)`;
+          }
+        }
+      }
     },
+    animation: {
+      animateRotate: true,
+      animateScale: true,
+      duration: 1500,
+    }
   };
 
   const lineOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
     plugins: {
       legend: {
-        display: false,
+        display: true,
+        position: 'top',
+        labels: {
+          usePointStyle: true,
+          padding: 20,
+          font: {
+            size: 13,
+            weight: 'bold'
+          }
+        }
       },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: '#ffffff',
+        bodyColor: '#ffffff',
+        borderColor: '#667eea',
+        borderWidth: 2,
+        cornerRadius: 10,
+        callbacks: {
+          label: function(context) {
+            return `${context.dataset.label}: ₹${context.parsed.y.toLocaleString('en-IN')}`;
+          }
+        }
+      }
     },
     scales: {
       y: {
         beginAtZero: true,
         grid: {
-          color: 'rgba(0, 0, 0, 0.1)',
+          color: 'rgba(0, 0, 0, 0.05)',
+          drawBorder: false,
         },
+        ticks: {
+          font: {
+            size: 11,
+            weight: 'bold'
+          },
+          color: '#6b7280',
+          callback: function(value) {
+            return '₹' + value.toLocaleString('en-IN');
+          }
+        }
       },
       x: {
         grid: {
           display: false,
         },
+        ticks: {
+          font: {
+            size: 11,
+            weight: 'bold'
+          },
+          color: '#6b7280'
+        }
       },
     },
+    animation: {
+      duration: 2000,
+      easing: 'easeInOutQuart',
+    }
   };
 
   // Calculate insights
