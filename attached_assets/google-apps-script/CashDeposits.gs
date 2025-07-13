@@ -1,4 +1,36 @@
+// ============================================================================
+// CASH DEPOSITS FUNCTIONS (CashDeposits.gs)
+// ============================================================================
+// Functions for managing cash deposit entries
+// ============================================================================
 
+/**
+ * Format timestamp for display - IST format
+ */
+function formatTimestampForDisplay(timestamp) {
+  try {
+    if (!timestamp) return '';
+
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return timestamp;
+
+    // Format as DD-MM-YYYY HH:MM:SS in IST
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit', 
+      year: 'numeric',
+      timeZone: 'Asia/Kolkata'
+    }) + ' ' + date.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: 'Asia/Kolkata'
+    });
+  } catch (error) {
+    console.error('Error formatting timestamp:', error);
+    return timestamp;
+  }
+}
 // ============================================================================
 // CASH DEPOSITS MANAGEMENT (CashDeposits.gs)
 // ============================================================================
@@ -86,7 +118,7 @@ function getCashDeposits() {
     }
 
     const data = sheet.getDataRange().getValues();
-    
+
     if (!data || data.length <= 1) {
       console.log("⚠️ No cash deposits found");
       return {
@@ -278,23 +310,23 @@ function deleteCashDeposit(data) {
 function formatCashDepositRow(sheet, rowNumber) {
   try {
     const range = sheet.getRange(rowNumber, 1, 1, 7);
-    
+
     // Set basic formatting
     range.setHorizontalAlignment("center");
     range.setVerticalAlignment("middle");
-    
+
     // Format cash amount column (column 5) as currency
     const amountRange = sheet.getRange(rowNumber, 5);
     amountRange.setNumberFormat("₹#,##0.00");
-    
+
     // Set borders
     range.setBorder(true, true, true, true, true, true);
-    
+
     // Alternate row coloring for better readability
     if (rowNumber % 2 === 0) {
       range.setBackground("#f8f9fa");
     }
-    
+
   } catch (error) {
     console.error("⚠️ Error formatting cash deposit row:", error);
   }
