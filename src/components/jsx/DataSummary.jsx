@@ -519,9 +519,9 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
       const date = new Date(dateStr);
       if (isNaN(date.getTime())) return dateStr;
 
-      // Always show in "07 Sept 2025" format for consistency
+      // Always show in "16 Jul 2025" format for consistency
       return date.toLocaleDateString('en-GB', {
-        day: '2-digit',
+        day: 'numeric',
         month: 'short',
         year: 'numeric'
       });
@@ -969,10 +969,10 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                             <table className="table table-striped table-sm cash-deposits-table">
                               <thead>
                                 <tr>
-                                  <th>Timestamp</th>
+                                  <th>Date</th>
+                                  <th>Time</th>
                                   <th>EntryType</th>
                                   <th>EntryId</th>
-                                  <th>Date</th>
                                   <th>CashAmount</th>
                                   <th>Description</th>
                                   <th>DepositedBy</th>
@@ -981,6 +981,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                               <tbody>
                                 {userCashDeposits.map((deposit) => (
                                   <tr key={deposit.id}>
+                                    <td>{formatDisplayDate(deposit.date)}</td>
                                     <td>{formatDisplayTime(deposit.timestamp)}</td>
                                     <td>
                                       <span className="badge bg-warning">
@@ -988,7 +989,6 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                                       </span>
                                     </td>
                                     <td>{deposit.entryId}</td>
-                                    <td>{formatDisplayDate(deposit.date)}</td>
                                     <td className="text-danger">₹{deposit.cashAmount.toLocaleString('en-IN')}</td>
                                     <td>{deposit.description}</td>
                                     <td>
