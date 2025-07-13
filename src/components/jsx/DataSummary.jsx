@@ -189,32 +189,103 @@ function DataSummary({ fareData, expenseData, currentUser }) {
     return filteredEntries;
   };
 
-  // Get final approved entries for table display - only approved status
+  // Get final approved entries for table display - only approved status from all data
   const getFinalApprovedEntriesForTable = () => {
     const currentUserName = currentUser?.fullName || currentUser?.username;
     if (!currentUserName) return [];
 
-    const filteredEntries = approvedData.filter(entry => 
-      entry.approvedBy === currentUserName && entry.entryStatus === 'approved'
-    );
+    // Search in all data sources, not just approvedData
+    let allEntries = [];
+    
+    // Process Fare Data
+    if (fareData && fareData.length > 0) {
+      fareData.forEach(entry => {
+        if (entry.entryStatus === 'approved' && entry.approvedBy === currentUserName) {
+          let dataType = '';
+          let displayName = '';
+          
+          if (entry.type === 'daily') {
+            dataType = 'Fare Receipt';
+            displayName = `Fare: ${entry.route || 'Daily Collection'}`;
+          } else if (entry.type === 'booking') {
+            dataType = 'Booking Entry';
+            displayName = `Booking: ${entry.bookingDetails || 'Booking Entry'}`;
+          } else if (entry.type === 'off') {
+            dataType = 'Off Day';
+            displayName = `Off Day: ${entry.reason || 'Off Day Request'}`;
+          }
+
+          allEntries.push({
+            ...entry,
+            dataType: dataType,
+            displayName: displayName
+          });
+        }
+      });
+    }
+
+    // Process Expense Data
+    if (expenseData && expenseData.length > 0) {
+      expenseData.forEach(entry => {
+        if (entry.entryStatus === 'approved' && entry.approvedBy === currentUserName) {
+          let dataType = '';
+          let displayName = '';
+
+          switch(entry.type) {
+            case 'fuel':
+              dataType = 'Fuel Payment';
+              displayName = `Fuel: ${entry.pumpName || 'Fuel Station'}`;
+              break;
+            case 'adda':
+              dataType = 'Adda Payment';
+              displayName = `Adda: ${entry.addaName || entry.description || 'Adda Fees'}`;
+              break;
+            case 'service':
+              dataType = 'Service Payment';
+              displayName = `Service: ${entry.serviceType || entry.serviceDetails || 'Service'}`;
+              break;
+            case 'union':
+              dataType = 'Union Payment';
+              displayName = `Union: ${entry.unionName || entry.description || 'Union Fees'}`;
+              break;
+            case 'other':
+              dataType = 'Other Payment';
+              displayName = `Other: ${entry.paymentType || entry.paymentDetails || 'Other Payment'}`;
+              break;
+            default:
+              dataType = 'Payment';
+              displayName = `Payment: ${entry.description || 'Payment Entry'}`;
+          }
+
+          allEntries.push({
+            ...entry,
+            dataType: dataType,
+            displayName: displayName
+          });
+        }
+      });
+    }
+
+    // Sort by timestamp (newest first)
+    allEntries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
     console.log('🔍 DataSummary - Checking final approved entries for table:');
     console.log('📊 Current user:', currentUserName);
-    console.log('✅ Entries with approved status approved by current user:', filteredEntries.length);
-    console.log('📝 Final approved entries details:', filteredEntries);
+    console.log('✅ Entries with approved status approved by current user:', allEntries.length);
+    console.log('📝 Final approved entries details:', allEntries);
 
-    return filteredEntries;
+    return allEntries;
   };
 
-  // Calculate total cash from approved entries of current user
+  // Calculate total cash from final approved entries of current user
   const calculateTotalCash = () => {
-    const userApprovedEntries = getApprovedEntriesForCurrentUser();
+    const userApprovedEntries = getFinalApprovedEntriesForTable();
     return userApprovedEntries.reduce((total, entry) => total + (entry.cashAmount || 0), 0);
   };
 
-  // Calculate total bank from approved entries of current user
+  // Calculate total bank from final approved entries of current user
   const calculateTotalBank = () => {
-    const userApprovedEntries = getApprovedEntriesForCurrentUser();
+    const userApprovedEntries = getFinalApprovedEntriesForTable();
     return userApprovedEntries.reduce((total, entry) => total + (entry.bankAmount || 0), 0);
   };
 
@@ -722,7 +793,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                 ) : (
                   <div className="no-approved-entries">
                     <i className="bi bi-inbox"></i>
-                    <p>No approved entries found</p>
+                    <p>No entries with final approval status found that were approved by you</p>
                   </div>
                 )}
               </div>
