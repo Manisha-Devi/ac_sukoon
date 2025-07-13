@@ -20,6 +20,9 @@ import authService from "./services/authService";
 function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [expenseData, setExpenseData] = useState([]);
+  const [fareData, setFareData] = useState([]);
+  const [totalEarnings, setTotalEarnings] = useState(0);
+  const [totalExpenses, setTotalExpenses] = useState(0);
   const [allUsers, setAllUsers] = useState([]);
   const [cashBookEntries, setCashBookEntries] = useState([]);
   const [cashDepositData, setCashDepositData] = useState([]);
@@ -453,6 +456,11 @@ function App() {
       console.error('Error fetching cash deposits:', error);
     }
   };
+
+  // Fetch cash deposits on component mount
+  useEffect(() => {
+    fetchCashDeposits();
+  }, []);
 
   // Generate cash book entries from fare, expense, and cash deposit data
   const generateCashBookEntries = () => {
