@@ -154,10 +154,16 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
   const currentEntries = filteredData.slice(indexOfFirstEntry, indexOfLastEntry);
   const totalPages = Math.ceil(filteredData.length / entriesPerPage);
 
-  // Handle checkbox selection for individual rows (for pending and approvedBank status)
+  // Handle checkbox selection for individual rows (only for specific conditions)
   const handleSelectEntry = (entryId) => {
     const entry = currentEntries.find(e => e.entryId === entryId);
-    if (entry && (entry.entryStatus === 'approvedBank' || entry.entryStatus === 'pending')) {
+    // Show checkbox only for:
+    // 1. status = 'approvedBank' (regardless of bankAmount)
+    // 2. status = 'pending' AND bankAmount = 0
+    if (entry && (
+      entry.entryStatus === 'approvedBank' || 
+      (entry.entryStatus === 'pending' && (entry.bankAmount || 0) === 0)
+    )) {
       setSelectedEntries(prev => {
         if (prev.includes(entryId)) {
           return prev.filter(id => id !== entryId);
@@ -168,10 +174,11 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
     }
   };
 
-  // Handle select all checkbox (for pending and approvedBank status entries)
+  // Handle select all checkbox (for selectable entries only)
   const handleSelectAll = () => {
     const selectableEntries = currentEntries.filter(entry => 
-      entry.entryStatus === 'approvedBank' || entry.entryStatus === 'pending'
+      entry.entryStatus === 'approvedBank' || 
+      (entry.entryStatus === 'pending' && (entry.bankAmount || 0) === 0)
     );
     const selectableEntryIds = selectableEntries.map(entry => entry.entryId);
 
@@ -184,7 +191,8 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
 
   // Check if all visible selectable entries are selected
   const selectableEntries = currentEntries.filter(entry => 
-    entry.entryStatus === 'approvedBank' || entry.entryStatus === 'pending'
+    entry.entryStatus === 'approvedBank' || 
+    (entry.entryStatus === 'pending' && (entry.bankAmount || 0) === 0)
   );
   const isAllSelected = selectableEntries.length > 0 && 
     selectableEntries.every(entry => selectedEntries.includes(entry.entryId));
@@ -559,7 +567,8 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
                         ₹{(entry.cashAmount || 0).toLocaleString()}
                       </td>
                       <td>
-                        {(entry.entryStatus === 'approvedBank' || entry.entryStatus === 'pending') ? (
+                        {(entry.entryStatus === 'approvedBank' || 
+                          (entry.entryStatus === 'pending' && (entry.bankAmount || 0) === 0)) ? (
                           <input 
                             type="checkbox" 
                             className="form-check-input"
