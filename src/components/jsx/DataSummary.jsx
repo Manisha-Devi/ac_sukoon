@@ -10,7 +10,8 @@ function DataSummary({ fareData, expenseData, currentUser }) {
   const [approvedData, setApprovedData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEntries, setSelectedEntries] = useState([]);
-  const [showFilterCard, setShowFilterCard] = useState(true);
+  const [showFilter, setShowFilter] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
 
   // Log user data for debugging
   useEffect(() => {
@@ -509,34 +510,106 @@ function DataSummary({ fareData, expenseData, currentUser }) {
           <h2><i className="bi bi-clipboard-check"></i> Data Summary</h2>
           <p>Review and approve submitted entries</p>
 
-          {/* Toggle Button for Filter Card */}
+          {/* Toggle Buttons */}
           <div className="filter-toggle-section">
             <button 
-              className="btn btn-outline-primary btn-sm filter-toggle-btn"
-              onClick={() => setShowFilterCard(!showFilterCard)}
+              className="btn btn-outline-primary btn-sm filter-toggle-btn me-2"
+              onClick={() => setShowFilter(!showFilter)}
             >
-              <i className={`bi ${showFilterCard ? 'bi-eye-slash' : 'bi-funnel'}`}></i>
-              {showFilterCard ? 'Hide Filter' : 'Show Filter'}
+              <i className={`bi ${showFilter ? 'bi-eye-slash' : 'bi-funnel'}`}></i>
+              {showFilter ? 'Hide Filter' : 'Show Filter'}
+            </button>
+            <button 
+              className="btn btn-outline-info btn-sm filter-toggle-btn"
+              onClick={() => setShowSummary(!showSummary)}
+            >
+              <i className={`bi ${showSummary ? 'bi-eye-slash' : 'bi-bar-chart'}`}></i>
+              {showSummary ? 'Hide Summary' : 'Show Summary'}
             </button>
           </div>
         </div>
 
-        {/* Separate Filter Card */}
-        {showFilterCard && (
+        {/* Filter Card */}
+        {showFilter && (
           <div className="filter-card">
             <div className="filter-card-content">
-              <button 
-                className="btn btn-outline-primary btn-sm filter-btn me-2"
-              >
-                <i className="bi bi-funnel"></i>
-                Filter
-              </button>
-              <button 
-                className="btn btn-outline-info btn-sm summary-btn"
-              >
-                <i className="bi bi-bar-chart"></i>
-                Summary
-              </button>
+              <h5><i className="bi bi-funnel"></i> Filter Options</h5>
+              <div className="filter-options">
+                <div className="row">
+                  <div className="col-md-3">
+                    <label className="form-label">Date From</label>
+                    <input type="date" className="form-control" />
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label">Date To</label>
+                    <input type="date" className="form-control" />
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label">Entry Type</label>
+                    <select className="form-select">
+                      <option value="">All Types</option>
+                      <option value="fare">Fare Receipt</option>
+                      <option value="booking">Booking Entry</option>
+                      <option value="fuel">Fuel Payment</option>
+                      <option value="adda">Adda Payment</option>
+                      <option value="other">Other Payment</option>
+                    </select>
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label">Status</label>
+                    <select className="form-select">
+                      <option value="">All Status</option>
+                      <option value="pending">Pending</option>
+                      <option value="approved">Approved</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="filter-actions mt-3">
+                  <button className="btn btn-primary btn-sm me-2">
+                    <i className="bi bi-search"></i> Apply Filter
+                  </button>
+                  <button className="btn btn-outline-secondary btn-sm">
+                    <i className="bi bi-arrow-clockwise"></i> Reset
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Summary Card */}
+        {showSummary && (
+          <div className="summary-card-container">
+            <div className="summary-card-content">
+              <h5><i className="bi bi-bar-chart"></i> Data Summary</h5>
+              <div className="summary-stats">
+                <div className="row">
+                  <div className="col-md-3">
+                    <div className="stat-card pending-stat">
+                      <div className="stat-number">{pendingData.length}</div>
+                      <div className="stat-label">Pending</div>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="stat-card bank-stat">
+                      <div className="stat-number">{bankApprovalData.length}</div>
+                      <div className="stat-label">Bank Approval</div>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="stat-card cash-stat">
+                      <div className="stat-number">{cashApprovalData.length}</div>
+                      <div className="stat-label">Cash Approval</div>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="stat-card approved-stat">
+                      <div className="stat-number">{approvedData.length}</div>
+                      <div className="stat-label">Approved</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
