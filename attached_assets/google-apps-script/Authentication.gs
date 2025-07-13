@@ -13,6 +13,14 @@ function handleLogin(data) {
     console.log("🔐 Processing login attempt for user:", data.username);
 
     // Validate API key first
+    if (!data || !data.apiKey) {
+      console.log("❌ No API key provided for login attempt");
+      return {
+        success: false,
+        error: "API key is required"
+      };
+    }
+
     const keyValidation = validateAPIKey(data.apiKey);
     if (!keyValidation.valid) {
       console.log("❌ Invalid API key for login attempt");
@@ -97,6 +105,14 @@ function getAllUsers(data) {
     console.log('👥 Fetching all users...');
 
     // Validate API key first
+    if (!data || !data.apiKey) {
+      console.log("❌ No API key provided for getAllUsers");
+      return {
+        success: false,
+        error: "API key is required"
+      };
+    }
+
     const keyValidation = validateAPIKey(data.apiKey);
     if (!keyValidation.valid) {
       console.log("❌ Invalid API key for getAllUsers");
@@ -185,6 +201,14 @@ function testConnection(data) {
     console.log('🔍 Testing connection...');
 
     // Validate API key first
+    if (!data || !data.apiKey) {
+      console.log("❌ No API key provided for test connection");
+      return {
+        success: false,
+        error: "API key is required"
+      };
+    }
+
     const keyValidation = validateAPIKey(data.apiKey);
     if (!keyValidation.valid) {
       console.log("❌ Invalid API key for test connection");
