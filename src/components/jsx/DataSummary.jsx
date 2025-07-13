@@ -115,15 +115,27 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       allEntries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
       // Separate by status with correct filtering
-      setPendingData(allEntries.filter(entry => entry.entryStatus === 'pending'));
-      setBankApprovalData(allEntries.filter(entry => entry.entryStatus === 'forwardedBank'));
-      setCashApprovalData(allEntries.filter(entry => entry.entryStatus === 'forwardedCash'));
-      setApprovedData(allEntries.filter(entry => 
+      const pendingEntries = allEntries.filter(entry => entry.entryStatus === 'pending');
+      const bankApprovalEntries = allEntries.filter(entry => entry.entryStatus === 'forwardedBank');
+      const cashApprovalEntries = allEntries.filter(entry => entry.entryStatus === 'forwardedCash');
+      const approvedEntries = allEntries.filter(entry => 
         entry.entryStatus === 'approvedCash' || 
         entry.entryStatus === 'approvedBank' ||
         entry.entryStatus === 'cashApproved' ||
-        entry.entryStatus === 'bankApproved'
-      ));
+        entry.entryStatus === 'bankApproved' ||
+        entry.entryStatus === 'approved'
+      );
+
+      console.log('📊 DataSummary - Data separation results:');
+      console.log('⏳ Pending:', pendingEntries.length);
+      console.log('🏦 Bank Approval:', bankApprovalEntries.length);
+      console.log('💰 Cash Approval:', cashApprovalEntries.length);
+      console.log('✅ Approved:', approvedEntries.length);
+
+      setPendingData(pendingEntries);
+      setBankApprovalData(bankApprovalEntries);
+      setCashApprovalData(cashApprovalEntries);
+      setApprovedData(approvedEntries);
 
       setLoading(false);
     } catch (error) {
@@ -178,7 +190,15 @@ function DataSummary({ fareData, expenseData, currentUser }) {
     const currentUserName = currentUser?.fullName || currentUser?.username;
     if (!currentUserName) return [];
 
-    return approvedData.filter(entry => entry.approvedBy === currentUserName);
+    const filteredEntries = approvedData.filter(entry => entry.approvedBy === currentUserName);
+    
+    console.log('🔍 DataSummary - Checking approved entries:');
+    console.log('📊 Current user:', currentUserName);
+    console.log('📋 Total approved data:', approvedData.length);
+    console.log('✅ Entries approved by current user:', filteredEntries.length);
+    console.log('📝 Approved entries details:', filteredEntries);
+
+    return filteredEntries;
   };
 
   // Calculate total cash from approved entries of current user
@@ -236,7 +256,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       const updatedEntryIds = [...selectedEntries];
 
       // Update local state for immediate UI feedback
-      const updateLocalData = (dataArray) => {
+      const updateLocalData = (dataArray, shouldMoveToApproved = false) => {
         return dataArray.map(entry => {
           if (updatedEntryIds.includes(entry.entryId)) {
             return {
@@ -253,7 +273,27 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       setPendingData(prev => updateLocalData(prev));
       setBankApprovalData(prev => updateLocalData(prev));
       setCashApprovalData(prev => updateLocalData(prev));
-      setApprovedData(prev => updateLocalData(prev));
+      
+      // For approved entries, add them to approved data if they're not already there
+      if (newStatus === 'approved' || newStatus === 'approvedBank' || newStatus === 'approvedCash') {
+        setApprovedData(prev => {
+          const existingIds = prev.map(e => e.entryId);
+          const newApprovedEntries = selectedEntries.map(entryId => {
+            // Find entry from current tab data
+            const currentData = getCurrentTabData();
+            const entry = currentData.find(e => e.entryId === entryId);
+            return {
+              ...entry,
+              entryStatus: newStatus,
+              approvedBy: approverName
+            };
+          }).filter(entry => entry && !existingIds.includes(entry.entryId));
+          
+          return [...prev, ...newApprovedEntries];
+        });
+      } else {
+        setApprovedData(prev => updateLocalData(prev));
+      }
 
       // Clear selection immediately
       setSelectedEntries([]);
@@ -338,12 +378,16 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       // Wait for all syncs to complete in background
       Promise.all(syncPromises).then(() => {
         console.log('✅ All entries synced to Google Sheets');
-        // Refresh local data after sync
-        processAllData();
+        // Don't refresh immediately to avoid losing approved entries
+        setTimeout(() => {
+          processAllData();
+        }, 2000); // Wait 2 seconds before refreshing
       }).catch((error) => {
         console.error('❌ Some entries failed to sync to Google Sheets:', error);
-        // Still refresh local data to show any partial updates
-        processAllData();
+        // Still refresh local data to show any partial updates, but with delay
+        setTimeout(() => {
+          processAllData();
+        }, 3000);
       });
 
     } catch (error) {
