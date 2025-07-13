@@ -3,13 +3,12 @@ import "../css/DataSummary.css";
 import authService from "../../services/authService.js";
 
 function DataSummary({ fareData, expenseData, currentUser }) {
-  const [activeTab, setActiveTab] = useState('pending');
+  const [activeTab, setActiveTab] = useState('cashApproval');
   const [pendingData, setPendingData] = useState([]);
   const [bankApprovalData, setBankApprovalData] = useState([]);
   const [cashApprovalData, setCashApprovalData] = useState([]);
   const [approvedData, setApprovedData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedEntries, setSelectedEntries] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
   const [showSummary, setShowSummary] = useState(true);
   const [dateFrom, setDateFrom] = useState('');
@@ -35,7 +34,6 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       // Process Fare Data
       if (fareData && fareData.length > 0) {
         fareData.forEach(entry => {
-          // Include all entries including off days
           let dataType = '';
           let displayName = '';
           let description = '';
@@ -116,7 +114,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       // Sort by timestamp (newest first)
       allEntries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-      // Separate by status with correct filtering
+      // Separate by status
       setPendingData(allEntries.filter(entry => entry.entryStatus === 'pending'));
       setBankApprovalData(allEntries.filter(entry => entry.entryStatus === 'forwardedBank'));
       setCashApprovalData(allEntries.filter(entry => entry.entryStatus === 'forwardedCash'));
@@ -124,7 +122,8 @@ function DataSummary({ fareData, expenseData, currentUser }) {
         entry.entryStatus === 'approvedCash' || 
         entry.entryStatus === 'approvedBank' ||
         entry.entryStatus === 'cashApproved' ||
-        entry.entryStatus === 'bankApproved'
+        entry.entryStatus === 'bankApproved' ||
+        entry.entryStatus === 'approved'
       ));
 
       setLoading(false);
@@ -137,23 +136,19 @@ function DataSummary({ fareData, expenseData, currentUser }) {
   // Get current tab data with date filtering
   const getCurrentTabData = () => {
     let data = [];
-    
+
     switch (activeTab) {
-      case 'pending': 
-        data = pendingData;
+      case 'cashApproval': 
+        data = cashApprovalData;
         break;
       case 'bankApproval': 
         data = bankApprovalData;
         break;
-      case 'cashApproval': 
-        data = cashApprovalData;
-        break;
       case 'approved': 
         data = approvedData;
         break;
-      case 'all':
       default: 
-        data = [...pendingData, ...bankApprovalData, ...cashApprovalData, ...approvedData];
+        data = approvedData;
         break;
     }
 
@@ -165,7 +160,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                          new Date(entry.date);
         const fromDate = new Date(dateFrom);
         const toDate = new Date(dateTo);
-        
+
         return entryDate >= fromDate && entryDate <= toDate;
       });
     }
@@ -173,186 +168,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
     return data;
   };
 
-  // Handle entry selection
-  const handleEntrySelect = (entryId) => {
-    setSelectedEntries(prev => {
-      if (prev.includes(entryId)) {
-        return prev.filter(id => id !== entryId);
-      } else {
-        return [...prev, entryId];
-      }
-    });
-  };
-
-  // Handle select all
-  const handleSelectAll = () => {
-    const currentData = getCurrentTabData();
-    const currentIds = currentData.map(entry => entry.entryId);
-
-    if (selectedEntries.length === currentIds.length && currentIds.length > 0) {
-      setSelectedEntries([]);
-    } else {
-      setSelectedEntries(currentIds);
-    }
-  };
-
-  // Check if all entries in current tab are selected
-  const isAllSelected = () => {
-    const currentData = getCurrentTabData();
-    const currentIds = currentData.map(entry => entry.entryId);
-    return currentIds.length > 0 && currentIds.every(id => selectedEntries.includes(id));
-  };
-
-  // Handle approval action
-  const handleApproval = async () => {
-    if (selectedEntries.length === 0) {
-      alert('Please select entries to approve');
-      return;
-    }
-
-    try {
-      const approverName = currentUser?.fullName || currentUser?.username;
-      let newStatus = '';
-
-      // Determine new status based on current tab and proper flow
-      switch (activeTab) {
-        case 'pending':
-          newStatus = 'approved'; // Direct approval from pending
-          break;
-        case 'bankApproval':
-          newStatus = 'approvedBank'; // forwardedBank -> approvedBank
-          break;
-        case 'cashApproval':
-          newStatus = 'approvedCash'; // forwardedCash -> approvedCash
-          break;
-        case 'approved':
-          newStatus = 'approved'; // Final approval (approvedCash/approvedBank -> approved)
-          break;
-        default:
-          throw new Error('Invalid tab for approval');
-      }
-
-      // First update local UI state immediately
-      const updatedEntryIds = [...selectedEntries];
-
-      // Update local state for immediate UI feedback
-      const updateLocalData = (dataArray) => {
-        return dataArray.map(entry => {
-          if (updatedEntryIds.includes(entry.entryId)) {
-            return {
-              ...entry,
-              entryStatus: newStatus,
-              approvedBy: approverName
-            };
-          }
-          return entry;
-        });
-      };
-
-      // Update all local data states immediately
-      setPendingData(prev => updateLocalData(prev));
-      setBankApprovalData(prev => updateLocalData(prev));
-      setCashApprovalData(prev => updateLocalData(prev));
-      setApprovedData(prev => updateLocalData(prev));
-
-      // Clear selection immediately
-      setSelectedEntries([]);
-
-      // Show immediate success feedback
-      alert(`${updatedEntryIds.length} entries approved successfully`);
-
-      // Then sync to Google Sheets in background
-      const syncPromises = updatedEntryIds.map(async (entryId) => {
-        // Find entry from all data sources, not just current tab
-        let entry = null;
-
-        // Search in all data arrays
-        const allData = [...pendingData, ...bankApprovalData, ...cashApprovalData, ...approvedData];
-        entry = allData.find(e => e.entryId === entryId);
-
-        if (!entry) {
-          console.error(`Entry ${entryId} not found in any data source`);
-          return;
-        }
-
-        console.log(`🔄 Syncing entry ${entryId} to Google Sheets:`, entry);
-
-        // Call appropriate status update function
-        let result;
-        try {
-          switch (entry.dataType) {
-            case 'Fare Receipt':
-              result = await authService.updateFareReceiptStatus(entryId, newStatus, approverName);
-              break;
-            case 'Booking Entry':
-              result = await authService.updateBookingEntryStatus(entryId, newStatus, approverName);
-              break;
-            case 'Off Day':
-              result = await authService.updateOffDayStatus(entryId, newStatus, approverName);
-              break;
-            case 'Fuel Payment':
-              result = await authService.updateFuelPaymentStatus(entryId, newStatus, approverName);
-              break;
-            case 'Adda Payment':
-              result = await authService.updateAddaPaymentStatus(entryId, newStatus, approverName);
-              break;
-            case 'Union Payment':
-              result = await authService.updateUnionPaymentStatus(entryId, newStatus, approverName);
-              break;
-            case 'Service Payment':
-              result = await authService.updateServicePaymentStatus(entryId, newStatus, approverName);
-              break;
-            case 'Other Payment':
-              result = await authService.updateOtherPaymentStatus(entryId, newStatus, approverName);
-              break;
-            default:
-              console.error(`Unsupported data type: ${entry.dataType}`);
-              return { success: false, error: 'Unsupported data type' };
-          }
-        } catch (error) {
-          console.error(`Error updating ${entry.dataType} status:`, error);
-          result = { success: false, error: error.message };
-        }
-
-        if (!result || !result.success) {
-          console.error(`❌ Failed to sync entry ${entryId} to Google Sheets:`, result?.error || 'Unknown error');
-          return { success: false, error: result?.error || 'Unknown error' };
-        } else {
-          console.log(`✅ Entry ${entryId} synced to Google Sheets successfully`);
-        }
-
-        // Update parent state after successful sync
-        if (window.updateEntryStatusInParent) {
-          window.updateEntryStatusInParent(entryId, newStatus, entry.type || entry.entryType);
-        }
-
-        // Also update parent component states directly
-        if (result.success && typeof window.updateExpenseDataState === 'function') {
-          window.updateExpenseDataState(entryId, newStatus, approverName);
-        }
-        if (result.success && typeof window.updateFareDataState === 'function') {
-          window.updateFareDataState(entryId, newStatus, approverName);
-        }
-      });
-
-      // Wait for all syncs to complete in background
-      Promise.all(syncPromises).then(() => {
-        console.log('✅ All entries synced to Google Sheets');
-        // Refresh local data after sync
-        processAllData();
-      }).catch((error) => {
-        console.error('❌ Some entries failed to sync to Google Sheets:', error);
-        // Still refresh local data to show any partial updates
-        processAllData();
-      });
-
-    } catch (error) {
-      console.error('Error approving entries:', error);
-      alert('Error approving entries: ' + error.message);
-    }
-  };
-
-  // Helper function to format date for display - consistent format
+  // Helper function to format date for display
   const formatDisplayDate = (dateStr) => {
     if (!dateStr) return '';
 
@@ -360,7 +176,6 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       const date = new Date(dateStr);
       if (isNaN(date.getTime())) return dateStr;
 
-      // Always show in "07 Sept 2025" format for consistency
       return date.toLocaleDateString('en-GB', {
         day: '2-digit',
         month: 'short',
@@ -371,7 +186,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
     }
   };
 
-  // Helper function to format time for display - simple format
+  // Helper function to format time for display
   const formatDisplayTime = (timestampStr) => {
     if (!timestampStr) return '';
 
@@ -379,7 +194,6 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       const date = new Date(timestampStr);
       if (isNaN(date.getTime())) return timestampStr;
 
-      // Simple time format - HH:MM AM/PM
       return date.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
@@ -388,106 +202,6 @@ function DataSummary({ fareData, expenseData, currentUser }) {
     } catch (error) {
       return timestampStr;
     }
-  };
-
-  // Render entry card
-  const renderEntryCard = (entry) => {
-    const isSelected = selectedEntries.includes(entry.entryId);
-
-    return (
-      <div 
-        key={entry.entryId} 
-        className={`recent-entry-card ${isSelected ? 'selected' : ''}`}
-        onClick={() => handleEntrySelect(entry.entryId)}
-      >
-        <div className="entry-checkbox">
-          <input
-            type="checkbox"
-            checked={isSelected}
-            onChange={() => handleEntrySelect(entry.entryId)}
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-
-        <div className="entry-content">
-          <div className="entry-header">
-            <div className="entry-type-badge">
-              {entry.dataType}
-            </div>
-            <div className="entry-status-badge" data-status={entry.entryStatus}>
-              {entry.entryStatus === 'pending' && (
-                <>
-                  <i className="bi bi-clock me-1"></i>
-                  PENDING
-                </>
-              )}
-              {entry.entryStatus === 'forwardedBank' && (
-                <>
-                  <i className="bi bi-bank me-1"></i>
-                  FORWARDED TO BANK
-                </>
-              )}
-              {entry.entryStatus === 'forwardedCash' && (
-                <>
-                  <i className="bi bi-cash-stack me-1"></i>
-                  FORWARDED TO CASH
-                </>
-              )}
-              {(entry.entryStatus === 'approvedCash' || entry.entryStatus === 'cashApproved') && (
-                <>
-                  <i className="bi bi-check-circle me-1"></i>
-                  CASH APPROVED
-                </>
-              )}
-              {(entry.entryStatus === 'approvedBank' || entry.entryStatus === 'bankApproved') && (
-                <>
-                  <i className="bi bi-check-circle me-1"></i>
-                  BANK APPROVED
-                </>
-              )}
-              {entry.entryStatus === 'approved' && (
-                <>
-                  <i className="bi bi-check-circle-fill me-1"></i>
-                  FINAL APPROVED
-                </>
-              )}
-            </div>
-          </div>
-
-          <div className="entry-details">
-            <div className="entry-row">
-              <span className="label">Entry ID:</span>
-              <span className="value">{entry.entryId}</span>
-            </div>
-            <div className="entry-row">
-              <span className="label">Submitted By:</span>
-              <span className="value">{entry.submittedBy}</span>
-            </div>
-            <div className="entry-row">
-              <span className="label">Date:</span>
-              <span className="value">
-                        {entry.entryType === 'booking' && entry.dateFrom ? 
-                          formatDisplayDate(entry.dateFrom) : 
-                          formatDisplayDate(entry.date)
-                        }
-                      </span>
-            </div>
-            <div className="entry-row">
-              <span className="label">Description:</span>
-              <span className="value">{entry.displayName}</span>
-            </div>
-            <div className="entry-row">
-              <span className="label">Total Amount:</span>
-              <span className="value">₹{(entry.totalAmount || 0).toLocaleString('en-IN')}</span>
-            </div>
-            <div className="entry-row">
-              <span className="label">Time:</span>
-              <span className="value">{formatDisplayTime(entry.timestamp)}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
   };
 
   // Get user role from different possible fields
@@ -505,7 +219,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
     );
   }
 
-  // Check user permission after all hooks are executed
+  // Check user permission
   if (userRole !== 'Manager' && userRole !== 'Admin') {
     return (
       <div className="data-approval-container">
@@ -533,6 +247,13 @@ function DataSummary({ fareData, expenseData, currentUser }) {
 
   const currentData = getCurrentTabData();
 
+  // Calculate summary totals
+  const totalCashApproval = cashApprovalData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+  const totalBankApproval = bankApprovalData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0);
+  const cashInHand = approvedData
+    .filter(entry => entry.cashAmount > 0)
+    .reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
+
   return (
     <div className="data-approval-container">
       <div className="container-fluid">
@@ -559,11 +280,71 @@ function DataSummary({ fareData, expenseData, currentUser }) {
           </div>
         </div>
 
+        {/* Summary Cards */}
+        {showSummary && (
+          <div className="summary-cards-section">
+            <div className="row mb-4">
+              <div className="col-md-4 col-sm-6 mb-3">
+                <div className="summary-card cash-approval-card">
+                  <div className="card-body">
+                    <h6><i className="bi bi-cash-stack"></i> Total Cash Approval</h6>
+                    <h4>{cashApprovalData.length}</h4>
+                    <small>₹{totalCashApproval.toLocaleString()}</small>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-4 col-sm-6 mb-3">
+                <div className="summary-card bank-approval-card">
+                  <div className="card-body">
+                    <h6><i className="bi bi-bank"></i> Total Bank Approval</h6>
+                    <h4>{bankApprovalData.length}</h4>
+                    <small>₹{totalBankApproval.toLocaleString()}</small>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-4 col-sm-6 mb-3">
+                <div className="summary-card cash-in-hand-card">
+                  <div className="card-body">
+                    <h6><i className="bi bi-wallet2"></i> Cash in Hand</h6>
+                    <h4>₹{cashInHand.toLocaleString()}</h4>
+                    <small>From approved entries</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Approval Tabs */}
+        <div className="approval-tabs">
+          <button
+            className={`tab-btn ${activeTab === 'cashApproval' ? 'active' : ''}`}
+            onClick={() => setActiveTab('cashApproval')}
+          >
+            <i className="bi bi-cash-stack"></i>
+            Cash Approval ({cashApprovalData.length})
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'bankApproval' ? 'active' : ''}`}
+            onClick={() => setActiveTab('bankApproval')}
+          >
+            <i className="bi bi-bank"></i>
+            Bank Approval ({bankApprovalData.length})
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'approved' ? 'active' : ''}`}
+            onClick={() => setActiveTab('approved')}
+          >
+            <i className="bi bi-check-circle"></i>
+            Approved ({approvedData.length})
+          </button>
+        </div>
+
         {/* Date Filter */}
         {showFilter && (
           <div className="date-filter-section">
             <div className="row">
-              <div className="col-md-4">
+              <div className="col-md-6">
                 <label className="form-label">From Date</label>
                 <input
                   type="date"
@@ -572,7 +353,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                   onChange={(e) => setDateFrom(e.target.value)}
                 />
               </div>
-              <div className="col-md-4">
+              <div className="col-md-6">
                 <label className="form-label">To Date</label>
                 <input
                   type="date"
@@ -581,64 +362,6 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                   onChange={(e) => setDateTo(e.target.value)}
                 />
               </div>
-              <div className="col-md-4">
-                <label className="form-label">Status Filter</label>
-                <select 
-                  className="form-control"
-                  value={activeTab}
-                  onChange={(e) => setActiveTab(e.target.value)}
-                >
-                  <option value="all">All Entries</option>
-                  <option value="pending">Pending</option>
-                  <option value="bankApproval">Bank Approval</option>
-                  <option value="cashApproval">Cash Approval</option>
-                  <option value="approved">Approved</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Summary Cards */}
-        {showSummary && (
-          <div className="summary-cards-section">
-            <div className="row mb-4">
-              <div className="col-md-3 col-sm-6 mb-3">
-                <div className="summary-card pending-card">
-                  <div className="card-body">
-                    <h6><i className="bi bi-clock"></i> Pending</h6>
-                    <h4>{pendingData.length}</h4>
-                    <small>₹{pendingData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</small>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-3 col-sm-6 mb-3">
-                <div className="summary-card bank-approval-card">
-                  <div className="card-body">
-                    <h6><i className="bi bi-bank"></i> Bank Approval</h6>
-                    <h4>{bankApprovalData.length}</h4>
-                    <small>₹{bankApprovalData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</small>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-3 col-sm-6 mb-3">
-                <div className="summary-card cash-approval-card">
-                  <div className="card-body">
-                    <h6><i className="bi bi-cash-stack"></i> Cash Approval</h6>
-                    <h4>{cashApprovalData.length}</h4>
-                    <small>₹{cashApprovalData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</small>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-3 col-sm-6 mb-3">
-                <div className="summary-card approved-card">
-                  <div className="card-body">
-                    <h6><i className="bi bi-check-circle"></i> Approved</h6>
-                    <h4>{approvedData.length}</h4>
-                    <small>₹{approvedData.reduce((sum, entry) => sum + (entry.totalAmount || 0), 0).toLocaleString()}</small>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         )}
@@ -646,32 +369,11 @@ function DataSummary({ fareData, expenseData, currentUser }) {
         {/* Data Table */}
         <div className="data-table-section">
           <div className="table-header">
-            <h5>Data Entries</h5>
-            {currentData.length > 0 && (
-              <div className="selection-controls">
-                <div className="select-all-container">
-                  <input
-                    type="checkbox"
-                    id="selectAll"
-                    checked={isAllSelected()}
-                    onChange={handleSelectAll}
-                  />
-                  <label htmlFor="selectAll">
-                    Select All ({selectedEntries.length}/{currentData.length})
-                  </label>
-                </div>
-
-                {selectedEntries.length > 0 && (
-                  <button 
-                    className="btn btn-success approve-btn"
-                    onClick={handleApproval}
-                  >
-                    <i className="bi bi-check-circle"></i> 
-                    Approve Selected ({selectedEntries.length})
-                  </button>
-                )}
-              </div>
-            )}
+            <h5>
+              {activeTab === 'cashApproval' && 'Cash Approval Entries'}
+              {activeTab === 'bankApproval' && 'Bank Approval Entries'}
+              {activeTab === 'approved' && 'Approved Entries'}
+            </h5>
           </div>
 
           {currentData.length === 0 ? (
@@ -684,11 +386,10 @@ function DataSummary({ fareData, expenseData, currentUser }) {
               <table className="table table-hover data-entries-table">
                 <thead>
                   <tr>
-                    <th width="5%">Select</th>
                     <th width="15%">Entry ID</th>
                     <th width="15%">Date</th>
                     <th width="15%">Type</th>
-                    <th width="20%">Description</th>
+                    <th width="25%">Description</th>
                     <th width="10%">Amount</th>
                     <th width="10%">Status</th>
                     <th width="10%">Submitted By</th>
@@ -696,20 +397,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                 </thead>
                 <tbody>
                   {currentData.map(entry => (
-                    <tr 
-                      key={entry.entryId}
-                      className={selectedEntries.includes(entry.entryId) ? 'table-primary' : ''}
-                      onClick={() => handleEntrySelect(entry.entryId)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <td>
-                        <input
-                          type="checkbox"
-                          checked={selectedEntries.includes(entry.entryId)}
-                          onChange={() => handleEntrySelect(entry.entryId)}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      </td>
+                    <tr key={entry.entryId}>
                       <td><small>{entry.entryId}</small></td>
                       <td>
                         {entry.entryType === 'booking' && entry.dateFrom ? 

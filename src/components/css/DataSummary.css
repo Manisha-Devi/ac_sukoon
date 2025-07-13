@@ -149,6 +149,14 @@
   color: #28a745;
 }
 
+.cash-in-hand-card {
+  border-left: 4px solid #6f42c1;
+}
+
+.cash-in-hand-card h4 {
+  color: #6f42c1;
+}
+
 /* Data Table Section */
 .data-table-section {
   background: white;
