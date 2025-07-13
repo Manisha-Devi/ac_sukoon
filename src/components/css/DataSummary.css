@@ -255,6 +255,274 @@
   font-size: 1rem;
 }
 
+/* Cash Deposit Modal */
+.cash-deposit-modal {
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.cash-deposit-modal .modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+}
+
+.cash-deposit-modal .modal-dialog {
+  z-index: 9999;
+  max-width: 500px;
+  margin: 2rem auto;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.cash-deposit-modal .modal-content {
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.cash-deposit-modal .modal-header {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border-bottom: none;
+  padding: 1.5rem 2rem;
+}
+
+.cash-deposit-modal .modal-title {
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.cash-deposit-modal .btn-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.cash-deposit-modal .btn-close:hover {
+  opacity: 1;
+  color: white;
+}
+
+.cash-deposit-modal .modal-body {
+  padding: 2rem;
+  background: #f8f9fa;
+}
+
+.cash-deposit-info {
+  margin-bottom: 1.5rem;
+}
+
+.info-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.info-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.info-content h6 {
+  margin: 0;
+  color: #6c757d;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.info-content .amount {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #28a745;
+}
+
+.form-floating {
+  position: relative;
+}
+
+.form-floating > .form-control {
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 1rem 0.75rem 0.25rem 0.75rem;
+  height: auto;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-floating > .form-control:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.form-floating > label {
+  padding: 1rem 0.75rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+  color: #28a745;
+  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+}
+
+.deposit-preview {
+  margin-top: 1.5rem;
+}
+
+.preview-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 2px solid #e8f5e8;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.preview-card h6 {
+  color: #28a745;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.preview-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.preview-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.preview-row:last-child {
+  border-bottom: none;
+  font-size: 1.1rem;
+}
+
+.cash-deposit-modal .modal-footer {
+  background: white;
+  border-top: 1px solid #e9ecef;
+  padding: 1.5rem 2rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.cash-deposit-modal .modal-footer .btn {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.cash-deposit-modal .modal-footer .btn:hover {
+  transform: translateY(-2px);
+}
+
+.cash-deposit-modal .modal-footer .btn-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.cash-deposit-modal .modal-footer .btn-success:hover {
+  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+}
+
+.cash-deposit-modal .modal-footer .btn-success:disabled {
+  background: #6c757d;
+  opacity: 0.6;
+  transform: none;
+  cursor: not-allowed;
+}
+
+.cash-deposit-modal .modal-footer .btn-outline-secondary {
+  border: 2px solid #6c757d;
+  color: #6c757d;
+}
+
+.cash-deposit-modal .modal-footer .btn-outline-secondary:hover {
+  background: #6c757d;
+  color: white;
+}
+
+/* Responsive Design for Modal */
+@media (max-width: 576px) {
+  .cash-deposit-modal .modal-dialog {
+    margin: 1rem;
+    max-width: none;
+  }
+
+  .cash-deposit-modal .modal-header {
+    padding: 1rem 1.5rem;
+  }
+
+  .cash-deposit-modal .modal-body {
+    padding: 1.5rem;
+  }
+
+  .cash-deposit-modal .modal-footer {
+    padding: 1rem 1.5rem;
+    flex-direction: column;
+  }
+
+  .info-card {
+    padding: 1rem;
+  }
+
+  .info-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  .info-content .amount {
+    font-size: 1.25rem;
+  }
+}
+
 @keyframes slideDown {
   from {
     opacity: 0;

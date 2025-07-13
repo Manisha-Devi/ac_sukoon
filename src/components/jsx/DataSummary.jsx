@@ -12,6 +12,12 @@ function DataSummary({ fareData, expenseData, currentUser }) {
   const [selectedEntries, setSelectedEntries] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
+  const [showCashDepositModal, setShowCashDepositModal] = useState(false);
+  const [cashDepositForm, setCashDepositForm] = useState({
+    amount: '',
+    description: '',
+    date: new Date().toISOString().split('T')[0]
+  });
 
   // Log user data for debugging
   useEffect(() => {
@@ -494,6 +500,37 @@ function DataSummary({ fareData, expenseData, currentUser }) {
     }
   };
 
+  // Handle Cash Deposit modal
+  const handleCashDepositSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!cashDepositForm.amount || !cashDepositForm.description) {
+      alert('Please fill all required fields');
+      return;
+    }
+
+    // Here you can add the logic to save the cash deposit
+    console.log('Cash Deposit:', cashDepositForm);
+    alert(`Cash Deposit of ₹${parseFloat(cashDepositForm.amount).toLocaleString('en-IN')} submitted successfully!`);
+    
+    // Reset form and close modal
+    setCashDepositForm({
+      amount: '',
+      description: '',
+      date: new Date().toISOString().split('T')[0]
+    });
+    setShowCashDepositModal(false);
+  };
+
+  const handleModalClose = () => {
+    setShowCashDepositModal(false);
+    setCashDepositForm({
+      amount: '',
+      description: '',
+      date: new Date().toISOString().split('T')[0]
+    });
+  };
+
   // Render entry card
   const renderEntryCard = (entry) => {
     const isSelected = selectedEntries.includes(entry.entryId);
@@ -753,7 +790,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                       <div className="cash-deposit-container mt-3">
                         <button 
                           className="btn btn-success btn-sm cash-deposit-btn"
-                          onClick={() => alert('Cash Deposit functionality will be implemented')}
+                          onClick={() => setShowCashDepositModal(true)}
                         >
                           <i className="bi bi-bank"></i> Cash Deposit
                         </button>
@@ -897,6 +934,137 @@ function DataSummary({ fareData, expenseData, currentUser }) {
           )}
         </div>
       </div>
+
+      {/* Cash Deposit Modal */}
+      {showCashDepositModal && (
+        <div className="modal fade show cash-deposit-modal" style={{ display: 'block' }} tabIndex="-1">
+          <div className="modal-overlay" onClick={handleModalClose}></div>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  <i className="bi bi-bank2 me-2"></i>
+                  Cash Deposit
+                </h5>
+                <button 
+                  type="button" 
+                  className="btn-close" 
+                  onClick={handleModalClose}
+                  aria-label="Close"
+                ></button>
+              </div>
+              
+              <form onSubmit={handleCashDepositSubmit}>
+                <div className="modal-body">
+                  <div className="cash-deposit-info mb-4">
+                    <div className="info-card">
+                      <div className="info-icon">
+                        <i className="bi bi-wallet2"></i>
+                      </div>
+                      <div className="info-content">
+                        <h6>Current Cash in Hand</h6>
+                        <p className="amount">₹{calculateCashInHand().toLocaleString('en-IN')}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="form-floating mb-3">
+                    <input
+                      type="number"
+                      className="form-control"
+                      id="depositAmount"
+                      placeholder="Enter amount"
+                      value={cashDepositForm.amount}
+                      onChange={(e) => setCashDepositForm({...cashDepositForm, amount: e.target.value})}
+                      required
+                      min="1"
+                      step="0.01"
+                    />
+                    <label htmlFor="depositAmount">
+                      <i className="bi bi-currency-rupee me-1"></i>
+                      Deposit Amount *
+                    </label>
+                  </div>
+
+                  <div className="form-floating mb-3">
+                    <input
+                      type="date"
+                      className="form-control"
+                      id="depositDate"
+                      value={cashDepositForm.date}
+                      onChange={(e) => setCashDepositForm({...cashDepositForm, date: e.target.value})}
+                      required
+                    />
+                    <label htmlFor="depositDate">
+                      <i className="bi bi-calendar me-1"></i>
+                      Deposit Date *
+                    </label>
+                  </div>
+
+                  <div className="form-floating mb-3">
+                    <textarea
+                      className="form-control"
+                      id="depositDescription"
+                      placeholder="Enter description"
+                      style={{ height: '80px' }}
+                      value={cashDepositForm.description}
+                      onChange={(e) => setCashDepositForm({...cashDepositForm, description: e.target.value})}
+                      required
+                    ></textarea>
+                    <label htmlFor="depositDescription">
+                      <i className="bi bi-chat-left-text me-1"></i>
+                      Description *
+                    </label>
+                  </div>
+
+                  {cashDepositForm.amount && (
+                    <div className="deposit-preview">
+                      <div className="preview-card">
+                        <h6><i className="bi bi-eye me-1"></i> Preview</h6>
+                        <div className="preview-details">
+                          <div className="preview-row">
+                            <span>Amount:</span>
+                            <span className="fw-bold text-success">₹{parseFloat(cashDepositForm.amount || 0).toLocaleString('en-IN')}</span>
+                          </div>
+                          <div className="preview-row">
+                            <span>Date:</span>
+                            <span>{new Date(cashDepositForm.date).toLocaleDateString('en-IN')}</span>
+                          </div>
+                          <div className="preview-row">
+                            <span>New Cash Balance:</span>
+                            <span className="fw-bold text-primary">
+                              ₹{(calculateCashInHand() - parseFloat(cashDepositForm.amount || 0)).toLocaleString('en-IN')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="modal-footer">
+                  <button 
+                    type="button" 
+                    className="btn btn-outline-secondary"
+                    onClick={handleModalClose}
+                  >
+                    <i className="bi bi-x-lg me-1"></i>
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="btn btn-success"
+                    disabled={!cashDepositForm.amount || !cashDepositForm.description}
+                  >
+                    <i className="bi bi-check-lg me-1"></i>
+                    Submit Deposit
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
