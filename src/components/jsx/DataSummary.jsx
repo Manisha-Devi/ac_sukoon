@@ -13,6 +13,8 @@ function DataSummary({ fareData, expenseData, currentUser }) {
   const [showFilter, setShowFilter] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [showCashDepositModal, setShowCashDepositModal] = useState(false);
+  const [summaryActiveTab, setSummaryActiveTab] = useState('approved');
+  const [cashDeposits, setCashDeposits] = useState([]);
   const [cashDepositForm, setCashDepositForm] = useState({
     amount: '',
     description: '',
@@ -509,8 +511,21 @@ function DataSummary({ fareData, expenseData, currentUser }) {
       return;
     }
 
-    // Here you can add the logic to save the cash deposit
-    console.log('Cash Deposit:', cashDepositForm);
+    // Create new cash deposit entry
+    const newCashDeposit = {
+      id: Date.now(),
+      entryId: `CD-${Date.now()}`,
+      amount: parseFloat(cashDepositForm.amount),
+      description: cashDepositForm.description,
+      date: cashDepositForm.date,
+      timestamp: new Date().toISOString(),
+      depositedBy: currentUser?.fullName || currentUser?.username || 'Unknown'
+    };
+
+    // Add to cash deposits array
+    setCashDeposits(prev => [newCashDeposit, ...prev]);
+
+    console.log('Cash Deposit:', newCashDeposit);
     alert(`Cash Deposit of ₹${parseFloat(cashDepositForm.amount).toLocaleString('en-IN')} submitted successfully!`);
     
     // Reset form and close modal
@@ -800,52 +815,120 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                 </div>
               </div>
 
-              {/* Approved Entries Table */}
-              <div className="approved-entries-section">
-                <h6><i className="bi bi-check-circle-fill"></i> Entries Approved By You</h6>
-                {getFinalApprovedEntriesForTable().length > 0 ? (
-                  <div className="table-responsive">
-                    <table className="table table-striped table-sm approved-entries-table">
-                      <thead>
-                        <tr>
-                          <th>Date</th>
-                          <th>I/E</th>
-                          <th>Description</th>
-                          <th>Cash</th>
-                          <th>Bank</th>
-                          <th>Total</th>
-                          <th>SubmittedBy</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {getFinalApprovedEntriesForTable().map((entry) => (
-                          <tr key={entry.entryId}>
-                            <td>{formatDisplayDate(entry.date)}</td>
-                            <td>
-                              <span className={`badge ${entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'bg-success' : 'bg-danger'}`}>
-                                {entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'I' : 'E'}
-                              </span>
-                            </td>
-                            <td>{entry.displayName}</td>
-                            <td className="text-success">₹{(entry.cashAmount || 0).toLocaleString('en-IN')}</td>
-                            <td className="text-primary">₹{(entry.bankAmount || 0).toLocaleString('en-IN')}</td>
-                            <td className="fw-bold">₹{(entry.totalAmount || 0).toLocaleString('en-IN')}</td>
-                            <td>
-                              <span className="badge bg-info">
-                                <i className="bi bi-person"></i> {entry.submittedBy || 'N/A'}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <div className="no-approved-entries">
-                    <i className="bi bi-inbox"></i>
-                    <p>No entries with final approval status found that were approved by you</p>
-                  </div>
-                )}
+              {/* Summary Tabs */}
+              <div className="summary-tabs-section">
+                <div className="summary-tabs">
+                  <button 
+                    className={`summary-tab-btn ${summaryActiveTab === 'approved' ? 'active' : ''}`}
+                    onClick={() => setSummaryActiveTab('approved')}
+                  >
+                    <i className="bi bi-check-circle-fill"></i> Approved Entries by You
+                  </button>
+                  <button 
+                    className={`summary-tab-btn ${summaryActiveTab === 'deposits' ? 'active' : ''}`}
+                    onClick={() => setSummaryActiveTab('deposits')}
+                  >
+                    <i className="bi bi-bank2"></i> Cash Deposits by You
+                  </button>
+                </div>
+
+                <div className="summary-tab-content">
+                  {summaryActiveTab === 'approved' ? (
+                    <div className="approved-entries-section">
+                      <h6><i className="bi bi-check-circle-fill"></i> Entries Approved By You</h6>
+                      {getFinalApprovedEntriesForTable().length > 0 ? (
+                        <div className="table-responsive">
+                          <table className="table table-striped table-sm approved-entries-table">
+                            <thead>
+                              <tr>
+                                <th>Date</th>
+                                <th>I/E</th>
+                                <th>Description</th>
+                                <th>Cash</th>
+                                <th>Bank</th>
+                                <th>Total</th>
+                                <th>SubmittedBy</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {getFinalApprovedEntriesForTable().map((entry) => (
+                                <tr key={entry.entryId}>
+                                  <td>{formatDisplayDate(entry.date)}</td>
+                                  <td>
+                                    <span className={`badge ${entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'bg-success' : 'bg-danger'}`}>
+                                      {entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'I' : 'E'}
+                                    </span>
+                                  </td>
+                                  <td>{entry.displayName}</td>
+                                  <td className="text-success">₹{(entry.cashAmount || 0).toLocaleString('en-IN')}</td>
+                                  <td className="text-primary">₹{(entry.bankAmount || 0).toLocaleString('en-IN')}</td>
+                                  <td className="fw-bold">₹{(entry.totalAmount || 0).toLocaleString('en-IN')}</td>
+                                  <td>
+                                    <span className="badge bg-info">
+                                      <i className="bi bi-person"></i> {entry.submittedBy || 'N/A'}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <div className="no-approved-entries">
+                          <i className="bi bi-inbox"></i>
+                          <p>No entries with final approval status found that were approved by you</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="cash-deposits-section">
+                      <h6><i className="bi bi-bank2"></i> Cash Deposits by You</h6>
+                      {cashDeposits.length > 0 ? (
+                        <div className="table-responsive">
+                          <table className="table table-striped table-sm cash-deposits-table">
+                            <thead>
+                              <tr>
+                                <th>Timestamp</th>
+                                <th>EntryType</th>
+                                <th>EntryId</th>
+                                <th>Date</th>
+                                <th>CashAmount</th>
+                                <th>Description</th>
+                                <th>DepositedBy</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {cashDeposits.map((deposit) => (
+                                <tr key={deposit.id}>
+                                  <td>{formatDisplayTime(deposit.timestamp)}</td>
+                                  <td>
+                                    <span className="badge bg-warning">
+                                      Cash Deposit
+                                    </span>
+                                  </td>
+                                  <td>{deposit.entryId}</td>
+                                  <td>{formatDisplayDate(deposit.date)}</td>
+                                  <td className="text-danger">₹{deposit.amount.toLocaleString('en-IN')}</td>
+                                  <td>{deposit.description}</td>
+                                  <td>
+                                    <span className="badge bg-primary">
+                                      <i className="bi bi-person"></i> {deposit.depositedBy}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <div className="no-cash-deposits">
+                          <i className="bi bi-inbox"></i>
+                          <p>No cash deposits found that were made by you</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
 
 

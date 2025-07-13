@@ -523,6 +523,87 @@
   }
 }
 
+/* Summary Tabs */
+.summary-tabs-section {
+  margin-top: 2rem;
+}
+
+.summary-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.summary-tab-btn {
+  background: none;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  color: #6c757d;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.summary-tab-btn:hover {
+  color: #495057;
+  background: rgba(0, 123, 255, 0.05);
+}
+
+.summary-tab-btn.active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+  background: rgba(0, 123, 255, 0.1);
+}
+
+.summary-tab-btn i {
+  margin-right: 0.5rem;
+}
+
+.summary-tab-content {
+  min-height: 300px;
+}
+
+/* Cash Deposits Table */
+.cash-deposits-table {
+  font-size: 0.875rem;
+}
+
+.cash-deposits-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+  border-top: none;
+  padding: 0.75rem 0.5rem;
+}
+
+.cash-deposits-table td {
+  padding: 0.75rem 0.5rem;
+  vertical-align: middle;
+}
+
+.no-cash-deposits {
+  text-align: center;
+  padding: 3rem;
+  color: #6c757d;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.no-cash-deposits i {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.no-cash-deposits p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
 @keyframes slideDown {
   from {
     opacity: 0;
