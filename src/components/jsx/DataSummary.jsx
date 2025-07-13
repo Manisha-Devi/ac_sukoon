@@ -302,9 +302,9 @@ function DataSummary({ fareData, expenseData, currentUser }) {
     return currentUser?.fixedCash || 0;
   };
 
-  // Calculate cash in hand (Income Cash + Fixed Cash)
+  // Calculate cash in hand (Only Income Cash)
   const calculateCashInHand = () => {
-    return calculateIncomeCash() + getFixedCash();
+    return calculateIncomeCash();
   };
 
   // Handle approval action
@@ -747,7 +747,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                       <div className="financial-details">
                         <div className="financial-amount">₹{calculateCashInHand().toLocaleString('en-IN')}</div>
                         <div className="financial-label">Cash in Hand</div>
-                        <div className="financial-subtitle">Income Cash + Fixed Cash</div>
+                        <div className="financial-subtitle">Income Cash Only</div>
                       </div>
                       {/* Cash Deposit Button */}
                       <div className="cash-deposit-container mt-3">
