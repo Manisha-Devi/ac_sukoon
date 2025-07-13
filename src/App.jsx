@@ -66,14 +66,14 @@ function App() {
 
       console.log('🔍 getAllUsers response:', response);
 
-      if (response && response.success) {
+      if (response && response.success && response.data) {
         console.log('✅ All Users Data Retrieved Successfully:');
-        console.log('📊 Total Users Count:', response.count || 0);
-        console.log('👥 Complete Users List:', response.data || []);
+        console.log('📊 Total Users Count:', response.count || response.data.length);
+        console.log('👥 Complete Users List:', response.data);
         console.log('⏰ Data Timestamp:', response.timestamp);
 
         // Log each user individually for better readability
-        if (response.data && Array.isArray(response.data)) {
+        if (Array.isArray(response.data) && response.data.length > 0) {
           console.log('📝 Individual User Details:');
           response.data.forEach((user, index) => {
             console.log(`${index + 1}. User:`, {
@@ -87,19 +87,43 @@ function App() {
           setAllUsers(response.data);
           return response.data;
         } else {
-          console.warn('⚠️ No users data found in response');
+          console.warn('⚠️ Empty users data array in response');
           setAllUsers([]);
           return [];
         }
       } else {
-        console.error('❌ Failed to fetch users:', response?.error || 'Unknown error');
+        const errorMessage = response?.error || response?.message || 'Unknown error';
+        console.error('❌ Failed to fetch users:', errorMessage);
         console.error('❌ Full response:', response);
+        
+        // For debugging: Try to call the API with GET method as fallback
+        console.log('🔄 Trying fallback GET method...');
+        try {
+          const fallbackResponse = await fetch(`${authService.API_URL}?action=getAllUsers`, {
+            method: 'GET',
+            mode: 'cors',
+            redirect: 'follow'
+          });
+          
+          if (fallbackResponse.ok) {
+            const fallbackResult = await fallbackResponse.json();
+            console.log('🔄 Fallback GET response:', fallbackResult);
+            
+            if (fallbackResult.success && fallbackResult.data) {
+              setAllUsers(fallbackResult.data);
+              return fallbackResult.data;
+            }
+          }
+        } catch (fallbackError) {
+          console.log('❌ Fallback method also failed:', fallbackError.message);
+        }
+        
         setAllUsers([]);
         return [];
       }
     } catch (error) {
       console.error('❌ Error fetching all users:', error);
-      console.error('❌ Error details:', error.message, error.stack);
+      console.error('❌ Error details:', error.message);
       setAllUsers([]);
       return [];
     }

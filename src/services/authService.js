@@ -109,25 +109,64 @@ class AuthService {
   // Get all users (for admin purposes)
   async getAllUsers() {
     try {
+      console.log('👥 Fetching all users from Google Sheets...');
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'text/plain;charset=utf-8',
         },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
         body: JSON.stringify({
           action: 'getAllUsers'
         })
       });
 
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('HTTP Error Response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
       const result = await response.json();
-      return result;
+      console.log('✅ getAllUsers API response:', result);
+
+      if (result.success) {
+        return result;
+      } else {
+        console.error('❌ API returned error:', result.error || result.message);
+        return { 
+          success: false, 
+          error: result.error || result.message || 'Failed to fetch users',
+          data: [],
+          count: 0
+        };
+      }
     } catch (error) {
       console.error('❌ Error fetching users:', error);
-      return { success: false, message: 'Failed to fetch users' };
+      
+      if (error.name === 'AbortError') {
+        return { 
+          success: false, 
+          error: 'Request timeout - API took too long to respond',
+          data: [],
+          count: 0
+        };
+      }
+      
+      return { 
+        success: false, 
+        error: error.message || 'Failed to fetch users',
+        data: [],
+        count: 0
+      };
     }
   }
 
