@@ -460,6 +460,18 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
         </div>
       )}
 
+      {/* Cash Deposit Button */}
+      {filteredData.length > 0 && showSummary && (
+        <div className="text-center mb-4">
+          <button 
+            className="btn btn-primary btn-lg cash-deposit-btn"
+            onClick={() => alert('Cash Deposit functionality will be implemented')}
+          >
+            <i className="bi bi-bank"></i> Cash Deposit
+          </button>
+        </div>
+      )}
+
       {/* Transactions List with Pagination */}
       <div className="transactions-list">
         <div className="d-flex justify-content-between align-items-center mb-3">
