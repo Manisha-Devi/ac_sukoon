@@ -533,35 +533,17 @@ function DataSummary({ fareData, expenseData, currentUser }) {
         {showFilter && (
           <div className="filter-card">
             <div className="filter-card-content">
-              <h5><i className="bi bi-funnel"></i> Filter Options</h5>
+              <h5><i className="bi bi-funnel"></i> Filter Approved Entries</h5>
+              <p className="text-muted mb-3">Filter approved entries by date range</p>
               <div className="filter-options">
-                <div className="row">
-                  <div className="col-md-3">
+                <div className="row justify-content-center">
+                  <div className="col-md-4">
                     <label className="form-label">Date From</label>
                     <input type="date" className="form-control" />
                   </div>
-                  <div className="col-md-3">
+                  <div className="col-md-4">
                     <label className="form-label">Date To</label>
                     <input type="date" className="form-control" />
-                  </div>
-                  <div className="col-md-3">
-                    <label className="form-label">Entry Type</label>
-                    <select className="form-select">
-                      <option value="">All Types</option>
-                      <option value="fare">Fare Receipt</option>
-                      <option value="booking">Booking Entry</option>
-                      <option value="fuel">Fuel Payment</option>
-                      <option value="adda">Adda Payment</option>
-                      <option value="other">Other Payment</option>
-                    </select>
-                  </div>
-                  <div className="col-md-3">
-                    <label className="form-label">Status</label>
-                    <select className="form-select">
-                      <option value="">All Status</option>
-                      <option value="pending">Pending</option>
-                      <option value="approved">Approved</option>
-                    </select>
                   </div>
                 </div>
                 <div className="filter-actions mt-3">

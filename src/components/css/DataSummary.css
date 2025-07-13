@@ -65,6 +65,11 @@
 .filter-card-content h5 {
   color: #495057;
   font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.filter-card-content p.text-muted {
+  font-size: 0.9rem;
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
   border-bottom: 2px solid #e9ecef;
