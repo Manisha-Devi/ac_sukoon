@@ -662,7 +662,7 @@ function App() {
             </button>
           </div>
 
-          {(user.userType === "Manager" || user.userType === "Admin") && (
+          {user.userType === "Admin" && (
             <div className="menu-section">
               <h6>AUTOMATION</h6>
               <button
@@ -682,16 +682,18 @@ function App() {
             </div>
           )}
 
-          {(user.userType === "Manager" || user.userType === "Admin") && (
+          {(user.userType === "Manager" || user.userType === "Admin" || user.userType === "Conductor") && (
             <div className="menu-section">
               <h6>MANAGEMENT</h6>
-              <button
-                className={`menu-item ${activeTab === "data-summary" ? "active" : ""}`}
-                onClick={() => handleMenuClick("data-summary")}
-              >
-                <i className="bi bi-clipboard-check"></i>
-                Data
-              </button>
+              {(user.userType === "Manager" || user.userType === "Admin") && (
+                <button
+                  className={`menu-item ${activeTab === "data-summary" ? "active" : ""}`}
+                  onClick={() => handleMenuClick("data-summary")}
+                >
+                  <i className="bi bi-clipboard-check"></i>
+                  Data
+                </button>
+              )}
               <button
                 className={`menu-item ${activeTab === "cash-summary" ? "active" : ""}`}
                 onClick={() => handleMenuClick("cash-summary")}
