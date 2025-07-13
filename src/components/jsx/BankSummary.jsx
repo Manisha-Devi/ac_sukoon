@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "../css/BankSummary.css";
 
-function BankSummary({ fareData, expenseData, currentUser }) {
+function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashDeposit }) {
   // 📊 RECEIVED DATA EXPLANATION:
   // fareData = Daily entries (income) + Booking entries + Off days
   // expenseData = Fuel + Adda + Union + Service + Other payments
+  // cashDeposit = Cash deposit entries from DataSummary
 
   const [filteredData, setFilteredData] = useState([]);
   const [dateFrom, setDateFrom] = useState('');
@@ -21,10 +22,29 @@ function BankSummary({ fareData, expenseData, currentUser }) {
     console.log('🔄 BankSummary: Props data updated');
     console.log('📈 FareData (Income):', fareData?.length || 0, 'entries');
     console.log('📉 ExpenseData (Expense):', expenseData?.length || 0, 'entries');
+    console.log('🏦 CashDeposit Data:', cashDeposit?.length || 0, 'entries');
 
     // Debug: Log complete data structure
     console.log('💰 BANK SUMMARY - Complete FareData:', fareData);
     console.log('💸 BANK SUMMARY - Complete ExpenseData:', expenseData);
+    console.log('🏦 BANK SUMMARY - Complete CashDeposit:', cashDeposit);
+
+    // Log individual cash deposit entries for detailed inspection
+    if (cashDeposit && cashDeposit.length > 0) {
+      console.log('🔍 BANK SUMMARY - Cash Deposit Entries Details:');
+      cashDeposit.forEach((deposit, index) => {
+        console.log(`${index + 1}. Cash Deposit Entry:`, {
+          entryType: deposit.entryType,
+          entryId: deposit.entryId,
+          date: deposit.date,
+          cashAmount: deposit.cashAmount,
+          description: deposit.description,
+          depositedBy: deposit.depositedBy
+        });
+      });
+    } else {
+      console.log('⚠️ BANK SUMMARY - No cash deposit entries found');
+    }
 
     // Sample entries for debugging
     if (fareData && fareData.length > 0) {
@@ -35,7 +55,7 @@ function BankSummary({ fareData, expenseData, currentUser }) {
     }
 
     filterUserData();
-  }, [fareData, expenseData, dateFrom, dateTo, currentUser]);
+  }, [fareData, expenseData, dateFrom, dateTo, currentUser, cashDeposit]);
 
   const filterUserData = () => {
     if (!currentUser) {

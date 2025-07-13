@@ -34,7 +34,8 @@ function App() {
     expenseRecords: 0,
     lastSync: null
   });
-    const [allUsers, setAllUsers] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const [cashDeposit, setCashDeposit] = useState([]);
 
 
   // New detailed statistics state
@@ -744,6 +745,8 @@ function App() {
             fareData={fareData} 
             expenseData={expenseData} 
             currentUser={user}
+            cashDeposit={cashDeposit}
+            setCashDeposit={setCashDeposit}
           />
         )}
         {activeTab === "cash-summary" && (
@@ -759,6 +762,8 @@ function App() {
             fareData={fareData} 
             expenseData={expenseData}
             currentUser={user}
+            cashDeposit={cashDeposit}
+            setCashDeposit={setCashDeposit}
           />
         )}
       </div>

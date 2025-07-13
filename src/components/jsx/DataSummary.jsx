@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../css/DataSummary.css";
 import authService from "../../services/authService.js";
 
-function DataSummary({ fareData, expenseData, currentUser }) {
+function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashDeposit }) {
   const [activeTab, setActiveTab] = useState('pending');
   const [pendingData, setPendingData] = useState([]);
   const [bankApprovalData, setBankApprovalData] = useState([]);
@@ -14,7 +14,6 @@ function DataSummary({ fareData, expenseData, currentUser }) {
   const [showSummary, setShowSummary] = useState(false);
   const [showCashDepositModal, setShowCashDepositModal] = useState(false);
   const [summaryActiveTab, setSummaryActiveTab] = useState('approved');
-  const [cashDeposits, setCashDeposits] = useState([]);
   const [cashDepositForm, setCashDepositForm] = useState({
     amount: '',
     description: '',
@@ -514,16 +513,17 @@ function DataSummary({ fareData, expenseData, currentUser }) {
     // Create new cash deposit entry
     const newCashDeposit = {
       id: Date.now(),
+      entryType: 'Cash Deposit',
       entryId: `CD-${Date.now()}`,
-      amount: parseFloat(cashDepositForm.amount),
-      description: cashDepositForm.description,
       date: cashDepositForm.date,
-      timestamp: new Date().toISOString(),
-      depositedBy: currentUser?.fullName || currentUser?.username || 'Unknown'
+      cashAmount: parseFloat(cashDepositForm.amount),
+      description: cashDepositForm.description,
+      depositedBy: currentUser?.fullName || currentUser?.username || 'Unknown',
+      timestamp: new Date().toISOString()
     };
 
-    // Add to cash deposits array
-    setCashDeposits(prev => [newCashDeposit, ...prev]);
+    // Add to cash deposits array using parent state
+    setCashDeposit(prev => [newCashDeposit, ...prev]);
 
     console.log('Cash Deposit:', newCashDeposit);
     alert(`Cash Deposit of ₹${parseFloat(cashDepositForm.amount).toLocaleString('en-IN')} submitted successfully!`);
@@ -883,7 +883,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                   ) : (
                     <div className="cash-deposits-section">
                       <h6><i className="bi bi-bank2"></i> Cash Deposits by You</h6>
-                      {cashDeposits.length > 0 ? (
+                      {cashDeposit.length > 0 ? (
                         <div className="table-responsive">
                           <table className="table table-striped table-sm cash-deposits-table">
                             <thead>
@@ -898,17 +898,17 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                               </tr>
                             </thead>
                             <tbody>
-                              {cashDeposits.map((deposit) => (
+                              {cashDeposit.map((deposit) => (
                                 <tr key={deposit.id}>
                                   <td>{formatDisplayTime(deposit.timestamp)}</td>
                                   <td>
                                     <span className="badge bg-warning">
-                                      Cash Deposit
+                                      {deposit.entryType}
                                     </span>
                                   </td>
                                   <td>{deposit.entryId}</td>
                                   <td>{formatDisplayDate(deposit.date)}</td>
-                                  <td className="text-danger">₹{deposit.amount.toLocaleString('en-IN')}</td>
+                                  <td className="text-danger">₹{deposit.cashAmount.toLocaleString('en-IN')}</td>
                                   <td>{deposit.description}</td>
                                   <td>
                                     <span className="badge bg-primary">
