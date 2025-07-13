@@ -219,33 +219,3 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* Cash Deposit Button */
-.cash-deposit-btn {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  border: none;
-  border-radius: 12px;
-  padding: 12px 30px;
-  font-weight: 600;
-  font-size: 1.1rem;
-  color: white;
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-  transition: all 0.3s ease;
-  min-width: 200px;
-}
-
-.cash-deposit-btn:hover {
-  background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-  color: white;
-}
-
-.cash-deposit-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 10px rgba(40, 167, 69, 0.3);
-}
-
-.cash-deposit-btn i {
-  margin-right: 8px;
-  font-size: 1.2rem;
-}

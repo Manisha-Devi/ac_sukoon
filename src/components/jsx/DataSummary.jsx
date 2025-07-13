@@ -749,6 +749,15 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                         <div className="financial-label">Cash in Hand</div>
                         <div className="financial-subtitle">Income Cash + Fixed Cash</div>
                       </div>
+                      {/* Cash Deposit Button */}
+                      <div className="cash-deposit-container mt-3">
+                        <button 
+                          className="btn btn-success btn-sm cash-deposit-btn"
+                          onClick={() => alert('Cash Deposit functionality will be implemented')}
+                        >
+                          <i className="bi bi-bank"></i> Cash Deposit
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
