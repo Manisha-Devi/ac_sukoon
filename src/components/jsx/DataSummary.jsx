@@ -459,10 +459,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
               <span className="label">Entry ID:</span>
               <span className="value">{entry.entryId}</span>
             </div>
-            <div className="entry-row">
-              <span className="label">Submitted By:</span>
-              <span className="value">{entry.submittedBy}</span>
-            </div>
+            
             <div className="entry-row">
               <span className="label">Date:</span>
               <span className="value">
@@ -655,7 +652,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
 
               {/* Approved Entries Table */}
               <div className="approved-entries-section">
-                <h6><i className="bi bi-check-circle-fill"></i> Approved Entries</h6>
+                <h6><i className="bi bi-check-circle-fill"></i> Entries Approved By You</h6>
                 {getApprovedEntriesForCurrentUser().length > 0 ? (
                   <div className="table-responsive">
                     <table className="table table-striped table-sm approved-entries-table">
@@ -694,7 +691,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                 ) : (
                   <div className="no-approved-entries">
                     <i className="bi bi-inbox"></i>
-                    <p>No approved entries found for current user</p>
+                    <p>No entries approved by you found</p>
                   </div>
                 )}
               </div>
