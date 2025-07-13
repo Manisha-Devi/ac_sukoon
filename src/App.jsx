@@ -147,28 +147,27 @@ function App() {
     setActiveTab("dashboard");
   };
 
-  // Data refresh function for Navbar component
+  // Centralized data refresh function used by Navbar
   const handleDataRefresh = async () => {
-    console.log('🔄 App.jsx: Starting data refresh from Navbar...');
+    setIsRefreshing(true);
+    setLastRefreshTime(new Date().toISOString());
 
     try {
-      // Direct data loading in App.jsx instead of Dashboard
-      const authService = (await import('./services/authService.js')).default;
+      console.log('🔄 App.jsx: Starting data refresh...');
 
-      console.log('🚀 App.jsx: Loading all data from Google Sheets...');
-
+      // Load all data with individual error handling
       const [
-        fareReceipts, 
-        bookingEntries, 
-        offDays, 
-        fuelPayments, 
-        addaPayments,
-        unionPayments,
-        servicePayments,
-        otherPayments,
-        allUsersData,
-        cashDepositsData,
-      ] = await Promise.all([
+        fareReceiptsResult,
+        bookingEntriesResult, 
+        offDaysResult,
+        fuelPaymentsResult,
+        addaPaymentsResult,
+        unionPaymentsResult,
+        servicePaymentsResult,
+        otherPaymentsResult,
+        cashDepositsResult,
+        allUsersResult
+      ] = await Promise.allSettled([
         authService.getFareReceipts(),
         authService.getBookingEntries(),
         authService.getOffDays(),
@@ -177,110 +176,153 @@ function App() {
         authService.getUnionPayments(),
         authService.getServicePayments(),
         authService.getOtherPayments(),
-        authService.getAllUsers(),
         authService.getCashDeposits(),
+        authService.getAllUsers()
       ]);
 
-      // Process fare data (fare receipts + booking entries)
-      let combinedFareData = [];
-
-      // Add fare receipts
-      if (fareReceipts?.data && Array.isArray(fareReceipts.data)) {
-        combinedFareData.push(...fareReceipts.data.map(receipt => ({
-          ...receipt,
+      // Process fare receipts
+      let processedFareReceipts = [];
+      if (fareReceiptsResult.status === 'fulfilled' && fareReceiptsResult.value?.success) {
+        processedFareReceipts = fareReceiptsResult.value.data.map(entry => ({
+          ...entry,
+          entryType: 'daily',
           type: 'daily'
-        })));
+        }));
+        console.log(`✅ App.jsx: Processed ${processedFareReceipts.length} fare receipts`);
+      } else {
+        console.error('❌ App.jsx: Failed to load fare receipts:', fareReceiptsResult.reason);
       }
 
-      // Add booking entries
-      if (bookingEntries?.data && Array.isArray(bookingEntries.data)) {
-        combinedFareData.push(...bookingEntries.data.map(booking => ({
-          ...booking,
+      // Process booking entries
+      let processedBookingEntries = [];
+      if (bookingEntriesResult.status === 'fulfilled' && bookingEntriesResult.value?.success) {
+        processedBookingEntries = bookingEntriesResult.value.data.map(entry => ({
+          ...entry,
+          entryType: 'booking',
           type: 'booking'
-        })));
+        }));
+        console.log(`✅ App.jsx: Processed ${processedBookingEntries.length} booking entries`);
+      } else {
+        console.error('❌ App.jsx: Failed to load booking entries:', bookingEntriesResult.reason);
       }
 
-      // Add off days
-      if (offDays?.data && Array.isArray(offDays.data)) {
-        combinedFareData.push(...offDays.data.map(offDay => ({
-          ...offDay,
+      // Process off days
+      let processedOffDays = [];
+      if (offDaysResult.status === 'fulfilled' && offDaysResult.value?.success) {
+        processedOffDays = offDaysResult.value.data.map(entry => ({
+          ...entry,
+          entryType: 'off',
           type: 'off'
-        })));
+        }));
+        console.log(`✅ App.jsx: Processed ${processedOffDays.length} off days`);
+      } else {
+        console.error('❌ App.jsx: Failed to load off days:', offDaysResult.reason);
       }
 
-      // Process expense data
-      let combinedExpenseData = [];
-
-      if (fuelPayments?.data && Array.isArray(fuelPayments.data)) {
-        combinedExpenseData.push(...fuelPayments.data.map(payment => ({
-          ...payment,
+      // Process fuel payments
+      let processedFuelPayments = [];
+      if (fuelPaymentsResult.status === 'fulfilled' && fuelPaymentsResult.value?.success) {
+        processedFuelPayments = fuelPaymentsResult.value.data.map(entry => ({
+          ...entry,
+          entryType: 'fuel',
           type: 'fuel'
-        })));
+        }));
+        console.log(`✅ App.jsx: Processed ${processedFuelPayments.length} fuel payments`);
+      } else {
+        console.error('❌ App.jsx: Failed to load fuel payments:', fuelPaymentsResult.reason);
       }
 
-      if (addaPayments?.data && Array.isArray(addaPayments.data)) {
-        combinedExpenseData.push(...addaPayments.data.map(payment => ({
-          ...payment,
+      // Process adda payments
+      let processedAddaPayments = [];
+      if (addaPaymentsResult.status === 'fulfilled' && addaPaymentsResult.value?.success) {
+        processedAddaPayments = addaPaymentsResult.value.data.map(entry => ({
+          ...entry,
+          entryType: 'adda',
           type: 'adda'
-        })));
+        }));
+        console.log(`✅ App.jsx: Processed ${processedAddaPayments.length} adda payments`);
+      } else {
+        console.error('❌ App.jsx: Failed to load adda payments:', addaPaymentsResult.reason);
       }
 
-      if (unionPayments?.data && Array.isArray(unionPayments.data)) {
-        combinedExpenseData.push(...unionPayments.data.map(payment => ({
-          ...payment,
+      // Process union payments
+      let processedUnionPayments = [];
+      if (unionPaymentsResult.status === 'fulfilled' && unionPaymentsResult.value?.success) {
+        processedUnionPayments = unionPaymentsResult.value.data.map(entry => ({
+          ...entry,
+          entryType: 'union',
           type: 'union'
-        })));
+        }));
+        console.log(`✅ App.jsx: Processed ${processedUnionPayments.length} union payments`);
+      } else {
+        console.error('❌ App.jsx: Failed to load union payments:', unionPaymentsResult.reason);
       }
 
-      if (servicePayments?.data && Array.isArray(servicePayments.data)) {
-        combinedExpenseData.push(...servicePayments.data.map(payment => ({
-          ...payment,
+      // Process service payments
+      let processedServicePayments = [];
+      if (servicePaymentsResult.status === 'fulfilled' && servicePaymentsResult.value?.success) {
+        processedServicePayments = servicePaymentsResult.value.data.map(entry => ({
+          ...entry,
+          entryType: 'service',
           type: 'service'
-        })));
+        }));
+        console.log(`✅ App.jsx: Processed ${processedServicePayments.length} service payments`);
+      } else {
+        console.error('❌ App.jsx: Failed to load service payments:', servicePaymentsResult.reason);
       }
 
-      if (otherPayments?.data && Array.isArray(otherPayments.data)) {
-        combinedExpenseData.push(...otherPayments.data.map(payment => ({
-          ...payment,
+      // Process other payments
+      let processedOtherPayments = [];
+      if (otherPaymentsResult.status === 'fulfilled' && otherPaymentsResult.value?.success) {
+        processedOtherPayments = otherPaymentsResult.value.data.map(entry => ({
+          ...entry,
+          entryType: 'other',
           type: 'other'
-        })));
+        }));
+        console.log(`✅ App.jsx: Processed ${processedOtherPayments.length} other payments`);
+      } else {
+        console.error('❌ App.jsx: Failed to load other payments:', otherPaymentsResult.reason);
       }
 
+      // Process cash deposits
+      let processedCashDeposits = [];
+      if (cashDepositsResult.status === 'fulfilled' && cashDepositsResult.value?.success) {
+        processedCashDeposits = cashDepositsResult.value.data.map(entry => ({
+          ...entry,
+          entryType: 'cashDeposit',
+          type: 'cashDeposit'
+        }));
+        setCashDeposit(processedCashDeposits);
+        console.log(`✅ App.jsx: Processed ${processedCashDeposits.length} cash deposits`);
+      } else {
+        console.error('❌ App.jsx: Failed to load cash deposits:', cashDepositsResult.reason);
+      }
 
+      // Process all users data
+      if (allUsersResult.status === 'fulfilled' && allUsersResult.value?.success) {
+        setAllUsers(allUsersResult.value.data || []);
+        console.log(`✅ App.jsx: Processed ${allUsersResult.value.data?.length || 0} users`);
+      } else {
+        console.error('❌ App.jsx: Failed to load users:', allUsersResult.reason);
+      }
 
-      // Update parent state
+      // Combine all processed data
+      const combinedFareData = [
+        ...processedFareReceipts,
+        ...processedBookingEntries,
+        ...processedOffDays
+      ];
+
+      const combinedExpenseData = [
+        ...processedFuelPayments,
+        ...processedAddaPayments,
+        ...processedUnionPayments,
+        ...processedServicePayments,
+        ...processedOtherPayments
+      ];
+
       setFareData(combinedFareData);
       setExpenseData(combinedExpenseData);
-
-      // Update allUsers state with fetched data
-      if (allUsersData?.success && allUsersData?.data) {
-        console.log('👥 Setting allUsers data:', allUsersData.data.length, 'users');
-        setAllUsers(allUsersData.data);
-      } else {
-        console.warn('⚠️ Failed to load all users data:', allUsersData?.error);
-        // Keep current user in allUsers if fetch fails
-        if (user) {
-          const currentUserForAllUsers = {
-            username: user.username,
-            name: user.fullName,
-            date: new Date().toISOString().split('T')[0],
-            fixedCash: user.fixedCash || 0
-          };
-          setAllUsers([currentUserForAllUsers]);
-        }
-      }
-
-      // Update cashDeposit state with fetched data
-      if (cashDepositsData?.success && cashDepositsData?.data) {
-        console.log('💰 Setting cashDeposit data:', cashDepositsData.data.length, 'deposits');
-        console.log('💰 Cash deposits fetched from Google Sheets:', cashDepositsData.data);
-        setCashDeposit(cashDepositsData.data);
-      } else {
-        console.warn('⚠️ Failed to load cash deposits data:', cashDepositsData?.error);
-        console.warn('⚠️ Full cash deposits response:', cashDepositsData);
-        // Keep existing data instead of clearing it
-        console.log('💰 Keeping existing cash deposits data');
-      }
 
       // Calculate and update totals
       const totalEarningsAmount = combinedFareData
@@ -303,14 +345,14 @@ function App() {
         lastFetchDate: now.toLocaleDateString('en-IN'),
         refreshCount: prev.refreshCount + 1,
         dataBreakdown: {
-          fareReceipts: fareReceipts?.data?.length || 0,
-          bookingEntries: bookingEntries?.data?.length || 0,
-          offDays: offDays?.data?.length || 0,
-          fuelPayments: fuelPayments?.data?.length || 0,
-          addaPayments: addaPayments?.data?.length || 0,
-          unionPayments: unionPayments?.data?.length || 0,
-          servicePayments: servicePayments?.data?.length || 0,
-          otherPayments: otherPayments?.data?.length || 0
+          fareReceipts: processedFareReceipts.length || 0,
+          bookingEntries: processedBookingEntries.length || 0,
+          offDays: processedOffDays.length || 0,
+          fuelPayments: processedFuelPayments.length || 0,
+          addaPayments: processedAddaPayments.length || 0,
+          unionPayments: processedUnionPayments.length || 0,
+          servicePayments: processedServicePayments.length || 0,
+          otherPayments: processedOtherPayments.length || 0
         }
       }));
 
@@ -322,12 +364,13 @@ function App() {
         }
       }));
 
-      console.log('✅ App.jsx: Data refresh completed from Navbar');
+      console.log('✅ App.jsx: Data refresh completed');
       console.log(`📊 Loaded ${combinedFareData.length} fare entries and ${combinedExpenseData.length} expense entries`);
 
     } catch (error) {
       console.error('❌ App.jsx: Error in data refresh:', error);
-      throw error; // Re-throw to be handled by Navbar
+    } finally {
+      setIsRefreshing(false);
     }
   };
 

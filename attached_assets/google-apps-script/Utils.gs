@@ -124,6 +124,30 @@ function formatTimestampForDisplay(timestamp) {
   }
 }
 
+/**
+ * Format time only in AM/PM format - IST timezone
+ */
+function formatTimeForDisplay(timestamp) {
+  try {
+    if (!timestamp) return '';
+
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return timestamp;
+
+    // Format as H:MM:SS AM/PM in IST
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
+      timeZone: 'Asia/Kolkata'
+    });
+  } catch (error) {
+    console.error('Error formatting time:', error);
+    return timestamp;
+  }
+}
+
 // Properties are handled directly in Code.gs and LegacyFunctions.gs
 // No separate setup functions needed since fallback mechanism is already implemented
 
