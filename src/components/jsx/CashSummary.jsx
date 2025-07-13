@@ -209,23 +209,23 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
     setSelectedEntry(null);
   };
 
-  // Get status icon for entry
-  const getStatusIcon = (entryStatus) => {
+  // Get status icon for entry based on status and bankAmount
+  const getStatusIcon = (entry) => {
+    const { entryStatus, bankAmount } = entry;
+    
     switch (entryStatus) {
       case 'pending':
-        return <i className="bi bi-dash text-muted" title="Pending"></i>; // - icon
+        if (!bankAmount || bankAmount === 0) {
+          return null; // Show checkbox
+        } else {
+          return <i className="bi bi-dash text-muted" title="Pending with Bank Amount"></i>; // - icon
+        }
       case 'forwardedBank':
         return <i className="bi bi-dash text-muted" title="Forwarded to Bank"></i>; // - icon
-      case 'approvedBank':
-        return null; // Show checkbox
-      case 'forwardedCash':
-        return <i className="bi bi-lock-fill text-warning" title="Forwarded to Cash"></i>; // lock icon
-      case 'approvedCash':
-        return <i className="bi bi-lock-fill text-warning" title="Cash Approved"></i>; // lock icon
       case 'approved':
-        return <i className="bi bi-check-circle-fill text-success" title="Final Approved"></i>; // tick icon
+        return <i className="bi bi-check-circle-fill text-success" title="Final Approved"></i>; // green tick icon
       default:
-        return null;
+        return <i className="bi bi-lock-fill text-warning" title={`Status: ${entryStatus}`}></i>; // lock icon for all other statuses
     }
   };
 
@@ -576,7 +576,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
                             onChange={() => handleSelectEntry(entry.entryId)}
                           />
                         ) : (
-                          getStatusIcon(entry.entryStatus)
+                          getStatusIcon(entry)
                         )}
                       </td>
                     </tr>

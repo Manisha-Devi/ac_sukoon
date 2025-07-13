@@ -217,18 +217,10 @@ function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
     switch (entryStatus) {
       case 'pending':
         return null; // Show checkbox
-      case 'forwardedBank':
-        return <i className="bi bi-lock-fill text-warning" title="Forwarded to Bank"></i>; // lock icon
-      case 'approvedBank':
-        return <i className="bi bi-lock-fill text-warning" title="Bank Approved"></i>; // lock icon
-      case 'forwardedCash':
-        return <i className="bi bi-lock-fill text-warning" title="Forwarded to Cash"></i>; // lock icon
-      case 'approvedCash':
-        return <i className="bi bi-lock-fill text-warning" title="Cash Approved"></i>; // lock icon
       case 'approved':
-        return <i className="bi bi-check-circle-fill text-success" title="Final Approved"></i>; // tick icon
+        return <i className="bi bi-check-circle-fill text-success" title="Final Approved"></i>; // green tick icon
       default:
-        return null;
+        return <i className="bi bi-lock-fill text-warning" title={`Status: ${entryStatus}`}></i>; // lock icon for all other statuses
     }
   };
 
