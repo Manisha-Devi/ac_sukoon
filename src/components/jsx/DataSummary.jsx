@@ -57,7 +57,8 @@ function DataSummary({ fareData, expenseData, currentUser }) {
             dataType: dataType,
             entryStatus: entry.entryStatus || 'pending',
             displayName: displayName,
-            description: description
+            description: description,
+            submittedBy: entry.submittedBy
           });
         });
       }
@@ -106,7 +107,8 @@ function DataSummary({ fareData, expenseData, currentUser }) {
             dataType: dataType,
             entryStatus: entry.entryStatus || 'pending',
             displayName: displayName,
-            description: description
+            description: description,
+            submittedBy: entry.submittedBy
           });
         });
       }
@@ -122,7 +124,8 @@ function DataSummary({ fareData, expenseData, currentUser }) {
         entry.entryStatus === 'approvedCash' || 
         entry.entryStatus === 'approvedBank' ||
         entry.entryStatus === 'cashApproved' ||
-        entry.entryStatus === 'bankApproved'
+        entry.entryStatus === 'bankApproved' ||
+        entry.entryStatus === 'approved'
       ));
 
       setLoading(false);
@@ -173,12 +176,39 @@ function DataSummary({ fareData, expenseData, currentUser }) {
     return currentIds.length > 0 && currentIds.every(id => selectedEntries.includes(id));
   };
 
-  // Get approved entries for current user
+  // Get approved entries for current user - only approvedCash status (for calculations)
   const getApprovedEntriesForCurrentUser = () => {
     const currentUserName = currentUser?.fullName || currentUser?.username;
     if (!currentUserName) return [];
 
-    return approvedData.filter(entry => entry.approvedBy === currentUserName);
+    const filteredEntries = approvedData.filter(entry => 
+      entry.approvedBy === currentUserName && entry.entryStatus === 'approvedCash'
+    );
+
+    console.log('🔍 DataSummary - Checking approved entries:');
+    console.log('📊 Current user:', currentUserName);
+    console.log('📋 Total approved data:', approvedData.length);
+    console.log('💰 Entries with approvedCash status approved by current user:', filteredEntries.length);
+    console.log('📝 ApprovedCash entries details:', filteredEntries);
+
+    return filteredEntries;
+  };
+
+  // Get final approved entries for table display - only approved status
+  const getFinalApprovedEntriesForTable = () => {
+    const currentUserName = currentUser?.fullName || currentUser?.username;
+    if (!currentUserName) return [];
+
+    const filteredEntries = approvedData.filter(entry => 
+      entry.approvedBy === currentUserName && entry.entryStatus === 'approved'
+    );
+
+    console.log('🔍 DataSummary - Checking final approved entries for table:');
+    console.log('📊 Current user:', currentUserName);
+    console.log('✅ Entries with approved status approved by current user:', filteredEntries.length);
+    console.log('📝 Final approved entries details:', filteredEntries);
+
+    return filteredEntries;
   };
 
   // Calculate total cash from approved entries of current user
@@ -459,7 +489,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
               <span className="label">Entry ID:</span>
               <span className="value">{entry.entryId}</span>
             </div>
-            
+
             <div className="entry-row">
               <span className="label">Date:</span>
               <span className="value">
@@ -653,13 +683,14 @@ function DataSummary({ fareData, expenseData, currentUser }) {
               {/* Approved Entries Table */}
               <div className="approved-entries-section">
                 <h6><i className="bi bi-check-circle-fill"></i> Entries Approved By You</h6>
-                {getApprovedEntriesForCurrentUser().length > 0 ? (
+                {getFinalApprovedEntriesForTable().length > 0 ? (
                   <div className="table-responsive">
                     <table className="table table-striped table-sm approved-entries-table">
                       <thead>
                         <tr>
                           <th>Date</th>
                           <th>Type</th>
+                          <th>I/E</th>
                           <th>Description</th>
                           <th>Cash</th>
                           <th>Bank</th>
@@ -668,19 +699,24 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                         </tr>
                       </thead>
                       <tbody>
-                        {getApprovedEntriesForCurrentUser().map((entry) => (
+                        {getFinalApprovedEntriesForTable().map((entry) => (
                           <tr key={entry.entryId}>
                             <td>{formatDisplayDate(entry.date)}</td>
                             <td>
                               <span className="badge bg-info">{entry.dataType}</span>
+                            </td>
+                            <td>
+                              <span className={`badge ${entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'bg-success' : 'bg-danger'}`}>
+                                {entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'I' : 'E'}
+                              </span>
                             </td>
                             <td>{entry.displayName}</td>
                             <td className="text-success">₹{(entry.cashAmount || 0).toLocaleString('en-IN')}</td>
                             <td className="text-primary">₹{(entry.bankAmount || 0).toLocaleString('en-IN')}</td>
                             <td className="fw-bold">₹{(entry.totalAmount || 0).toLocaleString('en-IN')}</td>
                             <td>
-                              <span className="badge bg-success">
-                                <i className="bi bi-check-circle"></i> Approved
+                              <span className="badge bg-info">
+                                <i className="bi bi-person"></i> {entry.submittedBy || 'N/A'}
                               </span>
                             </td>
                           </tr>
@@ -691,7 +727,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                 ) : (
                   <div className="no-approved-entries">
                     <i className="bi bi-inbox"></i>
-                    <p>No entries approved by you found</p>
+                    <p>No approved entries found</p>
                   </div>
                 )}
               </div>
