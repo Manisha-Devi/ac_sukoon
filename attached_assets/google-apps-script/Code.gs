@@ -27,9 +27,26 @@ function doPost(e) {
 
     const data = JSON.parse(e.postData.contents);
     const action = data.action;
-    let result;
-
+    const apiKey = data.apiKey;
+    
     console.log(`📥 Incoming POST request - Action: ${action}`);
+    
+    // Validate API key for all requests except test
+    if (action !== 'test') {
+      const keyValidation = validateAPIKey(apiKey);
+      if (!keyValidation.valid) {
+        console.log('❌ API key validation failed:', keyValidation.error);
+        return ContentService.createTextOutput(JSON.stringify({
+          success: false,
+          error: `Authentication failed: ${keyValidation.error}`,
+          timestamp: formatISTTimestamp()
+        })).setMimeType(ContentService.MimeType.JSON);
+      }
+      
+      console.log('✅ API key validated for:', keyValidation.keyName);
+    }
+
+    let result;
 
     // Route request to appropriate handler based on action
     switch (action) {
@@ -298,9 +315,26 @@ function doGet(e) {
     }
 
     const action = e.parameter.action;
-    let result;
-
+    const apiKey = e.parameter.apiKey;
+    
     console.log(`📥 Incoming GET request - Action: ${action}`);
+    
+    // Validate API key for all requests except test
+    if (action !== 'test') {
+      const keyValidation = validateAPIKey(apiKey);
+      if (!keyValidation.valid) {
+        console.log('❌ API key validation failed:', keyValidation.error);
+        return ContentService.createTextOutput(JSON.stringify({
+          success: false,
+          error: `Authentication failed: ${keyValidation.error}`,
+          timestamp: formatISTTimestamp()
+        })).setMimeType(ContentService.MimeType.JSON);
+      }
+      
+      console.log('✅ API key validated for:', keyValidation.keyName);
+    }
+
+    let result;
 
     switch (action) {
       case "test":

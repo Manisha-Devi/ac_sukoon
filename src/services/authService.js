@@ -1,8 +1,11 @@
+import APIKeyService from './key.js';
+
 // Authentication service for Google Sheets database
 class AuthService {
   constructor() {
     // Google Apps Script Web App URL - Updated to use the correct deployment URL
     this.API_URL = 'https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec';
+    this.apiKeyService = APIKeyService;
   }
 
   // Authenticate user against Google Sheets database
@@ -21,12 +24,12 @@ class AuthService {
         signal: controller.signal,
         redirect: 'follow',
         mode: 'cors',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'login',
           username: username,
           password: password,
           userType: userType
-        })
+        }))
       });
 
       clearTimeout(timeoutId);
@@ -122,9 +125,9 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         signal: controller.signal,
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'getAllUsers'
-        })
+        }))
       });
 
       clearTimeout(timeoutId);
@@ -175,7 +178,7 @@ class AuthService {
     try {
       console.log('📝 Adding fare receipt to Google Sheets:', data);
 
-      const requestBody = JSON.stringify({
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
         action: 'addFareReceipt',
         entryId: data.entryId,
         timestamp: data.timestamp,
@@ -185,7 +188,7 @@ class AuthService {
         bankAmount: data.bankAmount || 0,
         totalAmount: data.totalAmount || 0,
         submittedBy: data.submittedBy || 'driver'
-      });
+      }));
 
       // Try primary URL first
       let result = await this.makeAPIRequest(this.API_URL, requestBody);
@@ -205,7 +208,7 @@ class AuthService {
   }
 
   // Generic API request method with timeout and better error handling
-  async makeAPIRequest(url, body, timeout = 10000, retries = 1) {
+  async makeAPIRequest(url, bodyData, timeout = 10000, retries = 1) {
     let attempt = 0;
     while (attempt < retries + 1) {
       try {
@@ -213,6 +216,16 @@ class AuthService {
         console.log(`Attempt ${attempt} of ${retries + 1} to make API request`);
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+        // Parse body if it's a string, add API key, then stringify again
+        let requestData;
+        if (typeof bodyData === 'string') {
+          requestData = JSON.parse(bodyData);
+        } else {
+          requestData = bodyData;
+        }
+        
+        const authenticatedBody = JSON.stringify(this.apiKeyService.addAPIKey(requestData));
 
         const response = await fetch(url, {
           method: 'POST',
@@ -222,7 +235,7 @@ class AuthService {
           mode: 'cors',
           redirect: 'follow',
           signal: controller.signal,
-          body: body
+          body: authenticatedBody
         });
 
         clearTimeout(timeoutId);
@@ -1392,9 +1405,9 @@ class AuthService {
         },
         mode: 'cors',
         redirect: 'follow',
-        body: JSON.stringify({
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
           action: 'test'
-        })
+        }))
       });
 
       console.log('Response status:', response.status);

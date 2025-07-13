@@ -36,6 +36,7 @@ function App() {
   });
   const [allUsers, setAllUsers] = useState([]);
   const [cashDeposit, setCashDeposit] = useState([]);
+  const [error, setError] = useState(null);
 
 
   // New detailed statistics state
@@ -419,7 +420,8 @@ function App() {
     };
 
       // Fetch all users data centrally on app initialization
-    fetchAllUsersData();
+    //fetchAllUsersData();
+    initializeApp();
 
     // Expose function globally for manual testing
     window.refreshUsersData = fetchAllUsersData;
@@ -434,6 +436,35 @@ function App() {
         delete window.getAllUsersData;
     };
   }, []);
+
+  useEffect(() => {
+    initializeApp();
+  }, []);
+
+  const initializeApp = async () => {
+    try {
+      console.log('🚀 Initializing AC Sukoon Transport App...');
+
+      // Test API key first
+      console.log('🔐 Testing API key authentication...');
+      const isAPIKeyValid = await authService.testAPIKey();
+
+      if (!isAPIKeyValid) {
+        console.error('❌ API key authentication failed');
+        setError('Authentication system error. Please contact administrator.');
+        return;
+      }
+
+      console.log('✅ API key authentication successful');
+
+      // Fetch all users data after successful API key validation
+      await fetchAllUsersData();
+
+    } catch (error) {
+      console.error('❌ App initialization error:', error);
+      setError('Failed to initialize application. Please refresh the page.');
+    }
+  };
 
   // Update data stats when data changes
   useEffect(() => {
