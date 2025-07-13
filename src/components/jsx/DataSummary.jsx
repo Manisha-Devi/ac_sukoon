@@ -875,7 +875,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
         <div className="approval-tabs">
           <button 
             className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
-            onClick={()={() => {
+            onClick={() => {
               setActiveTab('pending');
               setSelectedEntries([]);
             }}
@@ -884,7 +884,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
           </button>
           <button 
             className={`tab-btn ${activeTab === 'bankApproval' ? 'active' : ''}`}
-            onClick={()={() => {
+            onClick={() => {
               setActiveTab('bankApproval');
               setSelectedEntries([]);
             }}
@@ -893,7 +893,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
           </button>
           <button 
             className={`tab-btn ${activeTab === 'cashApproval' ? 'active' : ''}`}
-            onClick={()={() => {
+            onClick={() => {
               setActiveTab('cashApproval');
               setSelectedEntries([]);
             }}
@@ -902,7 +902,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
           </button>
           <button 
             className={`tab-btn ${activeTab === 'approved' ? 'active' : ''}`}
-            onClick={()={() => {
+            onClick={() => {
               setActiveTab('approved');
               setSelectedEntries([]);
             }}
