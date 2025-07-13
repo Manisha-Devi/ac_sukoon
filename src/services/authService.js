@@ -1828,6 +1828,26 @@ class AuthService {
   // ============================================================================
   // ANALYTICS FUNCTIONS
   // ============================================================================
+
+  // Get analytics data for dashboard
+  async getAnalyticsData() {
+    try {
+      // This would fetch analytics data from Google Sheets
+      // For now, return empty structure
+      return {
+        success: true,
+        data: {
+          totalEntries: 0,
+          totalRevenue: 0,
+          totalExpenses: 0,
+          netProfit: 0
+        }
+      };
+    } catch (error) {
+      console.error('Error fetching analytics data:', error);
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 export default new AuthService();
