@@ -171,7 +171,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
     
     // Show checkbox only for:
     // 1. status = 'approvedBank' (regardless of bankAmount)  
-    // 2. status = 'pending' AND bankAmount = 0
+    // 2. status = 'pending' AND bankAmount = 0 (cash-only entries)
     if (entry && (
       entry.entryStatus === 'approvedBank' || 
       (entry.entryStatus === 'pending' && bankAmount === 0)
@@ -216,6 +216,152 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
   });
   const isAllSelected = selectableEntries.length > 0 && 
     selectableEntries.every(entry => selectedEntries.includes(entry.entryId));
+
+  // Separate function for cash-only approvals (bankAmount = 0)
+  const handleCashOnlyApproval = async () => {
+    if (selectedEntries.length === 0) {
+      alert('Please select entries for cash approval');
+      return;
+    }
+
+    try {
+      console.log('💰 CashSummary: Processing cash-only approvals:', selectedEntries);
+
+      // Process each selected entry
+      for (const entryId of selectedEntries) {
+        const entry = filteredData.find(e => e.entryId === entryId);
+        if (!entry) continue;
+
+        const bankAmount = entry.bankAmount || 0;
+
+        // For entries with bankAmount = 0 and status = pending
+        // Directly approve them (skip forwardedCash status)
+        if (entry.entryStatus === 'pending' && bankAmount === 0) {
+          // Update status locally first (for immediate UI feedback)
+          updateEntryStatus(entryId, "approved");
+
+          // Update parent state
+          if (window.updateEntryStatusInParent) {
+            window.updateEntryStatusInParent(entryId, "approved", entry.entryType);
+          }
+
+          // Background API call to Google Sheets for final approval
+          try {
+            const authService = (await import('../../services/authService.js')).default;
+
+            if (entry.entryType === 'daily') {
+              authService.approveFareReceipt({
+                entryId: entryId,
+                approvedBy: "Cash Approval"
+              }).catch(error => {
+                console.error('Background API sync failed for fare receipt approval:', error);
+              });
+            } else if (entry.entryType === 'booking') {
+              authService.approveBookingEntry({
+                entryId: entryId,
+                approvedBy: "Cash Approval"
+              }).catch(error => {
+                console.error('Background API sync failed for booking entry approval:', error);
+              });
+            } else if (entry.entryType === 'fuel') {
+              authService.approveFuelPayment({
+                entryId: entryId,
+                approvedBy: "Cash Approval"
+              }).catch(error => {
+                console.error('Background API sync failed for fuel payment approval:', error);
+              });
+            } else if (entry.entryType === 'adda') {
+              authService.approveAddaPayment({
+                entryId: entryId,
+                approvedBy: "Cash Approval"
+              }).catch(error => {
+                console.error('Background API sync failed for adda payment approval:', error);
+              });
+            } else if (entry.entryType === 'union') {
+              authService.approveUnionPayment({
+                entryId: entryId,
+                approvedBy: "Cash Approval"
+              }).catch(error => {
+                console.error('Background API sync failed for union payment approval:', error);
+              });
+            } else if (entry.entryType === 'service') {
+              authService.approveServicePayment({
+                entryId: entryId,
+                approvedBy: "Cash Approval"
+              }).catch(error => {
+                console.error('Background API sync failed for service payment approval:', error);
+              });
+            } else if (entry.entryType === 'other') {
+              authService.approveOtherPayment({
+                entryId: entryId,
+                approvedBy: "Cash Approval"
+              }).catch(error => {
+                console.error('Background API sync failed for other payment approval:', error);
+              });
+            }
+          } catch (error) {
+            console.error('Error importing authService:', error);
+          }
+        }
+        // For entries with approvedBank status, forward to cash approval
+        else if (entry.entryStatus === 'approvedBank') {
+          // Update status locally first (for immediate UI feedback)
+          updateEntryStatus(entryId, "forwardedCash");
+
+          // Update parent state
+          if (window.updateEntryStatusInParent) {
+            window.updateEntryStatusInParent(entryId, "forwardedCash", entry.entryType);
+          }
+
+          // Background API call to update status
+          try {
+            const authService = (await import('../../services/authService.js')).default;
+
+            if (entry.entryType === 'daily') {
+              authService.updateFareReceiptStatus(entryId, "forwardedCash", "").catch(error => {
+                console.error('Background API sync failed for fare receipt:', error);
+              });
+            } else if (entry.entryType === 'booking') {
+              authService.updateBookingEntryStatus(entryId, "forwardedCash", "").catch(error => {
+                console.error('Background API sync failed for booking entry:', error);
+              });
+            } else if (entry.entryType === 'fuel') {
+              authService.updateFuelPaymentStatus(entryId, "forwardedCash", "").catch(error => {
+                console.error('Background API sync failed for fuel payment:', error);
+              });
+            } else if (entry.entryType === 'adda') {
+              authService.updateAddaPaymentStatus(entryId, "forwardedCash", "").catch(error => {
+                console.error('Background API sync failed for adda payment:', error);
+              });
+            } else if (entry.entryType === 'union') {
+              authService.updateUnionPaymentStatus(entryId, "forwardedCash", "").catch(error => {
+                console.error('Background API sync failed for union payment:', error);
+              });
+            } else if (entry.entryType === 'service') {
+              authService.updateServicePaymentStatus(entryId, "forwardedCash", "").catch(error => {
+                console.error('Background API sync failed for service payment:', error);
+              });
+            } else if (entry.entryType === 'other') {
+              authService.updateOtherPaymentStatus(entryId, "forwardedCash", "").catch(error => {
+                console.error('Background API sync failed for other payment:', error);
+              });
+            }
+          } catch (error) {
+            console.error('Error importing authService:', error);
+          }
+        }
+      }
+
+      alert(`✅ ${selectedEntries.length} entries processed for cash approval!`);
+      setSelectedEntries([]);
+
+      console.log('✅ CashSummary: Cash approval completed');
+
+    } catch (error) {
+      console.error('❌ Error processing cash approvals:', error);
+      alert('Error processing cash approvals');
+    }
+  };
 
   // Handle type column click to show details
   const handleTypeClick = (entry) => {
@@ -542,10 +688,10 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
           <h5>Cash Transactions</h5>
           {selectedEntries.length > 0 && (
             <button 
-              className="btn btn-primary btn-sm"
-              onClick={handleForwardForApproval}
+              className="btn btn-success btn-sm"
+              onClick={handleCashOnlyApproval}
             >
-              <i className="bi bi-send"></i> Forward {selectedEntries.length} for Approval
+              <i className="bi bi-check-circle"></i> Cash Approve {selectedEntries.length} entries
             </button>
           )}
         </div>
