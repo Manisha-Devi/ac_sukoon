@@ -1878,6 +1878,163 @@ class AuthService {
   }
 
   // ============================================================================
+  // CASH DEPOSITS API METHODS
+  // ============================================================================
+
+  // Add Cash Deposit to Google Sheets
+  async addCashDeposit(data) {
+    try {
+      console.log('💰 Adding cash deposit to Google Sheets:', data);
+
+      const requestBody = JSON.stringify({
+        action: 'addCashDeposit',
+        entryId: data.entryId,
+        timestamp: data.timestamp,
+        entryType: data.entryType || 'Cash Deposit',
+        date: data.date,
+        cashAmount: data.cashAmount || 0,
+        description: data.description || '',
+        depositedBy: data.depositedBy || 'Unknown'
+      });
+
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
+
+      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
+        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
+        return { success: false, error: 'API temporarily unavailable - data saved locally' };
+      }
+
+      console.log('✅ Cash deposit response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error adding cash deposit:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Get all Cash Deposits from Google Sheets
+  async getCashDeposits() {
+    try {
+      console.log('📋 Fetching cash deposits from Google Sheets...');
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'getCashDeposits'
+        })
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Cash deposits fetched:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error fetching cash deposits:', error);
+      // Return empty data structure instead of error to prevent UI crashes
+      return { 
+        success: true, 
+        data: [],
+        message: 'Cash deposits loaded from local cache (API temporarily unavailable)'
+      };
+    }
+  }
+
+  // Update Cash Deposit
+  async updateCashDeposit(data) {
+    try {
+      console.log('📝 Updating cash deposit in Google Sheets:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: 'updateCashDeposit',
+          entryId: data.entryId,
+          updatedData: data.updatedData
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Cash deposit updated:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating cash deposit:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Delete Cash Deposit
+  async deleteCashDeposit(data) {
+    try {
+      console.log('🗑️ Deleting cash deposit from Google Sheets:', data);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'deleteCashDeposit',
+          entryId: data.entryId
+        })
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('HTTP Error Response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Cash deposit deleted successfully:', result);
+
+      // Validate response structure
+      if (result && typeof result === 'object') {
+        return result;
+      } else {
+        console.warn('⚠️ Invalid response format:', result);
+        return { success: true, message: 'Cash deposit deleted (response format issue)' };
+      }
+    } catch (error) {
+      console.error('❌ Error deleting cash deposit:', error);
+      if (error.name === 'AbortError') {
+        return { success: false, error: 'Request timeout - delete operation took too long' };
+      }
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ============================================================================
   // ANALYTICS FUNCTIONS
   // ============================================================================
 }

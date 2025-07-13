@@ -96,7 +96,7 @@ function App() {
         const errorMessage = response?.error || response?.message || 'Unknown error';
         console.error('❌ Failed to fetch users:', errorMessage);
         console.error('❌ Full response:', response);
-        
+
         // For debugging: Try to call the API with GET method as fallback
         console.log('🔄 Trying fallback GET method...');
         try {
@@ -105,11 +105,11 @@ function App() {
             mode: 'cors',
             redirect: 'follow'
           });
-          
+
           if (fallbackResponse.ok) {
             const fallbackResult = await fallbackResponse.json();
             console.log('🔄 Fallback GET response:', fallbackResult);
-            
+
             if (fallbackResult.success && fallbackResult.data) {
               setAllUsers(fallbackResult.data);
               return fallbackResult.data;
@@ -118,7 +118,7 @@ function App() {
         } catch (fallbackError) {
           console.log('❌ Fallback method also failed:', fallbackError.message);
         }
-        
+
         setAllUsers([]);
         return [];
       }
@@ -135,7 +135,7 @@ function App() {
   const handleLogin = (userData) => {
     setUser(userData);
     console.log('👤 User logged in via React state:', userData);
-    
+
     // Refresh users data after login
     console.log('🔄 Refreshing users data after login...');
     fetchAllUsersData();
@@ -167,6 +167,7 @@ function App() {
         servicePayments,
         otherPayments,
         allUsersData,
+        cashDepositsData,
       ] = await Promise.all([
         authService.getFareReceipts(),
         authService.getBookingEntries(),
@@ -177,6 +178,7 @@ function App() {
         authService.getServicePayments(),
         authService.getOtherPayments(),
         authService.getAllUsers(),
+        authService.getCashDeposits(),
       ]);
 
       // Process fare data (fare receipts + booking entries)
@@ -266,6 +268,16 @@ function App() {
           };
           setAllUsers([currentUserForAllUsers]);
         }
+      }
+
+      // Update cashDeposit state with fetched data
+      if (cashDepositsData?.success && cashDepositsData?.data) {
+        console.log('💰 Setting cashDeposit data:', cashDepositsData.data.length, 'deposits');
+        setCashDeposit(cashDepositsData.data);
+      } else {
+        console.warn('⚠️ Failed to load cash deposits data:', cashDepositsData?.error);
+        // Optionally, handle the error or set an empty array
+        setCashDeposit([]);
       }
 
       // Calculate and update totals

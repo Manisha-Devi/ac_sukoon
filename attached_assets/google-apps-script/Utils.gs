@@ -11,14 +11,14 @@ function formatISTTimestamp() {
   const now = new Date();
   const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
   const istTime = new Date(now.getTime() + istOffset);
-  
+
   const day = String(istTime.getUTCDate()).padStart(2, '0');
   const month = String(istTime.getUTCMonth() + 1).padStart(2, '0');
   const year = istTime.getUTCFullYear();
   const hours = String(istTime.getUTCHours()).padStart(2, '0');
   const minutes = String(istTime.getUTCMinutes()).padStart(2, '0');
   const seconds = String(istTime.getUTCSeconds()).padStart(2, '0');
-  
+
   return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
 }
 
@@ -28,7 +28,7 @@ function formatISTTimestamp() {
 function formatDateForDisplay(dateValue) {
   try {
     let date;
-    
+
     if (dateValue instanceof Date) {
       date = dateValue;
     } else if (typeof dateValue === 'string') {
@@ -39,15 +39,15 @@ function formatDateForDisplay(dateValue) {
     } else {
       return new Date().toLocaleDateString('en-IN');
     }
-    
+
     if (isNaN(date.getTime())) {
       return new Date().toLocaleDateString('en-IN');
     }
-    
+
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
-    
+
     return `${day}-${month}-${year}`;
   } catch (error) {
     console.error('Error formatting date:', error);
@@ -109,5 +109,6 @@ const SHEET_NAMES = {
   FUEL_PAYMENTS: "FuelPayments",
   UNION_PAYMENTS: "UnionPayments",
   SERVICE_PAYMENTS: "ServicePayments",
-  OTHER_PAYMENTS: "OtherPayments"
+  OTHER_PAYMENTS: "OtherPayments",
+  CASH_DEPOSITS: "CashDeposits"
 };

@@ -203,14 +203,14 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
 
     // Search in all data sources, not just approvedData
     let allEntries = [];
-    
+
     // Process Fare Data
     if (fareData && fareData.length > 0) {
       fareData.forEach(entry => {
         if (entry.entryStatus === 'approved' && entry.approvedBy === currentUserName) {
           let dataType = '';
           let displayName = '';
-          
+
           if (entry.type === 'daily') {
             dataType = 'Fare Receipt';
             displayName = `Fare: ${entry.route || 'Daily Collection'}`;
@@ -317,7 +317,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
     const userCashDeposits = cashDeposit.filter(deposit => 
       deposit.depositedBy === currentUserName
     );
-    
+
     return userCashDeposits.reduce((total, deposit) => total + (deposit.cashAmount || 0), 0);
   };
 
@@ -514,9 +514,10 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
   };
 
   // Handle Cash Deposit modal
-  const handleCashDepositSubmit = (e) => {
+  const handleCashDepositSubmit = async (e) => {
     e.preventDefault();
-    
+
+    // Validate form
     if (!cashDepositForm.amount || !cashDepositForm.description) {
       alert('Please fill all required fields');
       return;
@@ -535,12 +536,12 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
       timestamp: new Date().toISOString()
     };
 
-    // Add to cash deposits array using parent state
+    // Add to cash deposits array using parent state (immediate local update)
     setCashDeposit(prev => [newCashDeposit, ...prev]);
 
     console.log('Cash Deposit:', newCashDeposit);
     alert(`Cash Deposit of ₹${parseFloat(cashDepositForm.amount).toLocaleString('en-IN')} submitted successfully!`);
-    
+
     // Reset form and close modal
     setCashDepositForm({
       amount: '',
@@ -548,6 +549,28 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
       date: new Date().toISOString().split('T')[0]
     });
     setShowCashDepositModal(false);
+
+    // Sync to Google Sheets in background
+    try {
+      console.log('💰 Syncing cash deposit to Google Sheets...');
+      const syncResult = await authService.addCashDeposit({
+        entryId: newCashDeposit.entryId,
+        timestamp: newCashDeposit.timestamp,
+        entryType: newCashDeposit.entryType,
+        date: newCashDeposit.date,
+        cashAmount: newCashDeposit.cashAmount,
+        description: newCashDeposit.description,
+        depositedBy: newCashDeposit.depositedBy
+      });
+
+      if (syncResult.success) {
+        console.log('✅ Cash deposit synced to Google Sheets successfully');
+      } else {
+        console.log('⚠️ Cash deposit sync failed, but saved locally:', syncResult.error);
+      }
+    } catch (error) {
+      console.error('❌ Error syncing cash deposit to Google Sheets:', error);
+    }
   };
 
   const handleModalClose = () => {
@@ -883,16 +906,16 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                                     </span>
                                   </td>
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      ) : (
-                        <div className="no-approved-entries">
-                          <i className="bi bi-inbox"></i>
-                          <p>No entries with final approval status found that were approved by you</p>
-                        </div>
-                      )}
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        ) : (
+                          <div className="no-approved-entries">
+                            <i className="bi bi-inbox"></i>
+                            <p>No entries with final approval status found that were approved by you</p>
+                          </div>
+                        )}
                     </div>
                   ) : (
                     <div className="cash-deposits-section">
@@ -902,7 +925,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                         const userCashDeposits = cashDeposit.filter(deposit => 
                           deposit.depositedBy === currentUserName
                         );
-                        
+
                         return userCashDeposits.length > 0 ? (
                           <div className="table-responsive">
                             <table className="table table-striped table-sm cash-deposits-table">
@@ -1057,7 +1080,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                   aria-label="Close"
                 ></button>
               </div>
-              
+
               <form onSubmit={handleCashDepositSubmit}>
                 <div className="modal-body">
                   <div className="cash-deposit-info mb-4">

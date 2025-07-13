@@ -183,6 +183,20 @@ function doPost(e) {
         result = updateOtherPaymentStatus(data);
         break;
 
+      // ==================== CASH DEPOSITS ====================
+      case "addCashDeposit":
+        result = addCashDeposit(data);
+        break;
+      case "getCashDeposits":
+        result = getCashDeposits();
+        break;
+      case "updateCashDeposit":
+        result = updateCashDeposit(data);
+        break;
+      case "deleteCashDeposit":
+        result = deleteCashDeposit(data);
+        break;
+
       // ==================== APPROVAL WORKFLOW OPERATIONS ====================
       // Fare Receipts Approval
       case 'approveFareReceipt':
@@ -318,6 +332,9 @@ function doGet(e) {
         break;
       case "getOtherPayments":
         result = getOtherPayments();
+        break;
+      case "getCashDeposits":
+        result = getCashDeposits();
         break;
       default:
         result = { 
