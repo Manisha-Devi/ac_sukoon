@@ -536,7 +536,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
 
     try {
       let date;
-      
+
       // Handle different timestamp formats
       if (timestampStr.includes('/')) {
         // Handle format like "13/07/2025 16:14:45"
@@ -544,7 +544,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
         if (parts.length >= 2) {
           const datePart = parts[0]; // "13/07/2025"
           const timePart = parts[1]; // "16:14:45"
-          
+
           // Convert to proper date format
           const [day, month, year] = datePart.split('/');
           const properDateStr = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${timePart}`;
