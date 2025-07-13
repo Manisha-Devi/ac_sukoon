@@ -289,14 +289,22 @@ function DataSummary({ fareData, expenseData, currentUser }) {
     return userApprovedEntries.reduce((total, entry) => total + (entry.bankAmount || 0), 0);
   };
 
+  // Calculate income cash (only from fare receipts and bookings)
+  const calculateIncomeCash = () => {
+    const userApprovedEntries = getFinalApprovedEntriesForTable();
+    return userApprovedEntries
+      .filter(entry => entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry')
+      .reduce((total, entry) => total + (entry.cashAmount || 0), 0);
+  };
+
   // Get fixed cash for current user
   const getFixedCash = () => {
     return currentUser?.fixedCash || 0;
   };
 
-  // Calculate cash in hand (Total Cash + Fixed Cash)
+  // Calculate cash in hand (Income Cash + Fixed Cash)
   const calculateCashInHand = () => {
-    return calculateTotalCash() + getFixedCash();
+    return calculateIncomeCash() + getFixedCash();
   };
 
   // Handle approval action
@@ -739,7 +747,7 @@ function DataSummary({ fareData, expenseData, currentUser }) {
                       <div className="financial-details">
                         <div className="financial-amount">₹{calculateCashInHand().toLocaleString('en-IN')}</div>
                         <div className="financial-label">Cash in Hand</div>
-                        <div className="financial-subtitle">Total + Fixed Cash</div>
+                        <div className="financial-subtitle">Income Cash + Fixed Cash</div>
                       </div>
                     </div>
                   </div>
