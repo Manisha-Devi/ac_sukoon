@@ -61,21 +61,14 @@ function App() {
   const handleLogin = (userData) => {
     setUser(userData);
     console.log('👤 User logged in via React state:', userData);
-    
-    // Add current user to allUsers state only if not already present
-    setAllUsers(prevUsers => {
-      const existingUser = prevUsers.find(user => user.username === userData.username);
-      if (!existingUser) {
-        const currentUserForAllUsers = {
-          username: userData.username,
-          name: userData.fullName,
-          date: new Date().toISOString().split('T')[0],
-          fixedCash: userData.fixedCash || 0
-        };
-        return [...prevUsers, currentUserForAllUsers];
-      }
-      return prevUsers;
-    });
+          // Add current user to allUsers state
+          const currentUserForAllUsers = {
+            username: userData.username,
+            name: userData.fullName,
+            date: new Date().toISOString().split('T')[0],
+            fixedCash: userData.fixedCash || 0
+          };
+          setAllUsers([currentUserForAllUsers]);
   };
 
   // Handle user logout - Only clear React state
@@ -103,7 +96,6 @@ function App() {
         unionPayments,
         servicePayments,
         otherPayments,
-        allUsersData
       ] = await Promise.all([
         authService.getFareReceipts(),
         authService.getBookingEntries(),
@@ -113,7 +105,6 @@ function App() {
         authService.getUnionPayments(),
         authService.getServicePayments(),
         authService.getOtherPayments(),
-        authService.getAllUsers()
       ]);
 
       // Process fare data (fare receipts + booking entries)
@@ -183,12 +174,6 @@ function App() {
 
 
 
-      // Update all users state
-      if (allUsersData?.data && Array.isArray(allUsersData.data)) {
-        setAllUsers(allUsersData.data);
-        console.log(`👥 Loaded ${allUsersData.data.length} users with fixed cash data`);
-      }
-
       // Update parent state
       setFareData(combinedFareData);
       setExpenseData(combinedExpenseData);
@@ -222,9 +207,7 @@ function App() {
           addaPayments: addaPayments?.data?.length || 0,
           unionPayments: unionPayments?.data?.length || 0,
           servicePayments: servicePayments?.data?.length || 0,
-          otherPayments: otherPayments?.data?.length || 0,
-          totalUsers: allUsersData?.data?.length || 0,
-          usersWithFixedCash: allUsersData?.data?.filter(user => user.fixedCash > 0)?.length || 0
+          otherPayments: otherPayments?.data?.length || 0
         }
       }));
 

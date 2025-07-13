@@ -822,7 +822,7 @@ class AuthService {
 
       const result = await response.json();
       console.log('✅ Service payment deleted successfully:', result);
-
+      
       // Validate response structure
       if (result && typeof result === 'object') {
         return result;
@@ -981,7 +981,7 @@ class AuthService {
 
       const result = await response.json();
       console.log('✅ Other payment deleted successfully:', result);
-
+      
       // Validate response structure
       if (result && typeof result === 'object') {
         return result;
@@ -1575,7 +1575,7 @@ class AuthService {
     }
   }
 
-
+  
 
   // Generic approval functions for other data types (to be implemented similarly)
   async approveFareReceipt(data) {
@@ -1638,7 +1638,7 @@ class AuthService {
     }
   }
 
-
+  
 
   // ============================================================================
   // STATUS UPDATE FUNCTIONS
@@ -1840,43 +1840,6 @@ class AuthService {
 
   // ============================================================================
   // ANALYTICS FUNCTIONS
-  // ============================================================================
-
-  // ============================================================================
-  // USER MANAGEMENT API METHODS
-  // ============================================================================
-
-  /**
-   * Get all users with fixed cash information
-   */
-  async getAllUsers() {
-    try {
-      console.log('👥 Fetching all users from Google Sheets...');
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'getAllUsers'
-        })
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        console.log(`✅ Retrieved ${result.data?.length || 0} users`);
-        return result;
-      } else {
-        throw new Error(result.error || 'Failed to get users');
-      }
-    } catch (error) {
-      console.error('❌ Error getting users:', error);
-      throw error;
-    }
-  }
-
-  // ============================================================================
-  // OTHER PAYMENTS API METHODS
   // ============================================================================
 }
 
