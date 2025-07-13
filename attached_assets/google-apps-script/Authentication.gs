@@ -1,4 +1,3 @@
-
 // ============================================================================
 // AUTHENTICATION FUNCTIONS (Authentication.gs)
 // ============================================================================
@@ -12,11 +11,11 @@
 function handleLogin(data) {
   try {
     console.log("🔐 Processing login attempt for user:", data.username);
-    
+
     // Get Users sheet
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
       .getSheetByName(SHEET_NAMES.USERS);
-    
+
     if (!sheet) {
       throw new Error("Users sheet not found. Please check sheet configuration.");
     }
@@ -43,7 +42,7 @@ function handleLogin(data) {
       // Check if credentials match
       if (sheetUsername === inputUsername && sheetPassword === inputPassword) {
         console.log("✅ Login successful for user:", inputUsername);
-        
+
         // Update last login timestamp
         const istTimestamp = data.timestamp || formatISTTimestamp();
         sheet.getRange(i + 1, 7).setValue(istTimestamp);
@@ -76,6 +75,91 @@ function handleLogin(data) {
     return { 
       success: false, 
       error: "Login error: " + error.toString() 
+    };
+  }
+}
+
+/**
+ * Get all users from Users sheet
+ */
+function getAllUsers() {
+  try {
+    console.log('👥 Fetching all users...');
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Users');
+
+    if (!sheet) {
+      throw new Error('Users sheet not found');
+    }
+
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0];
+    const users = [];
+
+    // Find column indices
+    const usernameIndex = headers.indexOf('Username');
+    const fullNameIndex = headers.indexOf('FullName');
+    const createdDateIndex = headers.indexOf('CreatedDate');
+    const fixedCashIndex = headers.indexOf('FixedCash');
+
+    if (usernameIndex === -1 || fullNameIndex === -1 || createdDateIndex === -1 || fixedCashIndex === -1) {
+      throw new Error('Required columns not found in Users sheet');
+    }
+
+    // Process each user row (skip header)
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+
+      if (row[usernameIndex]) { // Only include rows with username
+        users.push({
+          username: row[usernameIndex],
+          name: row[fullNameIndex] || '',
+          date: row[createdDateIndex] ? formatDateForDisplay(row[createdDateIndex]) : '',
+          fixedCash: parseFloat(row[fixedCashIndex]) || 0
+        });
+      }
+    }
+
+    console.log(`✅ Retrieved ${users.length} users`);
+
+    return {
+      success: true,
+      data: users,
+      count: users.length,
+      timestamp: formatISTTimestamp()
+    };
+
+  } catch (error) {
+    console.error('❌ Error fetching all users:', error);
+
+    return {
+      success: false,
+      error: "Failed to fetch users: " + error.toString(),
+      timestamp: formatISTTimestamp()
+    };
+  }
+}
+
+/**
+ * Test connection to Google Sheets
+ */
+function testConnection() {
+  try {
+    console.log('🔍 Testing connection...');
+
+    return {
+      success: true,
+      message: "Google Apps Script is working!",
+      timestamp: formatISTTimestamp(),
+      version: "2.0.0"
+    };
+  } catch (error) {
+    console.error('❌ Test connection error:', error);
+
+    return {
+      success: false,
+      error: "Connection test failed: " + error.toString(),
+      timestamp: formatISTTimestamp()
     };
   }
 }

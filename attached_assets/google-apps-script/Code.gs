@@ -44,6 +44,9 @@ function doPost(e) {
       case "login":
         result = handleLogin(data);
         break;
+      case "getAllUsers":
+        result = getAllUsers();
+        break;
       case "test":
         result = testConnection();
         break;

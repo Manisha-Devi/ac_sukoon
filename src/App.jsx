@@ -61,14 +61,6 @@ function App() {
   const handleLogin = (userData) => {
     setUser(userData);
     console.log('👤 User logged in via React state:', userData);
-          // Add current user to allUsers state
-          const currentUserForAllUsers = {
-            username: userData.username,
-            name: userData.fullName,
-            date: new Date().toISOString().split('T')[0],
-            fixedCash: userData.fixedCash || 0
-          };
-          setAllUsers([currentUserForAllUsers]);
   };
 
   // Handle user logout - Only clear React state
@@ -96,6 +88,7 @@ function App() {
         unionPayments,
         servicePayments,
         otherPayments,
+        allUsersData,
       ] = await Promise.all([
         authService.getFareReceipts(),
         authService.getBookingEntries(),
@@ -105,6 +98,7 @@ function App() {
         authService.getUnionPayments(),
         authService.getServicePayments(),
         authService.getOtherPayments(),
+        authService.getAllUsers(),
       ]);
 
       // Process fare data (fare receipts + booking entries)
@@ -178,6 +172,23 @@ function App() {
       setFareData(combinedFareData);
       setExpenseData(combinedExpenseData);
 
+      // Update allUsers state with fetched data
+      if (allUsersData?.success && allUsersData?.data) {
+        console.log('👥 Setting allUsers data:', allUsersData.data.length, 'users');
+        setAllUsers(allUsersData.data);
+      } else {
+        console.warn('⚠️ Failed to load all users data:', allUsersData?.error);
+        // Keep current user in allUsers if fetch fails
+        if (user) {
+          const currentUserForAllUsers = {
+            username: user.username,
+            name: user.fullName,
+            date: new Date().toISOString().split('T')[0],
+            fixedCash: user.fixedCash || 0
+          };
+          setAllUsers([currentUserForAllUsers]);
+        }
+      }
 
       // Calculate and update totals
       const totalEarningsAmount = combinedFareData

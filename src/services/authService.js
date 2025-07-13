@@ -822,7 +822,7 @@ class AuthService {
 
       const result = await response.json();
       console.log('✅ Service payment deleted successfully:', result);
-      
+
       // Validate response structure
       if (result && typeof result === 'object') {
         return result;
@@ -981,7 +981,7 @@ class AuthService {
 
       const result = await response.json();
       console.log('✅ Other payment deleted successfully:', result);
-      
+
       // Validate response structure
       if (result && typeof result === 'object') {
         return result;
@@ -1575,7 +1575,7 @@ class AuthService {
     }
   }
 
-  
+
 
   // Generic approval functions for other data types (to be implemented similarly)
   async approveFareReceipt(data) {
@@ -1638,7 +1638,7 @@ class AuthService {
     }
   }
 
-  
+
 
   // ============================================================================
   // STATUS UPDATE FUNCTIONS
