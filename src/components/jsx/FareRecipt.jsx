@@ -239,16 +239,18 @@ function FareEntry({
 
   const routes = [
     "Total",
-    "Ghuraka to Doda",
-    "Doda to Ghuraka",
-    "Ghuraka to Thatri",
-    "Thatri to Ghuraka",
     "Ghuraka to Bhaderwah",
-    "Bhaderwah to Pul Doda",
-    "Pul Doda to Thatri",
-    "Thatri to Pul Doda",
-    "Pul Doda to Bhaderwah",
+    "Ghuraka to Pull Doda",
+    "Ghuraka to Thathri",
+    "Bhaderwah to Pull Doda",
+    "Bhaderwah to Thathri",
     "Bhaderwah to Ghuraka",
+    "Pull Doda to Thathri",
+    "Pull Doda to Bhaderwah",
+    "Pull Doda to Ghuraka",
+    "Thathri to Pull Doda",
+    "Thathri to Bhaderwah",
+    "Thathri to Ghuraka",
   ];
 
   const handleDailySubmit = async (e) => {
