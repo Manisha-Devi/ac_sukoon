@@ -86,6 +86,103 @@ function MiscPayment({
     return { min: minDate, max: maxDate };
   };
 
+  const serviceDetailOptions = [
+    "Engine Oil Change",
+    "Engine Repair",
+    "Engine Overhaul",
+    "Engine Tune Up",
+    "Brake Service",
+    "Brake Pad Change",
+    "Brake Oil Change",
+    "Clutch Service",
+    "Clutch Plate Change",
+    "Clutch Oil Change",
+    "Gear Box Service",
+    "Gear Oil Change",
+    "Transmission Repair",
+    "AC Service",
+    "AC Gas Filling",
+    "AC Compressor Repair",
+    "AC Filter Change",
+    "Radiator Service",
+    "Radiator Repair",
+    "Coolant Change",
+    "Battery Service",
+    "Battery Change",
+    "Alternator Repair",
+    "Starter Motor Repair",
+    "Electrical Work",
+    "Wiring Repair",
+    "Headlight Repair",
+    "Tail Light Repair",
+    "Horn Repair",
+    "Indicator Repair",
+    "Tyre Change",
+    "Tyre Puncture",
+    "Tyre Alignment",
+    "Wheel Balancing",
+    "Suspension Service",
+    "Shock Absorber Change",
+    "Spring Repair",
+    "Steering Service",
+    "Power Steering Oil",
+    "Body Work",
+    "Denting Work",
+    "Painting Work",
+    "Welding Work",
+    "Glass Work",
+    "Mirror Change",
+    "Door Lock Repair",
+    "Window Repair",
+    "Seat Repair",
+    "Interior Cleaning",
+    "Upholstery Work",
+    "Floor Mat Change",
+    "Seat Cover Change",
+    "Dashboard Repair",
+    "Exhaust Service",
+    "Silencer Change",
+    "Catalytic Converter",
+    "Fuel System Service",
+    "Fuel Pump Repair",
+    "Fuel Filter Change",
+    "Carburetor Service",
+    "Injector Cleaning",
+    "Spark Plug Change",
+    "Air Filter Change",
+    "Oil Filter Change",
+    "Fuel Tank Repair",
+    "Speedometer Repair",
+    "Odometer Service",
+    "Music System Repair",
+    "Speaker Change",
+    "Antenna Repair",
+    "GPS Installation",
+    "CCTV Installation",
+    "Fire Extinguisher Service",
+    "First Aid Kit Refill",
+    "Tool Kit Update",
+    "Emergency Kit",
+    "Safety Equipment",
+    "Pollution Check",
+    "Fitness Certificate",
+    "Insurance Claim Work",
+    "Accident Repair",
+    "Complete Service",
+    "Minor Service",
+    "Major Service",
+    "Pre-delivery Service",
+    "Periodic Maintenance",
+    "Preventive Maintenance",
+    "Emergency Repair",
+    "Roadside Assistance",
+    "Towing Service",
+    "Jump Start Service",
+    "Lockout Service",
+    "Flat Tyre Service",
+    "Other Service"
+  ];
+
   const otherPaymentDescriptions = [
     "Parking Fee",
     "Toll Tax",
@@ -649,18 +746,16 @@ function MiscPayment({
                   </div>
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Service Details</label>
-                    <input
-                      type="text"
-                      className="form-control"
+                    <SearchableSelect
+                      options={serviceDetailOptions}
                       value={serviceData.serviceDetails}
-                      onChange={(e) =>
-                        setServiceData({
-                          ...serviceData,
-                          serviceDetails: e.target.value,
-                        })
+                      onChange={(value) =>
+                        setServiceData({ ...serviceData, serviceDetails: value })
                       }
-                      placeholder="Enter service details"
-                      required
+                      placeholder="Type to search service details..."
+                      allowCustom={true}
+                      name="serviceDetails"
+                      className="service-details-selector"
                     />
                   </div>
                 </div>
