@@ -182,10 +182,29 @@ function FareEntry({
   const checkDateInFareData = (selectedDate, selectedRoute = null) => {
     if (!selectedDate) return null;
 
+    // Debug logging
+    console.log('🔍 checkDateInFareData called with:', {
+      selectedDate,
+      selectedRoute,
+      fareDataLength: fareData.length,
+      fareDataSample: fareData.slice(0, 3)
+    });
+
     const normalizedSelectedDate = normalizeDateString(selectedDate);
+    console.log('📅 Normalized selected date:', normalizedSelectedDate);
 
     // Check for existing entries in fareData
     const existingEntry = fareData.find((entry) => {
+      console.log('🔍 Checking entry:', {
+        entryId: entry.entryId,
+        type: entry.type,
+        date: entry.date,
+        dateFrom: entry.dateFrom,
+        dateTo: entry.dateTo,
+        route: entry.route,
+        normalizedEntryDate: entry.date ? normalizeDateString(entry.date) : null
+      });
+
       // Skip if editing the same entry
       if (editingEntry && entry.entryId === editingEntry.entryId) return false;
 
@@ -782,6 +801,23 @@ function FareEntry({
 
   // Load data on component mount and listen for refresh events
   useEffect(() => {
+    // Debug fareData structure whenever it changes
+    console.log('🎯 FAREDATA STRUCTURE DEBUG:', {
+      fareDataLength: fareData.length,
+      fareDataTypes: fareData.map(entry => entry.type),
+      sampleEntries: fareData.slice(0, 5).map(entry => ({
+        entryId: entry.entryId,
+        type: entry.type,
+        date: entry.date,
+        dateFrom: entry.dateFrom,
+        dateTo: entry.dateTo,
+        route: entry.route,
+        submittedBy: entry.submittedBy,
+        entryStatus: entry.entryStatus
+      })),
+      completeStructure: fareData[0] || 'No data available'
+    });
+
     // Listen for centralized refresh events
     const handleDataRefresh = () => {
       console.log("🔄 FareRecipt: Refreshing data from centralized refresh");
@@ -792,7 +828,7 @@ function FareEntry({
     return () => {
       window.removeEventListener("dataRefreshed", handleDataRefresh);
     };
-  }, [currentUser]);
+  }, [currentUser, fareData]);
 
   return (
     <div className="fare-entry-container">
