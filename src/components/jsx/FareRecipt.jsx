@@ -192,48 +192,6 @@ function FareEntry({
     return existingDailyEntry || existingBookingEntry || existingOffEntry;
   };
 
-  // Function to get specific conflict message for daily entry
-  const getDailyConflictMessage = (selectedDate, selectedRoute) => {
-    if (!selectedDate || !selectedRoute) return "";
-
-    const existingDailyEntry = fareData.find(
-      (entry) =>
-        entry.type === "daily" &&
-        entry.date === selectedDate &&
-        entry.route === selectedRoute &&
-        (!editingEntry || entry.entryId !== editingEntry.entryId),
-    );
-
-    if (existingDailyEntry) {
-      return "This date is already taken for Route Entry";
-    }
-
-    const existingBookingEntry = fareData.find(
-      (entry) =>
-        entry.type === "booking" &&
-        selectedDate >= entry.dateFrom &&
-        selectedDate <= entry.dateTo &&
-        (!editingEntry || entry.entryId !== editingEntry.entryId),
-    );
-
-    if (existingBookingEntry) {
-      return "This date is already taken for Booking Entry";
-    }
-
-    const existingOffEntry = fareData.find(
-      (entry) =>
-        entry.type === "off" &&
-        entry.date === selectedDate &&
-        (!editingEntry || entry.entryId !== editingEntry.entryId),
-    );
-
-    if (existingOffEntry) {
-      return "This date is already taken for Off Day";
-    }
-
-    return "";
-  };
-
   const isBookingDateDisabled = (selectedDate) => {
     if (!selectedDate) return false;
 
@@ -252,47 +210,6 @@ function FareEntry({
     );
 
     return existingDailyEntry || existingOffEntry;
-  };
-
-  // Function to get specific conflict message for booking entry
-  const getBookingConflictMessage = (selectedDate) => {
-    if (!selectedDate) return "";
-
-    const existingBookingEntry = fareData.find(
-      (entry) =>
-        entry.type === "booking" &&
-        selectedDate >= entry.dateFrom &&
-        selectedDate <= entry.dateTo &&
-        (!editingEntry || entry.entryId !== editingEntry.entryId),
-    );
-
-    if (existingBookingEntry) {
-      return "This date is already taken for Booking Entry";
-    }
-
-    const existingDailyEntry = fareData.find(
-      (entry) =>
-        entry.type === "daily" &&
-        entry.date === selectedDate &&
-        (!editingEntry || entry.entryId !== editingEntry.entryId),
-    );
-
-    if (existingDailyEntry) {
-      return "This date is already taken for Route Entry";
-    }
-
-    const existingOffEntry = fareData.find(
-      (entry) =>
-        entry.type === "off" &&
-        entry.date === selectedDate &&
-        (!editingEntry || entry.entryId !== editingEntry.entryId),
-    );
-
-    if (existingOffEntry) {
-      return "This date is already taken for Off Day";
-    }
-
-    return "";
   };
 
   const isOffDayDateDisabled = (selectedDate) => {
@@ -314,47 +231,6 @@ function FareEntry({
     );
 
     return existingDailyEntry || existingBookingEntry;
-  };
-
-  // Function to get specific conflict message for off day entry
-  const getOffDayConflictMessage = (selectedDate) => {
-    if (!selectedDate) return "";
-
-    const existingOffEntry = fareData.find(
-      (entry) =>
-        entry.type === "off" &&
-        entry.date === selectedDate &&
-        (!editingEntry || entry.entryId !== editingEntry.entryId),
-    );
-
-    if (existingOffEntry) {
-      return "This date is already taken for Off Day";
-    }
-
-    const existingDailyEntry = fareData.find(
-      (entry) =>
-        entry.type === "daily" &&
-        entry.date === selectedDate &&
-        (!editingEntry || entry.entryId !== editingEntry.entryId),
-    );
-
-    if (existingDailyEntry) {
-      return "This date is already taken for Route Entry";
-    }
-
-    const existingBookingEntry = fareData.find(
-      (entry) =>
-        entry.type === "booking" &&
-        selectedDate >= entry.dateFrom &&
-        selectedDate <= entry.dateTo &&
-        (!editingEntry || entry.entryId !== editingEntry.entryId),
-    );
-
-    if (existingBookingEntry) {
-      return "This date is already taken for Booking Entry";
-    }
-
-    return "";
   };
 
   const getTodayDate = () => {
@@ -383,8 +259,9 @@ function FareEntry({
 
     try {
       if (isDailyDateDisabled(dailyFareData.date, dailyFareData.route)) {
-        const conflictMessage = getDailyConflictMessage(dailyFareData.date, dailyFareData.route);
-        alert(conflictMessage);
+        alert(
+          "This date is already taken for this route or conflicts with existing bookings/off days!",
+        );
         setIsLoading(false);
         return;
       }
@@ -517,8 +394,9 @@ function FareEntry({
       ) {
         const dateStr = d.toISOString().split("T")[0];
         if (isBookingDateDisabled(dateStr)) {
-          const conflictMessage = getBookingConflictMessage(dateStr);
-          alert(`Date ${dateStr}: ${conflictMessage}`);
+          alert(
+            `Date ${dateStr} conflicts with existing daily collection or off day entries!`,
+          );
           setIsLoading(false);
           return;
         }
@@ -636,8 +514,9 @@ function FareEntry({
 
     try {
       if (isOffDayDateDisabled(offDayData.date)) {
-        const conflictMessage = getOffDayConflictMessage(offDayData.date);
-        alert(conflictMessage);
+        alert(
+          "This date conflicts with existing daily collection or booking entries!",
+        );
         setIsLoading(false);
         return;
       }
@@ -1011,7 +890,8 @@ function FareEntry({
                       dailyFareData.route,
                     ) && (
                       <div className="invalid-feedback">
-                        {getDailyConflictMessage(dailyFareData.date, dailyFareData.route)}
+                        This date is already taken for this route or conflicts
+                        with existing entries!
                       </div>
                     )}
                   </div>
@@ -1152,7 +1032,7 @@ function FareEntry({
                     />
                     {isBookingDateDisabled(bookingData.dateFrom) && (
                       <div className="invalid-feedback">
-                        {getBookingConflictMessage(bookingData.dateFrom)}
+                        This date conflicts with existing entries!
                       </div>
                     )}
                   </div>
@@ -1177,7 +1057,7 @@ function FareEntry({
                     />
                     {isBookingDateDisabled(bookingData.dateTo) && (
                       <div className="invalid-feedback">
-                        {getBookingConflictMessage(bookingData.dateTo)}
+                        This date conflicts with existing entries!
                       </div>
                     )}
                   </div>
@@ -1297,7 +1177,7 @@ function FareEntry({
                     />
                     {isOffDayDateDisabled(offDayData.date) && (
                       <div className="invalid-feedback">
-                        {getOffDayConflictMessage(offDayData.date)}
+                        This date conflicts with existing entries!
                       </div>
                     )}
                   </div>
