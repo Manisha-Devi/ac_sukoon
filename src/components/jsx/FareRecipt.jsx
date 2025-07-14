@@ -191,19 +191,21 @@ function FareEntry({
 
       // Check daily entries
       if (entry.type === "daily") {
-        return normalizeDateString(entry.date) === normalizedSelectedDate &&
-               (!selectedRoute || entry.route === selectedRoute);
+        const entryDate = normalizeDateString(entry.date);
+        return entryDate === normalizedSelectedDate;
       }
 
       // Check booking entries (date range)
       if (entry.type === "booking") {
-        return normalizedSelectedDate >= normalizeDateString(entry.dateFrom) &&
-               normalizedSelectedDate <= normalizeDateString(entry.dateTo);
+        const fromDate = normalizeDateString(entry.dateFrom);
+        const toDate = normalizeDateString(entry.dateTo);
+        return normalizedSelectedDate >= fromDate && normalizedSelectedDate <= toDate;
       }
 
       // Check off day entries
       if (entry.type === "off") {
-        return normalizeDateString(entry.date) === normalizedSelectedDate;
+        const entryDate = normalizeDateString(entry.date);
+        return entryDate === normalizedSelectedDate;
       }
 
       return false;
@@ -230,28 +232,43 @@ function FareEntry({
 
   // Simplified check functions
   const isDailyDateDisabled = (selectedDate, selectedRoute) => {
-    return checkDateInFareData(selectedDate, selectedRoute) !== null;
+    if (!selectedDate) return false;
+    
+    const existingEntry = checkDateInFareData(selectedDate, selectedRoute);
+    return existingEntry !== null;
   };
 
   const getDailyConflictMessage = (selectedDate, selectedRoute) => {
+    if (!selectedDate) return "";
+    
     const existingEntry = checkDateInFareData(selectedDate, selectedRoute);
     return getConflictMessage(existingEntry);
   };
 
   const isBookingDateDisabled = (selectedDate) => {
-    return checkDateInFareData(selectedDate) !== null;
+    if (!selectedDate) return false;
+    
+    const existingEntry = checkDateInFareData(selectedDate);
+    return existingEntry !== null;
   };
 
   const getBookingConflictMessage = (selectedDate) => {
+    if (!selectedDate) return "";
+    
     const existingEntry = checkDateInFareData(selectedDate);
     return getConflictMessage(existingEntry);
   };
 
   const isOffDayDateDisabled = (selectedDate) => {
-    return checkDateInFareData(selectedDate) !== null;
+    if (!selectedDate) return false;
+    
+    const existingEntry = checkDateInFareData(selectedDate);
+    return existingEntry !== null;
   };
 
   const getOffDayConflictMessage = (selectedDate) => {
+    if (!selectedDate) return "";
+    
     const existingEntry = checkDateInFareData(selectedDate);
     return getConflictMessage(existingEntry);
   };
