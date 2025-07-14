@@ -32,16 +32,17 @@ function addFareReceipt(data) {
     // Use entry ID from data (already provided by frontend)
     const entryId = data.entryId;
 
-    // Store timestamp exactly as received from frontend
-    const timestamp = data.timestamp || new Date().toISOString();
+    // Format timestamp (store only time part)
+    const timeOnly = data.timestamp || 
+      formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
 
     // Insert new row at position 2 (keeps newest entries at top)
     sheet.insertRowBefore(2);
 
     // Add data to the new row
     sheet.getRange(2, 1, 1, 11).setValues([[
-      timestamp,                     // A: Timestamp as-is from frontend
-      data.date,                     // B: Date as-is from frontend
+      timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
+      data.date,                     // B: Date from frontend
       data.route || "",              // C: Route information
       data.cashAmount || 0,          // D: Cash amount
       data.bankAmount || 0,          // E: Bank amount
@@ -59,7 +60,7 @@ function addFareReceipt(data) {
       success: true,
       message: 'Fare receipt added successfully',
       entryId: entryId,
-      timestamp: timestamp
+      timestamp: timeOnly
     };
 
   } catch (error) {
@@ -103,12 +104,12 @@ function getFareReceipts() {
       };
     }
 
-    // Process and return data exactly as stored in sheets
+    // Process and format data with CORRECT column mapping
     const data = values.slice(1).map((row, index) => {
       return {
         entryId: row[7],                      // Entry ID from column H (8th column)
-        timestamp: row[0],                    // Timestamp from column A - as-is
-        date: row[1],                         // Date from column B - as-is
+        timestamp: String(row[0] || ''),      // Timestamp from column A
+        date: String(row[1] || ''),           // Date from column B
         route: row[2],                        // Route from column C
         cashAmount: row[3],                   // Cash amount from column D
         bankAmount: row[4],                   // Bank amount from column E

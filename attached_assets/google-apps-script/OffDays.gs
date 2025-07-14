@@ -1,3 +1,4 @@
+
 /**
  * Add new Off Day
  * Sheet Columns: A=Timestamp, B=Date, C=Reason, D=EntryType, E=EntryId, 
@@ -29,16 +30,17 @@ function addOffDay(data) {
     // Use entry ID from data (already provided by frontend)
     const entryId = data.entryId;
 
-    // Store timestamp exactly as received from frontend
-    const timestamp = data.timestamp || new Date().toISOString();
+    // Format timestamp (store only time part)
+    const timeOnly = data.timestamp || 
+      formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
 
     // Insert new row at position 2 (keeps newest entries at top)
     sheet.insertRowBefore(2);
 
     // Add data to the new row
     sheet.getRange(2, 1, 1, 8).setValues([[
-      timestamp,                     // A: Timestamp as-is from frontend
-      data.date,                     // B: Date as-is from frontend
+      timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
+      data.date,                     // B: Date from frontend
       data.reason || "",             // C: Reason for off day
       "off",                         // D: Entry type (static)
       entryId,                       // E: Entry ID
@@ -53,7 +55,7 @@ function addOffDay(data) {
       success: true,
       message: 'Off day added successfully',
       entryId: entryId,
-      timestamp: timestamp
+      timestamp: timeOnly
     };
 
   } catch (error) {
@@ -101,8 +103,8 @@ function getOffDays() {
     const data = values.slice(1).map((row, index) => {
       return {
         entryId: row[4],                      // Entry ID from column E (5th column)
-        timestamp: row[0],                    // Timestamp as-is
-        date: row[1],                         // Date as-is
+        timestamp: String(row[0] || ''),      // Timestamp from column A
+        date: String(row[1] || ''),           // Date from column B
         reason: row[2],                       // Reason from column C
         entryType: row[3],                    // Entry type from column D
         submittedBy: row[5],                  // Submitted by from column F (6th column)
@@ -398,3 +400,5 @@ function resendOffDay(data) {
     };
   }
 }
+
+

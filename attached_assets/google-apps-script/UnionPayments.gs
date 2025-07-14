@@ -29,13 +29,14 @@ function addUnionPayment(data) {
       ]]);
     }
 
-    const entryId = data.entryId || new Date().getTime();
-    const timestamp = data.timestamp || new Date().toISOString();
+    const entryId = data.entryId || generateEntryId();
+    const timeOnly = data.timestamp || 
+      formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
 
     sheet.insertRowBefore(2);
 
     sheet.getRange(2, 1, 1, 12).setValues([[
-      timestamp,                   // A: Timestamp as-is
+      timeOnly,                    // A: Time in IST
       data.date,                   // B: Date
       data.unionName || "",        // C: Union Name
       data.cashAmount || 0,        // D: Cash Amount
@@ -92,8 +93,8 @@ function getUnionPayments() {
     const data = values.slice(1).map((row, index) => {
       return {
         entryId: row[9],                      // Entry ID from column J
-        timestamp: row[0],                    // Timestamp as-is
-        date: row[1],                         // Date as-is
+        timestamp: String(row[0] || ''),      // Convert timestamp to string
+        date: String(row[1] || ''),           // Convert date to string
         unionName: row[2],                    // Union name from column C
         cashAmount: row[3],                   // Cash amount from column D
         bankAmount: row[4],                   // Bank amount from column E

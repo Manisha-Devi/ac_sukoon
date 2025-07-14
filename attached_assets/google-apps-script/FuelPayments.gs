@@ -32,14 +32,15 @@ function addFuelPayment(data) {
     }
 
     // Assuming generateEntryId() is defined elsewhere or is a global function
-    const entryId = data.entryId || new Date().getTime();
-    const timestamp = data.timestamp || new Date().toISOString();
+    const entryId = data.entryId || generateEntryId();
+    const timeOnly = data.timestamp || 
+      formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
 
     sheet.insertRowBefore(2);
 
     // Add data to the new row
     sheet.getRange(2, 1, 1, 14).setValues([[
-      timestamp,                     // A: Timestamp as-is
+      timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
       data.date,                     // B: Date from frontend
       data.pumpName || "",           // C: Pump Name
       data.liters || "",             // D: Liters
@@ -99,8 +100,8 @@ function getFuelPayments() {
     const data = values.slice(1).map((row, index) => {
       return {
         entryId: row[11],                     // Entry ID from column L
-        timestamp: row[0],                    // Timestamp as-is
-        date: row[1],                         // Date as-is
+        timestamp: String(row[0] || ''),      // Convert timestamp to string
+        date: String(row[1] || ''),           // Convert date to string
         pumpName: row[2],                     // Pump name from column C
         liters: row[3],                       // Liters from column D
         rate: row[4],                         // Rate from column E
