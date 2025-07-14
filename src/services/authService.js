@@ -1982,9 +1982,7 @@ class AuthService {
         }
         results.push({ entryId: entry.entryId, result });
       }
-```python
-
-      return { success: true, results };
+return { success: true, results };
     } catch (error) {
       console.error('Error in batch update:', error);
       return { success: false, error: error.message };
