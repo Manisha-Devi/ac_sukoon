@@ -221,6 +221,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
   };
 
   const routes = [
+    "Total",
+    "Ghuraka to Doda",
+    "Doda to Ghuraka",
+    "Ghuraka to Thatri",
+    "Thatri to GHuraka",
     "Ghuraka to Bhaderwah",
     "Bhaderwah to Pul Doda", 
     "Pul Doda to Thatri",
