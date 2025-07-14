@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../css/FareRecipt.css";
 import authService from '../../services/authService.js';
+import SearchableSelect from './SearchableSelect.jsx';
 
 // Helper function to format date for display - consistent format
   const formatDisplayDate = (dateStr) => {
@@ -749,17 +750,15 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                 <div className="row">
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Route</label>
-                    <select
-                      className="form-select"
+                    <SearchableSelect
+                      options={routes}
                       value={dailyFareData.route}
-                      onChange={(e) => setDailyFareData({ ...dailyFareData, route: e.target.value })}
-                      required
-                    >
-                      <option value="">Select Route</option>
-                      {routes.map((route) => (
-                        <option key={route} value={route}>{route}</option>
-                      ))}
-                    </select>
+                      onChange={(value) => setDailyFareData({ ...dailyFareData, route: value })}
+                      placeholder="Type to search routes..."
+                      allowCustom={true}
+                      name="route"
+                      className="route-selector"
+                    />
                   </div>
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Date</label>
