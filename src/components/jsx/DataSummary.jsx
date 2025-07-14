@@ -358,23 +358,17 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
     return userCashDeposits.reduce((total, deposit) => total + (deposit.cashAmount || 0), 0);
   };
 
-  // Calculate cash expenses (only from approved expense entries)
+  // Calculate total cash expenses
   const calculateCashExpenses = () => {
     const userApprovedEntries = getFinalApprovedEntriesForTable();
     return userApprovedEntries
-      .filter(entry => 
-        entry.dataType === 'Fuel Payment' || 
-        entry.dataType === 'Adda Payment' || 
-        entry.dataType === 'Union Payment' || 
-        entry.dataType === 'Service Payment' || 
-        entry.dataType === 'Other Payment'
-      )
+      .filter(entry => entry.dataType !== 'Fare Receipt' && entry.dataType !== 'Booking Entry')
       .reduce((total, entry) => total + (entry.cashAmount || 0), 0);
   };
 
-  // Calculate cash in hand (Income Cash - Cash Expenses - Cash Deposits)
+  // Calculate cash in hand (Income Cash - (Cash Expenses + Cash Deposits))
   const calculateCashInHand = () => {
-    return calculateIncomeCash() - calculateCashExpenses() - calculateTotalCashDeposits();
+    return calculateIncomeCash() - (calculateCashExpenses() + calculateTotalCashDeposits());
   };
 
   // Handle approval action
@@ -909,7 +903,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                       <div className="financial-details">
                         <div className="financial-amount">₹{calculateCashInHand().toLocaleString('en-IN')}</div>
                         <div className="financial-label">Cash in Hand</div>
-                        <div className="financial-subtitle">Income - Expenses - Deposits</div>
+                        <div className="financial-subtitle">Income - (Expenses + Deposits)</div>
                       </div>
                     </div>
                   </div>
