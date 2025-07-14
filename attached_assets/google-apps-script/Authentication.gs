@@ -62,8 +62,8 @@ function handleLogin(data) {
         console.log("✅ Login successful for user:", inputUsername);
 
         // Update last login timestamp
-        const istTimestamp = data.timestamp || formatISTTimestamp();
-        sheet.getRange(i + 1, 7).setValue(istTimestamp);
+        const timestamp = data.timestamp || new Date().toISOString();
+        sheet.getRange(i + 1, 7).setValue(timestamp);
 
         // Return user data
         return {
@@ -75,9 +75,9 @@ function handleLogin(data) {
             fullName: values[i][3],
             status: values[i][4],
             fixedCash: values[i][7] || 0,
-            lastLogin: istTimestamp
+            lastLogin: timestamp
           },
-          timestamp: istTimestamp
+          timestamp: timestamp
         };
       }
     }
@@ -179,7 +179,7 @@ function getAllUsers(data) {
       success: true,
       data: usersData,
       count: usersData.length,
-      timestamp: formatISTTimestamp()
+      timestamp: new Date().toISOString()
     };
 
   } catch (error) {
@@ -188,7 +188,7 @@ function getAllUsers(data) {
     return {
       success: false,
       error: "Failed to fetch users: " + error.toString(),
-      timestamp: formatISTTimestamp(),
+      timestamp: new Date().toISOString(),
       data: [],
       count: 0
     };
@@ -223,7 +223,7 @@ function testConnection(data) {
     return {
       success: true,
       message: "Google Apps Script is working!",
-      timestamp: formatISTTimestamp(),
+      timestamp: new Date().toISOString(),
       version: "2.0.0"
     };
   } catch (error) {
@@ -232,7 +232,7 @@ function testConnection(data) {
     return {
       success: false,
       error: "Connection test failed: " + error.toString(),
-      timestamp: formatISTTimestamp()
+      timestamp: new Date().toISOString()
     };
   }
 }

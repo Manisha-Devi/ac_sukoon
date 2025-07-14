@@ -4,37 +4,7 @@ import "../css/BasicPayment.css";
 import authService from "../../services/authService.js";
 import SearchableSelect from "./SearchableSelect.jsx";
 
-// Helper function to format date for display
-const formatDisplayDate = (dateStr) => {
-  if (!dateStr) return "";
-  try {
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return dateStr;
-    return date.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  } catch (error) {
-    return dateStr;
-  }
-};
-
-// Helper function to format time for display
-const formatDisplayTime = (timestampStr) => {
-  if (!timestampStr) return "";
-  try {
-    const date = new Date(timestampStr);
-    if (isNaN(date.getTime())) return timestampStr;
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  } catch (error) {
-    return timestampStr;
-  }
-};
+// No date/time formatting - use raw values
 
 function BasicPayment({
   expenseData,

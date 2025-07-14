@@ -9,50 +9,11 @@ const CashBook = ({ cashBookEntries, setCashBookEntries, allUsers }) => {
   const [showFilter, setShowFilter] = useState(false);
   const [showSummary, setShowSummary] = useState(true);
 
-  // Helper function to format date properly for cash book
+  // No date formatting - use raw values
   const formatDateForCashBook = (date) => {
-    if (!date) return '';
+    return date || '';
 
-    try {
-      // If date is already in DD/MM/YYYY format, return as is
-      if (typeof date === 'string' && date.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
-        return date;
-      }
-
-      // If date is in YYYY-MM-DD format, convert to DD/MM/YYYY
-      if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        const parts = date.split('-');
-        return `${parts[2]}/${parts[1]}/${parts[0]}`;
-      }
-
-      // If it's an ISO string or timestamp, parse and format
-      const dateObj = new Date(date);
-      if (isNaN(dateObj.getTime())) {
-        console.warn('Invalid date found:', date);
-        // Return current date instead of empty string
-        return new Date().toLocaleDateString('en-IN', {
-          day: '2-digit',
-          month: '2-digit', 
-          year: 'numeric'
-        });
-      }
-
-      // Format to DD/MM/YYYY
-      return dateObj.toLocaleDateString('en-IN', {
-        day: '2-digit',
-        month: '2-digit', 
-        year: 'numeric'
-      });
-    } catch (error) {
-      console.warn('Error formatting date:', date, error);
-      // Return current date as fallback
-      return new Date().toLocaleDateString('en-IN', {
-        day: '2-digit',
-        month: '2-digit', 
-        year: 'numeric'
-      });
-    }
-  };
+      };
 
   useEffect(() => {
     console.log('📖 CashBook - Received cash book entries:', cashBookEntries.length);

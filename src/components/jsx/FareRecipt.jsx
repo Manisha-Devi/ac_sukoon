@@ -85,36 +85,7 @@ const convertToTimeString = (timestamp) => {
   return String(timestamp);
 };
 
-const convertToDateString = (date) => {
-  if (!date) return "";
-
-  // If it's already in YYYY-MM-DD format, return as is
-  if (typeof date === "string" && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
-    return date;
-  }
-
-  // If it's an ISO string from Google Sheets, convert to IST date
-  if (typeof date === "string" && date.includes("T")) {
-    try {
-      const dateObj = new Date(date);
-      // Convert to IST and get date part
-      const istDate = new Date(dateObj.getTime() + 5.5 * 60 * 60 * 1000);
-      return istDate.toISOString().split("T")[0];
-    } catch (error) {
-      console.warn("Error converting date:", date, error);
-      return date.split("T")[0];
-    }
-  }
-
-  // If it's a Date object, convert to IST date string
-  if (date instanceof Date) {
-    const istDate = new Date(date.getTime() + 5.5 * 60 * 60 * 1000);
-    return istDate.toISOString().split("T")[0];
-  }
-
-  // Return as string fallback
-  return String(date);
-};
+// No date conversion - use raw values
 
 // Function to format time in IST
 const formatISTTime = () => {
@@ -1049,7 +1020,8 @@ function FareEntry({
                         })
                       }
                       onFocus={(e) =>
-                        e.target.showPicker && e.target.showPicker()
+                        e.target```text
+.showPicker && e.target.showPicker()
                       }
                       placeholder="Select to date"
                       min={bookingData.dateFrom || getTodayDate()}
