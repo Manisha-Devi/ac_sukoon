@@ -237,7 +237,7 @@ function deleteOtherPayment(data) {
       throw new Error('OtherPayments sheet not found');
     }
 
-    const entryIdColumn = 10; // Column J contains Entry ID
+    const entryIdColumn = 11; // Column K contains Entry ID
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();

@@ -344,6 +344,7 @@ function MiscPayment({
             ? {
                 ...entry,
                 date: otherData.date,
+                paymentType: otherData.paymentType,
                 description: otherData.description,
                 cashAmount: cashAmount,
                 bankAmount: bankAmount,
@@ -369,7 +370,8 @@ function MiscPayment({
             entryId: editingEntry.entryId,
             updatedData: {
               date: otherData.date,
-              description: otherData.description,
+              paymentType: otherData.paymentType,
+              paymentDetails: otherData.description,
               cashAmount: cashAmount,
               bankAmount: bankAmount,
               totalAmount: totalAmount,
@@ -384,6 +386,7 @@ function MiscPayment({
           timestamp: timeOnly,
           type: "other",
           date: otherData.date,
+          paymentType: otherData.paymentType,
           description: otherData.description,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
@@ -409,7 +412,8 @@ function MiscPayment({
             entryId: newEntry.entryId,
             timestamp: timeOnly,
             date: otherData.date,
-            description: otherData.description,
+            paymentType: otherData.paymentType,
+            paymentDetails: otherData.description,
             cashAmount: cashAmount,
             bankAmount: bankAmount,
             totalAmount: totalAmount,
@@ -974,7 +978,14 @@ function MiscPayment({
                               )}
                             </div>
                           )}
-                          {entry.type === "other" && <p>{entry.description}</p>}
+                          {entry.type === "other" && (
+                            <div>
+                              <p><strong>{entry.paymentType}</strong></p>
+                              {entry.description && (
+                                <p><small>{entry.description.substring(0, 60)}...</small></p>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <div className="entry-amounts">
                           <div className="amount-row">
