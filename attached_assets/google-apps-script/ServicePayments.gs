@@ -32,18 +32,17 @@ function addServicePayment(data) {
     }
 
     // Generate entry ID if not provided
-    const entryId = data.entryId || generateEntryId();
+    const entryId = data.entryId || new Date().getTime();
 
-    // Format timestamp (store only time part)
-    const timeOnly = data.timestamp || 
-      formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
+    // Store timestamp exactly as received from frontend
+    const timestamp = data.timestamp || new Date().toISOString();
 
     // Insert new row at position 2 (keeps newest entries at top)
     sheet.insertRowBefore(2);
 
     // Add data to the new row
     sheet.getRange(2, 1, 1, 12).setValues([[
-      timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
+      timestamp,                     // A: Timestamp as-is
       data.date,                     // B: Date from frontend
       data.serviceType || "",        // C: Service Type
       data.cashAmount || 0,          // D: Cash Amount
@@ -105,8 +104,8 @@ function getServicePayments() {
     const data = values.slice(1).map((row, index) => {
       return {
         entryId: row[9],                      // Entry ID from column J
-        timestamp: String(row[0] || ''),      // Convert timestamp to string
-        date: String(row[1] || ''),           // Convert date to string
+        timestamp: row[0],                    // Timestamp as-is
+        date: row[1],                         // Date as-is
         serviceType: row[2],                  // Service type from column C
         cashAmount: row[3],                   // Cash amount from column D
         bankAmount: row[4],                   // Bank amount from column E
