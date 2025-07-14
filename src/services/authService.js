@@ -51,7 +51,7 @@ class AuthService {
       console.warn('Error parsing date:', dateValue, error);
       return dateValue;
     }
-  };
+  }
 
   // Helper function to safely parse timestamp values from Google Sheets
   const parseGoogleTimestamp = (timestampValue) => {
@@ -96,7 +96,7 @@ class AuthService {
       console.warn('Error parsing timestamp:', timestampValue, error);
       return new Date().toISOString();
     }
-  };
+  }
 
   // Authenticate user against Google Sheets database
   async authenticateUser(username, password, userType) {
@@ -2211,7 +2211,7 @@ return { success: true, results };
   async testAPIKeyValidity() {
     return await this.apiKeyService.testAPIKey();
   }
-  
+
   // Helper function to fetch data from Google Sheets
   async fetchData(action) {
     try {
@@ -2302,7 +2302,7 @@ return { success: true, results };
           entryType: 'booking'
         }));
         return processedData;
-      
+
       case 'getOffDays':
          // Process and format the data consistently
         const processedData = rawData.data.map(row => ({
@@ -2317,7 +2317,7 @@ return { success: true, results };
           entryType: 'off'
         }));
         return processedData;
-      
+
       case 'getAddaPayments':
       case 'getUnionPayments':
       case 'getServicePayments':
