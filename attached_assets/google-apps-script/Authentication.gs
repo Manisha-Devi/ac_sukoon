@@ -144,11 +144,12 @@ function getAllUsers(data) {
     const usersData = [];
 
     // Find exact column indices based on actual headers
-    // Headers: Username, Password, UserType, FullName, Status, CreatedDate, LastLogin, FixedCash
+    // Headers: Username, Password, UserType, FullName, Status, CreatedDate, LastLogin, FixedCash, givenBy
     const usernameIndex = 0;      // Username column
     const fullNameIndex = 3;      // FullName column  
     const createdDateIndex = 5;   // CreatedDate column
     const fixedCashIndex = 7;     // FixedCash column
+    const givenByIndex = 8;       // givenBy column
 
     console.log('📋 Using fixed column indices:', { usernameIndex, fullNameIndex, createdDateIndex, fixedCashIndex });
 
@@ -163,11 +164,17 @@ function getAllUsers(data) {
           date: row[createdDateIndex] ? 
                 formatDateForDisplay(row[createdDateIndex]) : 
                 new Date().toLocaleDateString('en-IN'),
-          fixedCash: row[fixedCashIndex] ? (parseFloat(row[fixedCashIndex]) || 0) : 0
+          fixedCash: row[fixedCashIndex] ? (parseFloat(row[fixedCashIndex]) || 0) : 0,
+          givenBy: row[givenByIndex] ? row[givenByIndex].toString().trim() : ''
         };
 
         usersData.push(user);
-        console.log('👤 User processed:', user);
+        console.log('👤 User processed:', {
+          username: user.username,
+          name: user.name,
+          fixedCash: user.fixedCash,
+          givenBy: user.givenBy
+        });
       }
     }
 
