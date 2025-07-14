@@ -1,80 +1,83 @@
 import React, { useState, useEffect } from "react";
 import "../css/FareRecipt.css";
-import authService from '../../services/authService.js';
-import SearchableSelect from './SearchableSelect.jsx';
+import authService from "../../services/authService.js";
+import SearchableSelect from "./SearchableSelect.jsx";
 
 // Helper function to format date for display - consistent format
-  const formatDisplayDate = (dateStr) => {
-    if (!dateStr) return '';
+const formatDisplayDate = (dateStr) => {
+  if (!dateStr) return "";
 
-    try {
-      const date = new Date(dateStr);
-      if (isNaN(date.getTime())) return dateStr;
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
 
-      // Always show in "07 Sept 2025" format for consistency
-      return date.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      });
-    } catch (error) {
-      return dateStr;
-    }
-  };
+    // Always show in "07 Sept 2025" format for consistency
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  } catch (error) {
+    return dateStr;
+  }
+};
 
-  // Helper function to format time for display - simple format
-  const formatDisplayTime = (timestampStr) => {
-    if (!timestampStr) return '';
+// Helper function to format time for display - simple format
+const formatDisplayTime = (timestampStr) => {
+  if (!timestampStr) return "";
 
-    try {
-      const date = new Date(timestampStr);
-      if (isNaN(date.getTime())) return timestampStr;
+  try {
+    const date = new Date(timestampStr);
+    if (isNaN(date.getTime())) return timestampStr;
 
-      // Simple time format - HH:MM AM/PM
-      return date.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      });
-    } catch (error) {
-      return timestampStr;
-    }
-  };
+    // Simple time format - HH:MM AM/PM
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  } catch (error) {
+    return timestampStr;
+  }
+};
 
 // Helper functions to convert ISO strings to proper format
 const convertToTimeString = (timestamp) => {
-  if (!timestamp) return '';
+  if (!timestamp) return "";
 
   // If it's already in H:MM:SS AM/PM format, return as is
-  if (typeof timestamp === 'string' && timestamp.match(/^\d{1,2}:\d{2}:\d{2} (AM|PM)$/)) {
+  if (
+    typeof timestamp === "string" &&
+    timestamp.match(/^\d{1,2}:\d{2}:\d{2} (AM|PM)$/)
+  ) {
     return timestamp;
   }
 
   // If it's an ISO string from Google Sheets, convert to IST format
-  if (typeof timestamp === 'string' && timestamp.includes('T')) {
+  if (typeof timestamp === "string" && timestamp.includes("T")) {
     try {
       const date = new Date(timestamp);
-      return date.toLocaleTimeString('en-US', {
+      return date.toLocaleTimeString("en-US", {
         hour12: true,
-        hour: 'numeric',
-        minute: '2-digit',
-        second: '2-digit',
-        timeZone: 'Asia/Kolkata'
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        timeZone: "Asia/Kolkata",
       });
     } catch (error) {
-      console.warn('Error converting timestamp:', timestamp, error);
-      return timestamp.split('T')[1]?.split('.')[0] || timestamp;
+      console.warn("Error converting timestamp:", timestamp, error);
+      return timestamp.split("T")[1]?.split(".")[0] || timestamp;
     }
   }
 
   // If it's a Date object, convert to IST time string
   if (timestamp instanceof Date) {
-    return timestamp.toLocaleTimeString('en-US', {
+    return timestamp.toLocaleTimeString("en-US", {
       hour12: true,
-      hour: 'numeric',
-      minute: '2-digit',
-      second: '2-digit',
-      timeZone: 'Asia/Kolkata'
+      hour: "numeric",
+      minute: "2-digit",
+      second: "2-digit",
+      timeZone: "Asia/Kolkata",
     });
   }
 
@@ -83,30 +86,30 @@ const convertToTimeString = (timestamp) => {
 };
 
 const convertToDateString = (date) => {
-  if (!date) return '';
+  if (!date) return "";
 
   // If it's already in YYYY-MM-DD format, return as is
-  if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+  if (typeof date === "string" && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
     return date;
   }
 
   // If it's an ISO string from Google Sheets, convert to IST date
-  if (typeof date === 'string' && date.includes('T')) {
+  if (typeof date === "string" && date.includes("T")) {
     try {
       const dateObj = new Date(date);
       // Convert to IST and get date part
-      const istDate = new Date(dateObj.getTime() + (5.5 * 60 * 60 * 1000));
-      return istDate.toISOString().split('T')[0];
+      const istDate = new Date(dateObj.getTime() + 5.5 * 60 * 60 * 1000);
+      return istDate.toISOString().split("T")[0];
     } catch (error) {
-      console.warn('Error converting date:', date, error);
-      return date.split('T')[0];
+      console.warn("Error converting date:", date, error);
+      return date.split("T")[0];
     }
   }
 
   // If it's a Date object, convert to IST date string
   if (date instanceof Date) {
-    const istDate = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
-    return istDate.toISOString().split('T')[0];
+    const istDate = new Date(date.getTime() + 5.5 * 60 * 60 * 1000);
+    return istDate.toISOString().split("T")[0];
   }
 
   // Return as string fallback
@@ -115,19 +118,25 @@ const convertToDateString = (date) => {
 
 // Function to format time in IST
 const formatISTTime = () => {
-    const now = new Date();
-    const istOffset = 330 * 60000; // IST is UTC+5:30
-    const istDate = new Date(now.getTime() + istOffset);
-    return istDate.toLocaleTimeString('en-US', {
-        hour12: true,
-        hour: 'numeric',
-        minute: '2-digit',
-        second: '2-digit',
-        timeZone: 'Asia/Kolkata' // Explicitly set timezone to IST
-    });
+  const now = new Date();
+  const istOffset = 330 * 60000; // IST is UTC+5:30
+  const istDate = new Date(now.getTime() + istOffset);
+  return istDate.toLocaleTimeString("en-US", {
+    hour12: true,
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZone: "Asia/Kolkata", // Explicitly set timezone to IST
+  });
 };
 
-function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries, currentUser }) {
+function FareEntry({
+  fareData,
+  setFareData,
+  setTotalEarnings,
+  setCashBookEntries,
+  currentUser,
+}) {
   const [activeTab, setActiveTab] = useState("daily");
   const [editingEntry, setEditingEntry] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -157,24 +166,27 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
   const isDailyDateDisabled = (selectedDate, selectedRoute) => {
     if (!selectedDate || !selectedRoute) return false;
 
-    const existingDailyEntry = fareData.find(entry => 
-      entry.type === 'daily' && 
-      entry.date === selectedDate && 
-      entry.route === selectedRoute &&
-      (!editingEntry || entry.entryId !== editingEntry.entryId)
+    const existingDailyEntry = fareData.find(
+      (entry) =>
+        entry.type === "daily" &&
+        entry.date === selectedDate &&
+        entry.route === selectedRoute &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
-    const existingBookingEntry = fareData.find(entry => 
-      entry.type === 'booking' && 
-      selectedDate >= entry.dateFrom && 
-      selectedDate <= entry.dateTo &&
-      (!editingEntry || entry.entryId !== editingEntry.entryId)
+    const existingBookingEntry = fareData.find(
+      (entry) =>
+        entry.type === "booking" &&
+        selectedDate >= entry.dateFrom &&
+        selectedDate <= entry.dateTo &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
-    const existingOffEntry = fareData.find(entry => 
-      entry.type === 'off' && 
-      entry.date === selectedDate &&
-      (!editingEntry || entry.entryId !== editingEntry.entryId)
+    const existingOffEntry = fareData.find(
+      (entry) =>
+        entry.type === "off" &&
+        entry.date === selectedDate &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
     return existingDailyEntry || existingBookingEntry || existingOffEntry;
@@ -183,16 +195,18 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
   const isBookingDateDisabled = (selectedDate) => {
     if (!selectedDate) return false;
 
-    const existingDailyEntry = fareData.find(entry => 
-      entry.type === 'daily' && 
-      entry.date === selectedDate &&
-      (!editingEntry || entry.entryId !== editingEntry.entryId)
+    const existingDailyEntry = fareData.find(
+      (entry) =>
+        entry.type === "daily" &&
+        entry.date === selectedDate &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
-    const existingOffEntry = fareData.find(entry => 
-      entry.type === 'off' && 
-      entry.date === selectedDate &&
-      (!editingEntry || entry.entryId !== editingEntry.entryId)
+    const existingOffEntry = fareData.find(
+      (entry) =>
+        entry.type === "off" &&
+        entry.date === selectedDate &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
     return existingDailyEntry || existingOffEntry;
@@ -201,24 +215,26 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
   const isOffDayDateDisabled = (selectedDate) => {
     if (!selectedDate) return false;
 
-    const existingDailyEntry = fareData.find(entry => 
-      entry.type === 'daily' && 
-      entry.date === selectedDate &&
-      (!editingEntry || entry.entryId !== editingEntry.entryId)
+    const existingDailyEntry = fareData.find(
+      (entry) =>
+        entry.type === "daily" &&
+        entry.date === selectedDate &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
-    const existingBookingEntry = fareData.find(entry => 
-      entry.type === 'booking' && 
-      selectedDate >= entry.dateFrom && 
-      selectedDate <= entry.dateTo &&
-      (!editingEntry || entry.entryId !== editingEntry.entryId)
+    const existingBookingEntry = fareData.find(
+      (entry) =>
+        entry.type === "booking" &&
+        selectedDate >= entry.dateFrom &&
+        selectedDate <= entry.dateTo &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
     return existingDailyEntry || existingBookingEntry;
   };
 
   const getTodayDate = () => {
-    return new Date().toISOString().split('T')[0];
+    return new Date().toISOString().split("T")[0];
   };
 
   const routes = [
@@ -226,9 +242,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
     "Ghuraka to Doda",
     "Doda to Ghuraka",
     "Ghuraka to Thatri",
-    "Thatri to GHuraka",
+    "Thatri to Ghuraka",
     "Ghuraka to Bhaderwah",
-    "Bhaderwah to Pul Doda", 
+    "Bhaderwah to Pul Doda",
     "Pul Doda to Thatri",
     "Thatri to Pul Doda",
     "Pul Doda to Bhaderwah",
@@ -241,7 +257,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
     try {
       if (isDailyDateDisabled(dailyFareData.date, dailyFareData.route)) {
-        alert('This date is already taken for this route or conflicts with existing bookings/off days!');
+        alert(
+          "This date is already taken for this route or conflicts with existing bookings/off days!",
+        );
         setIsLoading(false);
         return;
       }
@@ -249,51 +267,59 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const cashAmount = parseInt(dailyFareData.cashAmount) || 0;
       const bankAmount = parseInt(dailyFareData.bankAmount) || 0;
       const totalAmount = cashAmount + bankAmount;
-      const submittedBy = currentUser?.fullName || currentUser?.username || 'Unknown User';
+      const submittedBy =
+        currentUser?.fullName || currentUser?.username || "Unknown User";
       const now = new Date();
-      const timeOnly = now.toLocaleTimeString('en-US', { 
-        hour12: true, 
-        hour: 'numeric', 
-        minute: '2-digit', 
-        second: '2-digit' 
+      const timeOnly = now.toLocaleTimeString("en-US", {
+        hour12: true,
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
       }); // Returns H:MM:SS AM/PM format
       const dateOnly = dailyFareData.date; // Keep date as string (YYYY-MM-DD)
 
       if (editingEntry) {
         // UPDATE: First update React state immediately
         const oldTotal = editingEntry.totalAmount;
-        const updatedData = fareData.map(entry => 
-          entry.entryId === editingEntry.entryId 
-            ? { ...entry, 
+        const updatedData = fareData.map((entry) =>
+          entry.entryId === editingEntry.entryId
+            ? {
+                ...entry,
                 route: dailyFareData.route,
                 cashAmount: cashAmount,
                 bankAmount: bankAmount,
                 totalAmount: totalAmount,
                 date: dateOnly, // Use string date
               }
-            : entry
+            : entry,
         );
 
         setFareData(updatedData);
         setTotalEarnings((prev) => prev - oldTotal + totalAmount);
         setEditingEntry(null);
-        setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
+        setDailyFareData({
+          route: "",
+          cashAmount: "",
+          bankAmount: "",
+          date: "",
+        });
         setIsLoading(false);
 
         // Then sync to Google Sheets in background
-        authService.updateFareReceipt({
-          entryId: editingEntry.entryId,
-          updatedData: {
-            date: dateOnly, // Send date as string
-            route: dailyFareData.route,
-            cashAmount: cashAmount,
-            bankAmount: bankAmount,
-            totalAmount: totalAmount,
-          }
-        }).catch(error => {
-          console.error('Background daily update sync failed:', error);
-        });
-
+        authService
+          .updateFareReceipt({
+            entryId: editingEntry.entryId,
+            updatedData: {
+              date: dateOnly, // Send date as string
+              route: dailyFareData.route,
+              cashAmount: cashAmount,
+              bankAmount: bankAmount,
+              totalAmount: totalAmount,
+            },
+          })
+          .catch((error) => {
+            console.error("Background daily update sync failed:", error);
+          });
       } else {
         // ADD: First create entry and update React state immediately
         const newEntry = {
@@ -306,34 +332,43 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           totalAmount: totalAmount,
           date: dateOnly, // Date as string (YYYY-MM-DD)
           submittedBy: submittedBy,
-          entryStatus: 'pending' // Set initial approval status
+          entryStatus: "pending", // Set initial approval status
         };
 
         const updatedData = [newEntry, ...fareData];
         setFareData(updatedData);
         setTotalEarnings((prev) => prev + totalAmount);
-        setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
+        setDailyFareData({
+          route: "",
+          cashAmount: "",
+          bankAmount: "",
+          date: "",
+        });
         setIsLoading(false);
 
         // Then sync to Google Sheets in background
-        authService.addFareReceipt({
-          entryId: newEntry.entryId,
-          timestamp: timeOnly, // Send time as string
-          date: dateOnly, // Send date as string
-          route: dailyFareData.route,
-          cashAmount: cashAmount,
-          bankAmount: bankAmount,
-          totalAmount: totalAmount,
-          submittedBy: submittedBy,
-          entryStatus: 'pending' // Send initial approval status
-        }).catch(error => {
-          console.error('Background daily add sync failed:', error);
-        });
+        authService
+          .addFareReceipt({
+            entryId: newEntry.entryId,
+            timestamp: timeOnly, // Send time as string
+            date: dateOnly, // Send date as string
+            route: dailyFareData.route,
+            cashAmount: cashAmount,
+            bankAmount: bankAmount,
+            totalAmount: totalAmount,
+            submittedBy: submittedBy,
+            entryStatus: "pending", // Send initial approval status
+          })
+          .catch((error) => {
+            console.error("Background daily add sync failed:", error);
+          });
       }
     } catch (error) {
-      console.error('Error submitting daily fare:', error);
+      console.error("Error submitting daily fare:", error);
       setIsLoading(false);
-      alert(`❌ Error saving data: ${error.message || 'Unknown error'}. Please try again.`);
+      alert(
+        `❌ Error saving data: ${error.message || "Unknown error"}. Please try again.`,
+      );
     }
   };
 
@@ -350,10 +385,16 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const startDate = new Date(startDateStr);
       const endDate = new Date(endDateStr);
 
-      for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-        const dateStr = d.toISOString().split('T')[0];
+      for (
+        let d = new Date(startDate);
+        d <= endDate;
+        d.setDate(d.getDate() + 1)
+      ) {
+        const dateStr = d.toISOString().split("T")[0];
         if (isBookingDateDisabled(dateStr)) {
-          alert(`Date ${dateStr} conflicts with existing daily collection or off day entries!`);
+          alert(
+            `Date ${dateStr} conflicts with existing daily collection or off day entries!`,
+          );
           setIsLoading(false);
           return;
         }
@@ -362,15 +403,17 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
       const cashAmount = parseInt(bookingData.cashAmount) || 0;
       const bankAmount = parseInt(bookingData.bankAmount) || 0;
       const totalAmount = cashAmount + bankAmount;
-      const submittedBy = currentUser?.fullName || currentUser?.username || 'Unknown User';
+      const submittedBy =
+        currentUser?.fullName || currentUser?.username || "Unknown User";
       const timeOnly = formatISTTime(); // IST time in H:MM:SS AM/PM format
 
       if (editingEntry) {
         // UPDATE: First update React state immediately
         const oldTotal = editingEntry.totalAmount;
-        const updatedData = fareData.map(entry => 
-          entry.entryId === editingEntry.entryId 
-            ? { ...entry,
+        const updatedData = fareData.map((entry) =>
+          entry.entryId === editingEntry.entryId
+            ? {
+                ...entry,
                 bookingDetails: bookingData.bookingDetails,
                 cashAmount: cashAmount,
                 bankAmount: bankAmount,
@@ -378,30 +421,37 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                 dateFrom: startDateStr, // Use string date
                 dateTo: endDateStr, // Use string date
               }
-            : entry
+            : entry,
         );
 
         setFareData(updatedData);
         setTotalEarnings((prev) => prev - oldTotal + totalAmount);
         setEditingEntry(null);
-        setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
+        setBookingData({
+          bookingDetails: "",
+          cashAmount: "",
+          bankAmount: "",
+          dateFrom: "",
+          dateTo: "",
+        });
         setIsLoading(false);
 
         // Then sync to Google Sheets in background
-        authService.updateBookingEntry({
-          entryId: editingEntry.entryId,
-          updatedData: {
-            bookingDetails: bookingData.bookingDetails,
-            dateFrom: startDateStr, // Send date as string
-            dateTo: endDateStr, // Send date as string
-            cashAmount: cashAmount,
-            bankAmount: bankAmount,
-            totalAmount: totalAmount
-          }
-        }).catch(error => {
-          console.error('Background booking update sync failed:', error);
-        });
-
+        authService
+          .updateBookingEntry({
+            entryId: editingEntry.entryId,
+            updatedData: {
+              bookingDetails: bookingData.bookingDetails,
+              dateFrom: startDateStr, // Send date as string
+              dateTo: endDateStr, // Send date as string
+              cashAmount: cashAmount,
+              bankAmount: bankAmount,
+              totalAmount: totalAmount,
+            },
+          })
+          .catch((error) => {
+            console.error("Background booking update sync failed:", error);
+          });
       } else {
         // ADD: First create entry and update React state immediately
         const newEntry = {
@@ -415,34 +465,44 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           dateFrom: startDateStr, // Date as string (YYYY-MM-DD)
           dateTo: endDateStr, // Date as string (YYYY-MM-DD)
           submittedBy: submittedBy,
-          entryStatus: 'pending' // Set initial approval status
+          entryStatus: "pending", // Set initial approval status
         };
 
         const updatedData = [newEntry, ...fareData];
         setFareData(updatedData);
         setTotalEarnings((prev) => prev + totalAmount);
-        setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
+        setBookingData({
+          bookingDetails: "",
+          cashAmount: "",
+          bankAmount: "",
+          dateFrom: "",
+          dateTo: "",
+        });
         setIsLoading(false);
 
         // Then sync to Google Sheets in background
-        authService.addBookingEntry({
-          entryId: newEntry.entryId,
-          timestamp: timeOnly, // Send time as string
-          bookingDetails: bookingData.bookingDetails,
-          dateFrom: startDateStr, // Send date as string
-          dateTo: endDateStr, // Send date as string
-          cashAmount: cashAmount,
-          bankAmount: bankAmount,
-          totalAmount: totalAmount,
-          submittedBy: submittedBy
-        }).catch(error => {
-          console.error('Background booking add sync failed:', error);
-        });
+        authService
+          .addBookingEntry({
+            entryId: newEntry.entryId,
+            timestamp: timeOnly, // Send time as string
+            bookingDetails: bookingData.bookingDetails,
+            dateFrom: startDateStr, // Send date as string
+            dateTo: endDateStr, // Send date as string
+            cashAmount: cashAmount,
+            bankAmount: bankAmount,
+            totalAmount: totalAmount,
+            submittedBy: submittedBy,
+          })
+          .catch((error) => {
+            console.error("Background booking add sync failed:", error);
+          });
       }
     } catch (error) {
-      console.error('Error submitting booking entry:', error);
+      console.error("Error submitting booking entry:", error);
       setIsLoading(false);
-      alert(`❌ Error saving data: ${error.message || 'Unknown error'}. Please try again.`);
+      alert(
+        `❌ Error saving data: ${error.message || "Unknown error"}. Please try again.`,
+      );
     }
   };
 
@@ -452,27 +512,30 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
     try {
       if (isOffDayDateDisabled(offDayData.date)) {
-        alert('This date conflicts with existing daily collection or booking entries!');
+        alert(
+          "This date conflicts with existing daily collection or booking entries!",
+        );
         setIsLoading(false);
         return;
       }
 
-      const submittedBy = currentUser?.fullName || currentUser?.username || 'Unknown User';
+      const submittedBy =
+        currentUser?.fullName || currentUser?.username || "Unknown User";
       const now = new Date();
-      const timeOnly = now.toLocaleTimeString('en-US', { 
-        hour12: true, 
-        hour: 'numeric', 
-        minute: '2-digit', 
-        second: '2-digit' 
+      const timeOnly = now.toLocaleTimeString("en-US", {
+        hour12: true,
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
       }); // Returns H:MM:SS AM/PM format
       const dateOnly = offDayData.date; // Keep date as string (YYYY-MM-DD)
 
       if (editingEntry) {
         // UPDATE: First update React state immediately
-        const updatedData = fareData.map(entry => 
-          entry.entryId === editingEntry.entryId 
+        const updatedData = fareData.map((entry) =>
+          entry.entryId === editingEntry.entryId
             ? { ...entry, date: dateOnly, reason: offDayData.reason } // Use string date
-            : entry
+            : entry,
         );
         setFareData(updatedData);
         setEditingEntry(null);
@@ -480,16 +543,17 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         setIsLoading(false);
 
         // Then sync to Google Sheets in background
-        authService.updateOffDay({
-          entryId: editingEntry.entryId,
-          updatedData: {
-            date: dateOnly, // Send date as string
-            reason: offDayData.reason,
-          }
-        }).catch(error => {
-          console.error('Background off day update sync failed:', error);
-        });
-
+        authService
+          .updateOffDay({
+            entryId: editingEntry.entryId,
+            updatedData: {
+              date: dateOnly, // Send date as string
+              reason: offDayData.reason,
+            },
+          })
+          .catch((error) => {
+            console.error("Background off day update sync failed:", error);
+          });
       } else {
         // ADD: First create entry and update React state immediately
         const newEntry = {
@@ -502,7 +566,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
           bankAmount: 0,
           totalAmount: 0,
           submittedBy: submittedBy,
-          entryStatus: 'pending' // Set initial approval status
+          entryStatus: "pending", // Set initial approval status
         };
 
         const updatedData = [newEntry, ...fareData];
@@ -511,71 +575,92 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         setIsLoading(false);
 
         // Then sync to Google Sheets in background
-        authService.addOffDay({
-          entryId: newEntry.entryId,
-          timestamp: timeOnly, // Send time as string
-          date: dateOnly, // Send date as string
-          reason: offDayData.reason,
-          submittedBy: submittedBy,
-          entryStatus: 'pending' // Send initial approval status
-        }).catch(error => {
-          console.error('Background off day add sync failed:', error);
-        });
+        authService
+          .addOffDay({
+            entryId: newEntry.entryId,
+            timestamp: timeOnly, // Send time as string
+            date: dateOnly, // Send date as string
+            reason: offDayData.reason,
+            submittedBy: submittedBy,
+            entryStatus: "pending", // Send initial approval status
+          })
+          .catch((error) => {
+            console.error("Background off day add sync failed:", error);
+          });
       }
     } catch (error) {
-      console.error('Error submitting off day:', error);
+      console.error("Error submitting off day:", error);
       setIsLoading(false);
-      alert(`❌ Error saving data: ${error.message || 'Unknown error'}. Please try again.`);
+      alert(
+        `❌ Error saving data: ${error.message || "Unknown error"}. Please try again.`,
+      );
     }
   };
 
   const handleDeleteEntry = async (entryId) => {
     try {
-      const entryToDelete = fareData.find(entry => entry.entryId === entryId);
+      const entryToDelete = fareData.find((entry) => entry.entryId === entryId);
 
       if (!entryToDelete) {
-        alert('Entry not found!');
+        alert("Entry not found!");
         return;
       }
 
-      console.log('🗑️ Deleting entry:', { entryId, type: entryToDelete.type });
+      console.log("🗑️ Deleting entry:", { entryId, type: entryToDelete.type });
 
       // DELETE: First update React state immediately for better UX
-      const updatedData = fareData.filter(entry => entry.entryId !== entryId);
+      const updatedData = fareData.filter((entry) => entry.entryId !== entryId);
       setFareData(updatedData);
 
       if (entryToDelete && entryToDelete.totalAmount) {
         setTotalEarnings((prev) => prev - entryToDelete.totalAmount);
       }
 
-      setCashBookEntries(prev => prev.filter(entry => entry.source === 'fare-entry' && !entry.jfNo?.includes(entryId.toString())));
+      setCashBookEntries((prev) =>
+        prev.filter(
+          (entry) =>
+            entry.source === "fare-entry" &&
+            !entry.jfNo?.includes(entryId.toString()),
+        ),
+      );
 
-      console.log('✅ Entry removed from React state immediately');
+      console.log("✅ Entry removed from React state immediately");
 
       // Then sync deletion to Google Sheets in background
       try {
         let deleteResult;
-        if (entryToDelete.type === 'daily') {
-          deleteResult = await authService.deleteFareReceipt({ entryId: entryToDelete.entryId });
-        } else if (entryToDelete.type === 'booking') {
-          deleteResult = await authService.deleteBookingEntry({ entryId: entryToDelete.entryId });
-        } else if (entryToDelete.type === 'off') {
-          deleteResult = await authService.deleteOffDay({ entryId: entryToDelete.entryId });
+        if (entryToDelete.type === "daily") {
+          deleteResult = await authService.deleteFareReceipt({
+            entryId: entryToDelete.entryId,
+          });
+        } else if (entryToDelete.type === "booking") {
+          deleteResult = await authService.deleteBookingEntry({
+            entryId: entryToDelete.entryId,
+          });
+        } else if (entryToDelete.type === "off") {
+          deleteResult = await authService.deleteOffDay({
+            entryId: entryToDelete.entryId,
+          });
         }
         if (deleteResult.success) {
-          console.log('✅ Entry successfully deleted from Google Sheets');
+          console.log("✅ Entry successfully deleted from Google Sheets");
         } else {
-          console.warn('⚠️ Delete from Google Sheets failed but entry removed locally:', deleteResult.error);
+          console.warn(
+            "⚠️ Delete from Google Sheets failed but entry removed locally:",
+            deleteResult.error,
+          );
           // Don't revert the state - keep the optimistic update for better UX
         }
       } catch (syncError) {
-        console.warn('⚠️ Background delete sync failed but entry removed locally:', syncError.message);
+        console.warn(
+          "⚠️ Background delete sync failed but entry removed locally:",
+          syncError.message,
+        );
         // Don't revert the state - keep the optimistic update for better UX
       }
-
     } catch (error) {
-      console.error('❌ Error in delete process:', error);
-      alert('Error deleting entry. Please try again.');
+      console.error("❌ Error in delete process:", error);
+      alert("Error deleting entry. Please try again.");
     }
   };
 
@@ -610,7 +695,13 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
   const handleCancelEdit = () => {
     setEditingEntry(null);
     setDailyFareData({ route: "", cashAmount: "", bankAmount: "", date: "" });
-    setBookingData({ bookingDetails: "", cashAmount: "", bankAmount: "", dateFrom: "", dateTo: "" });
+    setBookingData({
+      bookingDetails: "",
+      cashAmount: "",
+      bankAmount: "",
+      dateFrom: "",
+      dateTo: "",
+    });
     setOffDayData({ date: "", reason: "" });
   };
 
@@ -618,12 +709,20 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
   const calculateSummaryTotals = () => {
     const currentUserName = currentUser?.fullName || currentUser?.username;
 
-    const userFareData = fareData.filter(entry => 
-      entry.submittedBy === currentUserName && entry.entryStatus !== 'approved'
+    const userFareData = fareData.filter(
+      (entry) =>
+        entry.submittedBy === currentUserName &&
+        entry.entryStatus !== "approved",
     );
 
-    const totalCash = userFareData.reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
-    const totalBank = userFareData.reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+    const totalCash = userFareData.reduce(
+      (sum, entry) => sum + (entry.cashAmount || 0),
+      0,
+    );
+    const totalBank = userFareData.reduce(
+      (sum, entry) => sum + (entry.bankAmount || 0),
+      0,
+    );
     const grandTotal = totalCash + totalBank;
 
     return { totalCash, totalBank, grandTotal };
@@ -633,8 +732,10 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
   const getCurrentUserNonApprovedEntries = () => {
     const currentUserName = currentUser?.fullName || currentUser?.username;
 
-    return fareData.filter(entry => 
-      entry.submittedBy === currentUserName && entry.entryStatus !== 'approved'
+    return fareData.filter(
+      (entry) =>
+        entry.submittedBy === currentUserName &&
+        entry.entryStatus !== "approved",
     );
   };
 
@@ -642,17 +743,15 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
   // Load data on component mount and listen for refresh events
   useEffect(() => {
-
-
     // Listen for centralized refresh events
     const handleDataRefresh = () => {
-      console.log('🔄 FareRecipt: Refreshing data from centralized refresh');
+      console.log("🔄 FareRecipt: Refreshing data from centralized refresh");
     };
 
-    window.addEventListener('dataRefreshed', handleDataRefresh);
+    window.addEventListener("dataRefreshed", handleDataRefresh);
 
     return () => {
-      window.removeEventListener('dataRefreshed', handleDataRefresh);
+      window.removeEventListener("dataRefreshed", handleDataRefresh);
     };
   }, [currentUser]);
 
@@ -662,10 +761,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         <div className="fare-header">
           <div className="header-content">
             <div>
-              <h2><i className="bi bi-receipt"></i> Fare Receipt Entry</h2>
+              <h2>
+                <i className="bi bi-receipt"></i> Fare Receipt Entry
+              </h2>
               <p>Record your daily earnings and bookings (Income)</p>
             </div>
-
           </div>
         </div>
 
@@ -679,7 +779,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                 <div className="summary-card cash-card">
                   <div className="card-body">
                     <h6>Cash Collection</h6>
-                    <h4>₹{totalCash.toLocaleString('en-IN')}</h4>
+                    <h4>₹{totalCash.toLocaleString("en-IN")}</h4>
                   </div>
                 </div>
               </div>
@@ -687,7 +787,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                 <div className="summary-card bank-card">
                   <div className="card-body">
                     <h6>Bank Transfer</h6>
-                    <h4>₹{totalBank.toLocaleString('en-IN')}</h4>
+                    <h4>₹{totalBank.toLocaleString("en-IN")}</h4>
                   </div>
                 </div>
               </div>
@@ -695,7 +795,7 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                 <div className="summary-card total-card">
                   <div className="card-body">
                     <h6>Total Earnings</h6>
-                    <h4>₹{grandTotal.toLocaleString('en-IN')}</h4>
+                    <h4>₹{grandTotal.toLocaleString("en-IN")}</h4>
                   </div>
                 </div>
               </div>
@@ -715,25 +815,25 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
         <div className="tab-navigation mb-4">
           <ul className="nav nav-tabs" role="tablist">
             <li className="nav-item">
-              <button 
-                className={`nav-link ${activeTab === 'daily' ? 'active' : ''}`}
-                onClick={() => setActiveTab('daily')}
+              <button
+                className={`nav-link ${activeTab === "daily" ? "active" : ""}`}
+                onClick={() => setActiveTab("daily")}
               >
                 <i className="bi bi-calendar-day"></i> Daily Fare
               </button>
             </li>
             <li className="nav-item">
-              <button 
-                className={`nav-link ${activeTab === 'booking' ? 'active' : ''}`}
-                onClick={() => setActiveTab('booking')}
+              <button
+                className={`nav-link ${activeTab === "booking" ? "active" : ""}`}
+                onClick={() => setActiveTab("booking")}
               >
-                <i className="bi bi-journal-bookmark"></i> Booking 
+                <i className="bi bi-journal-bookmark"></i> Booking
               </button>
             </li>
             <li className="nav-item">
-              <button 
-                className={`nav-link ${activeTab === 'off' ? 'active' : ''}`}
-                onClick={() => setActiveTab('off')}
+              <button
+                className={`nav-link ${activeTab === "off" ? "active" : ""}`}
+                onClick={() => setActiveTab("off")}
               >
                 <i className="bi bi-x-circle"></i> Off Day
               </button>
@@ -743,9 +843,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
 
         {/* Tab Content */}
         <div className="tab-content">
-          {activeTab === 'daily' && (
+          {activeTab === "daily" && (
             <div className="fare-form-card">
-              <h4><i className="bi bi-calendar-day"></i> Daily Collection</h4>
+              <h4>
+                <i className="bi bi-calendar-day"></i> Daily Collection
+              </h4>
               <form onSubmit={handleDailySubmit}>
                 <div className="row">
                   <div className="col-md-6 mb-3">
@@ -753,7 +855,9 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                     <SearchableSelect
                       options={routes}
                       value={dailyFareData.route}
-                      onChange={(value) => setDailyFareData({ ...dailyFareData, route: value })}
+                      onChange={(value) =>
+                        setDailyFareData({ ...dailyFareData, route: value })
+                      }
                       placeholder="Type to search routes..."
                       allowCustom={true}
                       name="route"
@@ -764,17 +868,28 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                     <label className="form-label">Date</label>
                     <input
                       type="date"
-                      className={`form-control date-input ${isDailyDateDisabled(dailyFareData.date, dailyFareData.route) ? 'is-invalid' : ''}`}
+                      className={`form-control date-input ${isDailyDateDisabled(dailyFareData.date, dailyFareData.route) ? "is-invalid" : ""}`}
                       value={dailyFareData.date}
-                      onChange={(e) => setDailyFareData({ ...dailyFareData, date: e.target.value })}
-                      onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+                      onChange={(e) =>
+                        setDailyFareData({
+                          ...dailyFareData,
+                          date: e.target.value,
+                        })
+                      }
+                      onFocus={(e) =>
+                        e.target.showPicker && e.target.showPicker()
+                      }
                       placeholder="Select date"
                       min={getTodayDate()}
                       required
                     />
-                    {isDailyDateDisabled(dailyFareData.date, dailyFareData.route) && (
+                    {isDailyDateDisabled(
+                      dailyFareData.date,
+                      dailyFareData.route,
+                    ) && (
                       <div className="invalid-feedback">
-                        This date is already taken for this route or conflicts with existing entries!
+                        This date is already taken for this route or conflicts
+                        with existing entries!
                       </div>
                     )}
                   </div>
@@ -786,7 +901,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       type="number"
                       className="form-control"
                       value={dailyFareData.cashAmount}
-                      onChange={(e) => setDailyFareData({ ...dailyFareData, cashAmount: e.target.value })}
+                      onChange={(e) =>
+                        setDailyFareData({
+                          ...dailyFareData,
+                          cashAmount: e.target.value,
+                        })
+                      }
                       placeholder="Enter cash amount"
                       min="0"
                     />
@@ -797,7 +917,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       type="number"
                       className="form-control"
                       value={dailyFareData.bankAmount}
-                      onChange={(e) => setDailyFareData({ ...dailyFareData, bankAmount: e.target.value })}
+                      onChange={(e) =>
+                        setDailyFareData({
+                          ...dailyFareData,
+                          bankAmount: e.target.value,
+                        })
+                      }
                       placeholder="Enter bank amount"
                       min="0"
                     />
@@ -806,23 +931,51 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                 <div className="amount-summary mb-3">
                   <div className="row">
                     <div className="col-4">
-                      <span>Cash: ₹{parseInt(dailyFareData.cashAmount) || 0}</span>
+                      <span>
+                        Cash: ₹{parseInt(dailyFareData.cashAmount) || 0}
+                      </span>
                     </div>
                     <div className="col-4">
-                      <span>Bank: ₹{parseInt(dailyFareData.bankAmount) || 0}</span>
+                      <span>
+                        Bank: ₹{parseInt(dailyFareData.bankAmount) || 0}
+                      </span>
                     </div>
                     <div className="col-4">
-                      <strong>Total: ₹{(parseInt(dailyFareData.cashAmount) || 0) + (parseInt(dailyFareData.bankAmount) || 0)}</strong>
+                      <strong>
+                        Total: ₹
+                        {(parseInt(dailyFareData.cashAmount) || 0) +
+                          (parseInt(dailyFareData.bankAmount) || 0)}
+                      </strong>
                     </div>
                   </div>
                 </div>
                 <div className="button-group">
-                  <button type="submit" className="btn fare-entry-btn" disabled={isLoading}>
-                    <i className={isLoading ? "bi bi-arrow-repeat" : editingEntry ? "bi bi-check-circle" : "bi bi-plus-circle"}></i> 
-                    {isLoading ? "Processing..." : editingEntry ? "Update Entry" : "Add Daily Entry"}
+                  <button
+                    type="submit"
+                    className="btn fare-entry-btn"
+                    disabled={isLoading}
+                  >
+                    <i
+                      className={
+                        isLoading
+                          ? "bi bi-arrow-repeat"
+                          : editingEntry
+                            ? "bi bi-check-circle"
+                            : "bi bi-plus-circle"
+                      }
+                    ></i>
+                    {isLoading
+                      ? "Processing..."
+                      : editingEntry
+                        ? "Update Entry"
+                        : "Add Daily Entry"}
                   </button>
                   {editingEntry && (
-                    <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary ms-2"
+                      onClick={handleCancelEdit}
+                    >
                       <i className="bi bi-x-circle"></i> Cancel
                     </button>
                   )}
@@ -831,9 +984,11 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
             </div>
           )}
 
-          {activeTab === 'booking' && (
+          {activeTab === "booking" && (
             <div className="fare-form-card">
-              <h4><i className="bi bi-journal-bookmark"></i> Booking Entry</h4>
+              <h4>
+                <i className="bi bi-journal-bookmark"></i> Booking Entry
+              </h4>
               <form onSubmit={handleBookingSubmit}>
                 <div className="row">
                   <div className="col-12 mb-3">
@@ -842,7 +997,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       className="form-control"
                       rows={3}
                       value={bookingData.bookingDetails}
-                      onChange={(e) => setBookingData({ ...bookingData, bookingDetails: e.target.value })}
+                      onChange={(e) =>
+                        setBookingData({
+                          ...bookingData,
+                          bookingDetails: e.target.value,
+                        })
+                      }
                       placeholder="Enter booking details..."
                       required
                     />
@@ -853,10 +1013,18 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                     <label className="form-label">From Date</label>
                     <input
                       type="date"
-                      className={`form-control date-input ${isBookingDateDisabled(bookingData.dateFrom) ? 'is-invalid' : ''}`}
+                      className={`form-control date-input ${isBookingDateDisabled(bookingData.dateFrom) ? "is-invalid" : ""}`}
                       value={bookingData.dateFrom}
-                      onChange={(e) => setBookingData({ ...bookingData, dateFrom: e.target.value })}
-                      onFocus={(e) => e.target.showPicker && e.target.showPicker()}                      placeholder="Select from date"
+                      onChange={(e) =>
+                        setBookingData({
+                          ...bookingData,
+                          dateFrom: e.target.value,
+                        })
+                      }
+                      onFocus={(e) =>
+                        e.target.showPicker && e.target.showPicker()
+                      }
+                      placeholder="Select from date"
                       min={getTodayDate()}
                       required
                     />
@@ -870,10 +1038,17 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                     <label className="form-label">To Date</label>
                     <input
                       type="date"
-                      className={`form-control date-input ${isBookingDateDisabled(bookingData.dateTo) ? 'is-invalid' : ''}`}
+                      className={`form-control date-input ${isBookingDateDisabled(bookingData.dateTo) ? "is-invalid" : ""}`}
                       value={bookingData.dateTo}
-                      onChange={(e) => setBookingData({ ...bookingData, dateTo: e.target.value })}
-                      onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+                      onChange={(e) =>
+                        setBookingData({
+                          ...bookingData,
+                          dateTo: e.target.value,
+                        })
+                      }
+                      onFocus={(e) =>
+                        e.target.showPicker && e.target.showPicker()
+                      }
                       placeholder="Select to date"
                       min={bookingData.dateFrom || getTodayDate()}
                       required
@@ -892,7 +1067,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       type="number"
                       className="form-control"
                       value={bookingData.cashAmount}
-                      onChange={(e) => setBookingData({ ...bookingData, cashAmount: e.target.value })}
+                      onChange={(e) =>
+                        setBookingData({
+                          ...bookingData,
+                          cashAmount: e.target.value,
+                        })
+                      }
                       placeholder="Enter cash amount"
                       min="0"
                     />
@@ -903,7 +1083,12 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       type="number"
                       className="form-control"
                       value={bookingData.bankAmount}
-                      onChange={(e) => setBookingData({ ...bookingData, bankAmount: e.target.value })}
+                      onChange={(e) =>
+                        setBookingData({
+                          ...bookingData,
+                          bankAmount: e.target.value,
+                        })
+                      }
                       placeholder="Enter bank amount"
                       min="0"
                     />
@@ -912,23 +1097,51 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                 <div className="amount-summary mb-3">
                   <div className="row">
                     <div className="col-4">
-                      <span>Cash: ₹{parseInt(bookingData.cashAmount) || 0}</span>
+                      <span>
+                        Cash: ₹{parseInt(bookingData.cashAmount) || 0}
+                      </span>
                     </div>
                     <div className="col-4">
-                      <span>Bank: ₹{parseInt(bookingData.bankAmount) || 0}</span>
+                      <span>
+                        Bank: ₹{parseInt(bookingData.bankAmount) || 0}
+                      </span>
                     </div>
                     <div className="col-4">
-                      <strong>Total: ₹{(parseInt(bookingData.cashAmount) || 0) + (parseInt(bookingData.bankAmount) || 0)}</strong>
+                      <strong>
+                        Total: ₹
+                        {(parseInt(bookingData.cashAmount) || 0) +
+                          (parseInt(bookingData.bankAmount) || 0)}
+                      </strong>
                     </div>
                   </div>
                 </div>
                 <div className="button-group">
-                  <button type="submit" className="btn fare-entry-btn" disabled={isLoading}>
-                    <i className={isLoading ? "bi bi-arrow-repeat" : editingEntry ? "bi bi-check-circle" : "bi bi-journal-plus"}></i>
-                    {isLoading ? "Processing..." : editingEntry ? "Update Entry" : "Add Booking Entry"}
+                  <button
+                    type="submit"
+                    className="btn fare-entry-btn"
+                    disabled={isLoading}
+                  >
+                    <i
+                      className={
+                        isLoading
+                          ? "bi bi-arrow-repeat"
+                          : editingEntry
+                            ? "bi bi-check-circle"
+                            : "bi bi-journal-plus"
+                      }
+                    ></i>
+                    {isLoading
+                      ? "Processing..."
+                      : editingEntry
+                        ? "Update Entry"
+                        : "Add Booking Entry"}
                   </button>
                   {editingEntry && (
-                    <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary ms-2"
+                      onClick={handleCancelEdit}
+                    >
                       <i className="bi bi-x-circle"></i> Cancel
                     </button>
                   )}
@@ -937,19 +1150,25 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
             </div>
           )}
 
-          {activeTab === 'off' && (
+          {activeTab === "off" && (
             <div className="fare-form-card">
-              <h4><i className="bi bi-x-circle"></i> Off Day Entry</h4>
+              <h4>
+                <i className="bi bi-x-circle"></i> Off Day Entry
+              </h4>
               <form onSubmit={handleOffDaySubmit}>
                 <div className="row">
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Date</label>
                     <input
                       type="date"
-                      className={`form-control date-input ${isOffDayDateDisabled(offDayData.date) ? 'is-invalid' : ''}`}
+                      className={`form-control date-input ${isOffDayDateDisabled(offDayData.date) ? "is-invalid" : ""}`}
                       value={offDayData.date}
-                      onChange={(e) => setOffDayData({ ...offDayData, date: e.target.value })}
-                      onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+                      onChange={(e) =>
+                        setOffDayData({ ...offDayData, date: e.target.value })
+                      }
+                      onFocus={(e) =>
+                        e.target.showPicker && e.target.showPicker()
+                      }
                       placeholder="Select off day date"
                       min={getTodayDate()}
                       required
@@ -966,19 +1185,41 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       type="text"
                       className="form-control"
                       value={offDayData.reason}
-                      onChange={(e) => setOffDayData({ ...offDayData, reason: e.target.value })}
+                      onChange={(e) =>
+                        setOffDayData({ ...offDayData, reason: e.target.value })
+                      }
                       placeholder="Enter reason for off day"
                       required
                     />
                   </div>
                 </div>
                 <div className="button-group">
-                  <button type="submit" className="btn fare-entry-btn" disabled={isLoading}>
-                    <i className={isLoading ? "bi bi-arrow-repeat" : editingEntry ? "bi bi-check-circle" : "bi bi-check-circle"}></i>
-                    {isLoading ? "Processing..." : editingEntry ? "Update Entry" : "Mark Day as Off"}
+                  <button
+                    type="submit"
+                    className="btn fare-entry-btn"
+                    disabled={isLoading}
+                  >
+                    <i
+                      className={
+                        isLoading
+                          ? "bi bi-arrow-repeat"
+                          : editingEntry
+                            ? "bi bi-check-circle"
+                            : "bi bi-check-circle"
+                      }
+                    ></i>
+                    {isLoading
+                      ? "Processing..."
+                      : editingEntry
+                        ? "Update Entry"
+                        : "Mark Day as Off"}
                   </button>
                   {editingEntry && (
-                    <button type="button" className="btn btn-secondary ms-2" onClick={handleCancelEdit}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary ms-2"
+                      onClick={handleCancelEdit}
+                    >
                       <i className="bi bi-x-circle"></i> Cancel
                     </button>
                   )}
@@ -1002,13 +1243,14 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                       <div className="card-body">
                         <div className="entry-header">
                           <span className={`entry-type ${entry.type}`}>
-{entry.type === "daily" ? "Daily" :
-                             entry.type === "booking" ? "Booking" : "Off Day"}
+                            {entry.type === "daily"
+                              ? "Daily"
+                              : entry.type === "booking"
+                                ? "Booking"
+                                : "Off Day"}
                           </span>
 
-
-
-                            {entry.entryStatus === 'pending' && (
+                          {entry.entryStatus === "pending" && (
                             <>
                               <button
                                 className="btn btn-sm btn-edit"
@@ -1027,52 +1269,69 @@ function FareEntry({ fareData, setFareData, setTotalEarnings, setCashBookEntries
                             </>
                           )}
 
-                          {(entry.entryStatus === 'forwardedBank' ||
-                            entry.entryStatus === 'approvedBank' ||
-                            entry.entryStatus === 'forwardedCash' ||
-                            entry.entryStatus === 'approvedCash') && (
-                            <span className="status-badge status-locked" title="Entry is locked">
+                          {(entry.entryStatus === "forwardedBank" ||
+                            entry.entryStatus === "approvedBank" ||
+                            entry.entryStatus === "forwardedCash" ||
+                            entry.entryStatus === "approvedCash") && (
+                            <span
+                              className="status-badge status-locked"
+                              title="Entry is locked"
+                            >
                               <i className="bi bi-lock-fill"></i>
                             </span>
                           )}
 
-                          {entry.entryStatus === 'approved' && (
-                            <span className="status-badge status-final-approved" title="Final Approved">
+                          {entry.entryStatus === "approved" && (
+                            <span
+                              className="status-badge status-final-approved"
+                              title="Final Approved"
+                            >
                               <i className="bi bi-check-circle-fill"></i>
                             </span>
                           )}
-
                         </div>
                         <div className="entry-date">
                           <small className="text-muted">
                             {entry.type === "daily" && (
                               <>
                                 <div>{formatDisplayDate(entry.date)}</div>
-                                <div className="timestamp">{formatDisplayTime(entry.timestamp)}</div>
+                                <div className="timestamp">
+                                  {formatDisplayTime(entry.timestamp)}
+                                </div>
                               </>
                             )}
                             {entry.type === "booking" && (
                               <>
-                                <div>{formatDisplayDate(entry.dateFrom)} - {formatDisplayDate(entry.dateTo)}</div>
-                                <div className="timestamp">{formatDisplayTime(entry.timestamp)}</div>
+                                <div>
+                                  {formatDisplayDate(entry.dateFrom)} -{" "}
+                                  {formatDisplayDate(entry.dateTo)}
+                                </div>
+                                <div className="timestamp">
+                                  {formatDisplayTime(entry.timestamp)}
+                                </div>
                               </>
                             )}
                             {entry.type === "off" && (
                               <>
                                 <div>{formatDisplayDate(entry.date)}</div>
-                                <div className="timestamp">{formatDisplayTime(entry.timestamp)}</div>
+                                <div className="timestamp">
+                                  {formatDisplayTime(entry.timestamp)}
+                                </div>
                               </>
                             )}
                           </small>
                         </div>
                         <div className="entry-content">
                           {entry.type === "daily" && <p>{entry.route}</p>}
-                          {entry.type === "booking" && <p>{entry.bookingDetails?.substring(0, 60)}...</p>}
+                          {entry.type === "booking" && (
+                            <p>{entry.bookingDetails?.substring(0, 60)}...</p>
+                          )}
                           {entry.type === "off" && <p>{entry.reason}</p>}
                           {entry.approvedBy && (
                             <div className="approved-by">
                               <small className="text-muted">
-                                <i className="bi bi-person-check"></i> Approved by: {entry.approvedBy}
+                                <i className="bi bi-person-check"></i> Approved
+                                by: {entry.approvedBy}
                               </small>
                             </div>
                           )}
