@@ -1,0 +1,111 @@
+
+.searchable-select {
+  position: relative;
+  width: 100%;
+}
+
+.searchable-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.searchable-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.searchable-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.searchable-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.searchable-option {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.searchable-option:last-child {
+  border-bottom: none;
+}
+
+.searchable-option:hover,
+.searchable-option.focused {
+  background-color: #f8f9fa;
+}
+
+.searchable-option.selected {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  font-weight: 500;
+}
+
+.searchable-option.no-results {
+  color: #6c757d;
+  font-style: italic;
+  cursor: default;
+}
+
+.searchable-option.no-results:hover {
+  background-color: transparent;
+}
+
+/* Route selector specific styling */
+.route-selector .searchable-input {
+  background-color: #f8f9fa;
+  border: 2px solid #e9ecef;
+}
+
+.route-selector .searchable-input:focus {
+  background-color: white;
+  border-color: #28a745;
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25);
+}
+
+.route-selector .searchable-dropdown {
+  border-color: #28a745;
+}
+
+.route-selector .searchable-option.selected {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.route-selector .searchable-option:hover,
+.route-selector .searchable-option.focused {
+  background-color: #e8f5e8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .searchable-dropdown {
+    max-height: 150px;
+  }
+  
+  .searchable-option {
+    padding: 10px 12px;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}
