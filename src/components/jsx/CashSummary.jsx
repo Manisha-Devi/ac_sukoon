@@ -24,24 +24,52 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
     console.log('📈 FareData (Income):', fareData?.length || 0, 'entries');
     console.log('📉 ExpenseData (Expense):', expenseData?.length || 0, 'entries');
 
-    // Debug: Log complete data structure
-    console.log('💰 CASH SUMMARY - Complete FareData:', fareData);
-    console.log('💸 CASH SUMMARY - Complete ExpenseData:', expenseData);
+    // 🚨 DETAILED OBJECT STRUCTURE DEBUG 🚨
+    console.log('💰 CASH SUMMARY - Complete FareData OBJECT STRUCTURE:');
+    console.log('   - fareData type:', typeof fareData);
+    console.log('   - fareData is Array:', Array.isArray(fareData));
+    console.log('   - fareData value:', fareData);
+    
+    console.log('💸 CASH SUMMARY - Complete ExpenseData OBJECT STRUCTURE:');
+    console.log('   - expenseData type:', typeof expenseData);
+    console.log('   - expenseData is Array:', Array.isArray(expenseData));
+    console.log('   - expenseData value:', expenseData);
+
+    console.log('👤 CURRENT USER OBJECT STRUCTURE:');
+    console.log('   - currentUser type:', typeof currentUser);
+    console.log('   - currentUser value:', currentUser);
+    console.log('   - currentUser.fullName:', currentUser?.fullName);
+    console.log('   - currentUser.username:', currentUser?.username);
+
+    console.log('👥 ALL USERS OBJECT STRUCTURE:');
+    console.log('   - allUsers type:', typeof allUsers);
+    console.log('   - allUsers is Array:', Array.isArray(allUsers));
+    console.log('   - allUsers value:', allUsers);
 
     // Sample entries for debugging
     if (fareData && fareData.length > 0) {
-      console.log('📊 CASH SUMMARY - Sample FareData Entry:', fareData[0]);
+      console.log('📊 CASH SUMMARY - Sample FareData Entry:');
+      console.log('   - Entry object keys:', Object.keys(fareData[0]));
+      console.log('   - Complete entry:', fareData[0]);
     }
     if (expenseData && expenseData.length > 0) {
-      console.log('📊 CASH SUMMARY - Sample ExpenseData Entry:', expenseData[0]);
+      console.log('📊 CASH SUMMARY - Sample ExpenseData Entry:');
+      console.log('   - Entry object keys:', Object.keys(expenseData[0]));
+      console.log('   - Complete entry:', expenseData[0]);
     }
+
+    console.log('🔍 PROPS RECEIVED IN CASH SUMMARY:');
+    console.log('   - Props keys:', Object.keys({ fareData, expenseData, currentUser, allUsers }));
 
     filterUserData();
   }, [fareData, expenseData, dateFrom, dateTo, currentUser, allUsers]);
 
   const filterUserData = () => {
+    console.log('🔍 STARTING filterUserData function...');
+    
     if (!currentUser) {
       console.log('⚠️ No current user found');
+      console.log('   - currentUser is:', currentUser);
       return;
     }
 
@@ -49,6 +77,8 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
     let allData = [];
 
     console.log('👤 Filtering data for user:', currentUserName);
+    console.log('   - currentUser.fullName:', currentUser.fullName);
+    console.log('   - currentUser.username:', currentUser.username);
     console.log('📊 FareData Filtered Structure:');
 
     // Log sample objects for debugging  
