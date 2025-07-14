@@ -1223,7 +1223,6 @@ function FareEntry({
                                 ? "Booking"
                                 : "Off Day"}
                           </span>
-                          </span>
 
                           {entry.entryStatus === "pending" && (
                             <>
