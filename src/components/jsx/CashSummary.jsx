@@ -413,8 +413,8 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
 
   const fixedCash = getCurrentUserFixedCash();
 
-  // Cash balance = Unapproved Income - Fixed Cash
-  const cashBalance = nonApprovedCashIncome - fixedCash;
+  // Cash balance = Unapproved Income - (Unapproved Expenses + Fixed Cash)
+  const cashBalance = nonApprovedCashIncome - (nonApprovedCashExpense + fixedCash);
 
   useEffect(() => {
   }, []);
@@ -548,7 +548,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
                   ₹{Math.abs(cashBalance).toLocaleString()}
                   {cashBalance < 0 && ' (Deficit)'}
                 </h4>
-                <small className="text-muted">Unapproved Income - Fixed Cash</small>
+                <small className="text-muted">Unapproved Income - (Unapproved Expenses + Fixed Cash)</small>
               </div>
             </div>
           </div>
