@@ -2269,7 +2269,7 @@ return { success: true, results };
     switch (actionType) {
       case 'getFareReceipts':
         // Process and format the data consistently
-        const processedData = rawData.data.map(row => ({
+        const fareReceiptsData = rawData.data.map(row => ({
           entryId: parseInt(row[0]) || Date.now(),
           timestamp: parseGoogleTimestamp(row[1]),
           date: parseGoogleDate(row[2]) || new Date().toISOString().split('T')[0],
@@ -2283,11 +2283,11 @@ return { success: true, results };
           type: 'daily',
           entryType: 'daily'
         }));
-        return processedData;
+        return fareReceiptsData;
 
       case 'getBookingEntries':
         // Process and format the data consistently
-        const processedData = rawData.data.map(row => ({
+        const bookingEntriesData = rawData.data.map(row => ({
           entryId: parseInt(row[0]) || Date.now(),
           timestamp: parseGoogleTimestamp(row[1]),
           bookingDetails: row[2] || '',
@@ -2302,11 +2302,11 @@ return { success: true, results };
           type: 'booking',
           entryType: 'booking'
         }));
-        return processedData;
+        return bookingEntriesData;
 
       case 'getOffDays':
          // Process and format the data consistently
-        const processedData = rawData.data.map(row => ({
+        const offDaysData = rawData.data.map(row => ({
           entryId: parseInt(row[0]) || Date.now(),
           timestamp: parseGoogleTimestamp(row[1]),
           date: parseGoogleDate(row[2]) || new Date().toISOString().split('T')[0],
@@ -2317,13 +2317,13 @@ return { success: true, results };
           type: 'off',
           entryType: 'off'
         }));
-        return processedData;
+        return offDaysData;
 
       case 'getAddaPayments':
       case 'getUnionPayments':
       case 'getServicePayments':
       case 'getOtherPayments':
-        return rawData.data.map(row => ({
+        const paymentsData = rawData.data.map(row => ({
           entryId: parseInt(row[0]) || Date.now(),
           timestamp: parseGoogleTimestamp(row[1]),
           date: parseGoogleDate(row[2]) || new Date().toISOString().split('T')[0],
@@ -2333,6 +2333,7 @@ return { success: true, results };
           entryStatus: row[6] || 'pending',
           approvedBy: row[7] || ''
         }));
+        return paymentsData;
       default:
         console.warn(`No data processing defined for action type: ${actionType}`);
         return rawData.data;
