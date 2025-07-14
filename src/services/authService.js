@@ -1,5 +1,95 @@
 import APIKeyService from './key.js';
 
+// Helper function to safely parse date values from Google Sheets
+const parseGoogleDate = (dateValue) => {
+  if (!dateValue) return null;
+
+  try {
+    if (typeof dateValue === 'string') {
+      // Handle DD-MM-YYYY format from Google Sheets
+      if (dateValue.includes('-') && dateValue.split('-').length === 3) {
+        const parts = dateValue.split('-');
+        if (parts[0].length === 2) {
+          // DD-MM-YYYY format - convert to YYYY-MM-DD
+          const [day, month, year] = parts;
+          return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        } else if (parts[0].length === 4) {
+          // YYYY-MM-DD format - return as is
+          return dateValue;
+        }
+      }
+
+      // Handle DD/MM/YYYY format
+      if (dateValue.includes('/') && dateValue.split('/').length === 3) {
+        const parts = dateValue.split('/');
+        if (parts[0].length === 2) {
+          // DD/MM/YYYY format
+          const [day, month, year] = parts;
+          return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        }
+      }
+
+      // Try to parse as date and convert to YYYY-MM-DD
+      const date = new Date(dateValue);
+      if (!isNaN(date.getTime())) {
+        // Ensure we get the correct date in IST
+        const istDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+        return istDate.toISOString().split('T')[0];
+      }
+    }
+
+    return dateValue;
+  } catch (error) {
+    console.warn('Error parsing date:', dateValue, error);
+    return dateValue;
+  }
+};
+
+// Helper function to safely parse timestamp values from Google Sheets
+const parseGoogleTimestamp = (timestampValue) => {
+  if (!timestampValue) return new Date().toISOString();
+
+  try {
+    if (typeof timestampValue === 'string') {
+      // Handle DD-MM-YYYY HH:MM:SS format from Google Sheets
+      if (timestampValue.includes('-') && timestampValue.includes(':')) {
+        const [datePart, timePart] = timestampValue.split(' ');
+        if (datePart && timePart) {
+          const [day, month, year] = datePart.split('-');
+          const properDateStr = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${timePart}`;
+          const date = new Date(properDateStr);
+          if (!isNaN(date.getTime())) {
+            return date.toISOString();
+          }
+        }
+      }
+
+      // Handle time-only strings like "1:33:41 PM"
+      if (timestampValue.includes(':') && (timestampValue.includes('AM') || timestampValue.includes('PM'))) {
+        const today = new Date();
+        const todayDateStr = today.toISOString().split('T')[0];
+        const fullTimeStr = `${todayDateStr} ${timestampValue}`;
+        const date = new Date(fullTimeStr);
+        if (!isNaN(date.getTime())) {
+          return date.toISOString();
+        }
+      }
+
+      // Try direct parsing
+      const date = new Date(timestampValue);
+      if (!isNaN(date.getTime()) && date.getFullYear() > 1900) {
+        return date.toISOString();
+      }
+    }
+
+    // If all else fails, return current timestamp
+    return new Date().toISOString();
+  } catch (error) {
+    console.warn('Error parsing timestamp:', timestampValue, error);
+    return new Date().toISOString();
+  }
+};
+
 // Authentication service for Google Sheets database
 class AuthService {
   constructor() {
@@ -7,96 +97,7 @@ class AuthService {
     this.API_URL = 'https://script.google.com/macros/s/AKfycbzrDR7QN5eaQd1YSj4wfP_Sg8qlTg9ftMnI8PkTXRllCioVNPiTkqb5CmA32FPgYBBN6g/exec';
     this.apiKeyService = APIKeyService;
   }
-
-  // Helper function to safely parse date values from Google Sheets
-  const parseGoogleDate = (dateValue) => {
-    if (!dateValue) return null;
-
-    try {
-      if (typeof dateValue === 'string') {
-        // Handle DD-MM-YYYY format from Google Sheets
-        if (dateValue.includes('-') && dateValue.split('-').length === 3) {
-          const parts = dateValue.split('-');
-          if (parts[0].length === 2) {
-            // DD-MM-YYYY format - convert to YYYY-MM-DD
-            const [day, month, year] = parts;
-            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-          } else if (parts[0].length === 4) {
-            // YYYY-MM-DD format - return as is
-            return dateValue;
-          }
-        }
-
-        // Handle DD/MM/YYYY format
-        if (dateValue.includes('/') && dateValue.split('/').length === 3) {
-          const parts = dateValue.split('/');
-          if (parts[0].length === 2) {
-            // DD/MM/YYYY format
-            const [day, month, year] = parts;
-            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-          }
-        }
-
-        // Try to parse as date and convert to YYYY-MM-DD
-        const date = new Date(dateValue);
-        if (!isNaN(date.getTime())) {
-          // Ensure we get the correct date in IST
-          const istDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
-          return istDate.toISOString().split('T')[0];
-        }
-      }
-
-      return dateValue;
-    } catch (error) {
-      console.warn('Error parsing date:', dateValue, error);
-      return dateValue;
-    }
-  }
-
-  // Helper function to safely parse timestamp values from Google Sheets
-  const parseGoogleTimestamp = (timestampValue) => {
-    if (!timestampValue) return new Date().toISOString();
-
-    try {
-      if (typeof timestampValue === 'string') {
-        // Handle DD-MM-YYYY HH:MM:SS format from Google Sheets
-        if (timestampValue.includes('-') && timestampValue.includes(':')) {
-          const [datePart, timePart] = timestampValue.split(' ');
-          if (datePart && timePart) {
-            const [day, month, year] = datePart.split('-');
-            const properDateStr = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${timePart}`;
-            const date = new Date(properDateStr);
-            if (!isNaN(date.getTime())) {
-              return date.toISOString();
-            }
-          }
-        }
-
-        // Handle time-only strings like "1:33:41 PM"
-        if (timestampValue.includes(':') && (timestampValue.includes('AM') || timestampValue.includes('PM'))) {
-          const today = new Date();
-          const todayDateStr = today.toISOString().split('T')[0];
-          const fullTimeStr = `${todayDateStr} ${timestampValue}`;
-          const date = new Date(fullTimeStr);
-          if (!isNaN(date.getTime())) {
-            return date.toISOString();
-          }
-        }
-
-        // Try direct parsing
-        const date = new Date(timestampValue);
-        if (!isNaN(date.getTime()) && date.getFullYear() > 1900) {
-          return date.toISOString();
-        }
-      }
-
-      // If all else fails, return current timestamp
-      return new Date().toISOString();
-    } catch (error) {
-      console.warn('Error parsing timestamp:', timestampValue, error);
-      return new Date().toISOString();
-    }
-  }
+    
 
   // Authenticate user against Google Sheets database
   async authenticateUser(username, password, userType) {
