@@ -96,29 +96,7 @@ function testConnection(data) {
   }
 }
 
-/**
- * Format current IST timestamp - Returns: "YYYY-MM-DD HH:MM:SS AM/PM"
- * Example: "2025-07-14 05:20:02 PM"
- */
-function formatISTTimestamp() {
-  const now = new Date();
-  const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000)); // Add 5.5 hours for IST
 
-  const year = istTime.getFullYear();
-  const month = String(istTime.getMonth() + 1).padStart(2, '0');
-  const day = String(istTime.getDate()).padStart(2, '0');
-
-  let hours = istTime.getHours();
-  const minutes = String(istTime.getMinutes()).padStart(2, '0');
-  const seconds = String(istTime.getSeconds()).padStart(2, '0');
-
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12;
-  hours = hours ? hours : 12; // 0 should be 12
-  const displayHours = String(hours).padStart(2, '0');
-
-  return `${year}-${month}-${day} ${displayHours}:${minutes}:${seconds} ${ampm}`;
-}
 
 /**
  * Format timestamp for display - Returns: "YYYY-MM-DD HH:MM:SS AM/PM"
@@ -154,29 +132,7 @@ function formatTimestampForDisplay(timestamp) {
   }
 }
 
-/**
- * Format current IST timestamp - Returns: "YYYY-MM-DD HH:MM:SS AM/PM"
- * Example: "2025-07-14 05:20:02 PM"
- */
-function formatISTTimestamp() {
-  const now = new Date();
-  const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000)); // Add 5.5 hours for IST
 
-  const year = istTime.getFullYear();
-  const month = String(istTime.getMonth() + 1).padStart(2, '0');
-  const day = String(istTime.getDate()).padStart(2, '0');
-
-  let hours = istTime.getHours();
-  const minutes = String(istTime.getMinutes()).padStart(2, '0');
-  const seconds = String(istTime.getSeconds()).padStart(2, '0');
-
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12;
-  hours = hours ? hours : 12; // 0 should be 12
-  const displayHours = String(hours).padStart(2, '0');
-
-  return `${year}-${month}-${day} ${displayHours}:${minutes}:${seconds} ${ampm}`;
-}
 
 /**
  * Format time for display - Returns: "YYYY-MM-DD HH:MM:SS AM/PM"
