@@ -720,19 +720,6 @@ function FareEntry({
         return;
       }
 
-      const existingOffEntry = fareData.find(
-        (entry) =>
-          entry.type === "off" &&
-          entry.date === offDayData.date &&
-          (!editingEntry || entry.entryId !== editingEntry.entryId),
-      );
-
-      if (existingOffEntry) {
-        alert(`❌ Date off day already hai!\nOff Day: ${offDayData.date}\nReason: ${existingOffEntry.reason}`);
-        setIsLoading(false);
-        return;
-      }
-
       const submittedBy =
         currentUser?.fullName || currentUser?.username || "Unknown User";
       const now = new Date();
