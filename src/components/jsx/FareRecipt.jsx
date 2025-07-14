@@ -605,10 +605,30 @@ function FareEntry({
     setIsLoading(true);
 
     try {
-      if (isOffDayDateDisabled(offDayData.date)) {
-        alert(
-          "This date conflicts with existing daily collection or booking entries!",
-        );
+      // Check for specific conflicts for off day date
+      const existingDailyEntry = fareData.find(
+        (entry) =>
+          entry.type === "daily" &&
+          entry.date === offDayData.date &&
+          (!editingEntry || entry.entryId !== editingEntry.entryId),
+      );
+
+      if (existingDailyEntry) {
+        alert(`❌ Same route + same date already exists!\nRoute: ${existingDailyEntry.route}\nDate: ${offDayData.date}`);
+        setIsLoading(false);
+        return;
+      }
+
+      const existingBookingEntry = fareData.find(
+        (entry) =>
+          entry.type === "booking" &&
+          offDayData.date >= entry.dateFrom &&
+          offDayData.date <= entry.dateTo &&
+          (!editingEntry || entry.entryId !== editingEntry.entryId),
+      );
+
+      if (existingBookingEntry) {
+        alert(`❌ Date booking range mein already hai!\nBooking Period: ${existingBookingEntry.dateFrom} to ${existingBookingEntry.dateTo}\nSelected Date: ${offDayData.date}`);
         setIsLoading(false);
         return;
       }
