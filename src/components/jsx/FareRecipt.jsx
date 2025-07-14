@@ -162,10 +162,11 @@ function FareEntry({
 
   // No automatic data loading - use centralized data from props
 
-  // Function to check if a date is disabled for daily collection
-  const isDailyDateDisabled = (selectedDate, selectedRoute) => {
-    if (!selectedDate || !selectedRoute) return false;
+  // Function to check if a date is disabled for daily collection and get specific message
+  const getDailyDateConflict = (selectedDate, selectedRoute) => {
+    if (!selectedDate || !selectedRoute) return null;
 
+    // Check for same route + same date conflict
     const existingDailyEntry = fareData.find(
       (entry) =>
         entry.type === "daily" &&
@@ -174,6 +175,14 @@ function FareEntry({
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
+    if (existingDailyEntry) {
+      return {
+        hasConflict: true,
+        message: `❌ Same route + same date already exists! (${selectedRoute} - ${selectedDate})`
+      };
+    }
+
+    // Check for booking range conflict
     const existingBookingEntry = fareData.find(
       (entry) =>
         entry.type === "booking" &&
@@ -182,6 +191,14 @@ function FareEntry({
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
+    if (existingBookingEntry) {
+      return {
+        hasConflict: true,
+        message: `❌ Date booking range mein already hai! (${existingBookingEntry.dateFrom} to ${existingBookingEntry.dateTo})`
+      };
+    }
+
+    // Check for off day conflict
     const existingOffEntry = fareData.find(
       (entry) =>
         entry.type === "off" &&
@@ -189,7 +206,19 @@ function FareEntry({
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
-    return existingDailyEntry || existingBookingEntry || existingOffEntry;
+    if (existingOffEntry) {
+      return {
+        hasConflict: true,
+        message: `❌ Date off day already hai! (${selectedDate} - ${existingOffEntry.reason})`
+      };
+    }
+
+    return { hasConflict: false, message: "" };
+  };
+
+  // Helper function for backward compatibility
+  const isDailyDateDisabled = (selectedDate, selectedRoute) => {
+    return getDailyDateConflict(selectedDate, selectedRoute).hasConflict;
   };
 
   const isBookingDateDisabled = (selectedDate) => {
@@ -913,7 +942,7 @@ function FareEntry({
                     <label className="form-label">Date</label>
                     <input
                       type="date"
-                      className={`form-control date-input ${isDailyDateDisabled(dailyFareData.date, dailyFareData.route) ? "is-invalid" : ""}`}
+                      className={`form-control date-input ${getDailyDateConflict(dailyFareData.date, dailyFareData.route).hasConflict ? "is-invalid" : ""}`}
                       value={dailyFareData.date}
                       onChange={(e) =>
                         setDailyFareData({
@@ -928,15 +957,14 @@ function FareEntry({
                       min={getTodayDate()}
                       required
                     />
-                    {isDailyDateDisabled(
-                      dailyFareData.date,
-                      dailyFareData.route,
-                    ) && (
-                      <div className="invalid-feedback">
-                        This date is already taken for this route or conflicts
-                        with existing entries!
-                      </div>
-                    )}
+                    {(() => {
+                      const conflict = getDailyDateConflict(dailyFareData.date, dailyFareData.route);
+                      return conflict.hasConflict ? (
+                        <div className="invalid-feedback">
+                          {conflict.message}
+                        </div>
+                      ) : null;
+                    })()}
                   </div>
                 </div>
                 <div className="row">
