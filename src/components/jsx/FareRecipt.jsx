@@ -255,6 +255,22 @@ function FareEntry({
       };
     }
 
+    // Check for booking range conflict
+    const existingBookingEntry = fareData.find(
+      (entry) =>
+        entry.type === "booking" &&
+        selectedDate >= entry.dateFrom &&
+        selectedDate <= entry.dateTo &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
+
+    if (existingBookingEntry) {
+      return {
+        hasConflict: true,
+        message: `❌ Date booking range mein already hai! (${existingBookingEntry.dateFrom} to ${existingBookingEntry.dateTo})`
+      };
+    }
+
     return { hasConflict: false, message: "" };
   };
 
@@ -536,7 +552,7 @@ function FareEntry({
             return;
           }
 
-          // Check for booking range overlap - ADDED MISSING VALIDATION
+          // Check for booking range overlap - FIXED VALIDATION
           const existingBookingEntry = fareData.find(
             (entry) =>
               entry.type === "booking" &&
