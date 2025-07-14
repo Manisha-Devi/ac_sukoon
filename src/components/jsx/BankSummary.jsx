@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../css/BankSummary.css";
 
-function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashDeposit }) {
+function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashDeposit, allUsers }) {
   // 📊 RECEIVED DATA EXPLANATION:
   // fareData = Daily entries (income) + Booking entries + Off days
   // expenseData = Fuel + Adda + Union + Service + Other payments

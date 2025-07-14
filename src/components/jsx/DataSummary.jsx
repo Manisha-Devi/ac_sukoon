@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../css/DataSummary.css";
 import authService from "../../services/authService.js";
 
-function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashDeposit }) {
+function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashDeposit, allUsers }) {
   const [activeTab, setActiveTab] = useState('pending');
   const [pendingData, setPendingData] = useState([]);
   const [bankApprovalData, setBankApprovalData] = useState([]);
