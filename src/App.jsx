@@ -466,7 +466,7 @@ function App() {
     }
   };
 
-  // Update data stats when data changes
+  // Update data stats when data changes - using raw timestamps
   useEffect(() => {
     setDataStats({
       totalRecords: fareData.length + expenseData.length,
@@ -514,7 +514,7 @@ function App() {
             bankAmount: fareEntry.bankAmount || 0,
             type: 'dr', // Debit (income)
             source: fareEntry.type === 'daily' ? 'fare-daily' : 'fare-booking',
-            particulars: fareEntry.type === 'daily' ? fareEntry.route : fareEntry.bookingDetails,
+            particulars: fareEntry.route : fareEntry.bookingDetails,
             jfNo: `JF-${fareEntry.entryId}`,
             submittedBy: fareEntry.submittedBy
           });
