@@ -70,20 +70,30 @@ function MiscPayment({
   const getDateRange = () => {
     const today = new Date();
     const todayISO = today.toISOString().split("T")[0];
-    let minDate = "";
-    let maxDate = "";
-
-    if (currentUser?.userType === "Conductor") {
-      const pastDate = new Date();
+    const userType = currentUser?.userType;
+    
+    if (userType === "Conductor") {
+      // Conductor: 7 days past to current date + future dates enabled
+      const pastDate = new Date(today);
       pastDate.setDate(today.getDate() - 7);
-      minDate = pastDate.toISOString().split("T")[0];
-      maxDate = todayISO;
+      
+      return {
+        min: pastDate.toISOString().split("T")[0],
+        max: null // No max limit for future dates
+      };
+    } else if (userType === "Manager" || userType === "Admin") {
+      // Manager and Admin: All dates enabled (no restrictions)
+      return {
+        min: null,
+        max: null
+      };
     } else {
-      minDate = "1900-01-01";
-      maxDate = "2100-01-01";
+      // Other users: Only current date and past dates enabled
+      return {
+        min: null,
+        max: todayISO
+      };
     }
-
-    return { min: minDate, max: maxDate };
   };
 
   const serviceDetailOptions = [
@@ -741,6 +751,8 @@ function MiscPayment({
                         e.target.showPicker && e.target.showPicker()
                       }
                       placeholder="Select date"
+                      min={getDateRange().min}
+                      max={getDateRange().max}
                       required
                     />
                   </div>
@@ -899,6 +911,8 @@ function MiscPayment({
                         e.target.showPicker && e.target.showPicker()
                       }
                       placeholder="Select date"
+                      min={getDateRange().min}
+                      max={getDateRange().max}
                       required
                     />
                   </div>
