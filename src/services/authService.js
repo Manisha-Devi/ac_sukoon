@@ -915,10 +915,10 @@ class AuthService {
         timestamp: data.timestamp,
         date: data.date,
         paymentType: data.paymentType || '',
+        description: data.description || '',
         cashAmount: data.cashAmount || 0,
         bankAmount: data.bankAmount || 0,
         totalAmount: data.totalAmount || 0,
-        paymentDetails: data.paymentDetails || '',
         submittedBy: data.submittedBy || 'driver'
       }));
 

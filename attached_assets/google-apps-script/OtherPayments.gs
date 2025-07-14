@@ -26,9 +26,9 @@ function addOtherPayment(data) {
 
       // Add headers exactly as specified
       sheet.getRange(1, 1, 1, 12).setValues([[
-        "Timestamp", "Date", "PaymentType", "CashAmount", "BankAmount", 
-        "TotalAmount", "PaymentDetails", "SubmittedBy", "EntryType", "EntryId",
-        "EntryStatus", "ApprovedBy"
+        "Timestamp", "Date", "PaymentType", "Description", "CashAmount", 
+        "BankAmount", "TotalAmount", "Category", "SubmittedBy", "EntryType", 
+        "EntryId", "EntryStatus"
       ]]);
     }
 
@@ -47,15 +47,15 @@ function addOtherPayment(data) {
       timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
       data.date,                     // B: Date from frontend
       data.paymentType || "",        // C: Payment Type
-      data.cashAmount || 0,          // D: Cash Amount
-      data.bankAmount || 0,          // E: Bank Amount
-      data.totalAmount || 0,         // F: Total Amount
-      data.paymentDetails || "",     // G: Payment Details
-      data.submittedBy || "",        // H: Submitted By
-      "other",                       // I: Entry Type (static)
-      entryId,                       // J: Entry ID
-      "pending",                     // K: Entry Status (pending/waiting/approved)
-      "",                            // L: Approved By (empty initially)
+      data.description || "",        // D: Description
+      data.cashAmount || 0,          // E: Cash Amount
+      data.bankAmount || 0,          // F: Bank Amount
+      data.totalAmount || 0,         // G: Total Amount
+      "other",                       // H: Category (static)
+      data.submittedBy || "",        // I: Submitted By
+      "other",                       // J: Entry Type (static)
+      entryId,                       // K: Entry ID
+      "pending",                     // L: Entry Status (pending/waiting/approved)
     ]]);
 
     console.log("✅ Other payment added successfully with ID:", entryId);
@@ -105,18 +105,18 @@ function getOtherPayments() {
     // Process and format data
     const data = values.slice(1).map((row, index) => {
       return {
-        entryId: row[9],                     // Entry ID from column J
+        entryId: row[10],                    // Entry ID from column K
         timestamp: String(row[0] || ''),      // Convert timestamp to string
         date: String(row[1] || ''),           // Convert date to string
         paymentType: row[2],                 // Payment type from column C
-        cashAmount: row[3],                  // Cash amount from column D
-        bankAmount: row[4],                  // Bank amount from column E
-        totalAmount: row[5],                 // Total amount from column F
-        paymentDetails: row[6],              // Payment details from column G
-        submittedBy: row[7],                 // Submitted by from column H
-        entryType: row[8],                   // Entry type from column I
-        entryStatus: row[10] || "pending",   // Entry status from column K
-        approvedBy: row[11] || "",           // Approved by from column L
+        description: row[3],                 // Description from column D
+        cashAmount: row[4],                  // Cash amount from column E
+        bankAmount: row[5],                  // Bank amount from column F
+        totalAmount: row[6],                 // Total amount from column G
+        category: row[7],                    // Category from column H
+        submittedBy: row[8],                 // Submitted by from column I
+        entryType: row[9],                   // Entry type from column J
+        entryStatus: row[11] || "pending",   // Entry status from column L
         rowIndex: index + 2,                 // Store row index for updates/deletes
       };
     });
@@ -159,7 +159,7 @@ function updateOtherPayment(data) {
       throw new Error('OtherPayments sheet not found');
     }
 
-    const entryIdColumn = 10; // Column J contains Entry ID
+    const entryIdColumn = 11; // Column K contains Entry ID
 
     // Find the row with matching entryId
     const values = sheet.getDataRange().getValues();
@@ -184,20 +184,20 @@ function updateOtherPayment(data) {
     if (updatedData.paymentType !== undefined) {
       sheet.getRange(rowIndex, 3).setValue(updatedData.paymentType);
     }
+    if (updatedData.description !== undefined) {
+      sheet.getRange(rowIndex, 4).setValue(updatedData.description);
+    }
     if (updatedData.cashAmount !== undefined) {
-      sheet.getRange(rowIndex, 4).setValue(updatedData.cashAmount);
+      sheet.getRange(rowIndex, 5).setValue(updatedData.cashAmount);
     }
     if (updatedData.bankAmount !== undefined) {
-      sheet.getRange(rowIndex, 5).setValue(updatedData.bankAmount);
+      sheet.getRange(rowIndex, 6).setValue(updatedData.bankAmount);
     }
     if (updatedData.totalAmount !== undefined) {
-      sheet.getRange(rowIndex, 6).setValue(updatedData.totalAmount);
-    }
-    if (updatedData.paymentDetails !== undefined) {
-      sheet.getRange(rowIndex, 7).setValue(updatedData.paymentDetails);
+      sheet.getRange(rowIndex, 7).setValue(updatedData.totalAmount);
     }
     if (updatedData.submittedBy !== undefined) {
-      sheet.getRange(rowIndex, 8).setValue(updatedData.submittedBy);
+      sheet.getRange(rowIndex, 9).setValue(updatedData.submittedBy);
     }
 
     console.log(`✅ Other payment updated successfully - ID: ${entryId}, Row: ${rowIndex}`);

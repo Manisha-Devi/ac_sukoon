@@ -371,7 +371,7 @@ function MiscPayment({
             updatedData: {
               date: otherData.date,
               paymentType: otherData.paymentType,
-              paymentDetails: otherData.description,
+              description: otherData.description,
               cashAmount: cashAmount,
               bankAmount: bankAmount,
               totalAmount: totalAmount,
@@ -413,7 +413,7 @@ function MiscPayment({
             timestamp: timeOnly,
             date: otherData.date,
             paymentType: otherData.paymentType,
-            paymentDetails: otherData.description,
+            description: otherData.description,
             cashAmount: cashAmount,
             bankAmount: bankAmount,
             totalAmount: totalAmount,
