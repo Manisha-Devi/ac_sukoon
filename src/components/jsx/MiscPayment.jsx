@@ -635,8 +635,6 @@ function MiscPayment({
                         e.target.showPicker && e.target.showPicker()
                       }
                       placeholder="Select date"
-                      min={getDateRange().min}
-                      max={getDateRange().max}
                       required
                     />
                   </div>
@@ -797,8 +795,6 @@ function MiscPayment({
                         e.target.showPicker && e.target.showPicker()
                       }
                       placeholder="Select date"
-                      min={getDateRange().min}
-                      max={getDateRange().max}
                       required
                     />
                   </div>
