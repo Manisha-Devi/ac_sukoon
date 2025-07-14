@@ -509,9 +509,47 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
     entry.entryStatus !== 'approved'
   );
   
-  console.log('📋 Non-approved Income entries for current user:', incomeEntries.length, incomeEntries);
-  console.log('📋 Non-approved Expense entries for current user:', expenseEntries.length, expenseEntries);
-  console.log('📋 Fixed Cash source user info:', allUsers?.find(user => 
+  // Show ALL entries for comparison
+  const allIncomeEntries = filteredData.filter(entry => 
+    entry.submittedBy === currentUserName && 
+    entry.type === 'income'
+  );
+  const allExpenseEntries = filteredData.filter(entry => 
+    entry.submittedBy === currentUserName && 
+    entry.type === 'expense'
+  );
+  
+  console.log('📋 ========== INCOME ENTRIES COMPARISON ==========');
+  console.log('📋 ALL Income entries for current user:', allIncomeEntries.length, allIncomeEntries);
+  console.log('📋 NON-APPROVED Income entries for current user:', incomeEntries.length, incomeEntries);
+  console.log('📋 ========== EXPENSE ENTRIES COMPARISON ==========');
+  console.log('📋 ALL Expense entries for current user:', allExpenseEntries.length, allExpenseEntries);
+  console.log('📋 NON-APPROVED Expense entries for current user:', expenseEntries.length, expenseEntries);
+  
+  console.log('🔍 ========== ENTRY STATUS BREAKDOWN ==========');
+  allIncomeEntries.forEach((entry, index) => {
+    console.log(`📈 Income Entry ${index + 1}:`, {
+      entryId: entry.entryId,
+      date: entry.date,
+      cashAmount: entry.cashAmount,
+      entryStatus: entry.entryStatus,
+      isApproved: entry.entryStatus === 'approved',
+      includedInBalance: entry.entryStatus !== 'approved'
+    });
+  });
+  
+  allExpenseEntries.forEach((entry, index) => {
+    console.log(`📉 Expense Entry ${index + 1}:`, {
+      entryId: entry.entryId,
+      date: entry.date,
+      cashAmount: entry.cashAmount,
+      entryStatus: entry.entryStatus,
+      isApproved: entry.entryStatus === 'approved',
+      includedInBalance: entry.entryStatus !== 'approved'
+    });
+  });
+  
+  console.log('🏦 Fixed Cash source user info:', allUsers?.find(user => 
     user.name === currentUserName || user.username === currentUserName
   ));
 
