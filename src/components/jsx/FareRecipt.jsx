@@ -221,9 +221,11 @@ function FareEntry({
     return getDailyDateConflict(selectedDate, selectedRoute).hasConflict;
   };
 
-  const isBookingDateDisabled = (selectedDate) => {
-    if (!selectedDate) return false;
+  // Function to check booking date conflicts and get specific message
+  const getBookingDateConflict = (selectedDate) => {
+    if (!selectedDate) return { hasConflict: false, message: "" };
 
+    // Check for same route + same date conflict
     const existingDailyEntry = fareData.find(
       (entry) =>
         entry.type === "daily" &&
@@ -231,6 +233,14 @@ function FareEntry({
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
+    if (existingDailyEntry) {
+      return {
+        hasConflict: true,
+        message: `❌ Same route + same date already exists! (${existingDailyEntry.route} - ${selectedDate})`
+      };
+    }
+
+    // Check for off day conflict
     const existingOffEntry = fareData.find(
       (entry) =>
         entry.type === "off" &&
@@ -238,12 +248,21 @@ function FareEntry({
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
-    return existingDailyEntry || existingOffEntry;
+    if (existingOffEntry) {
+      return {
+        hasConflict: true,
+        message: `❌ Date off day already hai! (${selectedDate} - ${existingOffEntry.reason})`
+      };
+    }
+
+    return { hasConflict: false, message: "" };
   };
 
-  const isOffDayDateDisabled = (selectedDate) => {
-    if (!selectedDate) return false;
+  // Function to check off day date conflicts and get specific message
+  const getOffDayDateConflict = (selectedDate) => {
+    if (!selectedDate) return { hasConflict: false, message: "" };
 
+    // Check for same route + same date conflict
     const existingDailyEntry = fareData.find(
       (entry) =>
         entry.type === "daily" &&
@@ -251,6 +270,14 @@ function FareEntry({
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
+    if (existingDailyEntry) {
+      return {
+        hasConflict: true,
+        message: `❌ Same route + same date already exists! (${existingDailyEntry.route} - ${selectedDate})`
+      };
+    }
+
+    // Check for booking range conflict
     const existingBookingEntry = fareData.find(
       (entry) =>
         entry.type === "booking" &&
@@ -259,7 +286,23 @@ function FareEntry({
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
-    return existingDailyEntry || existingBookingEntry;
+    if (existingBookingEntry) {
+      return {
+        hasConflict: true,
+        message: `❌ Date booking range mein already hai! (${existingBookingEntry.dateFrom} to ${existingBookingEntry.dateTo})`
+      };
+    }
+
+    return { hasConflict: false, message: "" };
+  };
+
+  // Helper functions for backward compatibility
+  const isBookingDateDisabled = (selectedDate) => {
+    return getBookingDateConflict(selectedDate).hasConflict;
+  };
+
+  const isOffDayDateDisabled = (selectedDate) => {
+    return getOffDayDateConflict(selectedDate).hasConflict;
   };
 
   const getTodayDate = () => {
@@ -1153,7 +1196,7 @@ function FareEntry({
                     <label className="form-label">From Date</label>
                     <input
                       type="date"
-                      className={`form-control date-input ${isBookingDateDisabled(bookingData.dateFrom) ? "is-invalid" : ""}`}
+                      className={`form-control date-input ${getBookingDateConflict(bookingData.dateFrom).hasConflict ? "is-invalid" : ""}`}
                       value={bookingData.dateFrom}
                       onChange={(e) =>
                         setBookingData({
@@ -1168,17 +1211,20 @@ function FareEntry({
                       min={getTodayDate()}
                       required
                     />
-                    {isBookingDateDisabled(bookingData.dateFrom) && (
-                      <div className="invalid-feedback">
-                        This date conflicts with existing entries!
-                      </div>
-                    )}
+                    {(() => {
+                      const conflict = getBookingDateConflict(bookingData.dateFrom);
+                      return conflict.hasConflict ? (
+                        <div className="invalid-feedback">
+                          {conflict.message}
+                        </div>
+                      ) : null;
+                    })()}
                   </div>
                   <div className="col-md-6 mb-3">
                     <label className="form-label">To Date</label>
                     <input
                       type="date"
-                      className={`form-control date-input ${isBookingDateDisabled(bookingData.dateTo) ? "is-invalid" : ""}`}
+                      className={`form-control date-input ${getBookingDateConflict(bookingData.dateTo).hasConflict ? "is-invalid" : ""}`}
                       value={bookingData.dateTo}
                       onChange={(e) =>
                         setBookingData({
@@ -1193,11 +1239,14 @@ function FareEntry({
                       min={bookingData.dateFrom || getTodayDate()}
                       required
                     />
-                    {isBookingDateDisabled(bookingData.dateTo) && (
-                      <div className="invalid-feedback">
-                        This date conflicts with existing entries!
-                      </div>
-                    )}
+                    {(() => {
+                      const conflict = getBookingDateConflict(bookingData.dateTo);
+                      return conflict.hasConflict ? (
+                        <div className="invalid-feedback">
+                          {conflict.message}
+                        </div>
+                      ) : null;
+                    })()}
                   </div>
                 </div>
                 <div className="row">
@@ -1301,7 +1350,7 @@ function FareEntry({
                     <label className="form-label">Date</label>
                     <input
                       type="date"
-                      className={`form-control date-input ${isOffDayDateDisabled(offDayData.date) ? "is-invalid" : ""}`}
+                      className={`form-control date-input ${getOffDayDateConflict(offDayData.date).hasConflict ? "is-invalid" : ""}`}
                       value={offDayData.date}
                       onChange={(e) =>
                         setOffDayData({ ...offDayData, date: e.target.value })
@@ -1313,11 +1362,14 @@ function FareEntry({
                       min={getTodayDate()}
                       required
                     />
-                    {isOffDayDateDisabled(offDayData.date) && (
-                      <div className="invalid-feedback">
-                        This date conflicts with existing entries!
-                      </div>
-                    )}
+                    {(() => {
+                      const conflict = getOffDayDateConflict(offDayData.date);
+                      return conflict.hasConflict ? (
+                        <div className="invalid-feedback">
+                          {conflict.message}
+                        </div>
+                      ) : null;
+                    })()}
                   </div>
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Reason</label>
