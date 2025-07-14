@@ -329,6 +329,75 @@ function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
     .filter(entry => entry.type === 'income' && entry.entryStatus !== 'approved')
     .reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
 
+  // Get current user cash deposits for Cash in Hand calculation
+  const getCurrentUserCashDeposits = () => {
+    const currentUserName = currentUser?.fullName || currentUser?.username;
+    if (!currentUserName || !cashDeposit) return 0;
+    
+    const userCashDeposits = cashDeposit.filter(deposit => 
+      deposit.depositedBy === currentUserName
+    );
+    
+    return userCashDeposits.reduce((total, deposit) => total + (deposit.cashAmount || 0), 0);
+  };
+
+  // Calculate approved cash income and expenses for Cash in Hand
+  const approvedCashIncome = filteredData
+    .filter(entry => {
+      const isCurrentUserEntry = entry.submittedBy === (currentUser?.fullName || currentUser?.username);
+      const isIncomeEntry = entry.type === 'income';
+      const isApproved = entry.entryStatus === 'approved';
+      
+      console.log('💰 Bank Summary - Approved Income Entry Check:', {
+        entryId: entry.entryId,
+        submittedBy: entry.submittedBy,
+        currentUser: currentUser?.fullName || currentUser?.username,
+        isCurrentUserEntry,
+        isIncomeEntry,
+        isApproved,
+        bankAmount: entry.bankAmount,
+        include: isCurrentUserEntry && isIncomeEntry && isApproved
+      });
+      
+      return isCurrentUserEntry && isIncomeEntry && isApproved;
+    })
+    .reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+
+  const approvedCashExpense = filteredData
+    .filter(entry => {
+      const isCurrentUserEntry = entry.submittedBy === (currentUser?.fullName || currentUser?.username);
+      const isExpenseEntry = entry.type === 'expense';
+      const isApproved = entry.entryStatus === 'approved';
+      
+      console.log('💸 Bank Summary - Approved Expense Entry Check:', {
+        entryId: entry.entryId,
+        submittedBy: entry.submittedBy,
+        currentUser: currentUser?.fullName || currentUser?.username,
+        isCurrentUserEntry,
+        isExpenseEntry,
+        isApproved,
+        bankAmount: entry.bankAmount,
+        include: isCurrentUserEntry && isExpenseEntry && isApproved
+      });
+      
+      return isCurrentUserEntry && isExpenseEntry && isApproved;
+    })
+    .reduce((sum, entry) => sum + (entry.bankAmount || 0), 0);
+
+  const currentUserCashDeposits = getCurrentUserCashDeposits();
+
+  // Cash in Hand = Approved Income - (Approved Expenses + Cash Deposits)
+  const cashInHand = approvedCashIncome - (approvedCashExpense + currentUserCashDeposits);
+
+  // Debug logging for Cash in Hand calculation
+  console.log('💰 BANK SUMMARY - CASH IN HAND CALCULATION DEBUG:');
+  console.log('👤 Current User:', currentUser?.fullName || currentUser?.username);
+  console.log('📊 Approved Cash Income (Current User Only):', approvedCashIncome);
+  console.log('📊 Approved Cash Expense (Current User Only):', approvedCashExpense);
+  console.log('📊 Cash Deposits by Current User:', currentUserCashDeposits);
+  console.log('📊 Cash in Hand Formula: Approved Income - (Approved Expenses + Cash Deposits)');
+  console.log('📊 Cash in Hand = ', approvedCashIncome, '- (', approvedCashExpense, '+', currentUserCashDeposits, ') =', cashInHand);
+
   useEffect(() => {
   }, []);
 
@@ -423,7 +492,7 @@ function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
       {/* Summary Cards */}
       {showSummary && (
       <div className="row mb-4">
-        <div className="col-md-4">
+        <div className="col-md-3">
           <div className="summary-card income-card">
             <div className="card-body">
               <h6><i className="bi bi-arrow-up-circle"></i> Bank Income</h6>
@@ -431,7 +500,7 @@ function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
             </div>
           </div>
         </div>
-        <div className="col-md-4">
+        <div className="col-md-3">
           <div className="summary-card expense-card">
             <div className="card-body">
               <h6><i className="bi bi-arrow-down-circle"></i> Bank Expense</h6>
@@ -439,7 +508,7 @@ function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
             </div>
           </div>
         </div>
-        <div className="col-md-4">
+        <div className="col-md-3">
           <div className="summary-card balance-card">
             <div className="card-body">
               <h6><i className="bi bi-calculator"></i> Bank Balance</h6>
@@ -448,6 +517,18 @@ function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                 {bankBalance < 0 && ' (Deficit)'}
               </h4>
               <small className="text-muted">Unapproved Income Only</small>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-3">
+          <div className="summary-card cash-in-hand-card">
+            <div className="card-body">
+              <h6><i className="bi bi-wallet2"></i> Cash in Hand</h6>
+              <h4 className={cashInHand >= 0 ? 'text-success' : 'text-danger'}>
+                ₹{Math.abs(cashInHand).toLocaleString()}
+                {cashInHand < 0 && ' (Deficit)'}
+              </h4>
+              <small className="text-muted">Approved Income - (Approved Expenses + Cash Deposits)</small>
             </div>
           </div>
         </div>
