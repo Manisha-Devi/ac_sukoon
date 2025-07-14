@@ -484,8 +484,8 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
 
   const fixedCash = getCurrentUserFixedCash();
 
-  // Cash balance = Non-approved Income - (Non-approved Expenses + Fixed Cash)
-  const cashBalance = nonApprovedCashIncome - (nonApprovedCashExpense + fixedCash);
+  // Cash balance = Non-approved Income - Non-approved Expenses (Fixed Cash not included)
+  const cashBalance = nonApprovedCashIncome - nonApprovedCashExpense;
 
   // Debug logging for calculation verification
   console.log('💰 CASH BALANCE CALCULATION DEBUG:');
@@ -493,8 +493,8 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
   console.log('📊 Non-approved Cash Income (Current User Only):', nonApprovedCashIncome);
   console.log('📊 Non-approved Cash Expense (Current User Only):', nonApprovedCashExpense);
   console.log('📊 Fixed Cash for Current User:', fixedCash);
-  console.log('📊 Cash Balance Formula: Income - (Expenses + Fixed Cash)');
-  console.log('📊 Cash Balance = ', nonApprovedCashIncome, '- (', nonApprovedCashExpense, '+', fixedCash, ') =', cashBalance);
+  console.log('📊 Cash Balance Formula: Income - Expenses');
+  console.log('📊 Cash Balance = ', nonApprovedCashIncome, '-', nonApprovedCashExpense, '=', cashBalance);
   
   // Detailed breakdown
   const currentUserName = currentUser?.fullName || currentUser?.username;
@@ -685,7 +685,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
                   ₹{Math.abs(cashBalance).toLocaleString()}
                   {cashBalance < 0 && ' (Deficit)'}
                 </h4>
-                <small className="text-muted">Unapproved Income - (Unapproved Expenses + Fixed Cash)</small>
+                <small className="text-muted">Unapproved Income - Unapproved Expenses</small>
               </div>
             </div>
           </div>
