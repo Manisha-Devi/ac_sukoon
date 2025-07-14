@@ -67,11 +67,13 @@ const SearchableSelect = ({
     }
   };
 
-  const handleInputBlur = () => {
-    // Delay closing to allow option selection
-    setTimeout(() => {
-      setIsOpen(false);
-    }, 150);
+  const handleInputBlur = (e) => {
+    // Check if the click is on an option - if so, don't close
+    const clickedElement = e.relatedTarget;
+    if (clickedElement && clickedElement.closest('.searchable-dropdown')) {
+      return;
+    }
+    setIsOpen(false);
   };
 
   const handleKeyDown = (e) => {
@@ -156,9 +158,13 @@ const SearchableSelect = ({
                   className={`searchable-option ${
                     index === focusedIndex ? 'focused' : ''
                   } ${option === value ? 'selected' : ''}`}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleOptionClick(option);
+                  }}
                   onClick={() => handleOptionClick(option)}
                   onMouseEnter={() => setFocusedIndex(index)}
-                >
+                ></li>
                   {option}
                 </li>
               ))
