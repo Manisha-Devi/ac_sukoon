@@ -512,15 +512,79 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
     }
   };
 
-  // No date formatting - use raw values
+  // Helper function to format date for display - consistent format
   const formatDisplayDate = (dateStr) => {
-    return dateStr || '';
+    if (!dateStr) return '';
+
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return dateStr;
+
+      // Always show in "16 Jul 2025" format for consistency
+      return date.toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    } catch (error) {
+      return dateStr;
+    }
   };
 
-  // No time formatting - use raw values
+  // Helper function to format time for display - with seconds format
   const formatDisplayTime = (timestampStr) => {
-    return timestampStr || '';
-      };
+    if (!timestampStr) return '--:--:-- --';
+
+    try {
+      let date;
+
+      // Handle different timestamp formats
+      if (timestampStr.includes('/')) {
+        // Handle format like "13/07/2025 16:14:45"
+        const parts = timestampStr.split(' ');
+        if (parts.length >= 2) {
+          const datePart = parts[0]; // "13/07/2025"
+          const timePart = parts[1]; // "16:14:45"
+
+          // Convert to proper date format
+          const [day, month, year] = datePart.split('/');
+          const properDateStr = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${timePart}`;
+          date = new Date(properDateStr);
+        } else {
+          date = new Date(timestampStr);
+        }
+      } else {
+        date = new Date(timestampStr);
+      }
+
+      if (isNaN(date.getTime())) {
+        // If still invalid, try to extract just time part if possible
+        if (timestampStr.includes(' ')) {
+          const timePart = timestampStr.split(' ')[1];
+          if (timePart && timePart.includes(':')) {
+            const [hours, minutes, seconds] = timePart.split(':');
+            const hour = parseInt(hours);
+            const period = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+            return `${displayHour}:${minutes}:${seconds || '00'} ${period}`;
+          }
+        }
+        return timestampStr;
+      }
+
+      // Time format with seconds - HH:MM:SS AM/PM
+      return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+        timeZone: 'Asia/Kolkata'
+      });
+    } catch (error) {
+      console.error('Error formatting time:', error, timestampStr);
+      return '--:--:-- --';
+    }
+  };
 
   // Handle Cash Deposit modal
   const handleCashDepositSubmit = async (e) => {

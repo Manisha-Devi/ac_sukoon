@@ -51,7 +51,7 @@ function addCashDeposit(data) {
       success: true,
       message: "Cash deposit added successfully",
       entryId: data.entryId,
-      timestamp: new Date().toISOString()
+      timestamp: formatISTTimestamp()
     };
 
   } catch (error) {
@@ -206,7 +206,7 @@ function updateCashDeposit(data) {
       success: true,
       message: "Cash deposit updated successfully",
       entryId: data.entryId,
-      timestamp: new Date().toISOString()
+      timestamp: formatISTTimestamp()
     };
 
   } catch (error) {
@@ -258,7 +258,7 @@ function deleteCashDeposit(data) {
       success: true,
       message: "Cash deposit deleted successfully",
       entryId: data.entryId,
-      timestamp: new Date().toISOString()
+      timestamp: formatISTTimestamp()
     };
 
   } catch (error) {

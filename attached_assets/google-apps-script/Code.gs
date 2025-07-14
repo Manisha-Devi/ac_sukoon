@@ -38,7 +38,7 @@ function doPost(e) {
         return ContentService.createTextOutput(JSON.stringify({
           success: false,
           error: `Authentication failed: ${keyValidation.error}`,
-          timestamp: new Date().toISOString()
+          timestamp: formatISTTimestamp()
         })).setMimeType(ContentService.MimeType.JSON);
       }
 
@@ -298,7 +298,7 @@ function doPost(e) {
     return ContentService.createTextOutput(JSON.stringify({
       success: false,
       error: "Server Error: " + error.toString(),
-      timestamp: new Date().toISOString()
+      timestamp: formatISTTimestamp()
     })).setMimeType(ContentService.MimeType.JSON);
   }
 }
@@ -328,7 +328,7 @@ function doGet(e) {
         return ContentService.createTextOutput(JSON.stringify({
           success: false,
           error: `Authentication failed: ${keyValidation.error}`,
-          timestamp: new Date().toISOString()
+          timestamp: formatISTTimestamp()
         })).setMimeType(ContentService.MimeType.JSON);
       }
 

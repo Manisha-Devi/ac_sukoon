@@ -62,8 +62,8 @@ function handleLogin(data) {
         console.log("✅ Login successful for user:", inputUsername);
 
         // Update last login timestamp
-        const timestamp = data.timestamp || new Date().toISOString();
-        sheet.getRange(i + 1, 7).setValue(timestamp);
+        const istTimestamp = data.timestamp || formatISTTimestamp();
+        sheet.getRange(i + 1, 7).setValue(istTimestamp);
 
         // Return user data
         return {
@@ -75,9 +75,9 @@ function handleLogin(data) {
             fullName: values[i][3],
             status: values[i][4],
             fixedCash: values[i][7] || 0,
-            lastLogin: timestamp
+            lastLogin: istTimestamp
           },
-          timestamp: timestamp
+          timestamp: istTimestamp
         };
       }
     }
@@ -160,7 +160,9 @@ function getAllUsers(data) {
         const user = {
           username: row[usernameIndex].toString().trim(),
           name: row[fullNameIndex] ? row[fullNameIndex].toString().trim() : '',
-          date: row[createdDateIndex] ? row[createdDateIndex].toString() : '',
+          date: row[createdDateIndex] ? 
+                formatDateForDisplay(row[createdDateIndex]) : 
+                new Date().toLocaleDateString('en-IN'),
           fixedCash: row[fixedCashIndex] ? (parseFloat(row[fixedCashIndex]) || 0) : 0
         };
 
@@ -175,7 +177,7 @@ function getAllUsers(data) {
       success: true,
       data: usersData,
       count: usersData.length,
-      timestamp: new Date().toISOString()
+      timestamp: formatISTTimestamp()
     };
 
   } catch (error) {
@@ -184,7 +186,7 @@ function getAllUsers(data) {
     return {
       success: false,
       error: "Failed to fetch users: " + error.toString(),
-      timestamp: new Date().toISOString(),
+      timestamp: formatISTTimestamp(),
       data: [],
       count: 0
     };
@@ -219,7 +221,7 @@ function testConnection(data) {
     return {
       success: true,
       message: "Google Apps Script is working!",
-      timestamp: new Date().toISOString(),
+      timestamp: formatISTTimestamp(),
       version: "2.0.0"
     };
   } catch (error) {
@@ -228,7 +230,7 @@ function testConnection(data) {
     return {
       success: false,
       error: "Connection test failed: " + error.toString(),
-      timestamp: new Date().toISOString()
+      timestamp: formatISTTimestamp()
     };
   }
 }

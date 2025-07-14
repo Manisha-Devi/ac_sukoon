@@ -30,12 +30,13 @@ function addAddaPayment(data) {
     }
 
     const entryId = data.entryId || Utilities.getUuid();
-    const timestamp = data.timestamp || new Date().toISOString();
+    const timeOnly = data.timestamp || 
+      formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
 
     sheet.insertRowBefore(2);
 
     sheet.getRange(2, 1, 1, 12).setValues([[
-      timestamp,                   // A: Timestamp
+      timeOnly,                    // A: Time in IST
       data.date,                   // B: Date
       data.addaName || "",         // C: Adda Name
       data.cashAmount || 0,        // D: Cash Amount
@@ -55,7 +56,7 @@ function addAddaPayment(data) {
       success: true,
       entryId: entryId,
       message: "Adda payment added successfully",
-      timestamp: timestamp,
+      timestamp: timeOnly,
     };
 
   } catch (error) {
@@ -92,8 +93,8 @@ function getAddaPayments() {
     const data = values.slice(1).map((row, index) => {
       return {
         entryId: row[9],                      // Entry ID from column J
-        timestamp: row[0] || '',              // Raw timestamp
-        date: row[1] || '',                   // Raw date
+        timestamp: String(row[0] || ''),      // Convert timestamp to string
+        date: String(row[1] || ''),           // Convert date to string
         addaName: row[2],                     // Adda name from column C
         cashAmount: row[3],                   // Cash amount from column D
         bankAmount: row[4],                   // Bank amount from column E

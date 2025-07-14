@@ -34,15 +34,16 @@ function addServicePayment(data) {
     // Generate entry ID if not provided
     const entryId = data.entryId || generateEntryId();
 
-    // Store raw timestamp
-    const timestamp = data.timestamp || new Date().toISOString();
+    // Format timestamp (store only time part)
+    const timeOnly = data.timestamp || 
+      formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
 
     // Insert new row at position 2 (keeps newest entries at top)
     sheet.insertRowBefore(2);
 
     // Add data to the new row
     sheet.getRange(2, 1, 1, 12).setValues([[
-      timestamp,                     // A: Raw timestamp
+      timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
       data.date,                     // B: Date from frontend
       data.serviceType || "",        // C: Service Type
       data.cashAmount || 0,          // D: Cash Amount
@@ -62,7 +63,7 @@ function addServicePayment(data) {
       success: true,
       message: 'Service payment added successfully',
       entryId: entryId,
-      timestamp: timestamp
+      timestamp: timeOnly
     };
 
   } catch (error) {

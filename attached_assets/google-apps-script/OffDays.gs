@@ -30,15 +30,16 @@ function addOffDay(data) {
     // Use entry ID from data (already provided by frontend)
     const entryId = data.entryId;
 
-    // Store raw timestamp
-    const timestamp = data.timestamp || new Date().toISOString();
+    // Format timestamp (store only time part)
+    const timeOnly = data.timestamp || 
+      formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
 
     // Insert new row at position 2 (keeps newest entries at top)
     sheet.insertRowBefore(2);
 
     // Add data to the new row
     sheet.getRange(2, 1, 1, 8).setValues([[
-      timestamp,                     // A: Raw timestamp
+      timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
       data.date,                     // B: Date from frontend
       data.reason || "",             // C: Reason for off day
       "off",                         // D: Entry type (static)
@@ -54,7 +55,7 @@ function addOffDay(data) {
       success: true,
       message: 'Off day added successfully',
       entryId: entryId,
-      timestamp: timestamp
+      timestamp: timeOnly
     };
 
   } catch (error) {

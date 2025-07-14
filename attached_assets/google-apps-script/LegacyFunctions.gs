@@ -744,8 +744,6 @@ function approveOffDayLegacy(data) {
 // Legacy functions for backward compatibility with existing API calls
 // ============================================================================
 
-// IST formatting functions removed - using raw timestamps
-
 /**
  * Legacy Universal Update Function (for backward compatibility)
  * Routes update requests to appropriate specific functions based on entry type

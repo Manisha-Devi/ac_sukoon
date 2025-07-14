@@ -82,12 +82,57 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
       let combinedExpenseData = [];
       let combinedCashBookEntries = [];
 
+      // Helper functions to convert ISO strings to proper format (same as components)
       const convertToTimeString = (timestamp) => {
-        return timestamp || '';
+        if (!timestamp) return '';
+        if (typeof timestamp === 'string' && timestamp.match(/^\d{1,2}:\d{2}:\d{2} (AM|PM)$/)) {
+          return timestamp;
+        }
+        if (typeof timestamp === 'string' && timestamp.includes('T')) {
+          try {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('en-US', {
+              hour12: true,
+              hour: 'numeric',
+              minute: '2-digit',
+              second: '2-digit',
+              timeZone: 'Asia/Kolkata'
+            });
+          } catch (error) {
+            return timestamp.split('T')[1]?.split('.')[0] || timestamp;
+          }
+        }
+        if (timestamp instanceof Date) {
+          return timestamp.toLocaleTimeString('en-US', {
+            hour12: true,
+            hour: 'numeric',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZone: 'Asia/Kolkata'
+          });
+        }
+        return String(timestamp);
       };
 
       const convertToDateString = (date) => {
-        return date || '';
+        if (!date) return '';
+        if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          return date;
+        }
+        if (typeof date === 'string' && date.includes('T')) {
+          try {
+            const dateObj = new Date(date);
+            const istDate = new Date(dateObj.getTime() + (5.5 * 60 * 60 * 1000));
+            return istDate.toISOString().split('T')[0];
+          } catch (error) {
+            return date.split('T')[0];
+          }
+        }
+        if (date instanceof Date) {
+          const istDate = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
+          return istDate.toISOString().split('T')[0];
+        }
+        return String(date);
       };
 
       // Process Fare Receipts (Daily Entries) - Only required fields for CashSummary

@@ -112,7 +112,7 @@ function generateNewAPIKey(name, permissions = ['read']) {
   API_KEYS[newKey] = {
     name: name,
     permissions: permissions,
-    created: new Date().toISOString(),
+    created: formatISTTimestamp(),
     active: true
   };
   

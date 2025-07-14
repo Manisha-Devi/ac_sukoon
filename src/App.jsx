@@ -466,7 +466,7 @@ function App() {
     }
   };
 
-  // Update data stats when data changes - using raw timestamps
+  // Update data stats when data changes
   useEffect(() => {
     setDataStats({
       totalRecords: fareData.length + expenseData.length,
