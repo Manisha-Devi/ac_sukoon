@@ -178,118 +178,211 @@ function FareEntry({
 
   // No automatic data loading - use centralized data from props
 
-  // Universal function to check if date exists in fareData and return entry type
-  const checkDateInFareData = (selectedDate, selectedRoute = null) => {
-    if (!selectedDate) return null;
-
-    // Debug logging
-    console.log('🔍 checkDateInFareData called with:', {
-      selectedDate,
-      selectedRoute,
-      fareDataLength: fareData.length,
-      fareDataSample: fareData.slice(0, 3)
-    });
+  // Function to check if a date is disabled for daily collection
+  const isDailyDateDisabled = (selectedDate, selectedRoute) => {
+    if (!selectedDate || !selectedRoute) return false;
 
     const normalizedSelectedDate = normalizeDateString(selectedDate);
-    console.log('📅 Normalized selected date:', normalizedSelectedDate);
 
-    // Check for existing entries in fareData
-    const existingEntry = fareData.find((entry) => {
-      console.log('🔍 Checking entry:', {
-        entryId: entry.entryId,
-        type: entry.type,
-        date: entry.date,
-        dateFrom: entry.dateFrom,
-        dateTo: entry.dateTo,
-        route: entry.route,
-        normalizedEntryDate: entry.date ? normalizeDateString(entry.date) : null
-      });
+    const existingDailyEntry = fareData.find(
+      (entry) =>
+        entry.type === "daily" &&
+        normalizeDateString(entry.date) === normalizedSelectedDate &&
+        entry.route === selectedRoute &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
 
-      // Skip if editing the same entry
-      if (editingEntry && entry.entryId === editingEntry.entryId) return false;
+    const existingBookingEntry = fareData.find(
+      (entry) =>
+        entry.type === "booking" &&
+        normalizedSelectedDate >= normalizeDateString(entry.dateFrom) &&
+        normalizedSelectedDate <= normalizeDateString(entry.dateTo) &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
 
-      // Check daily entries
-      if (entry.type === "daily") {
-        const entryDate = normalizeDateString(entry.date);
-        return entryDate === normalizedSelectedDate;
-      }
+    const existingOffEntry = fareData.find(
+      (entry) =>
+        entry.type === "off" &&
+        normalizeDateString(entry.date) === normalizedSelectedDate &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
 
-      // Check booking entries (date range)
-      if (entry.type === "booking") {
-        const fromDate = normalizeDateString(entry.dateFrom);
-        const toDate = normalizeDateString(entry.dateTo);
-        return normalizedSelectedDate >= fromDate && normalizedSelectedDate <= toDate;
-      }
-
-      // Check off day entries
-      if (entry.type === "off") {
-        const entryDate = normalizeDateString(entry.date);
-        return entryDate === normalizedSelectedDate;
-      }
-
-      return false;
-    });
-
-    return existingEntry || null;
+    return existingDailyEntry || existingBookingEntry || existingOffEntry;
   };
 
-  // Function to get conflict message based on entry type
-  const getConflictMessage = (existingEntry) => {
-    if (!existingEntry) return "";
-
-    switch (existingEntry.type) {
-      case "daily":
-        return "This date is already taken for Route Entry";
-      case "booking":
-        return "This date is already taken for Booking Entry";
-      case "off":
-        return "This date is already taken for Off Day";
-      default:
-        return "This date is already taken";
-    }
-  };
-
-  // Simplified check functions
-  const isDailyDateDisabled = (selectedDate, selectedRoute) => {
-    if (!selectedDate) return false;
-    
-    const existingEntry = checkDateInFareData(selectedDate, selectedRoute);
-    return existingEntry !== null;
-  };
-
+  // Function to get specific conflict message for daily entry
   const getDailyConflictMessage = (selectedDate, selectedRoute) => {
-    if (!selectedDate) return "";
-    
-    const existingEntry = checkDateInFareData(selectedDate, selectedRoute);
-    return getConflictMessage(existingEntry);
+    if (!selectedDate || !selectedRoute) return "";
+
+    const normalizedSelectedDate = normalizeDateString(selectedDate);
+
+    const existingDailyEntry = fareData.find(
+      (entry) =>
+        entry.type === "daily" &&
+        normalizeDateString(entry.date) === normalizedSelectedDate &&
+        entry.route === selectedRoute &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
+
+    if (existingDailyEntry) {
+      return "This date is already taken for Route Entry";
+    }
+
+    const existingBookingEntry = fareData.find(
+      (entry) =>
+        entry.type === "booking" &&
+        normalizedSelectedDate >= normalizeDateString(entry.dateFrom) &&
+        normalizedSelectedDate <= normalizeDateString(entry.dateTo) &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
+
+    if (existingBookingEntry) {
+      return "This date is already taken for Booking Entry";
+    }
+
+    const existingOffEntry = fareData.find(
+      (entry) =>
+        entry.type === "off" &&
+        normalizeDateString(entry.date) === normalizedSelectedDate &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
+
+    if (existingOffEntry) {
+      return "This date is already taken for Off Day";
+    }
+
+    return "";
   };
 
   const isBookingDateDisabled = (selectedDate) => {
     if (!selectedDate) return false;
-    
-    const existingEntry = checkDateInFareData(selectedDate);
-    return existingEntry !== null;
+
+    const normalizedSelectedDate = normalizeDateString(selectedDate);
+
+    const existingDailyEntry = fareData.find(
+      (entry) =>
+        entry.type === "daily" &&
+        normalizeDateString(entry.date) === normalizedSelectedDate &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
+
+    const existingOffEntry = fareData.find(
+      (entry) =>
+        entry.type === "off" &&
+        normalizeDateString(entry.date) === normalizedSelectedDate &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
+
+    return existingDailyEntry || existingOffEntry;
   };
 
+  // Function to get specific conflict message for booking entry
   const getBookingConflictMessage = (selectedDate) => {
     if (!selectedDate) return "";
-    
-    const existingEntry = checkDateInFareData(selectedDate);
-    return getConflictMessage(existingEntry);
+
+    const normalizedSelectedDate = normalizeDateString(selectedDate);
+
+    const existingBookingEntry = fareData.find(
+      (entry) =>
+        entry.type === "booking" &&
+        normalizedSelectedDate >= normalizeDateString(entry.dateFrom) &&
+        normalizedSelectedDate <= normalizeDateString(entry.dateTo) &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
+
+    if (existingBookingEntry) {
+      return "This date is already taken for Booking Entry";
+    }
+
+    const existingDailyEntry = fareData.find(
+      (entry) =>
+        entry.type === "daily" &&
+        normalizeDateString(entry.date) === normalizedSelectedDate &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
+
+    if (existingDailyEntry) {
+      return "This date is already taken for Route Entry";
+    }
+
+    const existingOffEntry = fareData.find(
+      (entry) =>
+        entry.type === "off" &&
+        normalizeDateString(entry.date) === normalizedSelectedDate &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
+
+    if (existingOffEntry) {
+      return "This date is already taken for Off Day";
+    }
+
+    return "";
   };
 
   const isOffDayDateDisabled = (selectedDate) => {
     if (!selectedDate) return false;
-    
-    const existingEntry = checkDateInFareData(selectedDate);
-    return existingEntry !== null;
+
+    const normalizedSelectedDate = normalizeDateString(selectedDate);
+
+    const existingDailyEntry = fareData.find(
+      (entry) =>
+        entry.type === "daily" &&
+        normalizeDateString(entry.date) === normalizedSelectedDate &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
+
+    const existingBookingEntry = fareData.find(
+      (entry) =>
+        entry.type === "booking" &&
+        normalizedSelectedDate >= normalizeDateString(entry.dateFrom) &&
+        normalizedSelectedDate <= normalizeDateString(entry.dateTo) &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
+
+    return existingDailyEntry || existingBookingEntry;
   };
 
+  // Function to get specific conflict message for off day entry
   const getOffDayConflictMessage = (selectedDate) => {
     if (!selectedDate) return "";
-    
-    const existingEntry = checkDateInFareData(selectedDate);
-    return getConflictMessage(existingEntry);
+
+    const normalizedSelectedDate = normalizeDateString(selectedDate);
+
+    const existingOffEntry = fareData.find(
+      (entry) =>
+        entry.type === "off" &&
+        normalizeDateString(entry.date) === normalizedSelectedDate &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
+
+    if (existingOffEntry) {
+      return "This date is already taken for Off Day";
+    }
+
+    const existingDailyEntry = fareData.find(
+      (entry) =>
+        entry.type === "daily" &&
+        normalizeDateString(entry.date) === normalizedSelectedDate &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
+
+    if (existingDailyEntry) {
+      return "This date is already taken for Route Entry";
+    }
+
+    const existingBookingEntry = fareData.find(
+      (entry) =>
+        entry.type === "booking" &&
+        normalizedSelectedDate >= normalizeDateString(entry.dateFrom) &&
+        normalizedSelectedDate <= normalizeDateString(entry.dateTo) &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
+
+    if (existingBookingEntry) {
+      return "This date is already taken for Booking Entry";
+    }
+
+    return "";
   };
 
   const getTodayDate = () => {
@@ -801,23 +894,6 @@ function FareEntry({
 
   // Load data on component mount and listen for refresh events
   useEffect(() => {
-    // Debug fareData structure whenever it changes
-    console.log('🎯 FAREDATA STRUCTURE DEBUG:', {
-      fareDataLength: fareData.length,
-      fareDataTypes: fareData.map(entry => entry.type),
-      sampleEntries: fareData.slice(0, 5).map(entry => ({
-        entryId: entry.entryId,
-        type: entry.type,
-        date: entry.date,
-        dateFrom: entry.dateFrom,
-        dateTo: entry.dateTo,
-        route: entry.route,
-        submittedBy: entry.submittedBy,
-        entryStatus: entry.entryStatus
-      })),
-      completeStructure: fareData[0] || 'No data available'
-    });
-
     // Listen for centralized refresh events
     const handleDataRefresh = () => {
       console.log("🔄 FareRecipt: Refreshing data from centralized refresh");
@@ -828,7 +904,7 @@ function FareEntry({
     return () => {
       window.removeEventListener("dataRefreshed", handleDataRefresh);
     };
-  }, [currentUser, fareData]);
+  }, [currentUser]);
 
   return (
     <div className="fare-entry-container">
