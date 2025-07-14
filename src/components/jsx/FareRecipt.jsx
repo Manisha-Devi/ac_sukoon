@@ -239,18 +239,16 @@ function FareEntry({
 
   const routes = [
     "Total",
-    "Ghuraka to Bhaderwah",
-    "Ghuraka to Pull Doda",
+    "Ghuraka to Doda",
+    "Doda to Ghuraka",
     "Ghuraka to Thatri",
-    "Bhaderwah to Pul Doda",
-    "Bhaderwah to Thatri",
-    "Bhaderwah to Ghuraka",
-    "Pul Doda to Thatri",
-    "Pul Doda to Bhaderwah",
-    "Pull Doda to Ghuraka",
-    "Thatri to Pull Doda",
-    "Thatri to Bhaderwah",
     "Thatri to Ghuraka",
+    "Ghuraka to Bhaderwah",
+    "Bhaderwah to Pul Doda",
+    "Pul Doda to Thatri",
+    "Thatri to Pul Doda",
+    "Pul Doda to Bhaderwah",
+    "Bhaderwah to Ghuraka",
   ];
 
   const handleDailySubmit = async (e) => {
@@ -359,7 +357,7 @@ function FareEntry({
             bankAmount: bankAmount,
             totalAmount: totalAmount,
             submittedBy: submittedBy,
-            entryStatus: "pending", // Set initial approval status
+            entryStatus: "pending", // Send initial approval status
           })
           .catch((error) => {
             console.error("Background daily add sync failed:", error);
@@ -584,7 +582,7 @@ function FareEntry({
             date: dateOnly, // Send date as string
             reason: offDayData.reason,
             submittedBy: submittedBy,
-            entryStatus: "pending", // Set initial approval status
+            entryStatus: "pending", // Send initial approval status
           })
           .catch((error) => {
             console.error("Background off day add sync failed:", error);

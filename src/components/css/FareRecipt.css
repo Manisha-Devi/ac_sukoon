@@ -12,26 +12,13 @@
   min-height: 100vh;
   width: 100%;
   max-width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  overflow-y: auto;
-  /* Hide scrollbar but keep functionality */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-}
-
-/* Hide scrollbar for webkit browsers */
-.fare-entry-container::-webkit-scrollbar {
-  display: none;
 }
 
 .fare-entry-container .container-fluid {
   padding-left: 15px;
   padding-right: 15px;
   width: 100%;
-  max-width: 1200px; /* Set a reasonable max width */
-  margin: 0 auto; /* Center the container */
+  max-width: 100%;
 }
 
 .fare-header {
@@ -713,15 +700,6 @@
 }
 
 @media (max-width: 575.98px) {
-  .fare-entry-container {
-    padding: 10px 0;
-  }
-  
-  .fare-entry-container .container-fluid {
-    padding-left: 10px;
-    padding-right: 10px;
-  }
-
   .fare-form-card {
     padding: 1.5rem;
   }
