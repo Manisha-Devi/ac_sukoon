@@ -59,7 +59,7 @@ function addFareReceipt(data) {
       success: true,
       message: 'Fare receipt added successfully',
       entryId: entryId,
-      timestamp: timeOnly
+      timestamp: timestamp
     };
 
   } catch (error) {
@@ -103,12 +103,12 @@ function getFareReceipts() {
       };
     }
 
-    // Process and format data with CORRECT column mapping
+    // Process and return data exactly as stored in sheets
     const data = values.slice(1).map((row, index) => {
       return {
         entryId: row[7],                      // Entry ID from column H (8th column)
-        timestamp: String(row[0] || ''),      // Timestamp from column A
-        date: String(row[1] || ''),           // Date from column B
+        timestamp: row[0],                    // Timestamp from column A - as-is
+        date: row[1],                         // Date from column B - as-is
         route: row[2],                        // Route from column C
         cashAmount: row[3],                   // Cash amount from column D
         bankAmount: row[4],                   // Bank amount from column E

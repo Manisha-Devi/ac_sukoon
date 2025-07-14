@@ -1,4 +1,3 @@
-
 // ============================================================================
 // BOOKING ENTRIES OPERATIONS (BookingEntries.gs)
 // ============================================================================
@@ -41,16 +40,15 @@ function addBookingEntry(data) {
     // Use entry ID from data (already provided by frontend)
     const entryId = data.entryId;
 
-    // Format timestamp (store only time part)
-    const timeOnly = data.timestamp || 
-      formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
+    // Store timestamp exactly as received from frontend
+    const timestamp = data.timestamp || new Date().toISOString();
 
     // Insert new row at position 2 (keeps newest entries at top)
     sheet.insertRowBefore(2);
 
-    // Add data to the new row (12 columns to match header)
+    // Add data to the new row
     sheet.getRange(2, 1, 1, 12).setValues([[
-      timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
+      timestamp,                     // A: Timestamp as-is
       data.bookingDetails || "",     // B: Booking details
       data.dateFrom,                 // C: Date from
       data.dateTo,                   // D: Date to
@@ -70,7 +68,7 @@ function addBookingEntry(data) {
       success: true,
       message: 'Booking entry added successfully',
       entryId: entryId,
-      timestamp: timeOnly
+      timestamp: timestamp
     };
 
   } catch (error) {
@@ -114,14 +112,14 @@ function getBookingEntries() {
       };
     }
 
-    // Process and format data with CORRECT column mapping
+    // Process and return data exactly as stored
     const data = values.slice(1).map((row, index) => {
       return {
         entryId: row[8],                      // Entry ID from column I (9th column)
-        timestamp: String(row[0] || ''),      // Timestamp from column A
+        timestamp: row[0],                    // Timestamp from column A - as-is
         bookingDetails: row[1],               // Booking details from column B
-        dateFrom: String(row[2] || ''),       // Date from column C
-        dateTo: String(row[3] || ''),         // Date to column D
+        dateFrom: row[2],                     // Date from from column C - as-is
+        dateTo: row[3],                       // Date to from column D - as-is
         cashAmount: row[4],                   // Cash amount from column E
         bankAmount: row[5],                   // Bank amount from column F
         totalAmount: row[6],                  // Total amount from column G
@@ -431,5 +429,3 @@ function resendBookingEntry(data) {
     };
   }
 }
-
-
