@@ -819,6 +819,7 @@ function App() {
             currentUser={user}
             cashDeposit={cashDeposit}
             setCashDeposit={setCashDeposit}
+            allUsers={allUsers}
           />
         )}
         {activeTab === "cash-summary" && (
@@ -826,7 +827,7 @@ function App() {
             fareData={fareData} 
             expenseData={expenseData}
             currentUser={user}
-              allUsers={allUsers}
+            allUsers={allUsers}
           />
         )}
         {activeTab === "bank-summary" && (
@@ -836,6 +837,7 @@ function App() {
             currentUser={user}
             cashDeposit={cashDeposit}
             setCashDeposit={setCashDeposit}
+            allUsers={allUsers}
           />
         )}
       </div>
