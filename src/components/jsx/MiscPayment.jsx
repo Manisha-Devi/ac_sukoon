@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../css/MiscPayment.css";
 import authService from "../../services/authService.js";
+import SearchableSelect from "./SearchableSelect.jsx";
 
 // Helper function to format date for display
 const formatDisplayDate = (dateStr) => {
@@ -83,6 +84,123 @@ function MiscPayment({
 
     return { min: minDate, max: maxDate };
   };
+
+  const otherPaymentDescriptions = [
+    "Parking Fee",
+    "Toll Tax",
+    "Police Challan",
+    "RTO Fee",
+    "Insurance Premium",
+    "Permit Fee",
+    "Registration Fee",
+    "Fitness Certificate",
+    "Pollution Certificate",
+    "Route Permit",
+    "Tax Payment",
+    "Fine Payment",
+    "Document Fee",
+    "Spare Parts",
+    "Tyre Purchase",
+    "Battery Purchase",
+    "Oil Change",
+    "Brake Service",
+    "Clutch Service",
+    "Engine Service",
+    "AC Service",
+    "Electrical Work",
+    "Body Work",
+    "Painting Work",
+    "Welding Work",
+    "Denting Work",
+    "Glass Work",
+    "Seat Cover",
+    "Floor Mat",
+    "Accessories",
+    "Cleaning Material",
+    "Tools Purchase",
+    "Emergency Repair",
+    "Towing Charge",
+    "Driver Allowance",
+    "Conductor Allowance",
+    "Food Expense",
+    "Accommodation",
+    "Medical Expense",
+    "Uniform Purchase",
+    "Safety Equipment",
+    "Fire Extinguisher",
+    "First Aid Kit",
+    "Communication Device",
+    "GPS Device",
+    "Entertainment System",
+    "CCTV Camera",
+    "Security System",
+    "Stationery",
+    "Office Supplies",
+    "Printing Cost",
+    "Photocopy Cost",
+    "Legal Fee",
+    "Consultant Fee",
+    "Audit Fee",
+    "Bank Charges",
+    "Interest Payment",
+    "Loan EMI",
+    "Rent Payment",
+    "Electricity Bill",
+    "Water Bill",
+    "Phone Bill",
+    "Internet Bill",
+    "Salary Payment",
+    "Bonus Payment",
+    "Overtime Payment",
+    "Festival Bonus",
+    "Incentive Payment",
+    "Commission Payment",
+    "Contractor Payment",
+    "Vendor Payment",
+    "Supplier Payment",
+    "Maintenance Contract",
+    "Annual Maintenance",
+    "Washing Expense",
+    "Cleaning Service",
+    "Security Service",
+    "Advertisement Cost",
+    "Promotion Cost",
+    "Donation",
+    "Charity Payment",
+    "Social Event",
+    "Staff Welfare",
+    "Training Cost",
+    "Conference Fee",
+    "Seminar Fee",
+    "Workshop Fee",
+    "Subscription Fee",
+    "Membership Fee",
+    "License Fee",
+    "Software Cost",
+    "Hardware Cost",
+    "Equipment Purchase",
+    "Furniture Purchase",
+    "Fixture Purchase",
+    "Renovation Cost",
+    "Repair Work",
+    "Maintenance Work",
+    "Upgrade Cost",
+    "Modernization Cost",
+    "Safety Upgrade",
+    "Compliance Cost",
+    "Audit Cost",
+    "Inspection Fee",
+    "Certification Fee",
+    "Testing Fee",
+    "Calibration Fee",
+    "Verification Fee",
+    "Validation Cost",
+    "Quality Check",
+    "Emergency Fund",
+    "Contingency Fund",
+    "Miscellaneous",
+    "Other Expense"
+  ];
 
   const handleServiceSubmit = async (e) => {
     e.preventDefault();
@@ -686,15 +804,16 @@ function MiscPayment({
                   </div>
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Description</label>
-                    <input
-                      type="text"
-                      className="form-control"
+                    <SearchableSelect
+                      options={otherPaymentDescriptions}
                       value={otherData.description}
-                      onChange={(e) =>
-                        setOtherData({ ...otherData, description: e.target.value })
+                      onChange={(value) =>
+                        setOtherData({ ...otherData, description: value })
                       }
-                      placeholder="Enter description"
-                      required
+                      placeholder="Type to search descriptions..."
+                      allowCustom={true}
+                      name="description"
+                      className="description-selector"
                     />
                   </div>
                 </div>
