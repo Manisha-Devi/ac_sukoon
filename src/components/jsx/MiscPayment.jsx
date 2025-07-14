@@ -818,16 +818,14 @@ function MiscPayment({
                   </div>
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Description</label>
-                    <SearchableSelect
-                      options={otherPaymentDescriptions}
+                    <textarea
+                      className="form-control"
+                      rows={3}
                       value={otherData.description}
-                      onChange={(value) =>
-                        setOtherData({ ...otherData, description: value })
+                      onChange={(e) =>
+                        setOtherData({ ...otherData, description: e.target.value })
                       }
-                      placeholder="Type to search descriptions..."
-                      allowCustom={true}
-                      name="description"
-                      className="description-selector"
+                      placeholder="Enter detailed description of payment (optional)"
                     />
                   </div>
                 </div>
