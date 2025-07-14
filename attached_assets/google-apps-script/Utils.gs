@@ -5,32 +5,25 @@
 // ============================================================================
 
 /**
- * Format current IST timestamp - Returns: "YYYY-MM-DD HH:MM:SS AM/PM"
- * Example: "2025-07-14 05:20:02 PM"
+ * Format IST timestamp for consistent display
  */
 function formatISTTimestamp() {
   const now = new Date();
-  const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000)); // Add 5.5 hours for IST
+  const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
+  const istTime = new Date(now.getTime() + istOffset);
 
-  const year = istTime.getFullYear();
-  const month = String(istTime.getMonth() + 1).padStart(2, '0');
-  const day = String(istTime.getDate()).padStart(2, '0');
+  const day = String(istTime.getUTCDate()).padStart(2, '0');
+  const month = String(istTime.getUTCMonth() + 1).padStart(2, '0');
+  const year = istTime.getUTCFullYear();
+  const hours = String(istTime.getUTCHours()).padStart(2, '0');
+  const minutes = String(istTime.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(istTime.getUTCSeconds()).padStart(2, '0');
 
-  let hours = istTime.getHours();
-  const minutes = String(istTime.getMinutes()).padStart(2, '0');
-  const seconds = String(istTime.getSeconds()).padStart(2, '0');
-
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12;
-  hours = hours ? hours : 12; // 0 should be 12
-  const displayHours = String(hours).padStart(2, '0');
-
-  return `${year}-${month}-${day} ${displayHours}:${minutes}:${seconds} ${ampm}`;
+  return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
 }
 
 /**
- * Format date for display - Returns: "YYYY-MM-DD"
- * Example: "2025-07-14"
+ * Format date for display in DD-MM-YYYY format
  */
 function formatDateForDisplay(dateValue) {
   try {
@@ -44,22 +37,21 @@ function formatDateForDisplay(dateValue) {
       // Handle Excel serial date numbers
       date = new Date((dateValue - 25569) * 86400 * 1000);
     } else {
-      const now = new Date();
-      return now.toISOString().split('T')[0]; // YYYY-MM-DD
+      return new Date().toLocaleDateString('en-IN');
     }
 
     if (isNaN(date.getTime())) {
-      const now = new Date();
-      return now.toISOString().split('T')[0]; // YYYY-MM-DD
+      return new Date().toLocaleDateString('en-IN');
     }
 
-    // Convert to IST and return YYYY-MM-DD format
-    const istDate = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
-    return istDate.toISOString().split('T')[0];
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    return `${day}-${month}-${year}`;
   } catch (error) {
     console.error('Error formatting date:', error);
-    const now = new Date();
-    return now.toISOString().split('T')[0];
+    return new Date().toLocaleDateString('en-IN');
   }
 }
 
@@ -96,11 +88,26 @@ function testConnection(data) {
   }
 }
 
+/**
+ * Format current timestamp in IST (Indian Standard Time)
+ * Returns format: DD-MM-YYYY HH:MM:SS
+ */
+function formatISTTimestamp() {
+  const now = new Date();
+  const istDate = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
 
+  const day = String(istDate.getDate()).padStart(2, '0');
+  const month = String(istDate.getMonth() + 1).padStart(2, '0');
+  const year = istDate.getFullYear();
+  const hours = String(istDate.getHours()).padStart(2, '0');
+  const minutes = String(istDate.getMinutes()).padStart(2, '0');
+  const seconds = String(istDate.getSeconds()).padStart(2, '0');
+
+  return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+}
 
 /**
- * Format timestamp for display - Returns: "YYYY-MM-DD HH:MM:SS AM/PM"
- * Example: "2025-07-14 05:20:02 PM"
+ * Format timestamp for display - IST format
  */
 function formatTimestampForDisplay(timestamp) {
   try {
@@ -109,34 +116,35 @@ function formatTimestampForDisplay(timestamp) {
     const date = new Date(timestamp);
     if (isNaN(date.getTime())) return timestamp;
 
-    // Convert to IST
-    const istTime = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
-
-    const year = istTime.getFullYear();
-    const month = String(istTime.getMonth() + 1).padStart(2, '0');
-    const day = String(istTime.getDate()).padStart(2, '0');
-
-    let hours = istTime.getHours();
-    const minutes = String(istTime.getMinutes()).padStart(2, '0');
-    const seconds = String(istTime.getSeconds()).padStart(2, '0');
-
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12; // 0 should be 12
-    const displayHours = String(hours).padStart(2, '0');
-
-    return `${year}-${month}-${day} ${displayHours}:${minutes}:${seconds} ${ampm}`;
+    // Format as DD-MM-YYYY HH:MM:SS in IST
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit', 
+      year: 'numeric',
+      timeZone: 'Asia/Kolkata'
+    }) + ' ' + date.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: 'Asia/Kolkata'
+    });
   } catch (error) {
     console.error('Error formatting timestamp:', error);
     return timestamp;
   }
 }
 
-
+/**
+ * Format IST Timestamp - Returns current IST timestamp
+ */
+function formatISTTimestamp() {
+  const now = new Date();
+  const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000)); // Add 5.5 hours for IST
+  return Utilities.formatDate(istTime, 'Asia/Kolkata', 'dd-MM-yyyy HH:mm:ss');
+}
 
 /**
- * Format time for display - Returns: "YYYY-MM-DD HH:MM:SS AM/PM"
- * Example: "2025-07-14 05:20:02 PM"
+ * Format time for display - Returns formatted time string
  */
 function formatTimeForDisplay(date) {
   if (!date) {
@@ -149,21 +157,7 @@ function formatTimeForDisplay(date) {
 
   // Convert to IST
   const istTime = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
-
-  const year = istTime.getFullYear();
-  const month = String(istTime.getMonth() + 1).padStart(2, '0');
-  const day = String(istTime.getDate()).padStart(2, '0');
-
-  let hours = istTime.getHours();
-  const minutes = String(istTime.getMinutes()).padStart(2, '0');
-  const seconds = String(istTime.getSeconds()).padStart(2, '0');
-
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12;
-  hours = hours ? hours : 12; // 0 should be 12
-  const displayHours = String(hours).padStart(2, '0');
-
-  return `${year}-${month}-${day} ${displayHours}:${minutes}:${seconds} ${ampm}`;
+  return Utilities.formatDate(istTime, 'Asia/Kolkata', 'dd-MM-yyyy HH:mm:ss');
 }
 
 // Properties are handled directly in Code.gs and LegacyFunctions.gs
