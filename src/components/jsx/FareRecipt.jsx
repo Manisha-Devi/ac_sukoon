@@ -309,6 +309,21 @@ function FareEntry({
       };
     }
 
+    // Check for off day conflict
+    const existingOffEntry = fareData.find(
+      (entry) =>
+        entry.type === "off" &&
+        entry.date === selectedDate &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
+
+    if (existingOffEntry) {
+      return {
+        hasConflict: true,
+        message: `❌ Date off day already hai! (${selectedDate} - ${existingOffEntry.reason})`
+      };
+    }
+
     return { hasConflict: false, message: "" };
   };
 
