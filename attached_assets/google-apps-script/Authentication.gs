@@ -161,7 +161,9 @@ function getAllUsers(data) {
           username: row[usernameIndex].toString().trim(),
           name: row[fullNameIndex] ? row[fullNameIndex].toString().trim() : '',
           date: row[createdDateIndex] ? 
-                formatDateForDisplay(row[createdDateIndex]) : 
+                (row[createdDateIndex] instanceof Date ? 
+                  row[createdDateIndex].toLocaleDateString('en-IN') : 
+                  String(row[createdDateIndex])) : 
                 new Date().toLocaleDateString('en-IN'),
           fixedCash: row[fixedCashIndex] ? (parseFloat(row[fixedCashIndex]) || 0) : 0
         };
