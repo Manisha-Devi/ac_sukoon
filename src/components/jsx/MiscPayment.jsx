@@ -817,8 +817,10 @@ function MiscPayment({
                       className="payment-type-selector"
                     />
                   </div>
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Description</label>
+                </div>
+                <div className="row">
+                  <div className="col-12 mb-3">
+                    <label className="form-label">Description (Optional)</label>
                     <textarea
                       className="form-control"
                       rows={3}
