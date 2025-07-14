@@ -53,24 +53,6 @@ const convertToTimeString = (timestamp) => {
     return timestamp;
   }
 
-  // Handle full date strings from Google Sheets (like "Mon Jul 14 2025 00:00:00 GMT+0530 (India Standard Time)")
-  if (typeof timestamp === "string" && (timestamp.includes("GMT") || timestamp.includes("IST") || timestamp.match(/\w{3} \w{3} \d{2} \d{4}/))) {
-    try {
-      const date = new Date(timestamp);
-      if (!isNaN(date.getTime())) {
-        return date.toLocaleTimeString("en-US", {
-          hour12: true,
-          hour: "numeric",
-          minute: "2-digit",
-          second: "2-digit",
-          timeZone: "Asia/Kolkata",
-        });
-      }
-    } catch (error) {
-      console.warn("Error converting full date timestamp:", timestamp, error);
-    }
-  }
-
   // If it's an ISO string from Google Sheets, convert to IST format
   if (typeof timestamp === "string" && timestamp.includes("T")) {
     try {
@@ -99,24 +81,6 @@ const convertToTimeString = (timestamp) => {
     });
   }
 
-  // Try to parse as Date if it's a string
-  if (typeof timestamp === "string") {
-    try {
-      const date = new Date(timestamp);
-      if (!isNaN(date.getTime())) {
-        return date.toLocaleTimeString("en-US", {
-          hour12: true,
-          hour: "numeric",
-          minute: "2-digit",
-          second: "2-digit",
-          timeZone: "Asia/Kolkata",
-        });
-      }
-    } catch (error) {
-      console.warn("Error parsing timestamp string:", timestamp, error);
-    }
-  }
-
   // Return as string fallback
   return String(timestamp);
 };
@@ -127,30 +91,6 @@ const convertToDateString = (date) => {
   // If it's already in YYYY-MM-DD format, return as is
   if (typeof date === "string" && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
     return date;
-  }
-
-  // Handle DD-MM-YYYY format from Google Sheets
-  if (typeof date === "string" && date.match(/^\d{2}-\d{2}-\d{4}$/)) {
-    try {
-      const parts = date.split("-");
-      return `${parts[2]}-${parts[1]}-${parts[0]}`; // Convert DD-MM-YYYY to YYYY-MM-DD
-    } catch (error) {
-      console.warn("Error converting DD-MM-YYYY date:", date, error);
-      return date;
-    }
-  }
-
-  // Handle full date strings from Google Sheets (like "Mon Jul 14 2025 00:00:00 GMT+0530 (India Standard Time)")
-  if (typeof date === "string" && (date.includes("GMT") || date.includes("IST") || date.match(/\w{3} \w{3} \d{2} \d{4}/))) {
-    try {
-      const dateObj = new Date(date);
-      if (!isNaN(dateObj.getTime())) {
-        // Convert to YYYY-MM-DD format
-        return dateObj.toISOString().split("T")[0];
-      }
-    } catch (error) {
-      console.warn("Error converting full date string:", date, error);
-    }
   }
 
   // If it's an ISO string from Google Sheets, convert to IST date
@@ -170,18 +110,6 @@ const convertToDateString = (date) => {
   if (date instanceof Date) {
     const istDate = new Date(date.getTime() + 5.5 * 60 * 60 * 1000);
     return istDate.toISOString().split("T")[0];
-  }
-
-  // Try to parse as Date if it's a string
-  if (typeof date === "string") {
-    try {
-      const dateObj = new Date(date);
-      if (!isNaN(dateObj.getTime())) {
-        return dateObj.toISOString().split("T")[0];
-      }
-    } catch (error) {
-      console.warn("Error parsing date string:", date, error);
-    }
   }
 
   // Return as string fallback
@@ -238,13 +166,10 @@ function FareEntry({
   const isDailyDateDisabled = (selectedDate, selectedRoute) => {
     if (!selectedDate || !selectedRoute) return false;
 
-    // Normalize selected date to YYYY-MM-DD format
-    const normalizedSelectedDate = convertToDateString(selectedDate);
-
     const existingDailyEntry = fareData.find(
       (entry) =>
         entry.type === "daily" &&
-        convertToDateString(entry.date) === normalizedSelectedDate &&
+        entry.date === selectedDate &&
         entry.route === selectedRoute &&
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
@@ -252,15 +177,15 @@ function FareEntry({
     const existingBookingEntry = fareData.find(
       (entry) =>
         entry.type === "booking" &&
-        normalizedSelectedDate >= convertToDateString(entry.dateFrom) &&
-        normalizedSelectedDate <= convertToDateString(entry.dateTo) &&
+        selectedDate >= entry.dateFrom &&
+        selectedDate <= entry.dateTo &&
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
     const existingOffEntry = fareData.find(
       (entry) =>
         entry.type === "off" &&
-        convertToDateString(entry.date) === normalizedSelectedDate &&
+        entry.date === selectedDate &&
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
@@ -271,13 +196,10 @@ function FareEntry({
   const getDailyConflictMessage = (selectedDate, selectedRoute) => {
     if (!selectedDate || !selectedRoute) return "";
 
-    // Normalize selected date to YYYY-MM-DD format
-    const normalizedSelectedDate = convertToDateString(selectedDate);
-
     const existingDailyEntry = fareData.find(
       (entry) =>
         entry.type === "daily" &&
-        convertToDateString(entry.date) === normalizedSelectedDate &&
+        entry.date === selectedDate &&
         entry.route === selectedRoute &&
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
@@ -289,8 +211,8 @@ function FareEntry({
     const existingBookingEntry = fareData.find(
       (entry) =>
         entry.type === "booking" &&
-        normalizedSelectedDate >= convertToDateString(entry.dateFrom) &&
-        normalizedSelectedDate <= convertToDateString(entry.dateTo) &&
+        selectedDate >= entry.dateFrom &&
+        selectedDate <= entry.dateTo &&
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
@@ -301,7 +223,7 @@ function FareEntry({
     const existingOffEntry = fareData.find(
       (entry) =>
         entry.type === "off" &&
-        convertToDateString(entry.date) === normalizedSelectedDate &&
+        entry.date === selectedDate &&
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
@@ -315,20 +237,17 @@ function FareEntry({
   const isBookingDateDisabled = (selectedDate) => {
     if (!selectedDate) return false;
 
-    // Normalize selected date to YYYY-MM-DD format
-    const normalizedSelectedDate = convertToDateString(selectedDate);
-
     const existingDailyEntry = fareData.find(
       (entry) =>
         entry.type === "daily" &&
-        convertToDateString(entry.date) === normalizedSelectedDate &&
+        entry.date === selectedDate &&
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
     const existingOffEntry = fareData.find(
       (entry) =>
         entry.type === "off" &&
-        convertToDateString(entry.date) === normalizedSelectedDate &&
+        entry.date === selectedDate &&
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
@@ -339,14 +258,11 @@ function FareEntry({
   const getBookingConflictMessage = (selectedDate) => {
     if (!selectedDate) return "";
 
-    // Normalize selected date to YYYY-MM-DD format
-    const normalizedSelectedDate = convertToDateString(selectedDate);
-
     const existingBookingEntry = fareData.find(
       (entry) =>
         entry.type === "booking" &&
-        normalizedSelectedDate >= convertToDateString(entry.dateFrom) &&
-        normalizedSelectedDate <= convertToDateString(entry.dateTo) &&
+        selectedDate >= entry.dateFrom &&
+        selectedDate <= entry.dateTo &&
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
@@ -357,7 +273,7 @@ function FareEntry({
     const existingDailyEntry = fareData.find(
       (entry) =>
         entry.type === "daily" &&
-        convertToDateString(entry.date) === normalizedSelectedDate &&
+        entry.date === selectedDate &&
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
@@ -368,7 +284,7 @@ function FareEntry({
     const existingOffEntry = fareData.find(
       (entry) =>
         entry.type === "off" &&
-        convertToDateString(entry.date) === normalizedSelectedDate &&
+        entry.date === selectedDate &&
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
@@ -382,21 +298,18 @@ function FareEntry({
   const isOffDayDateDisabled = (selectedDate) => {
     if (!selectedDate) return false;
 
-    // Normalize selected date to YYYY-MM-DD format
-    const normalizedSelectedDate = convertToDateString(selectedDate);
-
     const existingDailyEntry = fareData.find(
       (entry) =>
         entry.type === "daily" &&
-        convertToDateString(entry.date) === normalizedSelectedDate &&
+        entry.date === selectedDate &&
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
     const existingBookingEntry = fareData.find(
       (entry) =>
         entry.type === "booking" &&
-        normalizedSelectedDate >= convertToDateString(entry.dateFrom) &&
-        normalizedSelectedDate <= convertToDateString(entry.dateTo) &&
+        selectedDate >= entry.dateFrom &&
+        selectedDate <= entry.dateTo &&
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
@@ -407,13 +320,10 @@ function FareEntry({
   const getOffDayConflictMessage = (selectedDate) => {
     if (!selectedDate) return "";
 
-    // Normalize selected date to YYYY-MM-DD format
-    const normalizedSelectedDate = convertToDateString(selectedDate);
-
     const existingOffEntry = fareData.find(
       (entry) =>
         entry.type === "off" &&
-        convertToDateString(entry.date) === normalizedSelectedDate &&
+        entry.date === selectedDate &&
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
@@ -424,7 +334,7 @@ function FareEntry({
     const existingDailyEntry = fareData.find(
       (entry) =>
         entry.type === "daily" &&
-        convertToDateString(entry.date) === normalizedSelectedDate &&
+        entry.date === selectedDate &&
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
@@ -435,8 +345,8 @@ function FareEntry({
     const existingBookingEntry = fareData.find(
       (entry) =>
         entry.type === "booking" &&
-        normalizedSelectedDate >= convertToDateString(entry.dateFrom) &&
-        normalizedSelectedDate <= convertToDateString(entry.dateTo) &&
+        selectedDate >= entry.dateFrom &&
+        selectedDate <= entry.dateTo &&
         (!editingEntry || entry.entryId !== editingEntry.entryId),
     );
 
@@ -885,7 +795,7 @@ function FareEntry({
         route: entry.route,
         cashAmount: entry.cashAmount.toString(),
         bankAmount: entry.bankAmount.toString(),
-        date: convertToDateString(entry.date), // Convert date properly
+        date: entry.date,
       });
     } else if (entry.type === "booking") {
       setActiveTab("booking");
@@ -893,13 +803,13 @@ function FareEntry({
         bookingDetails: entry.bookingDetails,
         cashAmount: entry.cashAmount.toString(),
         bankAmount: entry.bankAmount.toString(),
-        dateFrom: convertToDateString(entry.dateFrom), // Convert date properly
-        dateTo: convertToDateString(entry.dateTo), // Convert date properly
+        dateFrom: entry.dateFrom,
+        dateTo: entry.dateTo,
       });
     } else if (entry.type === "off") {
       setActiveTab("off");
       setOffDayData({
-        date: convertToDateString(entry.date), // Convert date properly
+        date: entry.date,
         reason: entry.reason,
       });
     }
