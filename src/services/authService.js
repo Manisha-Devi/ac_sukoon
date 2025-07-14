@@ -8,6 +8,96 @@ class AuthService {
     this.apiKeyService = APIKeyService;
   }
 
+  // Helper function to safely parse date values from Google Sheets
+  const parseGoogleDate = (dateValue) => {
+    if (!dateValue) return null;
+
+    try {
+      if (typeof dateValue === 'string') {
+        // Handle DD-MM-YYYY format from Google Sheets
+        if (dateValue.includes('-') && dateValue.split('-').length === 3) {
+          const parts = dateValue.split('-');
+          if (parts[0].length === 2) {
+            // DD-MM-YYYY format - convert to YYYY-MM-DD
+            const [day, month, year] = parts;
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+          } else if (parts[0].length === 4) {
+            // YYYY-MM-DD format - return as is
+            return dateValue;
+          }
+        }
+
+        // Handle DD/MM/YYYY format
+        if (dateValue.includes('/') && dateValue.split('/').length === 3) {
+          const parts = dateValue.split('/');
+          if (parts[0].length === 2) {
+            // DD/MM/YYYY format
+            const [day, month, year] = parts;
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+          }
+        }
+
+        // Try to parse as date and convert to YYYY-MM-DD
+        const date = new Date(dateValue);
+        if (!isNaN(date.getTime())) {
+          // Ensure we get the correct date in IST
+          const istDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+          return istDate.toISOString().split('T')[0];
+        }
+      }
+
+      return dateValue;
+    } catch (error) {
+      console.warn('Error parsing date:', dateValue, error);
+      return dateValue;
+    }
+  };
+
+  // Helper function to safely parse timestamp values from Google Sheets
+  const parseGoogleTimestamp = (timestampValue) => {
+    if (!timestampValue) return new Date().toISOString();
+
+    try {
+      if (typeof timestampValue === 'string') {
+        // Handle DD-MM-YYYY HH:MM:SS format from Google Sheets
+        if (timestampValue.includes('-') && timestampValue.includes(':')) {
+          const [datePart, timePart] = timestampValue.split(' ');
+          if (datePart && timePart) {
+            const [day, month, year] = datePart.split('-');
+            const properDateStr = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${timePart}`;
+            const date = new Date(properDateStr);
+            if (!isNaN(date.getTime())) {
+              return date.toISOString();
+            }
+          }
+        }
+
+        // Handle time-only strings like "1:33:41 PM"
+        if (timestampValue.includes(':') && (timestampValue.includes('AM') || timestampValue.includes('PM'))) {
+          const today = new Date();
+          const todayDateStr = today.toISOString().split('T')[0];
+          const fullTimeStr = `${todayDateStr} ${timestampValue}`;
+          const date = new Date(fullTimeStr);
+          if (!isNaN(date.getTime())) {
+            return date.toISOString();
+          }
+        }
+
+        // Try direct parsing
+        const date = new Date(timestampValue);
+        if (!isNaN(date.getTime()) && date.getFullYear() > 1900) {
+          return date.toISOString();
+        }
+      }
+
+      // If all else fails, return current timestamp
+      return new Date().toISOString();
+    } catch (error) {
+      console.warn('Error parsing timestamp:', timestampValue, error);
+      return new Date().toISOString();
+    }
+  };
+
   // Authenticate user against Google Sheets database
   async authenticateUser(username, password, userType) {
     try {
@@ -1892,6 +1982,8 @@ class AuthService {
         }
         results.push({ entryId: entry.entryId, result });
       }
+```python
+
       return { success: true, results };
     } catch (error) {
       console.error('Error in batch update:', error);
@@ -2082,7 +2174,7 @@ class AuthService {
   async testAPIKey() {
     try {
       console.log('🔍 Testing API key validity...');
-      
+
       const testData = this.apiKeyService.addAPIKey({
         action: 'test'
       });
@@ -2102,7 +2194,7 @@ class AuthService {
       }
 
       const result = await response.json();
-      
+
       if (result.success) {
         console.log('✅ API key is valid and working');
         return true;
@@ -2110,7 +2202,7 @@ class AuthService {
         console.error('❌ API key test failed:', result.error);
         return false;
       }
-      
+
     } catch (error) {
       console.error('❌ Error testing API key:', error);
       return false;
@@ -2120,6 +2212,132 @@ class AuthService {
   // Delegate API key testing to the API key service
   async testAPIKeyValidity() {
     return await this.apiKeyService.testAPIKey();
+  }
+  
+  // Helper function to fetch data from Google Sheets
+  async fetchData(action) {
+    try {
+      console.log(`📋 Fetching data for ${action} from Google Sheets...`);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
+          action: action
+        }))
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log(`✅ ${action} fetched:`, result);
+      return result;
+    } catch (error) {
+      console.error(`❌ Error fetching ${action}:`, error);
+      return {
+        success: false,
+        error: error.message || 'Failed to fetch data',
+        data: [],
+        message: `${action} data temporarily unavailable`
+      };
+    }
+  }
+
+  // Helper function to process the fetched data
+  processData(rawData, actionType) {
+    if (!rawData || !rawData.success || !rawData.data) {
+      console.error(`❌ Invalid data received for ${actionType}:`, rawData);
+      return [];
+    }
+
+    if (!Array.isArray(rawData.data)) {
+      console.error(`❌ Data is not an array for ${actionType}:`, rawData.data);
+      return [];
+    }
+
+    switch (actionType) {
+      case 'getFareReceipts':
+        // Process and format the data consistently
+        const processedData = rawData.data.map(row => ({
+          entryId: parseInt(row[0]) || Date.now(),
+          timestamp: parseGoogleTimestamp(row[1]),
+          date: parseGoogleDate(row[2]) || new Date().toISOString().split('T')[0],
+          route: row[3] || '',
+          cashAmount: parseFloat(row[4]) || 0,
+          bankAmount: parseFloat(row[5]) || 0,
+          totalAmount: parseFloat(row[6]) || 0,
+          submittedBy: row[7] || 'Unknown User',
+          entryStatus: row[8] || 'pending',
+          approvedBy: row[9] || '',
+          type: 'daily',
+          entryType: 'daily'
+        }));
+        return processedData;
+
+      case 'getBookingEntries':
+        // Process and format the data consistently
+        const processedData = rawData.data.map(row => ({
+          entryId: parseInt(row[0]) || Date.now(),
+          timestamp: parseGoogleTimestamp(row[1]),
+          bookingDetails: row[2] || '',
+          dateFrom: parseGoogleDate(row[3]) || new Date().toISOString().split('T')[0],
+          dateTo: parseGoogleDate(row[4]) || new Date().toISOString().split('T')[0],
+          cashAmount: parseFloat(row[5]) || 0,
+          bankAmount: parseFloat(row[6]) || 0,
+          totalAmount: parseFloat(row[7]) || 0,
+          submittedBy: row[8] || 'Unknown User',
+          entryStatus: row[9] || 'pending',
+          approvedBy: row[10] || '',
+          type: 'booking',
+          entryType: 'booking'
+        }));
+        return processedData;
+      
+      case 'getOffDays':
+         // Process and format the data consistently
+        const processedData = rawData.data.map(row => ({
+          entryId: parseInt(row[0]) || Date.now(),
+          timestamp: parseGoogleTimestamp(row[1]),
+          date: parseGoogleDate(row[2]) || new Date().toISOString().split('T')[0],
+          reason: row[3] || '',
+          submittedBy: row[4] || 'Unknown User',
+          entryStatus: row[5] || 'pending',
+          approvedBy: row[6] || '',
+          type: 'off',
+          entryType: 'off'
+        }));
+        return processedData;
+      
+      case 'getAddaPayments':
+      case 'getUnionPayments':
+      case 'getServicePayments':
+      case 'getOtherPayments':
+        return rawData.data.map(row => ({
+          entryId: parseInt(row[0]) || Date.now(),
+          timestamp: parseGoogleTimestamp(row[1]),
+          date: parseGoogleDate(row[2]) || new Date().toISOString().split('T')[0],
+          amount: parseFloat(row[3]) || 0,
+          description: row[4] || '',
+          submittedBy: row[5] || 'Unknown User',
+          entryStatus: row[6] || 'pending',
+          approvedBy: row[7] || ''
+        }));
+      default:
+        console.warn(`No data processing defined for action type: ${actionType}`);
+        return rawData.data;
+    }
   }
 }
 
