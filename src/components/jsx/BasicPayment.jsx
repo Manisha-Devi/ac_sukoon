@@ -76,12 +76,12 @@ function BasicPayment({
   const getDateRange = () => {
     const today = new Date();
     const userType = currentUser?.userType;
-    
+
     if (userType === "Conductor") {
       // Conductor: 7 days past to current date + future dates
       const pastDate = new Date(today);
       pastDate.setDate(today.getDate() - 7);
-      
+
       return {
         min: pastDate.toISOString().split("T")[0],
         max: null // No max limit for future dates
@@ -820,7 +820,8 @@ function BasicPayment({
                         e.target.showPicker && e.target.showPicker()
                       }
                       placeholder="Select date"
-                      max={getTodayDate()}
+                      min={getDateRange().min}
+                      max={getDateRange().max}
                       required
                     />
                   </div>
@@ -944,7 +945,8 @@ function BasicPayment({
                         e.target.showPicker && e.target.showPicker()
                       }
                       placeholder="Select date"
-                      max={getTodayDate()}
+                      min={getDateRange().min}
+                      max={getDateRange().max}
                       required
                     />
                   </div>
