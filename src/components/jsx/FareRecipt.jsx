@@ -340,6 +340,35 @@ function FareEntry({
     return new Date().toISOString().split("T")[0];
   };
 
+  // Get date range based on user type
+  const getDateRange = () => {
+    const today = new Date();
+    const userType = currentUser?.userType;
+    
+    if (userType === "Conductor") {
+      // Conductor: 7 days past to current date + future dates
+      const pastDate = new Date(today);
+      pastDate.setDate(today.getDate() - 7);
+      
+      return {
+        min: pastDate.toISOString().split("T")[0],
+        max: null // No max limit for future dates
+      };
+    } else if (userType === "Manager" || userType === "Admin") {
+      // Manager and Admin: All dates enabled (no restrictions)
+      return {
+        min: null,
+        max: null
+      };
+    } else {
+      // Default: Only current date and past dates
+      return {
+        min: null,
+        max: getTodayDate()
+      };
+    }
+  };
+
   const routes = [
     "Total",
     "Ghuraka to Bhaderwah",
@@ -1096,7 +1125,8 @@ function FareEntry({
                         e.target.showPicker && e.target.showPicker()
                       }
                       placeholder="Select date"
-                      max={getTodayDate()}
+                      min={getDateRange().min}
+                      max={getDateRange().max}
                       required
                     />
                     {(() => {
@@ -1240,7 +1270,8 @@ function FareEntry({
                         e.target.showPicker && e.target.showPicker()
                       }
                       placeholder="Select from date"
-                      max={getTodayDate()}
+                      min={getDateRange().min}
+                      max={getDateRange().max}
                       required
                     />
                     {(() => {
@@ -1268,7 +1299,8 @@ function FareEntry({
                         e.target.showPicker && e.target.showPicker()
                       }
                       placeholder="Select to date"
-                      max={getTodayDate()}
+                      min={getDateRange().min}
+                      max={getDateRange().max}
                       required
                     />
                     {(() => {
@@ -1391,7 +1423,8 @@ function FareEntry({
                         e.target.showPicker && e.target.showPicker()
                       }
                       placeholder="Select off day date"
-                      max={getTodayDate()}
+                      min={getDateRange().min}
+                      max={getDateRange().max}
                       required
                     />
                     {(() => {

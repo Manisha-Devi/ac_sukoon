@@ -64,6 +64,26 @@ function MiscPayment({
     return new Date().toISOString().split("T")[0];
   };
 
+  // Function to determine the date range based on user role
+  const getDateRange = () => {
+    const today = new Date();
+    const todayISO = today.toISOString().split("T")[0];
+    let minDate = "";
+    let maxDate = "";
+
+    if (currentUser?.userType === "Conductor") {
+      const pastDate = new Date();
+      pastDate.setDate(today.getDate() - 7);
+      minDate = pastDate.toISOString().split("T")[0];
+      maxDate = todayISO;
+    } else {
+      minDate = "1900-01-01";
+      maxDate = "2100-01-01";
+    }
+
+    return { min: minDate, max: maxDate };
+  };
+
   const handleServiceSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -497,7 +517,8 @@ function MiscPayment({
                         e.target.showPicker && e.target.showPicker()
                       }
                       placeholder="Select date"
-                      max={getTodayDate()}
+                      min={getDateRange().min}
+                      max={getDateRange().max}
                       required
                     />
                   </div>
@@ -658,7 +679,8 @@ function MiscPayment({
                         e.target.showPicker && e.target.showPicker()
                       }
                       placeholder="Select date"
-                      max={getTodayDate()}
+                      min={getDateRange().min}
+                      max={getDateRange().max}
                       required
                     />
                   </div>
