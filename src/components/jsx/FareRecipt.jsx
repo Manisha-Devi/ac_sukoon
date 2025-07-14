@@ -216,6 +216,7 @@ function FareEntry({
 
     const normalizedSelectedDate = normalizeDateString(selectedDate);
 
+    // Priority 1: Check for daily conflicts first
     const existingDailyEntry = fareData.find(
       (entry) =>
         entry.type === "daily" &&
@@ -228,6 +229,7 @@ function FareEntry({
       return "This date is already taken for Route Entry";
     }
 
+    // Priority 2: Check for booking conflicts
     const existingBookingEntry = fareData.find(
       (entry) =>
         entry.type === "booking" &&
@@ -240,6 +242,7 @@ function FareEntry({
       return "This date is already taken for Booking Entry";
     }
 
+    // Priority 3: Check for off day conflicts
     const existingOffEntry = fareData.find(
       (entry) =>
         entry.type === "off" &&
@@ -282,6 +285,7 @@ function FareEntry({
 
     const normalizedSelectedDate = normalizeDateString(selectedDate);
 
+    // Priority 1: Check for booking conflicts first
     const existingBookingEntry = fareData.find(
       (entry) =>
         entry.type === "booking" &&
@@ -294,6 +298,7 @@ function FareEntry({
       return "This date is already taken for Booking Entry";
     }
 
+    // Priority 2: Check for daily conflicts
     const existingDailyEntry = fareData.find(
       (entry) =>
         entry.type === "daily" &&
@@ -305,6 +310,7 @@ function FareEntry({
       return "This date is already taken for Route Entry";
     }
 
+    // Priority 3: Check for off day conflicts
     const existingOffEntry = fareData.find(
       (entry) =>
         entry.type === "off" &&
@@ -348,6 +354,7 @@ function FareEntry({
 
     const normalizedSelectedDate = normalizeDateString(selectedDate);
 
+    // Priority 1: Check for off day conflicts first
     const existingOffEntry = fareData.find(
       (entry) =>
         entry.type === "off" &&
@@ -359,6 +366,7 @@ function FareEntry({
       return "This date is already taken for Off Day";
     }
 
+    // Priority 2: Check for daily conflicts
     const existingDailyEntry = fareData.find(
       (entry) =>
         entry.type === "daily" &&
@@ -370,6 +378,7 @@ function FareEntry({
       return "This date is already taken for Route Entry";
     }
 
+    // Priority 3: Check for booking conflicts
     const existingBookingEntry = fareData.find(
       (entry) =>
         entry.type === "booking" &&
