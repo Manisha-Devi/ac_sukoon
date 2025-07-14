@@ -40,69 +40,119 @@ class HybridDataService {
 
       let allData = [];
 
+      console.log('🔄 Processing and normalizing data...');
+
       if (fareReceipts.success && fareReceipts.data) {
-        allData = [...allData, ...fareReceipts.data.map(entry => normalizeEntryData({
-          ...entry,
-          type: 'daily',
-          entryType: 'daily'
-        }))];
+        console.log('📋 Processing fare receipts:', fareReceipts.data.length);
+        const processedFareReceipts = fareReceipts.data.map(entry => {
+          console.log('🔧 Processing fare receipt entry:', entry);
+          return normalizeEntryData({
+            ...entry,
+            type: 'daily',
+            entryType: 'daily'
+          });
+        });
+        allData = [...allData, ...processedFareReceipts];
+        console.log('✅ Fare receipts processed:', processedFareReceipts.length);
       }
 
       if (bookingEntries.success && bookingEntries.data) {
-        allData = [...allData, ...bookingEntries.data.map(entry => normalizeEntryData({
-          ...entry,
-          type: 'booking',
-          entryType: 'booking'
-        }))];
+        console.log('🎫 Processing booking entries:', bookingEntries.data.length);
+        const processedBookingEntries = bookingEntries.data.map(entry => {
+          console.log('🔧 Processing booking entry:', entry);
+          return normalizeEntryData({
+            ...entry,
+            type: 'booking',
+            entryType: 'booking'
+          });
+        });
+        allData = [...allData, ...processedBookingEntries];
+        console.log('✅ Booking entries processed:', processedBookingEntries.length);
       }
 
       if (offDays.success && offDays.data) {
-        allData = [...allData, ...offDays.data.map(entry => normalizeEntryData({
-          ...entry,
-          type: 'off',
-          entryType: 'off'
-        }))];
+        console.log('🔒 Processing off days:', offDays.data.length);
+        const processedOffDays = offDays.data.map(entry => {
+          console.log('🔧 Processing off day entry:', entry);
+          return normalizeEntryData({
+            ...entry,
+            type: 'off',
+            entryType: 'off'
+          });
+        });
+        allData = [...allData, ...processedOffDays];
+        console.log('✅ Off days processed:', processedOffDays.length);
       }
 
       // Add expense data
       if (fuelPayments.success && fuelPayments.data) {
-        allData = [...allData, ...fuelPayments.data.map(entry => normalizeEntryData({
-          ...entry,
-          type: 'fuel',
-          entryType: 'fuel'
-        }))];
+        console.log('⛽ Processing fuel payments:', fuelPayments.data.length);
+        const processedFuelPayments = fuelPayments.data.map(entry => {
+          console.log('🔧 Processing fuel payment entry:', entry);
+          return normalizeEntryData({
+            ...entry,
+            type: 'fuel',
+            entryType: 'fuel'
+          });
+        });
+        allData = [...allData, ...processedFuelPayments];
+        console.log('✅ Fuel payments processed:', processedFuelPayments.length);
       }
 
       if (addaPayments.success && addaPayments.data) {
-        allData = [...allData, ...addaPayments.data.map(entry => normalizeEntryData({
-          ...entry,
-          type: 'adda',
-          entryType: 'adda'
-        }))];
+        console.log('🏪 Processing adda payments:', addaPayments.data.length);
+        const processedAddaPayments = addaPayments.data.map(entry => {
+          console.log('🔧 Processing adda payment entry:', entry);
+          return normalizeEntryData({
+            ...entry,
+            type: 'adda',
+            entryType: 'adda'
+          });
+        });
+        allData = [...allData, ...processedAddaPayments];
+        console.log('✅ Adda payments processed:', processedAddaPayments.length);
       }
 
       if (unionPayments.success && unionPayments.data) {
-        allData = [...allData, ...unionPayments.data.map(entry => normalizeEntryData({
-          ...entry,
-          type: 'union',
-          entryType: 'union'
-        }))];
+        console.log('🤝 Processing union payments:', unionPayments.data.length);
+        const processedUnionPayments = unionPayments.data.map(entry => {
+          console.log('🔧 Processing union payment entry:', entry);
+          return normalizeEntryData({
+            ...entry,
+            type: 'union',
+            entryType: 'union'
+          });
+        });
+        allData = [...allData, ...processedUnionPayments];
+        console.log('✅ Union payments processed:', processedUnionPayments.length);
       }
 
       if (servicePayments.success && servicePayments.data) {
-        allData = [...allData, ...servicePayments.data.map(entry => normalizeEntryData({
-          ...entry,
-          type: 'service',
-          entryType: 'service'
-        }))];
+        console.log('🔧 Processing service payments:', servicePayments.data.length);
+        const processedServicePayments = servicePayments.data.map(entry => {
+          console.log('🔧 Processing service payment entry:', entry);
+          return normalizeEntryData({
+            ...entry,
+            type: 'service',
+            entryType: 'service'
+          });
+        });
+        allData = [...allData, ...processedServicePayments];
+        console.log('✅ Service payments processed:', processedServicePayments.length);
       }
 
       if (otherPayments.success && otherPayments.data) {
-        allData = [...allData, ...otherPayments.data.map(entry => normalizeEntryData({
-          ...entry,
-          type: 'other',
-          entryType: 'other'
-        }))];
+        console.log('💸 Processing other payments:', otherPayments.data.length);
+        const processedOtherPayments = otherPayments.data.map(entry => {
+          console.log('🔧 Processing other payment entry:', entry);
+          return normalizeEntryData({
+            ...entry,
+            type: 'other',
+            entryType: 'other'
+          });
+        });
+        allData = [...allData, ...processedOtherPayments];
+        console.log('✅ Other payments processed:', processedOtherPayments.length);
       }
 
       allData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
