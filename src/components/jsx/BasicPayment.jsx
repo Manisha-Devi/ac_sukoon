@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import "../css/BasicPayment.css";
 import authService from "../../services/authService.js";
@@ -1069,8 +1068,7 @@ function BasicPayment({
                         </div>
                         <div className="entry-content">
                           {entry.type === "fuel" && (
-                            <p>
-                              {entry.pumpName && `${entry.pumpName} - `}
+                            <p>                              {entry.pumpName && `${entry.pumpName} - `}
                               {entry.liters && `${entry.liters}L`}
                               {entry.ratePerLiter && ` @ ₹${entry.ratePerLiter}/L`}
                             </p>

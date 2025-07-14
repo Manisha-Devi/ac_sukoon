@@ -1096,7 +1096,7 @@ function FareEntry({
                         e.target.showPicker && e.target.showPicker()
                       }
                       placeholder="Select date"
-                      min={getTodayDate()}
+                      max={getTodayDate()}
                       required
                     />
                     {(() => {
@@ -1240,7 +1240,7 @@ function FareEntry({
                         e.target.showPicker && e.target.showPicker()
                       }
                       placeholder="Select from date"
-                      min={getTodayDate()}
+                      max={getTodayDate()}
                       required
                     />
                     {(() => {
@@ -1268,7 +1268,7 @@ function FareEntry({
                         e.target.showPicker && e.target.showPicker()
                       }
                       placeholder="Select to date"
-                      min={bookingData.dateFrom || getTodayDate()}
+                      max={getTodayDate()}
                       required
                     />
                     {(() => {
@@ -1391,7 +1391,7 @@ function FareEntry({
                         e.target.showPicker && e.target.showPicker()
                       }
                       placeholder="Select off day date"
-                      min={getTodayDate()}
+                      max={getTodayDate()}
                       required
                     />
                     {(() => {

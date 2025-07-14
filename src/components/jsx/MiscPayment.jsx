@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import "../css/MiscPayment.css";
 import authService from "../../services/authService.js";
