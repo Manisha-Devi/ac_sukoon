@@ -805,15 +805,16 @@ function MiscPayment({
                   </div>
                    <div className="col-md-6 mb-3">
                     <label className="form-label">Payment Type</label>
-                    <input
-                      type="text"
-                      className="form-control"
+                    <SearchableSelect
+                      options={otherPaymentDescriptions}
                       value={otherData.paymentType}
-                      onChange={(e) =>
-                        setOtherData({ ...otherData, paymentType: e.target.value })
+                      onChange={(value) =>
+                        setOtherData({ ...otherData, paymentType: value })
                       }
-                      placeholder="Enter payment type"
-                      required
+                      placeholder="Type to search payment types..."
+                      allowCustom={true}
+                      name="paymentType"
+                      className="payment-type-selector"
                     />
                   </div>
                   <div className="col-md-6 mb-3">
