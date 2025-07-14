@@ -133,13 +133,24 @@ function App() {
 
 
   // Handle user login - Only React state, no localStorage
-  const handleLogin = (userData) => {
+  const handleLogin = async (userData) => {
     setUser(userData);
     console.log('👤 User logged in via React state:', userData);
 
-    // Refresh users data after login
-    console.log('🔄 Refreshing users data after login...');
-    fetchAllUsersData();
+    // Automatically trigger complete data refresh after login
+    console.log('🔄 Auto-triggering complete data refresh after login...');
+    
+    try {
+      // First refresh users data
+      await fetchAllUsersData();
+      
+      // Then trigger the complete data refresh cycle (same as navbar refresh)
+      await handleDataRefresh();
+      
+      console.log('✅ Auto data refresh completed after login');
+    } catch (error) {
+      console.error('❌ Auto data refresh failed after login:', error);
+    }
   };
 
   // Handle user logout - Only clear React state

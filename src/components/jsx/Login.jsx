@@ -84,8 +84,14 @@ function Login({ onLogin }) {
           isAuthenticated: true
         };
         console.log('👤 User details for login:', userDetails);
+        
+        // Keep loading state active for auto-refresh
+        console.log('🔄 Initiating auto data refresh after successful login...');
+        
         // Direct pass to parent component, no localStorage saving
-        onLogin(userDetails);
+        await onLogin(userDetails);
+        
+        // Loading will be handled by parent component
       } else {
         setErrors({
           password: authResult.message || "Invalid username or password for selected user type"
@@ -217,7 +223,7 @@ function Login({ onLogin }) {
                         {isLoading ? (
                           <>
                             <span className="spinner-border spinner-border-sm me-2"></span>
-                            Signing In...
+                            Signing In & Loading Data...
                           </>
                         ) : (
                           <>
