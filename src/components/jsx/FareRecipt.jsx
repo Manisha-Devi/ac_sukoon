@@ -460,19 +460,39 @@ function FareEntry({
       const endDate = new Date(endDateStr);
 
       for (
-        let d = new Date(startDate);
-        d <= endDate;
-        d.setDate(d.getDate() + 1)
-      ) {
-        const dateStr = d.toISOString().split("T")[0];
-        if (isBookingDateDisabled(dateStr)) {
-          alert(
-            `Date ${dateStr} conflicts with existing daily collection or off day entries!`,
+          let d = new Date(startDate);
+          d <= endDate;
+          d.setDate(d.getDate() + 1)
+        ) {
+          const dateStr = d.toISOString().split("T")[0];
+
+          // Check for specific conflicts for each date in range
+          const existingDailyEntry = fareData.find(
+            (entry) =>
+              entry.type === "daily" &&
+              entry.date === dateStr &&
+              (!editingEntry || entry.entryId !== editingEntry.entryId),
           );
-          setIsLoading(false);
-          return;
+
+          if (existingDailyEntry) {
+            alert(`❌ Same route + same date already exists!\nRoute: ${existingDailyEntry.route}\nDate: ${dateStr}`);
+            setIsLoading(false);
+            return;
+          }
+
+          const existingOffEntry = fareData.find(
+            (entry) =>
+              entry.type === "off" &&
+              entry.date === dateStr &&
+              (!editingEntry || entry.entryId !== editingEntry.entryId),
+          );
+
+          if (existingOffEntry) {
+            alert(`❌ Date off day already hai!\nOff Day: ${dateStr}\nReason: ${existingOffEntry.reason}`);
+            setIsLoading(false);
+            return;
+          }
         }
-      }
 
       const cashAmount = parseInt(bookingData.cashAmount) || 0;
       const bankAmount = parseInt(bookingData.bankAmount) || 0;
