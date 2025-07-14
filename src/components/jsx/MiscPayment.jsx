@@ -56,6 +56,7 @@ function MiscPayment({
 
   const [otherData, setOtherData] = useState({
     date: "",
+    paymentType: "",
     description: "",
     cashAmount: "",
     bankAmount: "",
@@ -356,6 +357,7 @@ function MiscPayment({
         setEditingEntry(null);
         setOtherData({
           date: "",
+          paymentType: "",
           description: "",
           cashAmount: "",
           bankAmount: "",
@@ -395,6 +397,7 @@ function MiscPayment({
         setTotalExpenses((prev) => prev + totalAmount);
         setOtherData({
           date: "",
+          paymentType: "",
           description: "",
           cashAmount: "",
           bankAmount: "",
@@ -476,6 +479,7 @@ function MiscPayment({
       setActiveTab("other");
       setOtherData({
         date: entry.date,
+        paymentType: entry.paymentType,
         description: entry.description,
         cashAmount: entry.cashAmount.toString(),
         bankAmount: entry.bankAmount.toString(),
@@ -495,6 +499,7 @@ function MiscPayment({
     });
     setOtherData({
       date: "",
+      paymentType: "",
       description: "",
       cashAmount: "",
       bankAmount: "",
@@ -795,6 +800,19 @@ function MiscPayment({
                         e.target.showPicker && e.target.showPicker()
                       }
                       placeholder="Select date"
+                      required
+                    />
+                  </div>
+                   <div className="col-md-6 mb-3">
+                    <label className="form-label">Payment Type</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={otherData.paymentType}
+                      onChange={(e) =>
+                        setOtherData({ ...otherData, paymentType: e.target.value })
+                      }
+                      placeholder="Enter payment type"
                       required
                     />
                   </div>
