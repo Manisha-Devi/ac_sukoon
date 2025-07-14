@@ -1,25 +1,29 @@
 // ============================================================================
-// UTILITY FUNCTIONS (Utils.gs)
+// UTILITY FUNCTIONS & CONFIGURATION (Utils.gs)
 // ============================================================================
-// Simplified utility functions - no date formatting
+// Common utility functions and configuration management
 // ============================================================================
 
+// Sheet names configuration
+const SHEET_NAMES = {
+  USERS: "Users",
+  FARE_RECEIPTS: "FareReceipts", 
+  BOOKING_ENTRIES: "BookingEntries",
+  OFF_DAYS: "OffDays",
+  ADDA_PAYMENTS: "AddaPayments",
+  FUEL_PAYMENTS: "FuelPayments",
+  UNION_PAYMENTS: "UnionPayments",
+  SERVICE_PAYMENTS: "ServicePayments",
+  OTHER_PAYMENTS: "OtherPayments",
+  CASH_DEPOSITS: "CashDeposits"
+};
+
 /**
- * Test the connection to Google Apps Script
+ * Test Google Apps Script connection
  */
 function testConnection(data) {
   try {
-    console.log("🔍 Testing connection to Google Apps Script...");
-
-    // Validate API key first
-    const keyValidation = validateAPIKey(data.apiKey);
-    if (!keyValidation.valid) {
-      console.log("❌ Invalid API key for test connection");
-      return {
-        success: false,
-        error: "Invalid API key"
-      };
-    }
+    console.log('🔍 Testing connection...');
 
     return {
       success: true,
@@ -28,73 +32,33 @@ function testConnection(data) {
       version: "2.0.0"
     };
   } catch (error) {
-    console.error("❌ Connection test failed:", error);
+    console.error('❌ Test connection error:', error);
 
     return {
       success: false,
-      error: "Test connection error: " + error.toString()
+      error: "Connection test failed: " + error.toString(),
+      timestamp: new Date().toISOString()
     };
   }
 }
 
-// Sheet names configuration - centralized configuration
-const SHEET_NAMES = {
-  USERS: "Users",
-  FARE_RECEIPTS: "FareReceipts",
-  BOOKING_ENTRIES: "BookingEntries", 
-  OFF_DAYS: "OffDays",
-  ADDA_PAYMENTS: "AddaPayments",
-  FUEL_PAYMENTS: "UnionPayments",
-  UNION_PAYMENTS: "UnionPayments",
-  SERVICE_PAYMENTS: "ServicePayments",
-  OTHER_PAYMENTS: "OtherPayments",
-  CASH_DEPOSITS: "CashDeposits"
-};
-
 /**
- * Validate API key for authentication
- */
-function validateAPIKey(providedKey) {
-  try {
-    console.log("🔐 Validating API key...", {
-      hasProvidedKey: !!providedKey,
-      providedKeyType: typeof providedKey,
-      providedKeyPreview: providedKey ? `${providedKey.substring(0, 10)}...` : 'none',
-      expectedKeyPreview: API_KEY ? `${API_KEY.substring(0, 10)}...` : 'none'
-    });
-
-    if (!providedKey || typeof providedKey !== 'string') {
-      console.log("❌ API key validation failed: No key provided or invalid type");
-      return { valid: false, error: "API key is required" };
-    }
-
-    if (providedKey !== API_KEY) {
-      console.log("❌ API key validation failed: Key mismatch");
-      return { valid: false, error: "Invalid API key" };
-    }
-
-    console.log("✅ API key validation successful");
-    return { valid: true };
-  } catch (error) {
-    console.error("❌ API key validation error:", error);
-    return { valid: false, error: "API key validation failed" };
-  }
-}
-
-/**
- * Test function for API key validation
+ * Test API key connection with authentication
  */
 function testAPIKeyConnection(data) {
   try {
-    console.log('🔍 Testing API key connection...');
+    console.log('🔐 Testing API key connection...');
 
-    const keyValidation = validateAPIKey(data.apiKey);
-    if (!keyValidation.valid) {
-      console.log("❌ Invalid API key for test connection");
-      return {
-        success: false,
-        error: "Authentication failed: " + keyValidation.error
-      };
+    // If data has API key, validate it
+    if (data && data.apiKey) {
+      const keyValidation = validateAPIKey(data.apiKey);
+      if (!keyValidation.valid) {
+        console.log('❌ Invalid API key for test connection');
+        return {
+          success: false,
+          error: "Invalid API key"
+        };
+      }
     }
 
     return {

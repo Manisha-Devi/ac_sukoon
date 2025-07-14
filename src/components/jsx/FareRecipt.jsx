@@ -1135,7 +1135,7 @@ function FareEntry({
                     <label className="form-label">Date</label>
                     <input
                       type="date"
-                      className={`form-control date-input ${isOffDayDateDisabled(offDayData.date) ? "is-invalid" : ""}`}
+                      className="form-control date-input"
                       value={offDayData.date}
                       onChange={(e) =>
                         setOffDayData({ ...offDayData, date: e.target.value })
