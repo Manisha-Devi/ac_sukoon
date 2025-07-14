@@ -53,6 +53,24 @@ const convertToTimeString = (timestamp) => {
     return timestamp;
   }
 
+  // Handle full date strings from Google Sheets (like "Mon Jul 14 2025 00:00:00 GMT+0530 (India Standard Time)")
+  if (typeof timestamp === "string" && (timestamp.includes("GMT") || timestamp.includes("IST") || timestamp.match(/\w{3} \w{3} \d{2} \d{4}/))) {
+    try {
+      const date = new Date(timestamp);
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleTimeString("en-US", {
+          hour12: true,
+          hour: "numeric",
+          minute: "2-digit",
+          second: "2-digit",
+          timeZone: "Asia/Kolkata",
+        });
+      }
+    } catch (error) {
+      console.warn("Error converting full date timestamp:", timestamp, error);
+    }
+  }
+
   // If it's an ISO string from Google Sheets, convert to IST format
   if (typeof timestamp === "string" && timestamp.includes("T")) {
     try {
@@ -81,6 +99,24 @@ const convertToTimeString = (timestamp) => {
     });
   }
 
+  // Try to parse as Date if it's a string
+  if (typeof timestamp === "string") {
+    try {
+      const date = new Date(timestamp);
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleTimeString("en-US", {
+          hour12: true,
+          hour: "numeric",
+          minute: "2-digit",
+          second: "2-digit",
+          timeZone: "Asia/Kolkata",
+        });
+      }
+    } catch (error) {
+      console.warn("Error parsing timestamp string:", timestamp, error);
+    }
+  }
+
   // Return as string fallback
   return String(timestamp);
 };
@@ -104,6 +140,19 @@ const convertToDateString = (date) => {
     }
   }
 
+  // Handle full date strings from Google Sheets (like "Mon Jul 14 2025 00:00:00 GMT+0530 (India Standard Time)")
+  if (typeof date === "string" && (date.includes("GMT") || date.includes("IST") || date.match(/\w{3} \w{3} \d{2} \d{4}/))) {
+    try {
+      const dateObj = new Date(date);
+      if (!isNaN(dateObj.getTime())) {
+        // Convert to YYYY-MM-DD format
+        return dateObj.toISOString().split("T")[0];
+      }
+    } catch (error) {
+      console.warn("Error converting full date string:", date, error);
+    }
+  }
+
   // If it's an ISO string from Google Sheets, convert to IST date
   if (typeof date === "string" && date.includes("T")) {
     try {
@@ -121,6 +170,18 @@ const convertToDateString = (date) => {
   if (date instanceof Date) {
     const istDate = new Date(date.getTime() + 5.5 * 60 * 60 * 1000);
     return istDate.toISOString().split("T")[0];
+  }
+
+  // Try to parse as Date if it's a string
+  if (typeof date === "string") {
+    try {
+      const dateObj = new Date(date);
+      if (!isNaN(dateObj.getTime())) {
+        return dateObj.toISOString().split("T")[0];
+      }
+    } catch (error) {
+      console.warn("Error parsing date string:", date, error);
+    }
   }
 
   // Return as string fallback
@@ -824,7 +885,7 @@ function FareEntry({
         route: entry.route,
         cashAmount: entry.cashAmount.toString(),
         bankAmount: entry.bankAmount.toString(),
-        date: entry.date,
+        date: convertToDateString(entry.date), // Convert date properly
       });
     } else if (entry.type === "booking") {
       setActiveTab("booking");
@@ -832,13 +893,13 @@ function FareEntry({
         bookingDetails: entry.bookingDetails,
         cashAmount: entry.cashAmount.toString(),
         bankAmount: entry.bankAmount.toString(),
-        dateFrom: entry.dateFrom,
-        dateTo: entry.dateTo,
+        dateFrom: convertToDateString(entry.dateFrom), // Convert date properly
+        dateTo: convertToDateString(entry.dateTo), // Convert date properly
       });
     } else if (entry.type === "off") {
       setActiveTab("off");
       setOffDayData({
-        date: entry.date,
+        date: convertToDateString(entry.date), // Convert date properly
         reason: entry.reason,
       });
     }
