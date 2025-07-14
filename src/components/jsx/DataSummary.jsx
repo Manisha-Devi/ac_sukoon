@@ -366,9 +366,42 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
       .reduce((total, entry) => total + (entry.cashAmount || 0), 0);
   };
 
-  // Calculate cash in hand (Income Cash - (Cash Expenses + Cash Deposits))
+  // Calculate fixed cash given by current user to other users
+  const calculateFixedCashGivenByCurrentUser = () => {
+    const currentUserName = currentUser?.fullName || currentUser?.username;
+    if (!currentUserName || !allUsers) return 0;
+
+    const fixedCashGiven = allUsers
+      .filter(user => user.givenBy === currentUserName)
+      .reduce((total, user) => total + (user.fixedCash || 0), 0);
+
+    console.log('💰 Fixed Cash Given by Current User:', {
+      currentUser: currentUserName,
+      usersWithFixedCash: allUsers.filter(user => user.givenBy === currentUserName),
+      totalFixedCashGiven: fixedCashGiven
+    });
+
+    return fixedCashGiven;
+  };
+
+  // Calculate cash in hand (Income Cash - (Cash Expenses + Cash Deposits + Fixed Cash Given))
   const calculateCashInHand = () => {
-    return calculateIncomeCash() - (calculateCashExpenses() + calculateTotalCashDeposits());
+    const incomeCash = calculateIncomeCash();
+    const cashExpenses = calculateCashExpenses();
+    const cashDeposits = calculateTotalCashDeposits();
+    const fixedCashGiven = calculateFixedCashGivenByCurrentUser();
+    
+    const cashInHand = incomeCash - (cashExpenses + cashDeposits + fixedCashGiven);
+    
+    console.log('💰 CASH IN HAND CALCULATION - DataSummary:');
+    console.log('📊 Income Cash:', incomeCash);
+    console.log('📊 Cash Expenses:', cashExpenses);
+    console.log('📊 Cash Deposits:', cashDeposits);
+    console.log('📊 Fixed Cash Given by Current User:', fixedCashGiven);
+    console.log('📊 Formula: Income - (Expenses + Deposits + Fixed Cash Given)');
+    console.log('📊 Result:', incomeCash, '-', '(', cashExpenses, '+', cashDeposits, '+', fixedCashGiven, ') =', cashInHand);
+    
+    return cashInHand;
   };
 
   // Handle approval action
@@ -903,7 +936,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                       <div className="financial-details">
                         <div className="financial-amount">₹{calculateCashInHand().toLocaleString('en-IN')}</div>
                         <div className="financial-label">Cash in Hand</div>
-                        <div className="financial-subtitle">Income - (Expenses + Deposits)</div>
+                        <div className="financial-subtitle">Income - (Expenses + Deposits + Fixed Cash Given)</div>
                       </div>
                     </div>
                   </div>
