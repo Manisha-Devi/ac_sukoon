@@ -30,13 +30,12 @@ function addUnionPayment(data) {
     }
 
     const entryId = data.entryId || generateEntryId();
-    const timeOnly = data.timestamp || 
-      formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
+    const timestamp = data.timestamp || new Date().toISOString();
 
     sheet.insertRowBefore(2);
 
     sheet.getRange(2, 1, 1, 12).setValues([[
-      timeOnly,                    // A: Time in IST
+      timestamp,                   // A: Raw timestamp
       data.date,                   // B: Date
       data.unionName || "",        // C: Union Name
       data.cashAmount || 0,        // D: Cash Amount
@@ -56,7 +55,7 @@ function addUnionPayment(data) {
       success: true,
       message: 'Union payment added successfully',
       entryId: entryId,
-      timestamp: timeOnly
+      timestamp: timestamp
     };
 
   } catch (error) {

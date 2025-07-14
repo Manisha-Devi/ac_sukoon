@@ -33,14 +33,13 @@ function addFuelPayment(data) {
 
     // Assuming generateEntryId() is defined elsewhere or is a global function
     const entryId = data.entryId || generateEntryId();
-    const timeOnly = data.timestamp || 
-      formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
+    const timestamp = data.timestamp || new Date().toISOString();
 
     sheet.insertRowBefore(2);
 
     // Add data to the new row
     sheet.getRange(2, 1, 1, 14).setValues([[
-      timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
+      timestamp,                     // A: Raw timestamp
       data.date,                     // B: Date from frontend
       data.pumpName || "",           // C: Pump Name
       data.liters || "",             // D: Liters
@@ -62,7 +61,7 @@ function addFuelPayment(data) {
       success: true,
       entryId: entryId,
       message: "Fuel payment added successfully",
-      timestamp: timeOnly,
+      timestamp: timestamp,
     };
 
   } catch (error) {

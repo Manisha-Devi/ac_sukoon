@@ -35,16 +35,15 @@ function addOtherPayment(data) {
     // Generate entry ID if not provided
     const entryId = data.entryId;
 
-    // Format timestamp (store only time part)
-    const timeOnly = data.timestamp || 
-      formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
+    // Store raw timestamp
+    const timestamp = data.timestamp || new Date().toISOString();
 
     // Insert new row at position 2 (keeps newest entries at top)
     sheet.insertRowBefore(2);
 
     // Add data to the new row
     sheet.getRange(2, 1, 1, 12).setValues([[
-      timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
+      timestamp,                     // A: Raw timestamp
       data.date,                     // B: Date from frontend
       data.paymentType || "",        // C: Payment Type
       data.cashAmount || 0,          // D: Cash Amount
@@ -64,7 +63,7 @@ function addOtherPayment(data) {
       success: true,
       message: 'Other payment added successfully',
       entryId: entryId,
-      timestamp: timeOnly
+      timestamp: timestamp
     };
 
   } catch (error) {
