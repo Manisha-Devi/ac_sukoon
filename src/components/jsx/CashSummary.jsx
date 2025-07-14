@@ -74,6 +74,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
       );
       console.log('💰 Cash Income entries found:', userFareData.length);
       console.log('📋 Sample Filtered Cash Entry:', userFareData[0]);
+      console.log('🔍 All Fare Entries for', currentUserName, ':', userFareData);
 
       allData = [...allData, ...userFareData.map(entry => ({
         entryId: entry.entryId,
@@ -97,6 +98,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
       );
       console.log('💸 Cash Expense entries found:', userExpenseData.length);
       console.log('📋 Sample Filtered Expense Entry:', userExpenseData[0]);
+      console.log('🔍 All Expense Entries for', currentUserName, ':', userExpenseData);
 
       allData = [...allData, ...userExpenseData.map(entry => ({
         entryId: entry.entryId,
@@ -415,6 +417,15 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
 
   // Cash balance = Unapproved Income - (Unapproved Expenses + Fixed Cash)
   const cashBalance = nonApprovedCashIncome - (nonApprovedCashExpense + fixedCash);
+
+  // Debug logging for calculation verification
+  console.log('💰 CASH BALANCE CALCULATION DEBUG:');
+  console.log('📊 Unapproved Cash Income:', nonApprovedCashIncome);
+  console.log('📊 Unapproved Cash Expense:', nonApprovedCashExpense);
+  console.log('📊 Fixed Cash:', fixedCash);
+  console.log('📊 Cash Balance = ', nonApprovedCashIncome, '- (', nonApprovedCashExpense, '+', fixedCash, ') =', cashBalance);
+  console.log('📋 Income entries:', filteredData.filter(entry => entry.type === 'income' && entry.entryStatus !== 'approved'));
+  console.log('📋 Expense entries:', filteredData.filter(entry => entry.type === 'expense' && entry.entryStatus !== 'approved'));
 
   useEffect(() => {
   }, []);
