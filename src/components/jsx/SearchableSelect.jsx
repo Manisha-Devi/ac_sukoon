@@ -40,7 +40,13 @@ const SearchableSelect = ({
   const handleInputChange = (e) => {
     const newValue = e.target.value;
     setSearchTerm(newValue);
-    setIsOpen(true);
+    
+    // Only show dropdown if user has typed at least 1 character
+    if (newValue.trim().length > 0) {
+      setIsOpen(true);
+    } else {
+      setIsOpen(false);
+    }
     
     if (allowCustom) {
       onChange(newValue);
@@ -55,7 +61,10 @@ const SearchableSelect = ({
   };
 
   const handleInputFocus = () => {
-    setIsOpen(true);
+    // Only open dropdown if there's already some text
+    if (searchTerm.trim().length > 0) {
+      setIsOpen(true);
+    }
   };
 
   const handleInputBlur = () => {
@@ -67,7 +76,7 @@ const SearchableSelect = ({
 
   const handleKeyDown = (e) => {
     if (!isOpen) {
-      if (e.key === 'ArrowDown' || e.key === 'Enter') {
+      if ((e.key === 'ArrowDown' || e.key === 'Enter') && searchTerm.trim().length > 0) {
         setIsOpen(true);
         return;
       }
