@@ -160,11 +160,7 @@ function getAllUsers(data) {
         const user = {
           username: row[usernameIndex].toString().trim(),
           name: row[fullNameIndex] ? row[fullNameIndex].toString().trim() : '',
-          date: row[createdDateIndex] ? 
-                (row[createdDateIndex] instanceof Date ? 
-                  row[createdDateIndex].toLocaleDateString('en-IN') : 
-                  String(row[createdDateIndex])) : 
-                new Date().toLocaleDateString('en-IN'),
+          date: row[createdDateIndex] ? row[createdDateIndex].toString() : '',
           fixedCash: row[fixedCashIndex] ? (parseFloat(row[fixedCashIndex]) || 0) : 0
         };
 
