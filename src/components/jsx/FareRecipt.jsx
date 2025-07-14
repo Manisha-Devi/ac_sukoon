@@ -164,7 +164,7 @@ function FareEntry({
 
   // Function to check if a date is disabled for daily collection and get specific message
   const getDailyDateConflict = (selectedDate, selectedRoute) => {
-    if (!selectedDate || !selectedRoute) return null;
+    if (!selectedDate || !selectedRoute) return { hasConflict: false, message: "" };
 
     // Check for same route + same date conflict
     const existingDailyEntry = fareData.find(
