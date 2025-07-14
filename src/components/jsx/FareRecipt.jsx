@@ -549,6 +549,20 @@ function FareEntry({
             setIsLoading(false);
             return;
           }
+
+          const existingBookingEntry = fareData.find(
+            (entry) =>
+              entry.type === "booking" &&
+              dateStr >= entry.dateFrom &&
+              dateStr <= entry.dateTo &&
+              (!editingEntry || entry.entryId !== editingEntry.entryId),
+          );
+
+          if (existingBookingEntry) {
+            alert(`❌ Date booking range mein already hai!\nBooking Period: ${existingBookingEntry.dateFrom} to ${existingBookingEntry.dateTo}\nConflicting Date: ${dateStr}`);
+            setIsLoading(false);
+            return;
+          }
         }
 
       const cashAmount = parseInt(bookingData.cashAmount) || 0;
@@ -686,6 +700,19 @@ function FareEntry({
 
       if (existingBookingEntry) {
         alert(`❌ Date booking range mein already hai!\nBooking Period: ${existingBookingEntry.dateFrom} to ${existingBookingEntry.dateTo}\nSelected Date: ${offDayData.date}`);
+        setIsLoading(false);
+        return;
+      }
+
+      const existingOffEntry = fareData.find(
+        (entry) =>
+          entry.type === "off" &&
+          entry.date === offDayData.date &&
+          (!editingEntry || entry.entryId !== editingEntry.entryId),
+      );
+
+      if (existingOffEntry) {
+        alert(`❌ Date off day already hai!\nOff Day: ${offDayData.date}\nReason: ${existingOffEntry.reason}`);
         setIsLoading(false);
         return;
       }
