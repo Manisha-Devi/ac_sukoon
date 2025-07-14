@@ -41,7 +41,7 @@ class HybridDataService {
       let allData = [];
 
       if (fareReceipts.success && fareReceipts.data) {
-        allData = [...allData, ...fareReceipts.data.map(entry => ({
+        allData = [...allData, ...fareReceipts.data.map(entry => normalizeEntryData({
           ...entry,
           type: 'daily',
           entryType: 'daily'
@@ -49,7 +49,7 @@ class HybridDataService {
       }
 
       if (bookingEntries.success && bookingEntries.data) {
-        allData = [...allData, ...bookingEntries.data.map(entry => ({
+        allData = [...allData, ...bookingEntries.data.map(entry => normalizeEntryData({
           ...entry,
           type: 'booking',
           entryType: 'booking'
@@ -57,7 +57,7 @@ class HybridDataService {
       }
 
       if (offDays.success && offDays.data) {
-        allData = [...allData, ...offDays.data.map(entry => ({
+        allData = [...allData, ...offDays.data.map(entry => normalizeEntryData({
           ...entry,
           type: 'off',
           entryType: 'off'
@@ -66,7 +66,7 @@ class HybridDataService {
 
       // Add expense data
       if (fuelPayments.success && fuelPayments.data) {
-        allData = [...allData, ...fuelPayments.data.map(entry => ({
+        allData = [...allData, ...fuelPayments.data.map(entry => normalizeEntryData({
           ...entry,
           type: 'fuel',
           entryType: 'fuel'
@@ -74,7 +74,7 @@ class HybridDataService {
       }
 
       if (addaPayments.success && addaPayments.data) {
-        allData = [...allData, ...addaPayments.data.map(entry => ({
+        allData = [...allData, ...addaPayments.data.map(entry => normalizeEntryData({
           ...entry,
           type: 'adda',
           entryType: 'adda'
@@ -82,7 +82,7 @@ class HybridDataService {
       }
 
       if (unionPayments.success && unionPayments.data) {
-        allData = [...allData, ...unionPayments.data.map(entry => ({
+        allData = [...allData, ...unionPayments.data.map(entry => normalizeEntryData({
           ...entry,
           type: 'union',
           entryType: 'union'
@@ -90,7 +90,7 @@ class HybridDataService {
       }
 
       if (servicePayments.success && servicePayments.data) {
-        allData = [...allData, ...servicePayments.data.map(entry => ({
+        allData = [...allData, ...servicePayments.data.map(entry => normalizeEntryData({
           ...entry,
           type: 'service',
           entryType: 'service'
@@ -98,7 +98,7 @@ class HybridDataService {
       }
 
       if (otherPayments.success && otherPayments.data) {
-        allData = [...allData, ...otherPayments.data.map(entry => ({
+        allData = [...allData, ...otherPayments.data.map(entry => normalizeEntryData({
           ...entry,
           type: 'other',
           entryType: 'other'
@@ -168,7 +168,7 @@ class HybridDataService {
       let allData = [];
 
       if (fareReceipts.success && fareReceipts.data) {
-        allData = [...allData, ...fareReceipts.data.map(entry => ({
+        allData = [...allData, ...fareReceipts.data.map(entry => normalizeEntryData({
           ...entry,
           type: 'daily',
           entryType: 'daily'
@@ -176,7 +176,7 @@ class HybridDataService {
       }
 
       if (bookingEntries.success && bookingEntries.data) {
-        allData = [...allData, ...bookingEntries.data.map(entry => ({
+        allData = [...allData, ...bookingEntries.data.map(entry => normalizeEntryData({
           ...entry,
           type: 'booking',
           entryType: 'booking'
@@ -184,7 +184,7 @@ class HybridDataService {
       }
 
       if (offDays.success && offDays.data) {
-        allData = [...allData, ...offDays.data.map(entry => ({
+        allData = [...allData, ...offDays.data.map(entry => normalizeEntryData({
           ...entry,
           type: 'off',
           entryType: 'off'
@@ -193,7 +193,7 @@ class HybridDataService {
 
       // Add expense data
       if (fuelPayments.success && fuelPayments.data) {
-        allData = [...allData, ...fuelPayments.data.map(entry => ({
+        allData = [...allData, ...fuelPayments.data.map(entry => normalizeEntryData({
           ...entry,
           type: 'fuel',
           entryType: 'fuel'
@@ -201,7 +201,7 @@ class HybridDataService {
       }
 
       if (addaPayments.success && addaPayments.data) {
-        allData = [...allData, ...addaPayments.data.map(entry => ({
+        allData = [...allData, ...addaPayments.data.map(entry => normalizeEntryData({
           ...entry,
           type: 'adda',
           entryType: 'adda'
@@ -209,7 +209,7 @@ class HybridDataService {
       }
 
       if (unionPayments.success && unionPayments.data) {
-        allData = [...allData, ...unionPayments.data.map(entry => ({
+        allData = [...allData, ...unionPayments.data.map(entry => normalizeEntryData({
           ...entry,
           type: 'union',
           entryType: 'union'
@@ -217,7 +217,7 @@ class HybridDataService {
       }
 
       if (servicePayments.success && servicePayments.data) {
-        allData = [...allData, ...servicePayments.data.map(entry => ({
+        allData = [...allData, ...servicePayments.data.map(entry => normalizeEntryData({
           ...entry,
           type: 'service',
           entryType: 'service'
@@ -225,7 +225,7 @@ class HybridDataService {
       }
 
       if (otherPayments.success && otherPayments.data) {
-        allData = [...allData, ...otherPayments.data.map(entry => ({
+        allData = [...allData, ...otherPayments.data.map(entry => normalizeEntryData({
           ...entry,
           type: 'other',
           entryType: 'other'
@@ -420,3 +420,54 @@ class HybridDataService {
 }
 
 export default new HybridDataService();
+
+// Function to normalize date and timestamp formats
+function normalizeEntryData(entry) {
+  if (entry.date) {
+    entry.date = formatDate(entry.date);
+  }
+  if (entry.dateFrom) {
+    entry.dateFrom = formatDate(entry.dateFrom);
+  }
+  if (entry.dateTo) {
+    entry.dateTo = formatDate(entry.dateTo);
+  }
+  if (entry.timestamp) {
+    entry.timestamp = formatTime(entry.timestamp);
+  }
+  return entry;
+}
+
+// Function to format date as YYYY-MM-DD
+function formatDate(dateString) {
+  try {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return dateString; // Return original string if formatting fails
+  }
+}
+
+// Function to format timestamp as HH:MM:SS AM/PM
+function formatTime(timeString) {
+  try {
+    const date = new Date(timeString);
+    let hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    const formattedHours = String(hours).padStart(2, '0');
+    const formattedMinutes = String(minutes).padStart(2, '0');
+    const formattedSeconds = String(seconds).padStart(2, '0');
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds} ${ampm}`;
+  } catch (error) {
+    console.error('Error formatting time:', error);
+    return timeString; // Return original string if formatting fails
+  }
+}
