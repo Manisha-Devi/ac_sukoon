@@ -258,10 +258,53 @@ function FareEntry({
     setIsLoading(true);
 
     try {
-      if (isDailyDateDisabled(dailyFareData.date, dailyFareData.route)) {
-        alert(
-          "This date is already taken for this route or conflicts with existing bookings/off days!",
-        );
+      // Check for specific conflicts and show detailed message
+      if (!dailyFareData.date || !dailyFareData.route) {
+        alert("Please select both route and date!");
+        setIsLoading(false);
+        return;
+      }
+
+      // Check for same route + same date conflict
+      const existingDailyEntry = fareData.find(
+        (entry) =>
+          entry.type === "daily" &&
+          entry.date === dailyFareData.date &&
+          entry.route === dailyFareData.route &&
+          (!editingEntry || entry.entryId !== editingEntry.entryId),
+      );
+
+      if (existingDailyEntry) {
+        alert(`❌ Same route + same date already exists!\nRoute: ${dailyFareData.route}\nDate: ${dailyFareData.date}`);
+        setIsLoading(false);
+        return;
+      }
+
+      // Check for booking range conflict
+      const existingBookingEntry = fareData.find(
+        (entry) =>
+          entry.type === "booking" &&
+          dailyFareData.date >= entry.dateFrom &&
+          dailyFareData.date <= entry.dateTo &&
+          (!editingEntry || entry.entryId !== editingEntry.entryId),
+      );
+
+      if (existingBookingEntry) {
+        alert(`❌ Date booking range mein already hai!\nBooking Period: ${existingBookingEntry.dateFrom} to ${existingBookingEntry.dateTo}\nSelected Date: ${dailyFareData.date}`);
+        setIsLoading(false);
+        return;
+      }
+
+      // Check for off day conflict
+      const existingOffEntry = fareData.find(
+        (entry) =>
+          entry.type === "off" &&
+          entry.date === dailyFareData.date &&
+          (!editingEntry || entry.entryId !== editingEntry.entryId),
+      );
+
+      if (existingOffEntry) {
+        alert(`❌ Date off day already hai!\nOff Day: ${dailyFareData.date}\nReason: ${existingOffEntry.reason}`);
         setIsLoading(false);
         return;
       }
