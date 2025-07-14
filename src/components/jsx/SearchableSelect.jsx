@@ -164,7 +164,7 @@ const SearchableSelect = ({
                   }}
                   onClick={() => handleOptionClick(option)}
                   onMouseEnter={() => setFocusedIndex(index)}
-                ></li>
+                >
                   {option}
                 </li>
               ))
