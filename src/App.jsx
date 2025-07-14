@@ -514,7 +514,7 @@ function App() {
             bankAmount: fareEntry.bankAmount || 0,
             type: 'dr', // Debit (income)
             source: fareEntry.type === 'daily' ? 'fare-daily' : 'fare-booking',
-            particulars: fareEntry.route : fareEntry.bookingDetails,
+            particulars: fareEntry.type === 'daily' ? fareEntry.route : fareEntry.bookingDetails,
             jfNo: `JF-${fareEntry.entryId}`,
             submittedBy: fareEntry.submittedBy
           });
