@@ -258,6 +258,18 @@ function FareEntry({
   const getBookingConflictMessage = (selectedDate) => {
     if (!selectedDate) return "";
 
+    const existingBookingEntry = fareData.find(
+      (entry) =>
+        entry.type === "booking" &&
+        selectedDate >= entry.dateFrom &&
+        selectedDate <= entry.dateTo &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
+
+    if (existingBookingEntry) {
+      return "This date is already taken for Booking Entry";
+    }
+
     const existingDailyEntry = fareData.find(
       (entry) =>
         entry.type === "daily" &&
@@ -307,6 +319,17 @@ function FareEntry({
   // Function to get specific conflict message for off day entry
   const getOffDayConflictMessage = (selectedDate) => {
     if (!selectedDate) return "";
+
+    const existingOffEntry = fareData.find(
+      (entry) =>
+        entry.type === "off" &&
+        entry.date === selectedDate &&
+        (!editingEntry || entry.entryId !== editingEntry.entryId),
+    );
+
+    if (existingOffEntry) {
+      return "This date is already taken for Off Day";
+    }
 
     const existingDailyEntry = fareData.find(
       (entry) =>
