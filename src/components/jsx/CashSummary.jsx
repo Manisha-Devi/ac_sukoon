@@ -423,14 +423,48 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
     .filter(entry => entry.type === 'expense')
     .reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
 
-  // Calculate non-approved cash income (exclude approved entries)
+  // Calculate non-approved cash income (exclude approved entries) for current user only
   const nonApprovedCashIncome = filteredData
-    .filter(entry => entry.type === 'income' && entry.entryStatus !== 'approved')
+    .filter(entry => {
+      const isCurrentUserEntry = entry.submittedBy === (currentUser?.fullName || currentUser?.username);
+      const isIncomeEntry = entry.type === 'income';
+      const isNotApproved = entry.entryStatus !== 'approved';
+      
+      console.log('💰 Income Entry Check:', {
+        entryId: entry.entryId,
+        submittedBy: entry.submittedBy,
+        currentUser: currentUser?.fullName || currentUser?.username,
+        isCurrentUserEntry,
+        isIncomeEntry,
+        isNotApproved,
+        cashAmount: entry.cashAmount,
+        include: isCurrentUserEntry && isIncomeEntry && isNotApproved
+      });
+      
+      return isCurrentUserEntry && isIncomeEntry && isNotApproved;
+    })
     .reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
 
-  // Calculate non-approved cash expense (exclude approved entries)
+  // Calculate non-approved cash expense (exclude approved entries) for current user only
   const nonApprovedCashExpense = filteredData
-    .filter(entry => entry.type === 'expense' && entry.entryStatus !== 'approved')
+    .filter(entry => {
+      const isCurrentUserEntry = entry.submittedBy === (currentUser?.fullName || currentUser?.username);
+      const isExpenseEntry = entry.type === 'expense';
+      const isNotApproved = entry.entryStatus !== 'approved';
+      
+      console.log('💸 Expense Entry Check:', {
+        entryId: entry.entryId,
+        submittedBy: entry.submittedBy,
+        currentUser: currentUser?.fullName || currentUser?.username,
+        isCurrentUserEntry,
+        isExpenseEntry,
+        isNotApproved,
+        cashAmount: entry.cashAmount,
+        include: isCurrentUserEntry && isExpenseEntry && isNotApproved
+      });
+      
+      return isCurrentUserEntry && isExpenseEntry && isNotApproved;
+    })
     .reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
 
   // Get Fixed Cash for current user
@@ -440,22 +474,46 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
     const userInfo = allUsers.find(user => 
       user.name === currentUserName || user.username === currentUserName
     );
+    console.log('🏦 Fixed Cash Check:', {
+      currentUserName,
+      userInfo,
+      fixedCash: userInfo ? (userInfo.fixedCash || 0) : 0
+    });
     return userInfo ? (userInfo.fixedCash || 0) : 0;
   };
 
   const fixedCash = getCurrentUserFixedCash();
 
-  // Cash balance = Unapproved Income - (Unapproved Expenses + Fixed Cash)
+  // Cash balance = Non-approved Income - (Non-approved Expenses + Fixed Cash)
   const cashBalance = nonApprovedCashIncome - (nonApprovedCashExpense + fixedCash);
 
   // Debug logging for calculation verification
   console.log('💰 CASH BALANCE CALCULATION DEBUG:');
-  console.log('📊 Unapproved Cash Income:', nonApprovedCashIncome);
-  console.log('📊 Unapproved Cash Expense:', nonApprovedCashExpense);
-  console.log('📊 Fixed Cash:', fixedCash);
+  console.log('👤 Current User:', currentUser?.fullName || currentUser?.username);
+  console.log('📊 Non-approved Cash Income (Current User Only):', nonApprovedCashIncome);
+  console.log('📊 Non-approved Cash Expense (Current User Only):', nonApprovedCashExpense);
+  console.log('📊 Fixed Cash for Current User:', fixedCash);
+  console.log('📊 Cash Balance Formula: Income - (Expenses + Fixed Cash)');
   console.log('📊 Cash Balance = ', nonApprovedCashIncome, '- (', nonApprovedCashExpense, '+', fixedCash, ') =', cashBalance);
-  console.log('📋 Income entries:', filteredData.filter(entry => entry.type === 'income' && entry.entryStatus !== 'approved'));
-  console.log('📋 Expense entries:', filteredData.filter(entry => entry.type === 'expense' && entry.entryStatus !== 'approved'));
+  
+  // Detailed breakdown
+  const currentUserName = currentUser?.fullName || currentUser?.username;
+  const incomeEntries = filteredData.filter(entry => 
+    entry.submittedBy === currentUserName && 
+    entry.type === 'income' && 
+    entry.entryStatus !== 'approved'
+  );
+  const expenseEntries = filteredData.filter(entry => 
+    entry.submittedBy === currentUserName && 
+    entry.type === 'expense' && 
+    entry.entryStatus !== 'approved'
+  );
+  
+  console.log('📋 Non-approved Income entries for current user:', incomeEntries.length, incomeEntries);
+  console.log('📋 Non-approved Expense entries for current user:', expenseEntries.length, expenseEntries);
+  console.log('📋 Fixed Cash source user info:', allUsers?.find(user => 
+    user.name === currentUserName || user.username === currentUserName
+  ));
 
   useEffect(() => {
   }, []);
