@@ -46,6 +46,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .fare-header {
@@ -384,10 +386,12 @@
   box-shadow: var(--card-shadow);
   border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 30px;
-  margin-bottom: 30px;
+  margin: 0 auto 30px auto;
   transition: var(--transition);
   width: 100%;
   max-width: 800px;
+  display: block;
+  text-align: left;
 }
 
 .fare-form-card:hover {
@@ -756,6 +760,8 @@
   max-width: 800px;
   display: flex;
   justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
 @media (max-width: 575.98px) {
