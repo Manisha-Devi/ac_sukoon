@@ -32,17 +32,16 @@ function addFareReceipt(data) {
     // Use entry ID from data (already provided by frontend)
     const entryId = data.entryId;
 
-    // Format timestamp (store only time part)
-    const timeOnly = data.timestamp || 
-      formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
+    // Store timestamp exactly as received from frontend
+    const timestamp = data.timestamp || new Date().toISOString();
 
     // Insert new row at position 2 (keeps newest entries at top)
     sheet.insertRowBefore(2);
 
     // Add data to the new row
     sheet.getRange(2, 1, 1, 11).setValues([[
-      timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
-      data.date,                     // B: Date from frontend
+      timestamp,                     // A: Timestamp as-is from frontend
+      data.date,                     // B: Date as-is from frontend
       data.route || "",              // C: Route information
       data.cashAmount || 0,          // D: Cash amount
       data.bankAmount || 0,          // E: Bank amount

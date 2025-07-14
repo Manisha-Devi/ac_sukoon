@@ -5,54 +5,19 @@
 // ============================================================================
 
 /**
- * Format IST timestamp for consistent display
+ * Return timestamp as-is without formatting
  */
 function formatISTTimestamp() {
-  const now = new Date();
-  const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
-  const istTime = new Date(now.getTime() + istOffset);
-
-  const day = String(istTime.getUTCDate()).padStart(2, '0');
-  const month = String(istTime.getUTCMonth() + 1).padStart(2, '0');
-  const year = istTime.getUTCFullYear();
-  const hours = String(istTime.getUTCHours()).padStart(2, '0');
-  const minutes = String(istTime.getUTCMinutes()).padStart(2, '0');
-  const seconds = String(istTime.getUTCSeconds()).padStart(2, '0');
-
-  return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+  // Return current timestamp as-is without any formatting
+  return new Date().toISOString();
 }
 
 /**
- * Format date for display in DD-MM-YYYY format
+ * Return date as-is without formatting
  */
 function formatDateForDisplay(dateValue) {
-  try {
-    let date;
-
-    if (dateValue instanceof Date) {
-      date = dateValue;
-    } else if (typeof dateValue === 'string') {
-      date = new Date(dateValue);
-    } else if (typeof dateValue === 'number') {
-      // Handle Excel serial date numbers
-      date = new Date((dateValue - 25569) * 86400 * 1000);
-    } else {
-      return new Date().toLocaleDateString('en-IN');
-    }
-
-    if (isNaN(date.getTime())) {
-      return new Date().toLocaleDateString('en-IN');
-    }
-
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-
-    return `${day}-${month}-${year}`;
-  } catch (error) {
-    console.error('Error formatting date:', error);
-    return new Date().toLocaleDateString('en-IN');
-  }
+  // Return date value exactly as received without any formatting
+  return dateValue;
 }
 
 /**
@@ -75,7 +40,7 @@ function testConnection(data) {
     return {
       success: true,
       message: "Google Apps Script is working!",
-      timestamp: formatISTTimestamp(),
+      timestamp: new Date().toISOString(),
       version: "2.0.0"
     };
   } catch (error) {
@@ -107,31 +72,11 @@ function formatISTTimestamp() {
 }
 
 /**
- * Format timestamp for display - IST format
+ * Return timestamp as-is without formatting
  */
 function formatTimestampForDisplay(timestamp) {
-  try {
-    if (!timestamp) return '';
-
-    const date = new Date(timestamp);
-    if (isNaN(date.getTime())) return timestamp;
-
-    // Format as DD-MM-YYYY HH:MM:SS in IST
-    return date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit', 
-      year: 'numeric',
-      timeZone: 'Asia/Kolkata'
-    }) + ' ' + date.toLocaleTimeString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      timeZone: 'Asia/Kolkata'
-    });
-  } catch (error) {
-    console.error('Error formatting timestamp:', error);
-    return timestamp;
-  }
+  // Return timestamp exactly as received without any formatting
+  return timestamp;
 }
 
 /**
