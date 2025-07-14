@@ -536,6 +536,7 @@ function FareEntry({
             return;
           }
 
+          // Check for booking range overlap - ADDED MISSING VALIDATION
           const existingBookingEntry = fareData.find(
             (entry) =>
               entry.type === "booking" &&
