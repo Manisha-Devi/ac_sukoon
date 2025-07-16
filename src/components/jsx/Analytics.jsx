@@ -51,6 +51,8 @@ function Analytics({
   const [userFilter, setUserFilter] = useState('all');
   const [entryTypeFilter, setEntryTypeFilter] = useState('all');
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [showFilter, setShowFilter] = useState(false);
+  const [showSummary, setShowSummary] = useState(true);
 
   // Simplified logging for better performance
   if (process.env.NODE_ENV === 'development') {
@@ -588,16 +590,37 @@ function Analytics({
 
   return (
     <div className="fade-in">
-      {/* Header with advanced filters */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      {/* Header with toggle buttons */}
+      <div className="analytics-header">
         <h2>
           <i className="bi bi-graph-up me-2"></i>
           Advanced Analytics
         </h2>
+        <p>Comprehensive data analysis and insights</p>
+
+        {/* Toggle Buttons */}
+        <div className="filter-toggle-section">
+          <button 
+            className="btn btn-outline-primary btn-sm filter-toggle-btn me-2"
+            onClick={() => setShowFilter(!showFilter)}
+          >
+            <i className={`bi ${showFilter ? 'bi-eye-slash' : 'bi-funnel'}`}></i>
+            {showFilter ? 'Hide Filters' : 'Show Filters'}
+          </button>
+          <button 
+            className="btn btn-outline-info btn-sm filter-toggle-btn"
+            onClick={() => setShowSummary(!showSummary)}
+          >
+            <i className={`bi ${showSummary ? 'bi-eye-slash' : 'bi-bar-chart'}`}></i>
+            {showSummary ? 'Hide Cards' : 'Show Cards'}
+          </button>
+        </div>
       </div>
 
       {/* Advanced Filter Controls */}
-      <div className="row g-3 mb-4">
+      {showFilter && (
+        <div className="analytics-filter-section">
+          <div className="row g-3 mb-4">
         <div className="col-md-3">
           <label className="form-label">Date Range</label>
           <select 
@@ -670,10 +693,12 @@ function Analytics({
             <option value="other">Other</option>
           </select>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Enhanced Key Metrics Cards */}
-      <div className="row g-4 mb-4">
+      {showSummary && (
+        <div className="row g-4 mb-4">
         <div className="col-12 col-md-2">
           <div className="analytics-stats-card">
             <div className="card-body text-center">
@@ -746,7 +771,7 @@ function Analytics({
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Charts Section */}
       <div className="row g-4 mb-4">
