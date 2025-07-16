@@ -395,7 +395,7 @@ function Analytics({
       for (let i = 0; i < dayCount; i += daysPerSlide) {
         const slideData = dailyData.slice(i, i + daysPerSlide);
         const backgroundColors = slideData.map(d => 
-          d.profit >= 0 ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 107, 107, 0.1)'
+          d.profit >= 0 ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 107, 107, 0.3)'
         );
         
         const borderColors = slideData.map(d => 
@@ -427,7 +427,7 @@ function Analytics({
                 },
                 backgroundColor: function(ctx) {
                   const currentProfit = ctx.p0.parsed.y;
-                  return currentProfit >= 0 ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 107, 107, 0.1)';
+                  return currentProfit >= 0 ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 107, 107, 0.3)';
                 }
               }
             },
@@ -437,7 +437,7 @@ function Analytics({
     } else {
       // Single slide for desktop or small data
       const backgroundColors = dailyData.map(d => 
-        d.profit >= 0 ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 107, 107, 0.1)'
+        d.profit >= 0 ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 107, 107, 0.3)'
       );
       
       const borderColors = dailyData.map(d => 
@@ -470,7 +470,7 @@ function Analytics({
               },
               backgroundColor: function(ctx) {
                 const currentProfit = ctx.p0.parsed.y;
-                return currentProfit >= 0 ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 107, 107, 0.1)';
+                return currentProfit >= 0 ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 107, 107, 0.3)';
               }
             }
           },
