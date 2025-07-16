@@ -64,6 +64,7 @@ function BasicPayment({
 
   const [unionData, setUnionData] = useState({
     date: "",
+    unionName: "",
     description: "",
     cashAmount: "",
     bankAmount: "",
@@ -354,6 +355,7 @@ function BasicPayment({
             ? {
                 ...entry,
                 date: unionData.date,
+                unionName: unionData.unionName,
                 description: unionData.description,
                 cashAmount: cashAmount,
                 bankAmount: bankAmount,
@@ -367,6 +369,7 @@ function BasicPayment({
         setEditingEntry(null);
         setUnionData({
           date: "",
+          unionName: "",
           description: "",
           cashAmount: "",
           bankAmount: "",
@@ -378,6 +381,7 @@ function BasicPayment({
             entryId: editingEntry.entryId,
             updatedData: {
               date: unionData.date,
+              unionName: unionData.unionName,
               description: unionData.description,
               cashAmount: cashAmount,
               bankAmount: bankAmount,
@@ -393,6 +397,7 @@ function BasicPayment({
           timestamp: timeOnly,
           type: "union",
           date: unionData.date,
+          unionName: unionData.unionName,
           description: unionData.description,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
@@ -406,6 +411,7 @@ function BasicPayment({
         setTotalExpenses((prev) => prev + totalAmount);
         setUnionData({
           date: "",
+          unionName: "",
           description: "",
           cashAmount: "",
           bankAmount: "",
@@ -417,6 +423,7 @@ function BasicPayment({
             entryId: newEntry.entryId,
             timestamp: timeOnly,
             date: unionData.date,
+            unionName: unionData.unionName,
             description: unionData.description,
             cashAmount: cashAmount,
             bankAmount: bankAmount,
@@ -500,6 +507,7 @@ function BasicPayment({
       setActiveTab("union");
       setUnionData({
         date: entry.date,
+        unionName: entry.unionName || "",
         description: entry.description,
         cashAmount: entry.cashAmount.toString(),
         bankAmount: entry.bankAmount.toString(),
@@ -526,6 +534,7 @@ function BasicPayment({
     });
     setUnionData({
       date: "",
+      unionName: "",
       description: "",
       cashAmount: "",
       bankAmount: "",
@@ -975,11 +984,25 @@ function BasicPayment({
                       required
                     />
                   </div>
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Description</label>
+                   <div className="col-md-6 mb-3">
+                    <label className="form-label">Union Name (Optional)</label>
                     <input
                       type="text"
                       className="form-control"
+                      value={unionData.unionName}
+                      onChange={(e) =>
+                        setUnionData({ ...unionData, unionName: e.target.value })
+                      }
+                      placeholder="Enter union name"
+                    />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-12 mb-3">
+                    <label className="form-label">Description</label>
+                    <textarea
+                      className="form-control"
+                      rows={3}
                       value={unionData.description}
                       onChange={(e) =>
                         setUnionData({ ...unionData, description: e.target.value })
@@ -1029,8 +1052,7 @@ function BasicPayment({
                       <span>Cash: ₹{parseInt(unionData.cashAmount) || 0}</span>
                     </div>
                     <div className="col-4">
-                      <span>Bank: ₹{parseInt(unionData.bankAmount) || 0}</span>
-                    </div>
+                      <span>Bank: ₹{parseInt(unionData.bankAmount) || 0}                    </div>
                     <div className="col-4">
                       <strong>
                         Total: ₹
