@@ -414,13 +414,13 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
     }
   };
 
-  // Calculate totals
+  // Calculate totals - Only NON-APPROVED entries (exclude approved status)
   const totalCashIncome = filteredData
-    .filter(entry => entry.type === 'income')
+    .filter(entry => entry.type === 'income' && entry.entryStatus !== 'approved')
     .reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
 
   const totalCashExpense = filteredData
-    .filter(entry => entry.type === 'expense')
+    .filter(entry => entry.type === 'expense' && entry.entryStatus !== 'approved')
     .reduce((sum, entry) => sum + (entry.cashAmount || 0), 0);
 
   // Calculate non-approved cash income (exclude approved entries) for current user only
@@ -655,7 +655,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
               <div className="card-body">
                 <h6><i className="bi bi-arrow-up-circle"></i> Cash Income</h6>
                 <h4 className="text-success">₹{totalCashIncome.toLocaleString()}</h4>
-                <small className="text-muted">All entries</small>
+                <small className="text-muted">Pending entries</small>
               </div>
             </div>
           </div>
@@ -664,7 +664,7 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
               <div className="card-body">
                 <h6><i className="bi bi-arrow-down-circle"></i> Cash Expense</h6>
                 <h4 className="text-danger">₹{totalCashExpense.toLocaleString()}</h4>
-                <small className="text-muted">Total payments</small>
+                <small className="text-muted">Pending payments</small>
               </div>
             </div>
           </div>
