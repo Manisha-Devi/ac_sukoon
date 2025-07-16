@@ -1054,7 +1054,6 @@ function BasicPayment({
                       value={unionData.bankAmount}
                       onChange={(e) =>
                         setUnionData({
-```text
                           ...unionData,
                           bankAmount: e.target.value,
                         })
