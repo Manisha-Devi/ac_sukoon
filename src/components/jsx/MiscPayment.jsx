@@ -642,12 +642,19 @@ function MiscPayment({
 
   const getCurrentUserNonApprovedEntries = () => {
     const currentUserName = currentUser?.fullName || currentUser?.username;
-    return expenseData.filter(
+    const userEntries = expenseData.filter(
       (entry) =>
         entry.submittedBy === currentUserName &&
         entry.entryStatus !== "approved" &&
         (entry.type === "service" || entry.type === "other"),
     );
+    
+    // Sort by entryId (timestamp) in descending order to show newest first
+    return userEntries.sort((a, b) => {
+      const timeA = a.entryId || 0;
+      const timeB = b.entryId || 0;
+      return timeB - timeA; // Newest first
+    });
   };
 
   const { totalCash, totalBank, grandTotal } = calculateSummaryTotals();

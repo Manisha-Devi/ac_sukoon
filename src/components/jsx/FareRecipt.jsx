@@ -344,12 +344,12 @@ function FareEntry({
   const getDateRange = () => {
     const today = new Date();
     const userType = currentUser?.userType;
-    
+
     if (userType === "Conductor") {
       // Conductor: 7 days past to current date + future dates
       const pastDate = new Date(today);
       pastDate.setDate(today.getDate() - 7);
-      
+
       return {
         min: pastDate.toISOString().split("T")[0],
         max: null // No max limit for future dates
@@ -976,12 +976,18 @@ function FareEntry({
   // Filter function to get non-approved entries for current user
   const getCurrentUserNonApprovedEntries = () => {
     const currentUserName = currentUser?.fullName || currentUser?.username;
-
-    return fareData.filter(
+    const userEntries = fareData.filter(```text
       (entry) =>
         entry.submittedBy === currentUserName &&
         entry.entryStatus !== "approved",
     );
+
+    // Sort by entryId (timestamp) in descending order to show newest first
+    return userEntries.sort((a, b) => {
+      const timeA = a.entryId || 0;
+      const timeB = b.entryId || 0;
+      return timeB - timeA; // Newest first
+    });
   };
 
   const { totalCash, totalBank, grandTotal } = calculateSummaryTotals();
