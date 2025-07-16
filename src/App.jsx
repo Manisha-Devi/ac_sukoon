@@ -139,14 +139,14 @@ function App() {
 
     // Automatically trigger complete data refresh after login
     console.log('🔄 Auto-triggering complete data refresh after login...');
-    
+
     try {
       // First refresh users data
       await fetchAllUsersData();
-      
+
       // Then trigger the complete data refresh cycle (same as navbar refresh)
       await handleDataRefresh();
-      
+
       console.log('✅ Auto data refresh completed after login');
     } catch (error) {
       console.error('❌ Auto data refresh failed after login:', error);
@@ -451,6 +451,7 @@ function App() {
 
   useEffect(() => {
     initializeApp();
+    fetchAllUsersData();
   }, []);
 
   const initializeApp = async () => {
@@ -470,7 +471,7 @@ function App() {
       console.log('✅ API key authentication successful');
 
       // Fetch all users data after successful API key validation
-      await fetchAllUsersData();
+      //await fetchAllUsersData();
 
     } catch (error) {
       console.error('❌ App initialization error:', error);

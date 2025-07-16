@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import "../css/Analytics.css";
 import {
   Chart as ChartJS,
@@ -46,23 +46,13 @@ function Analytics({
   const [userFilter, setUserFilter] = useState('all');
   const [entryTypeFilter, setEntryTypeFilter] = useState('all');
 
-  console.log('📊 Analytics Props Received:', {
-    fareDataCount: fareData.length,
-    expenseDataCount: expenseData.length,
-    cashBookEntriesCount: cashBookEntries.length,
-    allUsersCount: allUsers.length,
-    cashDepositCount: cashDeposit.length,
-    dataStatistics,
-    currentUser
-  });
+  // Simplified logging for better performance
+  if (process.env.NODE_ENV === 'development') {
+    console.log('📊 Analytics loaded with', fareData.length, 'fare entries and', expenseData.length, 'expense entries');
+  }
 
-  // Debug: Check sample data structure
-  console.log('📊 Sample fareData:', fareData.slice(0, 3));
-  console.log('📊 Sample expenseData:', expenseData.slice(0, 3));
-  console.log('📊 Sample cashDeposit:', cashDeposit.slice(0, 3));
-
-  // Advanced date filtering function
-  const filterDataByDateRange = (data) => {
+  // Optimized date filtering function
+  const filterDataByDateRange = useCallback((data) => {
     const now = new Date();
     let startDate, endDate;
 
@@ -113,16 +103,15 @@ function Analytics({
       } else if (item.dateTo) {
         itemDate = new Date(item.dateTo);
       } else {
-        console.warn('📅 No valid date found for item:', item);
         return false;
       }
       
       return itemDate >= startDate && itemDate <= endDate;
     });
-  };
+  }, [dateRange, customDateFrom, customDateTo]);
 
   // Filter data by user
-  const filterDataByUser = (data) => {
+  const filterDataByUser = useCallback((data) => {
     if (userFilter === 'all') return data;
     return data.filter(item => 
       item.submittedBy === userFilter || 
@@ -130,18 +119,18 @@ function Analytics({
       item.givenBy === userFilter ||
       item.conductorName === userFilter
     );
-  };
+  }, [userFilter]);
 
   // Filter data by entry type
-  const filterDataByEntryType = (data) => {
+  const filterDataByEntryType = useCallback((data) => {
     if (entryTypeFilter === 'all') return data;
     return data.filter(item => item.type === entryTypeFilter || item.entryType === entryTypeFilter);
-  };
+  }, [entryTypeFilter]);
 
   // Apply all filters
-  const applyFilters = (data) => {
+  const applyFilters = useCallback((data) => {
     return filterDataByEntryType(filterDataByUser(filterDataByDateRange(data)));
-  };
+  }, [filterDataByDateRange, filterDataByUser, filterDataByEntryType]);
 
   // Enhanced analytics calculations
   const analytics = useMemo(() => {
@@ -409,17 +398,7 @@ function Analytics({
           pointBackgroundColor: borderColors,
           pointBorderColor: borderColors,
           pointRadius: 4,
-          pointHoverRadius: 6,
-          segment: {
-            borderColor: (ctx) => {
-              const profit = ctx.p1.parsed.y;
-              return profit >= 0 ? '#2ed573' : '#ff6b6b';
-            },
-            backgroundColor: (ctx) => {
-              const profit = ctx.p1.parsed.y;
-              return profit >= 0 ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 107, 107, 0.1)';
-            }
-          }
+          pointHoverRadius: 6
         },
       ],
       dailyDataCount: dayCount // Store count for responsive chart sizing
@@ -481,41 +460,40 @@ function Analytics({
     },
   };
 
-  // Enhanced chart options for trend chart with horizontal scroll support
-  const trendChartOptions = {
-    ...chartOptions,
+  // Simplified chart options for better performance
+  const trendChartOptions = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
-    scales: {
-      ...chartOptions.scales,
-      x: {
-        ...chartOptions.scales.x,
-        min: dailyTrendData.dailyDataCount > 30 ? 
-          Math.max(0, dailyTrendData.labels?.length - 30) : undefined, // Show last 30 points initially
-      }
-    },
     plugins: {
-      ...chartOptions.plugins,
-      zoom: {
-        pan: {
-          enabled: true,
-          mode: 'x',
-          speed: 10,
-          threshold: 10,
-        },
-        zoom: {
-          wheel: {
-            enabled: true,
-            speed: 0.1,
-          },
-          pinch: {
-            enabled: true
-          },
-          mode: 'x',
+      legend: {
+        position: 'top',
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            const value = context.parsed.y;
+            const color = value >= 0 ? '🟢' : '🔴';
+            return `${color} Profit: ₹${value?.toLocaleString('en-IN')}`;
+          }
         }
       }
-    }
-  };
+    },
+    scales: {
+      x: {
+        ticks: {
+          maxRotation: 45,
+        }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: function(value) {
+            return '₹' + value.toLocaleString('en-IN');
+          }
+        }
+      },
+    },
+  }), []);
 
   const doughnutOptions = {
     responsive: true,
@@ -721,17 +699,8 @@ function Analytics({
                 </small>
               )}
             </div>
-            <div style={{ 
-              overflowX: dailyTrendData.dailyDataCount > 30 ? 'auto' : 'visible',
-              overflowY: 'hidden'
-            }}>
-              <div style={{ 
-                minWidth: dailyTrendData.dailyDataCount > 30 ? 
-                  `${Math.max(800, dailyTrendData.dailyDataCount * 25)}px` : '100%',
-                height: '380px'
-              }}>
-                <Line data={dailyTrendData} options={trendChartOptions} />
-              </div>
+            <div style={{ height: '380px' }}>
+              <Line data={dailyTrendData} options={trendChartOptions} />
             </div>
             {/* Profit/Loss Legend */}
             <div className="mt-2 d-flex justify-content-center gap-4">
