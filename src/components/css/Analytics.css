@@ -209,6 +209,72 @@
   border-radius: 10px;
 }
 
+/* Chart Swiper Styling */
+.chart-swiper {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.chart-swiper .swiper-slide {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swiper-btn-prev,
+.swiper-btn-next {
+  min-width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  border: 1px solid #667eea;
+  background: rgba(255, 255, 255, 0.9);
+  color: #667eea;
+}
+
+.swiper-btn-prev:hover,
+.swiper-btn-next:hover {
+  background: #667eea;
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.swiper-btn-prev:disabled,
+.swiper-btn-next:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.swiper-pagination-custom {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+.swiper-pagination-custom .swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(102, 126, 234, 0.5);
+  opacity: 1;
+  transition: all 0.3s ease;
+}
+
+.swiper-pagination-custom .swiper-pagination-bullet-active {
+  background: #667eea;
+  transform: scale(1.2);
+}
+
 /* Enhanced responsive design */
 @media (max-width: 1199.98px) {
   .analytics-chart-card {
@@ -292,6 +358,38 @@
   
   .analytics-stats-card .card-text {
     font-size: 1.25rem;
+  }
+  
+  /* Mobile Swiper Enhancements */
+  .swiper-btn-prev,
+  .swiper-btn-next {
+    min-width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+  }
+  
+  .chart-swiper {
+    touch-action: pan-x;
+  }
+  
+  .swiper-pagination-custom {
+    bottom: 2px;
+  }
+  
+  .swiper-pagination-custom .swiper-pagination-bullet {
+    width: 6px;
+    height: 6px;
+  }
+  
+  /* Chart title adjustments for navigation buttons */
+  .analytics-chart-card .d-flex.justify-content-between {
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .analytics-chart-card .d-flex .flex-shrink-1 {
+    flex: 1;
+    min-width: 0;
   }
 }
 

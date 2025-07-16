@@ -15,6 +15,11 @@ import {
   Filler,
 } from "chart.js";
 import { Bar, Doughnut, Line } from "react-chartjs-2";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 ChartJS.register(
   CategoryScale,
@@ -45,6 +50,7 @@ function Analytics({
   const [customDateTo, setCustomDateTo] = useState('');
   const [userFilter, setUserFilter] = useState('all');
   const [entryTypeFilter, setEntryTypeFilter] = useState('all');
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   // Simplified logging for better performance
   if (process.env.NODE_ENV === 'development') {
@@ -288,7 +294,7 @@ function Analytics({
     };
   }, [analytics.userBreakdown]);
 
-  // Enhanced Daily trend chart with dynamic date range
+  // Enhanced Daily trend chart with swiper support
   const dailyTrendData = useMemo(() => {
     // Get date range based on filter
     const now = new Date();
@@ -371,49 +377,105 @@ function Analytics({
       };
     });
 
-    // Create dynamic colors based on profit/loss
-    const backgroundColors = dailyData.map(d => 
-      d.profit >= 0 ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 107, 107, 0.1)'
-    );
-    
-    const borderColors = dailyData.map(d => 
-      d.profit >= 0 ? '#2ed573' : '#ff6b6b'
-    );
+    // Mobile optimization: Create slides for chunks of data
+    const isMobile = window.innerWidth <= 768;
+    const daysPerSlide = isMobile ? 15 : dayCount; // 15 days per slide on mobile
+    const slides = [];
+
+    if (isMobile && dayCount > 15) {
+      // Create multiple slides for mobile
+      for (let i = 0; i < dayCount; i += daysPerSlide) {
+        const slideData = dailyData.slice(i, i + daysPerSlide);
+        const backgroundColors = slideData.map(d => 
+          d.profit >= 0 ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 107, 107, 0.1)'
+        );
+        
+        const borderColors = slideData.map(d => 
+          d.profit >= 0 ? '#2ed573' : '#ff6b6b'
+        );
+
+        slides.push({
+          labels: slideData.map(d => new Date(d.date).toLocaleDateString('en-IN', { 
+            month: 'short', 
+            day: 'numeric'
+          })),
+          datasets: [
+            {
+              label: '📈 Daily Profit',
+              data: slideData.map(d => d.profit),
+              borderColor: borderColors,
+              backgroundColor: backgroundColors,
+              borderWidth: 3,
+              fill: true,
+              tension: 0.4,
+              pointBackgroundColor: borderColors,
+              pointBorderColor: borderColors,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              segment: {
+                borderColor: function(ctx) {
+                  const currentProfit = ctx.p0.parsed.y;
+                  return currentProfit >= 0 ? '#2ed573' : '#ff6b6b';
+                },
+                backgroundColor: function(ctx) {
+                  const currentProfit = ctx.p0.parsed.y;
+                  return currentProfit >= 0 ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 107, 107, 0.1)';
+                }
+              }
+            },
+          ]
+        });
+      }
+    } else {
+      // Single slide for desktop or small data
+      const backgroundColors = dailyData.map(d => 
+        d.profit >= 0 ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 107, 107, 0.1)'
+      );
+      
+      const borderColors = dailyData.map(d => 
+        d.profit >= 0 ? '#2ed573' : '#ff6b6b'
+      );
+
+      slides.push({
+        labels: dailyData.map(d => new Date(d.date).toLocaleDateString('en-IN', { 
+          month: 'short', 
+          day: 'numeric',
+          ...(dayCount > 30 && { year: '2-digit' })
+        })),
+        datasets: [
+          {
+            label: '📈 Daily Profit',
+            data: dailyData.map(d => d.profit),
+            borderColor: borderColors,
+            backgroundColor: backgroundColors,
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: borderColors,
+            pointBorderColor: borderColors,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            segment: {
+              borderColor: function(ctx) {
+                const currentProfit = ctx.p0.parsed.y;
+                return currentProfit >= 0 ? '#2ed573' : '#ff6b6b';
+              },
+              backgroundColor: function(ctx) {
+                const currentProfit = ctx.p0.parsed.y;
+                return currentProfit >= 0 ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 107, 107, 0.1)';
+              }
+            }
+          },
+        ]
+      });
+    }
 
     return {
-      labels: dailyData.map(d => new Date(d.date).toLocaleDateString('en-IN', { 
-        month: 'short', 
-        day: 'numeric',
-        ...(dayCount > 30 && { year: '2-digit' }) // Add year for longer ranges
-      })),
-      datasets: [
-        {
-          label: '📈 Daily Profit',
-          data: dailyData.map(d => d.profit),
-          borderColor: borderColors,
-          backgroundColor: backgroundColors,
-          borderWidth: 3,
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: borderColors,
-          pointBorderColor: borderColors,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          segment: {
-            borderColor: function(ctx) {
-              const currentProfit = ctx.p0.parsed.y;
-              const nextProfit = ctx.p1.parsed.y;
-              // If current point is profit, use green, else red
-              return currentProfit >= 0 ? '#2ed573' : '#ff6b6b';
-            },
-            backgroundColor: function(ctx) {
-              const currentProfit = ctx.p0.parsed.y;
-              return currentProfit >= 0 ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 107, 107, 0.1)';
-            }
-          }
-        },
-      ],
-      dailyDataCount: dayCount // Store count for responsive chart sizing
+      slides,
+      dailyDataCount: dayCount,
+      totalSlides: slides.length,
+      daysPerSlide,
+      isMobile
     };
   }, [fareData, expenseData, dateRange, customDateFrom, customDateTo]);
 
@@ -698,32 +760,105 @@ function Analytics({
                   ({dailyTrendData.dailyDataCount} days)
                 </small>
               </h5>
-              {dailyTrendData.dailyDataCount > 30 && (
+              
+              {/* Navigation Controls for Mobile */}
+              {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 && (
+                <div className="d-flex align-items-center gap-2">
+                  <button 
+                    className="btn btn-sm btn-outline-primary swiper-btn-prev"
+                    type="button"
+                  >
+                    <i className="bi bi-chevron-left"></i>
+                  </button>
+                  <small className="text-muted">
+                    {currentSlide + 1}/{dailyTrendData.totalSlides}
+                  </small>
+                  <button 
+                    className="btn btn-sm btn-outline-primary swiper-btn-next"
+                    type="button"
+                  >
+                    <i className="bi bi-chevron-right"></i>
+                  </button>
+                </div>
+              )}
+              
+              {!dailyTrendData.isMobile && dailyTrendData.dailyDataCount > 30 && (
                 <small className="text-muted d-none d-lg-block">
                   <i className="bi bi-mouse me-1"></i>
                   Scroll/Zoom to view all data
                 </small>
               )}
             </div>
+            
             <div style={{ 
               height: 'calc(100% - 60px)', 
               minHeight: window.innerWidth <= 576 ? '280px' : '340px',
               width: '100%',
               position: 'relative'
             }}>
-              <Line data={dailyTrendData} options={{
-                ...trendChartOptions,
-                responsive: true,
-                maintainAspectRatio: false,
-                layout: {
-                  padding: {
-                    left: 5,
-                    right: 5,
-                    top: 5,
-                    bottom: 5
-                  }
-                }
-              }} />
+              {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 ? (
+                <Swiper
+                  modules={[Navigation, Pagination]}
+                  spaceBetween={10}
+                  slidesPerView={1}
+                  navigation={{
+                    prevEl: '.swiper-btn-prev',
+                    nextEl: '.swiper-btn-next',
+                  }}
+                  pagination={{ 
+                    clickable: true,
+                    el: '.swiper-pagination-custom'
+                  }}
+                  onSlideChange={(swiper) => setCurrentSlide(swiper.activeIndex)}
+                  style={{ height: '100%' }}
+                  className="chart-swiper"
+                >
+                  {dailyTrendData.slides.map((slideData, index) => (
+                    <SwiperSlide key={index}>
+                      <div style={{ height: '100%', padding: '0 5px' }}>
+                        <Line 
+                          data={slideData} 
+                          options={{
+                            ...trendChartOptions,
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            layout: {
+                              padding: {
+                                left: 5,
+                                right: 5,
+                                top: 5,
+                                bottom: 15
+                              }
+                            }
+                          }} 
+                        />
+                      </div>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              ) : (
+                <Line 
+                  data={dailyTrendData.slides[0]} 
+                  options={{
+                    ...trendChartOptions,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                      padding: {
+                        left: 5,
+                        right: 5,
+                        top: 5,
+                        bottom: 5
+                      }
+                    }
+                  }} 
+                />
+              )}
+              
+              {/* Custom pagination dots for mobile */}
+              {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 && (
+                <div className="swiper-pagination-custom"></div>
+              )}
             </div>
           </div>
         </div>
