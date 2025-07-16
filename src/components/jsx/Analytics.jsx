@@ -620,7 +620,7 @@ function Analytics({
           </button>
           <button 
             className="btn btn-outline-info btn-sm filter-toggle-btn"
-            onClick={() => setShowSummary(!showSummary)}
+            onClick={()={() => setShowSummary(!showSummary)}}
           >
             <i className={`bi ${showSummary ? 'bi-eye-slash' : 'bi-bar-chart'}`}></i>
             {showSummary ? 'Hide Cards' : 'Show Cards'}
@@ -799,7 +799,7 @@ function Analytics({
                       ({dailyTrendData.dailyDataCount} days)
                     </small>
                   </h5>
-                  <div className="d-flex gap-1 align-items-center">
+                  <div className="d-flex gap-2 align-items-center">
                   <div className="form-check form-switch">
                     <input 
                       className="form-check-input" 
@@ -808,7 +808,7 @@ function Analytics({
                       checked={addExpenseAdjustment}
                       onChange={(e) => {
                         setAddExpenseAdjustment(e.target.checked);
-                        // Reset 1400 checkbox when 1000 is unchecked
+                        // When 1000 checkbox is unchecked, hide and uncheck 1400
                         if (!e.target.checked) {
                           setAddExpenseAdjustment1400(false);
                         }
@@ -822,7 +822,13 @@ function Analytics({
                         type="checkbox" 
                         id="expenseAdjustment1400"
                         checked={addExpenseAdjustment1400}
-                        onChange={(e) => setAddExpenseAdjustment1400(e.target.checked)}
+                        onChange={(e) => {
+                          setAddExpenseAdjustment1400(e.target.checked);
+                          // When 1400 checkbox is unchecked, hide it (by unchecking 1000)
+                          if (!e.target.checked) {
+                            setAddExpenseAdjustment(false);
+                          }
+                        }}
                       />
                     </div>
                   )}
