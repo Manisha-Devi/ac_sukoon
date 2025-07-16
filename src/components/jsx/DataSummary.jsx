@@ -981,7 +981,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                       setApprovedEntriesPage(1);
                     }}
                   >
-                    <i className="bi bi-arrow-up-circle"></i> Income Entries by You
+                    <i className="bi bi-arrow-up-circle"></i> Income Approvals
                   </button>
                   <button 
                     className={`summary-tab-btn ${summaryActiveTab === 'expense' ? 'active' : ''}`}
@@ -990,7 +990,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                       setApprovedEntriesPage(1);
                     }}
                   >
-                    <i className="bi bi-arrow-down-circle"></i> Expense Entries by You
+                    <i className="bi bi-arrow-down-circle"></i> Expense Approvals
                   </button>
                   <button 
                     className={`summary-tab-btn ${summaryActiveTab === 'deposits' ? 'active' : ''}`}
@@ -999,19 +999,24 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                       setCashDepositsPage(1);
                     }}
                   >
-                    <i className="bi bi-bank2"></i> Cash Deposits by You
+                    <i className="bi bi-bank2"></i> Cash Deposits
                   </button>
                 </div>
 
                 <div className="summary-tab-content">
                   {summaryActiveTab === 'income' ? (
                     <div className="income-entries-section">
-                      <h6><i className="bi bi-arrow-up-circle"></i> Income Entries Approved By You</h6>
+                      <h6><i className="bi bi-arrow-up-circle"></i> Income Approvals</h6>
                       {(() => {
                         const allApprovedEntries = getFinalApprovedEntriesForTable();
                         const incomeEntries = allApprovedEntries.filter(entry => 
                           entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry'
-                        );
+                        ).sort((a, b) => {
+                          // Sort by date (newest first)
+                          const dateA = new Date(a.dateFrom || a.date);
+                          const dateB = new Date(b.dateFrom || b.date);
+                          return dateB - dateA;
+                        });
                         
                         if (incomeEntries.length === 0) {
                           return (
@@ -1122,12 +1127,17 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                     </div>
                   ) : summaryActiveTab === 'expense' ? (
                     <div className="expense-entries-section">
-                      <h6><i className="bi bi-arrow-down-circle"></i> Expense Entries Approved By You</h6>
+                      <h6><i className="bi bi-arrow-down-circle"></i> Expense Approvals</h6>
                       {(() => {
                         const allApprovedEntries = getFinalApprovedEntriesForTable();
                         const expenseEntries = allApprovedEntries.filter(entry => 
                           entry.dataType !== 'Fare Receipt' && entry.dataType !== 'Booking Entry'
-                        );
+                        ).sort((a, b) => {
+                          // Sort by date (newest first)
+                          const dateA = new Date(a.dateFrom || a.date);
+                          const dateB = new Date(b.dateFrom || b.date);
+                          return dateB - dateA;
+                        });
                         
                         if (expenseEntries.length === 0) {
                           return (
@@ -1238,12 +1248,17 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                     </div>
                   ) : (
                     <div className="cash-deposits-section">
-                      <h6><i className="bi bi-bank2"></i> Cash Deposits by You</h6>
+                      <h6><i className="bi bi-bank2"></i> Cash Deposits</h6>
                       {(() => {
                         const currentUserName = currentUser?.fullName || currentUser?.username;
                         const allUserCashDeposits = cashDeposit.filter(deposit => 
                           deposit.depositedBy === currentUserName
-                        );
+                        ).sort((a, b) => {
+                          // Sort by date (newest first)
+                          const dateA = new Date(a.date || a.timestamp);
+                          const dateB = new Date(b.date || b.timestamp);
+                          return dateB - dateA;
+                        });
 
                         if (allUserCashDeposits.length === 0) {
                           return (
