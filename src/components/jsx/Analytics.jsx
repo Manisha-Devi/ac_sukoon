@@ -632,7 +632,7 @@ function Analytics({
       {showFilter && (
         <div className="analytics-filter-section">
           <div className="row g-3 mb-4">
-            <div className="col-md-3">
+            <div className="col-md-4">
               <label className="form-label">Date Range</label>
               <select 
                 className="form-select" 
@@ -650,7 +650,7 @@ function Analytics({
 
             {dateRange === 'custom' && (
               <>
-                <div className="col-md-2">
+                <div className="col-md-4">
                   <label className="form-label">From Date</label>
                   <input
                     type="date"
@@ -659,7 +659,7 @@ function Analytics({
                     onChange={(e) => setCustomDateFrom(e.target.value)}
                   />
                 </div>
-                <div className="col-md-2">
+                <div className="col-md-4">
                   <label className="form-label">To Date</label>
                   <input
                     type="date"
@@ -671,39 +671,7 @@ function Analytics({
               </>
             )}
 
-            <div className="col-md-3">
-              <label className="form-label">User Filter</label>
-              <select 
-                className="form-select" 
-                value={userFilter} 
-                onChange={(e) => setUserFilter(e.target.value)}
-              >
-                <option value="all">All Users</option>
-                {allUsers.map(user => (
-                  <option key={user.username} value={user.name}>
-                    {user.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="col-md-2">
-              <label className="form-label">Entry Type</label>
-              <select 
-                className="form-select" 
-                value={entryTypeFilter} 
-                onChange={(e) => setEntryTypeFilter(e.target.value)}
-              >
-                <option value="all">All Types</option>
-                <option value="daily">Daily</option>
-                <option value="booking">Booking</option>
-                <option value="fuel">Fuel</option>
-                <option value="adda">Adda</option>
-                <option value="union">Union</option>
-                <option value="service">Service</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
+            
           </div>
         </div>
       )}
