@@ -771,6 +771,7 @@ function Analytics({
             </div>
           </div>
         </div>
+        </div>
       )}
 
       {/* Charts Section */}
