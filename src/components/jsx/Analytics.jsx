@@ -800,9 +800,9 @@ function Analytics({
                     ({dailyTrendData.dailyDataCount} days)
                   </small>
                 </h5>
-                <div className="d-flex gap-3">
+                <div className="d-flex gap-4 align-items-center">
                   {addExpenseAdjustment && (
-                    <div className="form-check form-switch">
+                    <div className="form-check form-switch d-flex align-items-center gap-2">
                       <input 
                         className="form-check-input" 
                         type="checkbox" 
@@ -810,9 +810,12 @@ function Analytics({
                         checked={addExpenseAdjustment1400}
                         onChange={(e) => setAddExpenseAdjustment1400(e.target.checked)}
                       />
+                      <label className="form-check-label text-muted small" htmlFor="expenseAdjustment1400">
+                        +₹1400
+                      </label>
                     </div>
                   )}
-                  <div className="form-check form-switch">
+                  <div className="form-check form-switch d-flex align-items-center gap-2">
                     <input 
                       className="form-check-input" 
                       type="checkbox" 
@@ -826,6 +829,9 @@ function Analytics({
                         }
                       }}
                     />
+                    <label className="form-check-label text-muted small" htmlFor="expenseAdjustment">
+                      +₹1000
+                    </label>
                   </div>
                 </div>
               </div>
