@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback } from "react";
 import "../css/Analytics.css";
 import {
@@ -110,7 +111,7 @@ function Analytics({
       } else {
         return false;
       }
-
+      
       return itemDate >= startDate && itemDate <= endDate;
     });
   }, [dateRange, customDateFrom, customDateTo]);
@@ -180,7 +181,7 @@ function Analytics({
     // Calculate cash vs bank breakdown
     const totalCash = filteredFareData.reduce((sum, item) => sum + (parseFloat(item.cashAmount) || 0), 0);
     const totalBank = filteredFareData.reduce((sum, item) => sum + (parseFloat(item.bankAmount) || 0), 0);
-
+    
     const expenseCash = filteredExpenseData.reduce((sum, item) => sum + (parseFloat(item.cashAmount) || 0), 0);
     const expenseBank = filteredExpenseData.reduce((sum, item) => sum + (parseFloat(item.bankAmount) || 0), 0);
 
@@ -195,7 +196,7 @@ function Analytics({
       const userEarnings = filteredFareData
         .filter(entry => entry.submittedBy === user.name)
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
-
+      
       const userExpenses = filteredExpenseData
         .filter(entry => entry.submittedBy === user.name)
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
@@ -293,7 +294,7 @@ function Analytics({
     };
   }, [analytics.userBreakdown]);
 
-  // Enhanced Daily trend chart with swiper support and 15-day chunks
+  // Enhanced Daily trend chart with swiper support
   const dailyTrendData = useMemo(() => {
     // Get date range based on filter
     const now = new Date();
@@ -362,11 +363,11 @@ function Analytics({
           const entryDate = entry.date || entry.dateFrom;
           return entryDate === date && entry.type !== 'off';
         })
-        .reduce((sum, entry) => sum + (parseFloat(entry.totalAmount) || 0), 0);
-
+        .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
+      
       const dayExpenses = expenseData
         .filter(entry => entry.date === date)
-        .reduce((sum, entry) => sum + (parseFloat(entry.totalAmount) || 0), 0);
+        .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
       return {
         date,
@@ -378,87 +379,47 @@ function Analytics({
 
     // Mobile optimization: Create slides for chunks of data
     const isMobile = window.innerWidth <= 768;
-    const daysPerSlide = 15; // Always 15 days per slide for consistency
+    const daysPerSlide = isMobile ? 15 : dayCount; // 15 days per slide on mobile
     const slides = [];
 
-    // Create slides for mobile and desktop with different thresholds
-    if ((isMobile && dayCount > 15) || (!isMobile && dayCount > 30)) {
-      // Create multiple slides
+    if (isMobile && dayCount > 15) {
+      // Create multiple slides for mobile
       for (let i = 0; i < dayCount; i += daysPerSlide) {
         const slideData = dailyData.slice(i, i + daysPerSlide);
-
-        // Create gradient colors for profit/loss
-        const chartData = slideData.map(d => d.profit);
-        const backgroundColors = chartData.map(profit => {
-          if (profit > 0) {
-            return 'rgba(34, 197, 94, 0.1)'; // Green background for profit
-          } else if (profit < 0) {
-            return 'rgba(239, 68, 68, 0.1)'; // Red background for loss
-          } else {
-            return 'rgba(156, 163, 175, 0.1)'; // Gray for zero
-          }
-        });
-
-        const borderColors = chartData.map(profit => {
-          if (profit > 0) {
-            return '#22c55e'; // Green border for profit
-          } else if (profit < 0) {
-            return '#ef4444'; // Red border for loss
-          } else {
-            return '#9ca3af'; // Gray for zero
-          }
-        });
-
-        // Calculate date range for this slide
-        const slideStartDate = new Date(slideData[0].date);
-        const slideEndDate = new Date(slideData[slideData.length - 1].date);
-        const slideTitle = `${slideStartDate.toLocaleDateString('en-IN', { 
-          month: 'short', 
-          day: 'numeric'
-        })} - ${slideEndDate.toLocaleDateString('en-IN', { 
-          month: 'short', 
-          day: 'numeric'
-        })}`;
+        const backgroundColors = slideData.map(d => 
+          d.profit >= 0 ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 107, 107, 0.1)'
+        );
+        
+        const borderColors = slideData.map(d => 
+          d.profit >= 0 ? '#2ed573' : '#ff6b6b'
+        );
 
         slides.push({
-          title: slideTitle,
-          slideIndex: slides.length + 1,
           labels: slideData.map(d => new Date(d.date).toLocaleDateString('en-IN', { 
             month: 'short', 
             day: 'numeric'
           })),
           datasets: [
             {
-              label: '📈 Daily Profit Trend',
-              data: chartData,
-              borderColor: function(context) {
-                const dataIndex = context.dataIndex;
-                return borderColors[dataIndex];
-              },
-              backgroundColor: function(context) {
-                const dataIndex = context.dataIndex;
-                return backgroundColors[dataIndex];
-              },
+              label: '📈 Daily Profit',
+              data: slideData.map(d => d.profit),
+              borderColor: borderColors,
+              backgroundColor: backgroundColors,
               borderWidth: 3,
               fill: true,
               tension: 0.4,
               pointBackgroundColor: borderColors,
               pointBorderColor: borderColors,
-              pointRadius: 5,
-              pointHoverRadius: 8,
-              pointBorderWidth: 2,
+              pointRadius: 4,
+              pointHoverRadius: 6,
               segment: {
                 borderColor: function(ctx) {
                   const currentProfit = ctx.p0.parsed.y;
-                  const nextProfit = ctx.p1.parsed.y;
-                  if (currentProfit >= 0 && nextProfit >= 0) return '#22c55e';
-                  if (currentProfit < 0 && nextProfit < 0) return '#ef4444';
-                  return '#f59e0b'; // Orange for mixed segments
+                  return currentProfit >= 0 ? '#2ed573' : '#ff6b6b';
                 },
                 backgroundColor: function(ctx) {
                   const currentProfit = ctx.p0.parsed.y;
-                  if (currentProfit >= 0) return 'rgba(34, 197, 94, 0.1)';
-                  return 'rgba(239, 68, 68, 0.1)';
+                  return currentProfit >= 0 ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 107, 107, 0.1)';
                 }
               }
             },
@@ -466,31 +427,16 @@ function Analytics({
         });
       }
     } else {
-      // Single slide for desktop with small data or mobile with <= 15 days
-      const chartData = dailyData.map(d => d.profit);
-      const backgroundColors = chartData.map(profit => {
-        if (profit > 0) {
-          return 'rgba(34, 197, 94, 0.1)';
-        } else if (profit < 0) {
-          return 'rgba(239, 68, 68, 0.1)';
-        } else {
-          return 'rgba(156, 163, 175, 0.1)';
-        }
-      });
-
-      const borderColors = chartData.map(profit => {
-        if (profit > 0) {
-          return '#22c55e';
-        } else if (profit < 0) {
-          return '#ef4444';
-        } else {
-          return '#9ca3af';
-        }
-      });
+      // Single slide for desktop or small data
+      const backgroundColors = dailyData.map(d => 
+        d.profit >= 0 ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 107, 107, 0.1)'
+      );
+      
+      const borderColors = dailyData.map(d => 
+        d.profit >= 0 ? '#2ed573' : '#ff6b6b'
+      );
 
       slides.push({
-        title: `Complete ${dayCount} Days View`,
-        slideIndex: 1,
         labels: dailyData.map(d => new Date(d.date).toLocaleDateString('en-IN', { 
           month: 'short', 
           day: 'numeric',
@@ -498,16 +444,10 @@ function Analytics({
         })),
         datasets: [
           {
-            label: '📈 Daily Profit Trend',
-            data: chartData,
-            borderColor: function(context) {
-              const dataIndex = context.dataIndex;
-              return borderColors[dataIndex];
-            },
-            backgroundColor: function(context) {
-              const dataIndex = context.dataIndex;
-              return backgroundColors[dataIndex];
-            },
+            label: '📈 Daily Profit',
+            data: dailyData.map(d => d.profit),
+            borderColor: borderColors,
+            backgroundColor: backgroundColors,
             borderWidth: 3,
             fill: true,
             tension: 0.4,
@@ -515,19 +455,14 @@ function Analytics({
             pointBorderColor: borderColors,
             pointRadius: 4,
             pointHoverRadius: 6,
-            pointBorderWidth: 2,
             segment: {
               borderColor: function(ctx) {
                 const currentProfit = ctx.p0.parsed.y;
-                const nextProfit = ctx.p1.parsed.y;
-                if (currentProfit >= 0 && nextProfit >= 0) return '#22c55e';
-                if (currentProfit < 0 && nextProfit < 0) return '#ef4444';
-                return '#f59e0b';
+                return currentProfit >= 0 ? '#2ed573' : '#ff6b6b';
               },
               backgroundColor: function(ctx) {
                 const currentProfit = ctx.p0.parsed.y;
-                if (currentProfit >= 0) return 'rgba(34, 197, 94, 0.1)';
-                return 'rgba(239, 68, 68, 0.1)';
+                return currentProfit >= 0 ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 107, 107, 0.1)';
               }
             }
           },
@@ -540,8 +475,7 @@ function Analytics({
       dailyDataCount: dayCount,
       totalSlides: slides.length,
       daysPerSlide,
-      isMobile,
-      hasMultipleSlides: slides.length > 1
+      isMobile
     };
   }, [fareData, expenseData, dateRange, customDateFrom, customDateTo]);
 
@@ -826,9 +760,9 @@ function Analytics({
                   ({dailyTrendData.dailyDataCount} days)
                 </small>
               </h5>
-
+              
               {/* Navigation Controls for Mobile */}
-              {dailyTrendData.isMobile && dailyTrendData.hasMultipleSlides && (
+              {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 && (
                 <div className="d-flex align-items-center gap-2">
                   <button 
                     className="btn btn-sm btn-outline-primary swiper-btn-prev"
@@ -847,7 +781,7 @@ function Analytics({
                   </button>
                 </div>
               )}
-
+              
               {!dailyTrendData.isMobile && dailyTrendData.dailyDataCount > 30 && (
                 <small className="text-muted d-none d-lg-block">
                   <i className="bi bi-mouse me-1"></i>
@@ -855,14 +789,14 @@ function Analytics({
                 </small>
               )}
             </div>
-
+            
             <div style={{ 
               height: 'calc(100% - 60px)', 
               minHeight: window.innerWidth <= 576 ? '280px' : '340px',
               width: '100%',
               position: 'relative'
             }}>
-              {dailyTrendData.hasMultipleSlides ? (
+              {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 ? (
                 <Swiper
                   modules={[Navigation, Pagination]}
                   spaceBetween={10}
@@ -881,7 +815,6 @@ function Analytics({
                 >
                   {dailyTrendData.slides.map((slideData, index) => (
                     <SwiperSlide key={index}>
-                      <div className="card-title text-center">Slide {slideData.slideIndex}: {slideData.title}</div>
                       <div style={{ height: '100%', padding: '0 5px' }}>
                         <Line 
                           data={slideData} 
@@ -921,9 +854,9 @@ function Analytics({
                   }} 
                 />
               )}
-
+              
               {/* Custom pagination dots for mobile */}
-              {dailyTrendData.hasMultipleSlides && (
+              {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 && (
                 <div className="swiper-pagination-custom"></div>
               )}
             </div>
