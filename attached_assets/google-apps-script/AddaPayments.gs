@@ -22,9 +22,10 @@ function addAddaPayment(data) {
       sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
         .insertSheet(SHEET_NAMES.ADDA_PAYMENTS);
 
+      // Add headers exactly as specified
       sheet.getRange(1, 1, 1, 12).setValues([[
         "Timestamp", "Date", "AddaName", "CashAmount", "BankAmount", 
-        "TotalAmount", "Remarks", "SubmittedBy", "EntryType", "EntryId",
+        "TotalAmount", "Description", "SubmittedBy", "EntryType", "EntryId",
         "EntryStatus", "ApprovedBy"
       ]]);
     }
@@ -35,19 +36,20 @@ function addAddaPayment(data) {
 
     sheet.insertRowBefore(2);
 
+    // Add data to the new row
     sheet.getRange(2, 1, 1, 12).setValues([[
-      timeOnly,                    // A: Time in IST
-      data.date,                   // B: Date
-      data.addaName || "",         // C: Adda Name
-      data.cashAmount || 0,        // D: Cash Amount
-      data.bankAmount || 0,        // E: Bank Amount
-      data.totalAmount || 0,       // F: Total Amount
-      data.remarks || "",          // G: Remarks
-      data.submittedBy || "",      // H: Submitted By
-      "adda",                      // I: Entry Type
-      entryId,                     // J: Entry ID
-      "pending",                   // K: Entry Status
-      "",                          // L: Approved By
+      timeOnly,                      // A: Time in IST (HH:MM:SS AM/PM)
+      data.date,                     // B: Date from frontend
+      data.addaName || "",           // C: Adda Name
+      data.cashAmount || 0,          // D: Cash Amount
+      data.bankAmount || 0,          // E: Bank Amount
+      data.totalAmount || 0,         // F: Total Amount
+      data.description || "",        // G: Description (changed from remarks)
+      data.submittedBy || "",        // H: Submitted By
+      "adda",                        // I: Entry Type (static)
+      entryId,                       // J: Entry ID
+      "pending",                     // K: Entry Status (pending/waiting/approved)
+      "",                            // L: Approved By
     ]]);
 
     console.log("✅ Adda payment added successfully with ID:", entryId);
@@ -90,21 +92,22 @@ function getAddaPayments() {
       return { success: true, data: [] };
     }
 
+    // Process and format data
     const data = values.slice(1).map((row, index) => {
       return {
-        entryId: row[9],                      // Entry ID from column J
-        timestamp: String(row[0] || ''),      // Convert timestamp to string
-        date: String(row[1] || ''),           // Convert date to string
-        addaName: row[2],                     // Adda name from column C
-        cashAmount: row[3],                   // Cash amount from column D
-        bankAmount: row[4],                   // Bank amount from column E
-        totalAmount: row[5],                  // Total amount from column F
-        remarks: row[6],                      // Remarks from column G
-        submittedBy: row[7],                  // Submitted by from column H
-        entryType: row[8],                    // Entry type from column I
-        entryStatus: row[10] || "pending",    // Entry status from column K
-        approvedBy: row[11] || "",            // Approved by from column L
-        rowIndex: index + 2,                  // Store row index for updates/deletes
+        entryId: row[9],                     // Entry ID from column J
+        timestamp: String(row[0] || ''),     // Convert timestamp to string
+        date: String(row[1] || ''),          // Convert date to string
+        addaName: row[2],                    // Adda name from column C
+        cashAmount: row[3],                  // Cash amount from column D
+        bankAmount: row[4],                  // Bank amount from column E
+        totalAmount: row[5],                 // Total amount from column F
+        description: row[6],                 // Description from column G (changed from remarks)
+        submittedBy: row[7],                 // Submitted by from column H
+        entryType: row[8],                   // Entry type from column I
+        entryStatus: row[10] || "pending",   // Entry status from column K
+        approvedBy: row[11] || "",           // Approved by from column L
+        rowIndex: index + 2,                 // Store row index for updates/deletes
       };
     });
 
@@ -157,8 +160,8 @@ function updateAddaPayment(data) {
       throw new Error(`Adda payment not found with ID: ${entryId}`);
     }
 
-    // Update only provided fields
-    if (updatedData.date) {
+    // Update fields that are provided in updatedData
+    if (updatedData.date !== undefined) {
       sheet.getRange(rowIndex, 2).setValue(updatedData.date);
     }
     if (updatedData.addaName !== undefined) {
@@ -173,8 +176,11 @@ function updateAddaPayment(data) {
     if (updatedData.totalAmount !== undefined) {
       sheet.getRange(rowIndex, 6).setValue(updatedData.totalAmount);
     }
-    if (updatedData.remarks !== undefined) {
-      sheet.getRange(rowIndex, 7).setValue(updatedData.remarks);
+    if (updatedData.description !== undefined) {
+      sheet.getRange(rowIndex, 7).setValue(updatedData.description);
+    }
+    if (updatedData.submittedBy !== undefined) {
+      sheet.getRange(rowIndex, 8).setValue(updatedData.submittedBy);
     }
 
     console.log(`✅ Adda payment updated successfully - ID: ${entryId}, Row: ${rowIndex}`);

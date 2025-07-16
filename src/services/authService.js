@@ -491,7 +491,7 @@ class AuthService {
         cashAmount: data.cashAmount || 0,
         bankAmount: data.bankAmount || 0,
         totalAmount: data.totalAmount || 0,
-        remarks: data.remarks || '',
+        description: data.description || '',
         submittedBy: data.submittedBy || 'driver'
       }));
 
