@@ -976,7 +976,7 @@ function FareEntry({
   // Filter function to get non-approved entries for current user
   const getCurrentUserNonApprovedEntries = () => {
     const currentUserName = currentUser?.fullName || currentUser?.username;
-    const userEntries = fareData.filter(```text
+    const userEntries = fareData.filter(
       (entry) =>
         entry.submittedBy === currentUserName &&
         entry.entryStatus !== "approved",
