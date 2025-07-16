@@ -1052,7 +1052,8 @@ function BasicPayment({
                       <span>Cash: ₹{parseInt(unionData.cashAmount) || 0}</span>
                     </div>
                     <div className="col-4">
-                      <span>Bank: ₹{parseInt(unionData.bankAmount) || 0}                    </div>
+                      <span>Bank: ₹{parseInt(unionData.bankAmount) || 0}</span>
+                    </div>
                     <div className="col-4">
                       <strong>
                         Total: ₹
