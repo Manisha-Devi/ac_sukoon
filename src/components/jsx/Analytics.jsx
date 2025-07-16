@@ -684,7 +684,7 @@ function Analytics({
       <div className="row g-4 mb-4">
         <div className="col-12 col-xl-8">
           <div className="analytics-chart-card">
-            <div className="d-flex justify-content-between align-items-center mb-3">
+            <div className="d-flex justify-content-between align-items-center mb-2">
               <h5 className="mb-0">
                 <i className="bi bi-line-chart me-2"></i>
                 Daily Profit Trend 
@@ -699,7 +699,7 @@ function Analytics({
                 </small>
               )}
             </div>
-            <div style={{ height: '380px' }}>
+            <div style={{ height: 'calc(100% - 80px)', minHeight: '300px' }}>
               <Line data={dailyTrendData} options={trendChartOptions} />
             </div>
             {/* Profit/Loss Legend */}
