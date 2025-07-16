@@ -860,7 +860,7 @@ function BasicPayment({
                   </div>
                 <div className="row">
                   <div className="col-12 mb-3">
-                    <label className="form-label">Description</label>
+                    <label className="form-label">Description (Optional)</label>
                     <textarea
                       className="form-control"
                       rows={3}
@@ -868,8 +868,7 @@ function BasicPayment({
                       onChange={(e) =>
                         setAddaData({ ...addaData, description: e.target.value })
                       }
-                      placeholder="Enter detailed description of adda payment"
-                      required
+                      placeholder="Enter detailed description of adda payment (optional)"
                     />
                   </div>
                 </div>
@@ -999,7 +998,7 @@ function BasicPayment({
                 </div>
                 <div className="row">
                   <div className="col-12 mb-3">
-                    <label className="form-label">Description</label>
+                    <label className="form-label">Description (Optional)</label>
                     <textarea
                       className="form-control"
                       rows={3}
@@ -1007,8 +1006,7 @@ function BasicPayment({
                       onChange={(e) =>
                         setUnionData({ ...unionData, description: e.target.value })
                       }
-                      placeholder="Enter description"
-                      required
+                      placeholder="Enter description (optional)"
                     />
                   </div>
                 </div>
