@@ -53,6 +53,7 @@ function Analytics({
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showFilter, setShowFilter] = useState(false);
   const [showSummary, setShowSummary] = useState(true);
+  const [addExpenseAdjustment, setAddExpenseAdjustment] = useState(false);
 
   // Simplified logging for better performance
   if (process.env.NODE_ENV === 'development') {
@@ -367,9 +368,14 @@ function Analytics({
         })
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
       
-      const dayExpenses = expenseData
+      let dayExpenses = expenseData
         .filter(entry => entry.date === date)
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
+
+      // Add ₹1000 to expenses if checkbox is checked
+      if (addExpenseAdjustment) {
+        dayExpenses += 1000;
+      }
 
       return {
         date,
@@ -479,7 +485,7 @@ function Analytics({
       daysPerSlide,
       isMobile
     };
-  }, [fareData, expenseData, dateRange, customDateFrom, customDateTo]);
+  }, [fareData, expenseData, dateRange, customDateFrom, customDateTo, addExpenseAdjustment]);
 
   // Chart options
   const chartOptions = {
@@ -780,13 +786,27 @@ function Analytics({
         <div className="col-12 col-xl-8">
           <div className="analytics-chart-card">
             <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap">
-              <h5 className="mb-0 flex-shrink-1">
-                <i className="bi bi-line-chart me-2"></i>
-                Daily Profit Trend 
-                <small className="text-muted ms-2 d-none d-md-inline">
-                  ({dailyTrendData.dailyDataCount} days)
-                </small>
-              </h5>
+              <div className="d-flex align-items-center flex-wrap">
+                <h5 className="mb-0 flex-shrink-1 me-3">
+                  <i className="bi bi-line-chart me-2"></i>
+                  Daily Profit Trend 
+                  <small className="text-muted ms-2 d-none d-md-inline">
+                    ({dailyTrendData.dailyDataCount} days)
+                  </small>
+                </h5>
+                <div className="form-check form-switch">
+                  <input 
+                    className="form-check-input" 
+                    type="checkbox" 
+                    id="expenseAdjustment"
+                    checked={addExpenseAdjustment}
+                    onChange={(e) => setAddExpenseAdjustment(e.target.checked)}
+                  />
+                  <label className="form-check-label text-muted small" htmlFor="expenseAdjustment">
+                    +₹1000 Expense Adjustment
+                  </label>
+                </div>
+              </div>
               
               {/* Navigation Controls for Mobile */}
               {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 && (
