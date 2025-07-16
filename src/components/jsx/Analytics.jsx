@@ -711,31 +711,8 @@ function Analytics({
                 </small>
               )}
             </div>
-            <div style={{ height: 'calc(100% - 80px)', minHeight: '300px' }}>
+            <div style={{ height: 'calc(100% - 60px)', minHeight: '340px' }}>
               <Line data={dailyTrendData} options={trendChartOptions} />
-            </div>
-            {/* Profit/Loss Legend */}
-            <div className="mt-2 d-flex justify-content-center gap-4">
-              <div className="d-flex align-items-center">
-                <div style={{
-                  width: '12px',
-                  height: '12px',
-                  backgroundColor: '#2ed573',
-                  borderRadius: '50%',
-                  marginRight: '8px'
-                }}></div>
-                <small className="text-success fw-semibold">Profit Days</small>
-              </div>
-              <div className="d-flex align-items-center">
-                <div style={{
-                  width: '12px',
-                  height: '12px',
-                  backgroundColor: '#ff6b6b',
-                  borderRadius: '50%',
-                  marginRight: '8px'
-                }}></div>
-                <small className="text-danger fw-semibold">Loss Days</small>
-              </div>
             </div>
           </div>
         </div>
