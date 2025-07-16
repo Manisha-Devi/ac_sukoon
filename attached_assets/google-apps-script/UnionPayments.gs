@@ -24,7 +24,7 @@ function addUnionPayment(data) {
 
       sheet.getRange(1, 1, 1, 12).setValues([[
         "Timestamp", "Date", "UnionName", "CashAmount", "BankAmount", 
-        "TotalAmount", "Remarks", "SubmittedBy", "SubmittedBy", "EntryId",
+        "TotalAmount", "Description", "SubmittedBy", "EntryType", "EntryId",
         "EntryStatus", "ApprovedBy"
       ]]);
     }
@@ -42,7 +42,7 @@ function addUnionPayment(data) {
       data.cashAmount || 0,        // D: Cash Amount
       data.bankAmount || 0,        // E: Bank Amount
       data.totalAmount || 0,       // F: Total Amount
-      data.remarks || "",          // G: Remarks
+      data.description || "",      // G: Description (changed from remarks)
       data.submittedBy || "",      // H: Submitted By
       "union",                     // I: Entry Type
       entryId,                     // J: Entry ID
@@ -99,7 +99,7 @@ function getUnionPayments() {
         cashAmount: row[3],                   // Cash amount from column D
         bankAmount: row[4],                   // Bank amount from column E
         totalAmount: row[5],                  // Total amount from column F
-        remarks: row[6],                      // Remarks from column G
+        description: row[6],                  // Description from column G (changed from remarks)
         submittedBy: row[7],                  // Submitted by from column H
         entryType: row[8],                    // Entry type from column I
         entryStatus: row[10] || "pending",    // Entry status from column K
@@ -173,8 +173,8 @@ function updateUnionPayment(data) {
     if (updatedData.totalAmount !== undefined) {
       sheet.getRange(rowIndex, 6).setValue(updatedData.totalAmount);
     }
-    if (updatedData.remarks !== undefined) {
-      sheet.getRange(rowIndex, 7).setValue(updatedData.remarks);
+    if (updatedData.description !== undefined) {
+      sheet.getRange(rowIndex, 7).setValue(updatedData.description);
     }
 
     console.log(`✅ Union payment updated successfully - ID: ${entryId}, Row: ${rowIndex}`);

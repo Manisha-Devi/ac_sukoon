@@ -622,7 +622,7 @@ class AuthService {
         cashAmount: data.cashAmount || 0,
         bankAmount: data.bankAmount || 0,
         totalAmount: data.totalAmount || 0,
-        remarks: data.remarks || '',
+        description: data.description || '',
         submittedBy: data.submittedBy || 'driver'
       }));
 
@@ -979,8 +979,7 @@ class AuthService {
   }
 
   // Update Other Payment
-  async updateOtherPayment(data) {
-    try {
+  async updateOtherPayment(data) {    try {
       console.log('📝 Updating other payment in Google Sheets:', data);
 
       const response = await fetch(this.API_URL, {
@@ -2082,7 +2081,7 @@ class AuthService {
   async testAPIKey() {
     try {
       console.log('🔍 Testing API key validity...');
-      
+
       const testData = this.apiKeyService.addAPIKey({
         action: 'test'
       });
@@ -2102,7 +2101,7 @@ class AuthService {
       }
 
       const result = await response.json();
-      
+
       if (result.success) {
         console.log('✅ API key is valid and working');
         return true;
@@ -2110,7 +2109,7 @@ class AuthService {
         console.error('❌ API key test failed:', result.error);
         return false;
       }
-      
+
     } catch (error) {
       console.error('❌ Error testing API key:', error);
       return false;
