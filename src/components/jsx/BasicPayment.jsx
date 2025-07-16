@@ -109,8 +109,8 @@ function BasicPayment({
     setIsLoading(true);
 
     try {
-      const cashAmount = parseInt(fuelData.cashAmount) || 0;
-      const bankAmount = parseInt(fuelData.bankAmount) || 0;
+      const cashAmount = parseFloat(fuelData.cashAmount) || 0;
+      const bankAmount = parseFloat(fuelData.bankAmount) || 0;
       const totalAmount = cashAmount + bankAmount;
       const submittedBy = currentUser?.fullName || currentUser?.username || "Unknown User";
       const now = new Date();
@@ -230,8 +230,8 @@ function BasicPayment({
     setIsLoading(true);
 
     try {
-      const cashAmount = parseInt(addaData.cashAmount) || 0;
-      const bankAmount = parseInt(addaData.bankAmount) || 0;
+      const cashAmount = parseFloat(addaData.cashAmount) || 0;
+      const bankAmount = parseFloat(addaData.bankAmount) || 0;
       const totalAmount = cashAmount + bankAmount;
       const submittedBy = currentUser?.fullName || currentUser?.username || "Unknown User";
       const now = new Date();
@@ -341,8 +341,8 @@ function BasicPayment({
     setIsLoading(true);
 
     try {
-      const cashAmount = parseInt(unionData.cashAmount) || 0;
-      const bankAmount = parseInt(unionData.bankAmount) || 0;
+      const cashAmount = parseFloat(unionData.cashAmount) || 0;
+      const bankAmount = parseFloat(unionData.bankAmount) || 0;
       const totalAmount = cashAmount + bankAmount;
       const submittedBy = currentUser?.fullName || currentUser?.username || "Unknown User";
       const now = new Date();
@@ -551,6 +551,8 @@ function BasicPayment({
   // Calculate totals for current user
   const calculateSummaryTotals = () => {
     const currentUserName = currentUser?.fullName || currentUser?.username;
+    if (!currentUserName) return { totalCash: 0, totalBank: 0, grandTotal: 0 };
+
     const userExpenseData = expenseData.filter(
       (entry) =>
         entry.submittedBy === currentUserName &&
@@ -559,11 +561,11 @@ function BasicPayment({
     );
 
     const totalCash = userExpenseData.reduce(
-      (sum, entry) => sum + (entry.cashAmount || 0),
+      (sum, entry) => sum + (parseInt(entry.cashAmount) || 0),
       0,
     );
     const totalBank = userExpenseData.reduce(
-      (sum, entry) => sum + (entry.bankAmount || 0),
+      (sum, entry) => sum + (parseInt(entry.bankAmount) || 0),
       0,
     );
     const grandTotal = totalCash + totalBank;
@@ -573,6 +575,8 @@ function BasicPayment({
 
   const getCurrentUserNonApprovedEntries = () => {
     const currentUserName = currentUser?.fullName || currentUser?.username;
+    if (!currentUserName) return [];
+
     const userEntries = expenseData.filter(
       (entry) =>
         entry.submittedBy === currentUserName &&
