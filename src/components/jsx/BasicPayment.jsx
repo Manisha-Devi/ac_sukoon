@@ -1146,13 +1146,17 @@ function BasicPayment({
                         </div>
                         <div className="entry-content">
                           {entry.type === "fuel" && (
-                            <p>                              {entry.pumpName && `${entry.pumpName} - `}
+                            <p>
+                              {entry.pumpName && `${entry.pumpName} - `}
                               {entry.liters && `${entry.liters}L`}
                               {entry.ratePerLiter && ` @ ₹${entry.ratePerLiter}/L`}
                             </p>
                           )}
-                          {(entry.type === "adda" || entry.type === "union") && (
-                            <p>{entry.description}</p>
+                          {entry.type === "adda" && (
+                            <p>{entry.addaName || "Adda Payment"}</p>
+                          )}
+                          {entry.type === "union" && (
+                            <p>{entry.unionName || "Union Payment"}</p>
                           )}
                         </div>
                         <div className="entry-amounts">
