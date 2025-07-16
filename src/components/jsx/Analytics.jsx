@@ -690,23 +690,40 @@ function Analytics({
       <div className="row g-4 mb-4">
         <div className="col-12 col-xl-8">
           <div className="analytics-chart-card">
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              <h5 className="mb-0">
+            <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap">
+              <h5 className="mb-0 flex-shrink-1">
                 <i className="bi bi-line-chart me-2"></i>
                 Daily Profit Trend 
-                <small className="text-muted ms-2">
+                <small className="text-muted ms-2 d-none d-md-inline">
                   ({dailyTrendData.dailyDataCount} days)
                 </small>
               </h5>
               {dailyTrendData.dailyDataCount > 30 && (
-                <small className="text-muted">
+                <small className="text-muted d-none d-lg-block">
                   <i className="bi bi-mouse me-1"></i>
                   Scroll/Zoom to view all data
                 </small>
               )}
             </div>
-            <div style={{ height: 'calc(100% - 60px)', minHeight: '340px' }}>
-              <Line data={dailyTrendData} options={trendChartOptions} />
+            <div style={{ 
+              height: 'calc(100% - 60px)', 
+              minHeight: window.innerWidth <= 576 ? '280px' : '340px',
+              width: '100%',
+              position: 'relative'
+            }}>
+              <Line data={dailyTrendData} options={{
+                ...trendChartOptions,
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                  padding: {
+                    left: 5,
+                    right: 5,
+                    top: 5,
+                    bottom: 5
+                  }
+                }
+              }} />
             </div>
           </div>
         </div>
