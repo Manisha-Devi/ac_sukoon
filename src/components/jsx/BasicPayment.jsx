@@ -848,16 +848,18 @@ function BasicPayment({
                       placeholder="Enter Adda Name"
                     />
                   </div>
-                  <div className="col-md-6 mb-3">
+                  </div>
+                <div className="row">
+                  <div className="col-12 mb-3">
                     <label className="form-label">Description</label>
-                    <input
-                      type="text"
+                    <textarea
                       className="form-control"
+                      rows={3}
                       value={addaData.description}
                       onChange={(e) =>
                         setAddaData({ ...addaData, description: e.target.value })
                       }
-                      placeholder="Enter description"
+                      placeholder="Enter detailed description of adda payment"
                       required
                     />
                   </div>
