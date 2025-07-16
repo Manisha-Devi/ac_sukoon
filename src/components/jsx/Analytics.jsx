@@ -783,7 +783,7 @@ function Analytics({
 
       {/* Charts Section */}
       <div className="row g-4 mb-4">
-        <div className="col-12 col-xl-8">
+        <div className="col-12">
           <div className="analytics-chart-card">
             <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap">
               <div className="d-flex align-items-center flex-wrap">
@@ -907,116 +907,12 @@ function Analytics({
           </div>
         </div>
 
-        <div className="col-12 col-xl-4">
-          <div className="analytics-chart-card">
-            <h5>
-              <i className="bi bi-pie-chart me-2"></i>
-              Expense Breakdown
-            </h5>
-            <Doughnut data={expenseBreakdownData} options={doughnutOptions} />
-          </div>
-        </div>
+        
       </div>
 
-      {/* User Performance and Detailed Statistics */}
-      <div className="row g-4 mb-4">
-        <div className="col-12 col-lg-8">
-          <div className="analytics-chart-card">
-            <h5>
-              <i className="bi bi-people me-2"></i>
-              User-wise Performance
-            </h5>
-            <Bar data={userPerformanceData} options={chartOptions} />
-          </div>
-        </div>
+      
 
-        <div className="col-12 col-lg-4">
-          <div className="analytics-summary-card">
-            <div className="card-body">
-              <h5 className="card-title">
-                <i className="bi bi-clipboard-data me-2"></i>
-                Detailed Insights
-              </h5>
-              <div className="row g-3">
-                <div className="col-12">
-                  <strong>Entry Statistics:</strong>
-                  <div className="ms-2">
-                    <div>Fare Entries: {analytics.entryStats.fareEntries}</div>
-                    <div>Expense Entries: {analytics.entryStats.expenseEntries}</div>
-                    <div>Off Days: {analytics.entryStats.offDays}</div>
-                  </div>
-                </div>
-                <div className="col-12">
-                  <strong>Cash Flow:</strong>
-                  <div className="ms-2">
-                    <div>Income Cash: ₹{analytics.cashVsBank.incomeCash.toLocaleString()}</div>
-                    <div>Income Bank: ₹{analytics.cashVsBank.incomeBank.toLocaleString()}</div>
-                    <div>Expense Cash: ₹{analytics.cashVsBank.expenseCash.toLocaleString()}</div>
-                    <div>Expense Bank: ₹{analytics.cashVsBank.expenseBank.toLocaleString()}</div>
-                  </div>
-                </div>
-                <div className="col-12">
-                  <strong>Top Performer:</strong>
-                  <div className="ms-2">
-                    {Object.entries(analytics.userBreakdown)
-                      .sort(([,a], [,b]) => b.profit - a.profit)[0]?.[0] || 'No data'}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* User-wise Breakdown Table */}
-      <div className="row g-4">
-        <div className="col-12">
-          <div className="analytics-chart-card">
-            <h5>
-              <i className="bi bi-table me-2"></i>
-              User-wise Performance Breakdown
-            </h5>
-            <div className="table-responsive">
-              <table className="table table-hover">
-                <thead>
-                  <tr>
-                    <th>User</th>
-                    <th>Earnings</th>
-                    <th>Expenses</th>
-                    <th>Profit</th>
-                    <th>Fixed Cash</th>
-                    <th>Performance</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(analytics.userBreakdown).map(([userName, data]) => (
-                    <tr key={userName}>
-                      <td><strong>{userName}</strong></td>
-                      <td className="text-success">₹{data.earnings.toLocaleString()}</td>
-                      <td className="text-danger">₹{data.expenses.toLocaleString()}</td>
-                      <td className={data.profit >= 0 ? 'text-success' : 'text-danger'}>
-                        ₹{data.profit.toLocaleString()}
-                      </td>
-                      <td className="text-info">₹{data.fixedCash.toLocaleString()}</td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <div className="progress me-2" style={{width: '60px', height: '8px'}}>
-                            <div 
-                              className={`progress-bar ${data.profit >= 0 ? 'bg-success' : 'bg-danger'}`}
-                              style={{width: `${Math.min(100, Math.abs(data.profit) / 1000)}%`}}
-                            ></div>
-                          </div>
-                          <small>{data.profit >= 0 ? 'Profitable' : 'Loss'}</small>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
+      
     </div>
   );
 }
