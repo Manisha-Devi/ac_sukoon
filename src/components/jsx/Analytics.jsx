@@ -824,9 +824,12 @@ function Analytics({
                         checked={addExpenseAdjustment1400}
                         onChange={(e) => {
                           setAddExpenseAdjustment1400(e.target.checked);
-                          // When 1400 checkbox is unchecked, hide it (by unchecking 1000)
+                          // When 1400 checkbox is unchecked, uncheck 1000 to hide 1400
                           if (!e.target.checked) {
                             setAddExpenseAdjustment(false);
+                          } else {
+                            // When 1400 is checked, ensure 1000 stays checked
+                            setAddExpenseAdjustment(true);
                           }
                         }}
                       />
