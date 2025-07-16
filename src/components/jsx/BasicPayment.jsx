@@ -52,6 +52,7 @@ function BasicPayment({
     ratePerLiter: "",
     cashAmount: "",
     bankAmount: "",
+    description: "",
   });
 
   const [addaData, setAddaData] = useState({
@@ -147,6 +148,7 @@ function BasicPayment({
           ratePerLiter: "",
           cashAmount: "",
           bankAmount: "",
+          description: "",
         });
         setIsLoading(false);
 
@@ -192,6 +194,7 @@ function BasicPayment({
           ratePerLiter: "",
           cashAmount: "",
           bankAmount: "",
+          description: "",
         });
         setIsLoading(false);
 
@@ -493,6 +496,7 @@ function BasicPayment({
         ratePerLiter: entry.ratePerLiter?.toString() || "",
         cashAmount: entry.cashAmount.toString(),
         bankAmount: entry.bankAmount.toString(),
+        description: entry.description || ""
       });
     } else if (entry.type === "adda") {
       setActiveTab("adda");
@@ -524,6 +528,7 @@ function BasicPayment({
       ratePerLiter: "",
       cashAmount: "",
       bankAmount: "",
+      description: "",
     });
     setAddaData({
       date: "",
@@ -698,6 +703,20 @@ function BasicPayment({
                         setFuelData({ ...fuelData, pumpName: e.target.value })
                       }
                       placeholder="Enter pump name"
+                    />
+                  </div>
+                </div>
+                 <div className="row">
+                  <div className="col-12 mb-3">
+                    <label className="form-label">Description (Optional)</label>
+                    <textarea
+                      className="form-control"
+                      rows={3}
+                      value={fuelData.description}
+                      onChange={(e) =>
+                        setFuelData({ ...fuelData, description: e.target.value })
+                      }
+                      placeholder="Enter description (optional)"
                     />
                   </div>
                 </div>
@@ -1035,6 +1054,7 @@ function BasicPayment({
                       value={unionData.bankAmount}
                       onChange={(e) =>
                         setUnionData({
+```text
                           ...unionData,
                           bankAmount: e.target.value,
                         })
