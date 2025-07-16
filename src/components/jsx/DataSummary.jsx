@@ -19,6 +19,11 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
     description: '',
     date: new Date().toISOString().split('T')[0]
   });
+  
+  // Pagination states for summary tables
+  const [approvedEntriesPage, setApprovedEntriesPage] = useState(1);
+  const [cashDepositsPage, setCashDepositsPage] = useState(1);
+  const [entriesPerPage] = useState(10);
 
   // Load cash deposits when component mounts
   useEffect(() => {
@@ -971,13 +976,19 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                 <div className="summary-tabs">
                   <button 
                     className={`summary-tab-btn ${summaryActiveTab === 'approved' ? 'active' : ''}`}
-                    onClick={() => setSummaryActiveTab('approved')}
+                    onClick={() => {
+                      setSummaryActiveTab('approved');
+                      setApprovedEntriesPage(1);
+                    }}
                   >
                     <i className="bi bi-check-circle-fill"></i> Approved Entries by You
                   </button>
                   <button 
                     className={`summary-tab-btn ${summaryActiveTab === 'deposits' ? 'active' : ''}`}
-                    onClick={() => setSummaryActiveTab('deposits')}
+                    onClick={() => {
+                      setSummaryActiveTab('deposits');
+                      setCashDepositsPage(1);
+                    }}
                   >
                     <i className="bi bi-bank2"></i> Cash Deposits by You
                   </button>
@@ -987,111 +998,233 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                   {summaryActiveTab === 'approved' ? (
                     <div className="approved-entries-section">
                       <h6><i className="bi bi-check-circle-fill"></i> Entries Approved By You</h6>
-                      {getFinalApprovedEntriesForTable().length > 0 ? (
-                        <div className="table-responsive">
-                          <table className="table table-striped table-sm approved-entries-table">
-                            <thead>
-                              <tr>
-                                <th>Date</th>
-                                <th>I/E</th>
-                                <th>Description</th>
-                                <th>Cash</th>
-                                <th>Bank</th>
-                                <th>Total</th>
-                                <th>SubmittedBy</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {getFinalApprovedEntriesForTable().map((entry) => (
-                                  <tr key={entry.entryId}>
-                                    <td>{formatDisplayDate(entry.date)}</td>
-                                    <td>
-                                      <span className={`badge ${entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'bg-success' : 'bg-danger'}`}>
-                                        {entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'I' : 'E'}
-                                      </span>
-                                    </td>
-                                    <td>{entry.displayName}</td>
-                                    <td className="text-success">₹{(entry.cashAmount || 0).toLocaleString('en-IN')}</td>
-                                    <td className="text-primary">₹{(entry.bankAmount || 0).toLocaleString('en-IN')}</td>
-                                    <td className="fw-bold">₹{(entry.totalAmount || 0).toLocaleString('en-IN')}</td>
-                                    <td>
-                                      <span className="badge bg-info">
-                                        <i className="bi bi-person"></i> {entry.submittedBy || 'N/A'}
-                                      </span>
-                                    </td>
+                      {(() => {
+                        const allApprovedEntries = getFinalApprovedEntriesForTable();
+                        
+                        if (allApprovedEntries.length === 0) {
+                          return (
+                            <div className="no-approved-entries">
+                              <i className="bi bi-inbox"></i>
+                              <p>No entries with final approval status found that were approved by you</p>
+                            </div>
+                          );
+                        }
+
+                        // Pagination logic for approved entries
+                        const indexOfLastEntry = approvedEntriesPage * entriesPerPage;
+                        const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
+                        const currentEntries = allApprovedEntries.slice(indexOfFirstEntry, indexOfLastEntry);
+                        const totalPages = Math.ceil(allApprovedEntries.length / entriesPerPage);
+
+                        return (
+                          <>
+                            <div className="table-responsive">
+                              <table className="table table-striped table-sm approved-entries-table">
+                                <thead>
+                                  <tr>
+                                    <th>Date</th>
+                                    <th>I/E</th>
+                                    <th>Description</th>
+                                    <th>Cash</th>
+                                    <th>Bank</th>
+                                    <th>Total</th>
+                                    <th>SubmittedBy</th>
                                   </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        ) : (
-                          <div className="no-approved-entries">
-                            <i className="bi bi-inbox"></i>
-                            <p>No entries with final approval status found that were approved by you</p>
-                          </div>
-                        )}
+                                </thead>
+                                <tbody>
+                                  {currentEntries.map((entry) => (
+                                    <tr key={entry.entryId}>
+                                      <td>{formatDisplayDate(entry.date)}</td>
+                                      <td>
+                                        <span className={`badge ${entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'bg-success' : 'bg-danger'}`}>
+                                          {entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'I' : 'E'}
+                                        </span>
+                                      </td>
+                                      <td>{entry.displayName}</td>
+                                      <td className="text-success">₹{(entry.cashAmount || 0).toLocaleString('en-IN')}</td>
+                                      <td className="text-primary">₹{(entry.bankAmount || 0).toLocaleString('en-IN')}</td>
+                                      <td className="fw-bold">₹{(entry.totalAmount || 0).toLocaleString('en-IN')}</td>
+                                      <td>
+                                        <span className="badge bg-info">
+                                          <i className="bi bi-person"></i> {entry.submittedBy || 'N/A'}
+                                        </span>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+
+                            {/* Pagination for Approved Entries */}
+                            {totalPages > 1 && (
+                              <nav aria-label="Approved entries pagination">
+                                <ul className="pagination justify-content-center pagination-sm">
+                                  <li className={`page-item ${approvedEntriesPage === 1 ? 'disabled' : ''}`}>
+                                    <button 
+                                      className="page-link" 
+                                      onClick={() => setApprovedEntriesPage(approvedEntriesPage - 1)}
+                                      disabled={approvedEntriesPage === 1}
+                                    >
+                                      Previous
+                                    </button>
+                                  </li>
+
+                                  {[...Array(totalPages)].map((_, index) => {
+                                    const pageNumber = index + 1;
+                                    return (
+                                      <li key={pageNumber} className={`page-item ${approvedEntriesPage === pageNumber ? 'active' : ''}`}>
+                                        <button 
+                                          className="page-link" 
+                                          onClick={() => setApprovedEntriesPage(pageNumber)}
+                                        >
+                                          {pageNumber}
+                                        </button>
+                                      </li>
+                                    );
+                                  })}
+
+                                  <li className={`page-item ${approvedEntriesPage === totalPages ? 'disabled' : ''}`}>
+                                    <button 
+                                      className="page-link" 
+                                      onClick={() => setApprovedEntriesPage(approvedEntriesPage + 1)}
+                                      disabled={approvedEntriesPage === totalPages}
+                                    >
+                                      Next
+                                    </button>
+                                  </li>
+                                </ul>
+                              </nav>
+                            )}
+
+                            <div className="d-flex justify-content-between align-items-center mt-3">
+                              <small className="text-muted">
+                                Showing {indexOfFirstEntry + 1} to {Math.min(indexOfLastEntry, allApprovedEntries.length)} of {allApprovedEntries.length} approved entries
+                              </small>
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   ) : (
                     <div className="cash-deposits-section">
                       <h6><i className="bi bi-bank2"></i> Cash Deposits by You</h6>
                       {(() => {
                         const currentUserName = currentUser?.fullName || currentUser?.username;
-                        const userCashDeposits = cashDeposit.filter(deposit => 
+                        const allUserCashDeposits = cashDeposit.filter(deposit => 
                           deposit.depositedBy === currentUserName
                         );
 
-                        return userCashDeposits.length > 0 ? (
-                          <div className="table-responsive">
-                            <table className="table table-striped table-sm cash-deposits-table">
-                              <thead>
-                                <tr>
-                                  <th>Date</th>
-                                  <th>Time</th>
-                                  <th>EntryType</th>
-                                  <th>EntryId</th>
-                                  <th>CashAmount</th>
-                                  <th>Description</th>
-                                  <th>DepositedBy</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {userCashDeposits.map((deposit) => (
-                                  <tr key={deposit.id}>
-                                    <td>
-                                      {deposit.date ? 
-                                        formatDisplayDate(deposit.date) : 
-                                        formatDisplayDate(deposit.timestamp)
-                                      }
-                                    </td>
-                                    <td>
-                                      {deposit.timestamp ? 
-                                        formatDisplayTime(deposit.timestamp) : 
-                                        '--:--:-- --'
-                                      }
-                                    </td>
-                                    <td>
-                                      <span className="badge bg-warning">
-                                        {deposit.entryType}
-                                      </span>
-                                    </td>
-                                    <td>{deposit.entryId}</td>
-                                    <td className="text-danger">₹{deposit.cashAmount.toLocaleString('en-IN')}</td>
-                                    <td>{deposit.description}</td>
-                                    <td>
-                                      <span className="badge bg-primary">
-                                        <i className="bi bi-person"></i> {deposit.depositedBy}
-                                      </span>
-                                    </td>
+                        if (allUserCashDeposits.length === 0) {
+                          return (
+                            <div className="no-cash-deposits">
+                              <i className="bi bi-inbox"></i>
+                              <p>No cash deposits found that were made by you</p>
+                            </div>
+                          );
+                        }
+
+                        // Pagination logic for cash deposits
+                        const indexOfLastDeposit = cashDepositsPage * entriesPerPage;
+                        const indexOfFirstDeposit = indexOfLastDeposit - entriesPerPage;
+                        const currentDeposits = allUserCashDeposits.slice(indexOfFirstDeposit, indexOfLastDeposit);
+                        const totalPages = Math.ceil(allUserCashDeposits.length / entriesPerPage);
+
+                        return (
+                          <>
+                            <div className="table-responsive">
+                              <table className="table table-striped table-sm cash-deposits-table">
+                                <thead>
+                                  <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>EntryType</th>
+                                    <th>EntryId</th>
+                                    <th>CashAmount</th>
+                                    <th>Description</th>
+                                    <th>DepositedBy</th>
                                   </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        ) : (
-                          <div className="no-cash-deposits">
-                            <i className="bi bi-inbox"></i>
-                            <p>No cash deposits found that were made by you</p>
-                          </div>
+                                </thead>
+                                <tbody>
+                                  {currentDeposits.map((deposit) => (
+                                    <tr key={deposit.id}>
+                                      <td>
+                                        {deposit.date ? 
+                                          formatDisplayDate(deposit.date) : 
+                                          formatDisplayDate(deposit.timestamp)
+                                        }
+                                      </td>
+                                      <td>
+                                        {deposit.timestamp ? 
+                                          formatDisplayTime(deposit.timestamp) : 
+                                          '--:--:-- --'
+                                        }
+                                      </td>
+                                      <td>
+                                        <span className="badge bg-warning">
+                                          {deposit.entryType}
+                                        </span>
+                                      </td>
+                                      <td>{deposit.entryId}</td>
+                                      <td className="text-danger">₹{deposit.cashAmount.toLocaleString('en-IN')}</td>
+                                      <td>{deposit.description}</td>
+                                      <td>
+                                        <span className="badge bg-primary">
+                                          <i className="bi bi-person"></i> {deposit.depositedBy}
+                                        </span>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+
+                            {/* Pagination for Cash Deposits */}
+                            {totalPages > 1 && (
+                              <nav aria-label="Cash deposits pagination">
+                                <ul className="pagination justify-content-center pagination-sm">
+                                  <li className={`page-item ${cashDepositsPage === 1 ? 'disabled' : ''}`}>
+                                    <button 
+                                      className="page-link" 
+                                      onClick={() => setCashDepositsPage(cashDepositsPage - 1)}
+                                      disabled={cashDepositsPage === 1}
+                                    >
+                                      Previous
+                                    </button>
+                                  </li>
+
+                                  {[...Array(totalPages)].map((_, index) => {
+                                    const pageNumber = index + 1;
+                                    return (
+                                      <li key={pageNumber} className={`page-item ${cashDepositsPage === pageNumber ? 'active' : ''}`}>
+                                        <button 
+                                          className="page-link" 
+                                          onClick={() => setCashDepositsPage(pageNumber)}
+                                        >
+                                          {pageNumber}
+                                        </button>
+                                      </li>
+                                    );
+                                  })}
+
+                                  <li className={`page-item ${cashDepositsPage === totalPages ? 'disabled' : ''}`}>
+                                    <button 
+                                      className="page-link" 
+                                      onClick={() => setCashDepositsPage(cashDepositsPage + 1)}
+                                      disabled={cashDepositsPage === totalPages}
+                                    >
+                                      Next
+                                    </button>
+                                  </li>
+                                </ul>
+                              </nav>
+                            )}
+
+                            <div className="d-flex justify-content-between align-items-center mt-3">
+                              <small className="text-muted">
+                                Showing {indexOfFirstDeposit + 1} to {Math.min(indexOfLastDeposit, allUserCashDeposits.length)} of {allUserCashDeposits.length} cash deposits
+                              </small>
+                            </div>
+                          </>
                         );
                       })()}
                     </div>
