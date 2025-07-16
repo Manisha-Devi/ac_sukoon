@@ -299,15 +299,70 @@ function Analytics({
     };
   }, [analytics.userBreakdown]);
 
-  // Daily trend chart
+  // Enhanced Daily trend chart with dynamic date range
   const dailyTrendData = useMemo(() => {
-    const last14Days = Array.from({length: 14}, (_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() - (13 - i));
+    // Get date range based on filter
+    const now = new Date();
+    let startDate, endDate, dayCount;
+
+    switch (dateRange) {
+      case 'thisWeek':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - now.getDay());
+        endDate = new Date(now);
+        dayCount = 7;
+        break;
+      case 'thisMonth':
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now);
+        dayCount = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+        break;
+      case 'last7Days':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 7);
+        endDate = new Date(now);
+        dayCount = 7;
+        break;
+      case 'last30Days':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 30);
+        endDate = new Date(now);
+        dayCount = 30;
+        break;
+      case 'last3Months':
+        startDate = new Date(now);
+        startDate.setMonth(now.getMonth() - 3);
+        endDate = new Date(now);
+        dayCount = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+        break;
+      case 'custom':
+        if (customDateFrom && customDateTo) {
+          startDate = new Date(customDateFrom);
+          endDate = new Date(customDateTo);
+          dayCount = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+        } else {
+          // Default to last 14 days
+          startDate = new Date(now);
+          startDate.setDate(now.getDate() - 14);
+          endDate = new Date(now);
+          dayCount = 14;
+        }
+        break;
+      default:
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 14);
+        endDate = new Date(now);
+        dayCount = 14;
+    }
+
+    // Generate array of dates
+    const dateArray = Array.from({length: dayCount}, (_, i) => {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + i);
       return date.toISOString().split('T')[0];
     });
 
-    const dailyData = last14Days.map(date => {
+    const dailyData = dateArray.map(date => {
       const dayEarnings = fareData
         .filter(entry => {
           const entryDate = entry.date || entry.dateFrom;
@@ -327,21 +382,49 @@ function Analytics({
       };
     });
 
+    // Create dynamic colors based on profit/loss
+    const backgroundColors = dailyData.map(d => 
+      d.profit >= 0 ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 107, 107, 0.1)'
+    );
+    
+    const borderColors = dailyData.map(d => 
+      d.profit >= 0 ? '#2ed573' : '#ff6b6b'
+    );
+
     return {
-      labels: dailyData.map(d => new Date(d.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })),
+      labels: dailyData.map(d => new Date(d.date).toLocaleDateString('en-IN', { 
+        month: 'short', 
+        day: 'numeric',
+        ...(dayCount > 30 && { year: '2-digit' }) // Add year for longer ranges
+      })),
       datasets: [
         {
           label: '📈 Daily Profit',
           data: dailyData.map(d => d.profit),
-          borderColor: '#667eea',
-          backgroundColor: 'rgba(102, 126, 234, 0.1)',
+          borderColor: borderColors,
+          backgroundColor: backgroundColors,
           borderWidth: 3,
           fill: true,
           tension: 0.4,
+          pointBackgroundColor: borderColors,
+          pointBorderColor: borderColors,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          segment: {
+            borderColor: (ctx) => {
+              const profit = ctx.p1.parsed.y;
+              return profit >= 0 ? '#2ed573' : '#ff6b6b';
+            },
+            backgroundColor: (ctx) => {
+              const profit = ctx.p1.parsed.y;
+              return profit >= 0 ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 107, 107, 0.1)';
+            }
+          }
         },
       ],
+      dailyDataCount: dayCount // Store count for responsive chart sizing
     };
-  }, [fareData, expenseData]);
+  }, [fareData, expenseData, dateRange, customDateFrom, customDateTo]);
 
   // Chart options
   const chartOptions = {
@@ -358,21 +441,80 @@ function Analytics({
       tooltip: {
         callbacks: {
           label: function(context) {
-            return `${context.dataset.label}: ₹${context.parsed.y?.toLocaleString('en-IN') || context.parsed?.toLocaleString('en-IN')}`;
+            const value = context.parsed.y;
+            const color = value >= 0 ? '🟢' : '🔴';
+            return `${color} ${context.dataset.label}: ₹${value?.toLocaleString('en-IN') || context.parsed?.toLocaleString('en-IN')}`;
           }
         }
       }
     },
     scales: {
+      x: {
+        ticks: {
+          maxRotation: 45,
+          minRotation: 0,
+          autoSkip: false,
+          maxTicksLimit: dailyTrendData.dailyDataCount > 30 ? 15 : dailyTrendData.dailyDataCount
+        }
+      },
       y: {
         beginAtZero: true,
         ticks: {
           callback: function(value) {
-            return '₹' + value.toLocaleString('en-IN');
+            const sign = value >= 0 ? '+' : '';
+            return sign + '₹' + value.toLocaleString('en-IN');
+          }
+        },
+        grid: {
+          color: function(context) {
+            return context.tick.value === 0 ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.1)';
+          },
+          lineWidth: function(context) {
+            return context.tick.value === 0 ? 2 : 1;
           }
         }
       },
     },
+    interaction: {
+      intersect: false,
+      mode: 'index',
+    },
+  };
+
+  // Enhanced chart options for trend chart with horizontal scroll support
+  const trendChartOptions = {
+    ...chartOptions,
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      ...chartOptions.scales,
+      x: {
+        ...chartOptions.scales.x,
+        min: dailyTrendData.dailyDataCount > 30 ? 
+          Math.max(0, dailyTrendData.labels?.length - 30) : undefined, // Show last 30 points initially
+      }
+    },
+    plugins: {
+      ...chartOptions.plugins,
+      zoom: {
+        pan: {
+          enabled: true,
+          mode: 'x',
+          speed: 10,
+          threshold: 10,
+        },
+        zoom: {
+          wheel: {
+            enabled: true,
+            speed: 0.1,
+          },
+          pinch: {
+            enabled: true
+          },
+          mode: 'x',
+        }
+      }
+    }
   };
 
   const doughnutOptions = {
@@ -564,11 +706,56 @@ function Analytics({
       <div className="row g-4 mb-4">
         <div className="col-12 col-xl-8">
           <div className="analytics-chart-card">
-            <h5>
-              <i className="bi bi-line-chart me-2"></i>
-              Daily Profit Trend (Last 14 Days)
-            </h5>
-            <Line data={dailyTrendData} options={chartOptions} />
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h5 className="mb-0">
+                <i className="bi bi-line-chart me-2"></i>
+                Daily Profit Trend 
+                <small className="text-muted ms-2">
+                  ({dailyTrendData.dailyDataCount} days)
+                </small>
+              </h5>
+              {dailyTrendData.dailyDataCount > 30 && (
+                <small className="text-muted">
+                  <i className="bi bi-mouse me-1"></i>
+                  Scroll/Zoom to view all data
+                </small>
+              )}
+            </div>
+            <div style={{ 
+              overflowX: dailyTrendData.dailyDataCount > 30 ? 'auto' : 'visible',
+              overflowY: 'hidden'
+            }}>
+              <div style={{ 
+                minWidth: dailyTrendData.dailyDataCount > 30 ? 
+                  `${Math.max(800, dailyTrendData.dailyDataCount * 25)}px` : '100%',
+                height: '380px'
+              }}>
+                <Line data={dailyTrendData} options={trendChartOptions} />
+              </div>
+            </div>
+            {/* Profit/Loss Legend */}
+            <div className="mt-2 d-flex justify-content-center gap-4">
+              <div className="d-flex align-items-center">
+                <div style={{
+                  width: '12px',
+                  height: '12px',
+                  backgroundColor: '#2ed573',
+                  borderRadius: '50%',
+                  marginRight: '8px'
+                }}></div>
+                <small className="text-success fw-semibold">Profit Days</small>
+              </div>
+              <div className="d-flex align-items-center">
+                <div style={{
+                  width: '12px',
+                  height: '12px',
+                  backgroundColor: '#ff6b6b',
+                  borderRadius: '50%',
+                  marginRight: '8px'
+                }}></div>
+                <small className="text-danger fw-semibold">Loss Days</small>
+              </div>
+            </div>
           </div>
         </div>
 
