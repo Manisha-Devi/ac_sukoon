@@ -529,7 +529,8 @@ function BasicPayment({
     const userExpenseData = expenseData.filter(
       (entry) =>
         entry.submittedBy === currentUserName &&
-        entry.entryStatus !== "approved",
+        entry.entryStatus !== "approved" &&
+        (entry.type === "fuel" || entry.type === "adda" || entry.type === "union"),
     );
 
     const totalCash = userExpenseData.reduce(
@@ -550,7 +551,8 @@ function BasicPayment({
     return expenseData.filter(
       (entry) =>
         entry.submittedBy === currentUserName &&
-        entry.entryStatus !== "approved",
+        entry.entryStatus !== "approved" &&
+        (entry.type === "fuel" || entry.type === "adda" || entry.type === "union"),
     );
   };
 
