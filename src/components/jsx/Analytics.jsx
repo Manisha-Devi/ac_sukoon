@@ -352,10 +352,10 @@ function Analytics({
         dayCount = 14;
     }
 
-    // Generate array of dates
+    // Generate array of dates (reversed to show most recent first)
     const dateArray = Array.from({length: dayCount}, (_, i) => {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
+      const date = new Date(endDate);
+      date.setDate(endDate.getDate() - i);
       return date.toISOString().split('T')[0];
     });
 
