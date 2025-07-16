@@ -13,7 +13,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
   const [showFilter, setShowFilter] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [showCashDepositModal, setShowCashDepositModal] = useState(false);
-  const [summaryActiveTab, setSummaryActiveTab] = useState('approved');
+  const [summaryActiveTab, setSummaryActiveTab] = useState('income');
   const [cashDepositForm, setCashDepositForm] = useState({
     amount: '',
     description: '',
@@ -975,13 +975,22 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
               <div className="summary-tabs-section">
                 <div className="summary-tabs">
                   <button 
-                    className={`summary-tab-btn ${summaryActiveTab === 'approved' ? 'active' : ''}`}
+                    className={`summary-tab-btn ${summaryActiveTab === 'income' ? 'active' : ''}`}
                     onClick={() => {
-                      setSummaryActiveTab('approved');
+                      setSummaryActiveTab('income');
                       setApprovedEntriesPage(1);
                     }}
                   >
-                    <i className="bi bi-check-circle-fill"></i> Approved Entries by You
+                    <i className="bi bi-arrow-up-circle"></i> Income Entries by You
+                  </button>
+                  <button 
+                    className={`summary-tab-btn ${summaryActiveTab === 'expense' ? 'active' : ''}`}
+                    onClick={() => {
+                      setSummaryActiveTab('expense');
+                      setApprovedEntriesPage(1);
+                    }}
+                  >
+                    <i className="bi bi-arrow-down-circle"></i> Expense Entries by You
                   </button>
                   <button 
                     className={`summary-tab-btn ${summaryActiveTab === 'deposits' ? 'active' : ''}`}
@@ -995,26 +1004,29 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                 </div>
 
                 <div className="summary-tab-content">
-                  {summaryActiveTab === 'approved' ? (
-                    <div className="approved-entries-section">
-                      <h6><i className="bi bi-check-circle-fill"></i> Entries Approved By You</h6>
+                  {summaryActiveTab === 'income' ? (
+                    <div className="income-entries-section">
+                      <h6><i className="bi bi-arrow-up-circle"></i> Income Entries Approved By You</h6>
                       {(() => {
                         const allApprovedEntries = getFinalApprovedEntriesForTable();
+                        const incomeEntries = allApprovedEntries.filter(entry => 
+                          entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry'
+                        );
                         
-                        if (allApprovedEntries.length === 0) {
+                        if (incomeEntries.length === 0) {
                           return (
                             <div className="no-approved-entries">
                               <i className="bi bi-inbox"></i>
-                              <p>No entries with final approval status found that were approved by you</p>
+                              <p>No income entries with final approval status found that were approved by you</p>
                             </div>
                           );
                         }
 
-                        // Pagination logic for approved entries
+                        // Pagination logic for income entries
                         const indexOfLastEntry = approvedEntriesPage * entriesPerPage;
                         const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
-                        const currentEntries = allApprovedEntries.slice(indexOfFirstEntry, indexOfLastEntry);
-                        const totalPages = Math.ceil(allApprovedEntries.length / entriesPerPage);
+                        const currentEntries = incomeEntries.slice(indexOfFirstEntry, indexOfLastEntry);
+                        const totalPages = Math.ceil(incomeEntries.length / entriesPerPage);
 
                         return (
                           <>
@@ -1041,9 +1053,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                                         }
                                       </td>
                                       <td>
-                                        <span className={`badge ${entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'bg-success' : 'bg-danger'}`}>
-                                          {entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'I' : 'E'}
-                                        </span>
+                                        <span className="badge bg-success">I</span>
                                       </td>
                                       <td>{entry.displayName}</td>
                                       <td className="text-success">₹{(entry.cashAmount || 0).toLocaleString('en-IN')}</td>
@@ -1060,9 +1070,9 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                               </table>
                             </div>
 
-                            {/* Pagination for Approved Entries */}
+                            {/* Pagination for Income Entries */}
                             {totalPages > 1 && (
-                              <nav aria-label="Approved entries pagination">
+                              <nav aria-label="Income entries pagination">
                                 <ul className="pagination justify-content-center pagination-sm">
                                   <li className={`page-item ${approvedEntriesPage === 1 ? 'disabled' : ''}`}>
                                     <button 
@@ -1103,7 +1113,123 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
 
                             <div className="d-flex justify-content-between align-items-center mt-3">
                               <small className="text-muted">
-                                Showing {indexOfFirstEntry + 1} to {Math.min(indexOfLastEntry, allApprovedEntries.length)} of {allApprovedEntries.length} approved entries
+                                Showing {indexOfFirstEntry + 1} to {Math.min(indexOfLastEntry, incomeEntries.length)} of {incomeEntries.length} income entries
+                              </small>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  ) : summaryActiveTab === 'expense' ? (
+                    <div className="expense-entries-section">
+                      <h6><i className="bi bi-arrow-down-circle"></i> Expense Entries Approved By You</h6>
+                      {(() => {
+                        const allApprovedEntries = getFinalApprovedEntriesForTable();
+                        const expenseEntries = allApprovedEntries.filter(entry => 
+                          entry.dataType !== 'Fare Receipt' && entry.dataType !== 'Booking Entry'
+                        );
+                        
+                        if (expenseEntries.length === 0) {
+                          return (
+                            <div className="no-approved-entries">
+                              <i className="bi bi-inbox"></i>
+                              <p>No expense entries with final approval status found that were approved by you</p>
+                            </div>
+                          );
+                        }
+
+                        // Pagination logic for expense entries
+                        const indexOfLastEntry = approvedEntriesPage * entriesPerPage;
+                        const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
+                        const currentEntries = expenseEntries.slice(indexOfFirstEntry, indexOfLastEntry);
+                        const totalPages = Math.ceil(expenseEntries.length / entriesPerPage);
+
+                        return (
+                          <>
+                            <div className="table-responsive">
+                              <table className="table table-striped table-sm approved-entries-table">
+                                <thead>
+                                  <tr>
+                                    <th>Date</th>
+                                    <th>I/E</th>
+                                    <th>Description</th>
+                                    <th>Cash</th>
+                                    <th>Bank</th>
+                                    <th>Total</th>
+                                    <th>SubmittedBy</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {currentEntries.map((entry) => (
+                                    <tr key={entry.entryId}>
+                                      <td>
+                                        {entry.dataType === 'Booking Entry' && entry.dateFrom ? 
+                                          formatDisplayDate(entry.dateFrom) : 
+                                          formatDisplayDate(entry.date)
+                                        }
+                                      </td>
+                                      <td>
+                                        <span className="badge bg-danger">E</span>
+                                      </td>
+                                      <td>{entry.displayName}</td>
+                                      <td className="text-success">₹{(entry.cashAmount || 0).toLocaleString('en-IN')}</td>
+                                      <td className="text-primary">₹{(entry.bankAmount || 0).toLocaleString('en-IN')}</td>
+                                      <td className="fw-bold">₹{(entry.totalAmount || 0).toLocaleString('en-IN')}</td>
+                                      <td>
+                                        <span className="badge bg-info">
+                                          <i className="bi bi-person"></i> {entry.submittedBy || 'N/A'}
+                                        </span>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+
+                            {/* Pagination for Expense Entries */}
+                            {totalPages > 1 && (
+                              <nav aria-label="Expense entries pagination">
+                                <ul className="pagination justify-content-center pagination-sm">
+                                  <li className={`page-item ${approvedEntriesPage === 1 ? 'disabled' : ''}`}>
+                                    <button 
+                                      className="page-link" 
+                                      onClick={() => setApprovedEntriesPage(approvedEntriesPage - 1)}
+                                      disabled={approvedEntriesPage === 1}
+                                    >
+                                      Previous
+                                    </button>
+                                  </li>
+
+                                  {[...Array(totalPages)].map((_, index) => {
+                                    const pageNumber = index + 1;
+                                    return (
+                                      <li key={pageNumber} className={`page-item ${approvedEntriesPage === pageNumber ? 'active' : ''}`}>
+                                        <button 
+                                          className="page-link" 
+                                          onClick={() => setApprovedEntriesPage(pageNumber)}
+                                        >
+                                          {pageNumber}
+                                        </button>
+                                      </li>
+                                    );
+                                  })}
+
+                                  <li className={`page-item ${approvedEntriesPage === totalPages ? 'disabled' : ''}`}>
+                                    <button 
+                                      className="page-link" 
+                                      onClick={() => setApprovedEntriesPage(approvedEntriesPage + 1)}
+                                      disabled={approvedEntriesPage === totalPages}
+                                    >
+                                      Next
+                                    </button>
+                                  </li>
+                                </ul>
+                              </nav>
+                            )}
+
+                            <div className="d-flex justify-content-between align-items-center mt-3">
+                              <small className="text-muted">
+                                Showing {indexOfFirstEntry + 1} to {Math.min(indexOfLastEntry, expenseEntries.length)} of {expenseEntries.length} expense entries
                               </small>
                             </div>
                           </>
