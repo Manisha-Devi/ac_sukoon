@@ -621,156 +621,157 @@ function Analytics({
       {showFilter && (
         <div className="analytics-filter-section">
           <div className="row g-3 mb-4">
-        <div className="col-md-3">
-          <label className="form-label">Date Range</label>
-          <select 
-            className="form-select" 
-            value={dateRange} 
-            onChange={(e) => setDateRange(e.target.value)}
-          >
-            <option value="thisWeek">This Week</option>
-            <option value="thisMonth">This Month</option>
-            <option value="last7Days">Last 7 Days</option>
-            <option value="last30Days">Last 30 Days</option>
-            <option value="last3Months">Last 3 Months</option>
-            <option value="custom">Custom Range</option>
-          </select>
-        </div>
-
-        {dateRange === 'custom' && (
-          <>
-            <div className="col-md-2">
-              <label className="form-label">From Date</label>
-              <input
-                type="date"
-                className="form-control"
-                value={customDateFrom}
-                onChange={(e) => setCustomDateFrom(e.target.value)}
-              />
+            <div className="col-md-3">
+              <label className="form-label">Date Range</label>
+              <select 
+                className="form-select" 
+                value={dateRange} 
+                onChange={(e) => setDateRange(e.target.value)}
+              >
+                <option value="thisWeek">This Week</option>
+                <option value="thisMonth">This Month</option>
+                <option value="last7Days">Last 7 Days</option>
+                <option value="last30Days">Last 30 Days</option>
+                <option value="last3Months">Last 3 Months</option>
+                <option value="custom">Custom Range</option>
+              </select>
             </div>
-            <div className="col-md-2">
-              <label className="form-label">To Date</label>
-              <input
-                type="date"
-                className="form-control"
-                value={customDateTo}
-                onChange={(e) => setCustomDateTo(e.target.value)}
-              />
+
+            {dateRange === 'custom' && (
+              <>
+                <div className="col-md-2">
+                  <label className="form-label">From Date</label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={customDateFrom}
+                    onChange={(e) => setCustomDateFrom(e.target.value)}
+                  />
+                </div>
+                <div className="col-md-2">
+                  <label className="form-label">To Date</label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={customDateTo}
+                    onChange={(e) => setCustomDateTo(e.target.value)}
+                  />
+                </div>
+              </>
+            )}
+
+            <div className="col-md-3">
+              <label className="form-label">User Filter</label>
+              <select 
+                className="form-select" 
+                value={userFilter} 
+                onChange={(e) => setUserFilter(e.target.value)}
+              >
+                <option value="all">All Users</option>
+                {allUsers.map(user => (
+                  <option key={user.username} value={user.name}>
+                    {user.name}
+                  </option>
+                ))}
+              </select>
             </div>
-          </>
-        )}
 
-        <div className="col-md-3">
-          <label className="form-label">User Filter</label>
-          <select 
-            className="form-select" 
-            value={userFilter} 
-            onChange={(e) => setUserFilter(e.target.value)}
-          >
-            <option value="all">All Users</option>
-            {allUsers.map(user => (
-              <option key={user.username} value={user.name}>
-                {user.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="col-md-2">
-          <label className="form-label">Entry Type</label>
-          <select 
-            className="form-select" 
-            value={entryTypeFilter} 
-            onChange={(e) => setEntryTypeFilter(e.target.value)}
-          >
-            <option value="all">All Types</option>
-            <option value="daily">Daily</option>
-            <option value="booking">Booking</option>
-            <option value="fuel">Fuel</option>
-            <option value="adda">Adda</option>
-            <option value="union">Union</option>
-            <option value="service">Service</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
+            <div className="col-md-2">
+              <label className="form-label">Entry Type</label>
+              <select 
+                className="form-select" 
+                value={entryTypeFilter} 
+                onChange={(e) => setEntryTypeFilter(e.target.value)}
+              >
+                <option value="all">All Types</option>
+                <option value="daily">Daily</option>
+                <option value="booking">Booking</option>
+                <option value="fuel">Fuel</option>
+                <option value="adda">Adda</option>
+                <option value="union">Union</option>
+                <option value="service">Service</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Enhanced Key Metrics Cards */}
       {showSummary && (
         <div className="row g-4 mb-4">
-        <div className="col-12 col-md-2">
-          <div className="analytics-stats-card">
-            <div className="card-body text-center">
-              <h6 className="card-title text-success">Total Earnings</h6>
-              <h4 className="card-text">₹{analytics.earnings.toLocaleString()}</h4>
-              <small className="text-muted">
-                Daily: ₹{analytics.dailyEarnings.toLocaleString()} | 
-                Booking: ₹{analytics.bookingEarnings.toLocaleString()}
-              </small>
+          <div className="col-12 col-md-2">
+            <div className="analytics-stats-card">
+              <div className="card-body text-center">
+                <h6 className="card-title text-success">Total Earnings</h6>
+                <h4 className="card-text">₹{analytics.earnings.toLocaleString()}</h4>
+                <small className="text-muted">
+                  Daily: ₹{analytics.dailyEarnings.toLocaleString()} | 
+                  Booking: ₹{analytics.bookingEarnings.toLocaleString()}
+                </small>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="col-12 col-md-2">
-          <div className="analytics-stats-card">
-            <div className="card-body text-center">
-              <h6 className="card-title text-danger">Total Expenses</h6>
-              <h4 className="card-text">₹{analytics.expenses.toLocaleString()}</h4>
-              <small className="text-muted">
-                {analytics.entryStats.expenseEntries} entries
-              </small>
+          <div className="col-12 col-md-2">
+            <div className="analytics-stats-card">
+              <div className="card-body text-center">
+                <h6 className="card-title text-danger">Total Expenses</h6>
+                <h4 className="card-text">₹{analytics.expenses.toLocaleString()}</h4>
+                <small className="text-muted">
+                  {analytics.entryStats.expenseEntries} entries
+                </small>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="col-12 col-md-2">
-          <div className="analytics-stats-card">
-            <div className="card-body text-center">
-              <h6 className="card-title text-primary">Net Profit</h6>
-              <h4 className="card-text">₹{analytics.profit.toLocaleString()}</h4>
-              <small className={analytics.profit > 0 ? "text-success" : "text-danger"}>
-                {analytics.profitMargin.toFixed(1)}% margin
-              </small>
+          <div className="col-12 col-md-2">
+            <div className="analytics-stats-card">
+              <div className="card-body text-center">
+                <h6 className="card-title text-primary">Net Profit</h6>
+                <h4 className="card-text">₹{analytics.profit.toLocaleString()}</h4>
+                <small className={analytics.profit > 0 ? "text-success" : "text-danger"}>
+                  {analytics.profitMargin.toFixed(1)}% margin
+                </small>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="col-12 col-md-2">
-          <div className="analytics-stats-card">
-            <div className="card-body text-center">
-              <h6 className="card-title text-info">Cash vs Bank</h6>
-              <h4 className="card-text">₹{analytics.cashVsBank.incomeCash.toLocaleString()}</h4>
-              <small className="text-muted">
-                Cash Income
-              </small>
+          <div className="col-12 col-md-2">
+            <div className="analytics-stats-card">
+              <div className="card-body text-center">
+                <h6 className="card-title text-info">Cash vs Bank</h6>
+                <h4 className="card-text">₹{analytics.cashVsBank.incomeCash.toLocaleString()}</h4>
+                <small className="text-muted">
+                  Cash Income
+                </small>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="col-12 col-md-2">
-          <div className="analytics-stats-card">
-            <div className="card-body text-center">
-              <h6 className="card-title text-warning">Total Entries</h6>
-              <h4 className="card-text">{analytics.entryStats.totalEntries}</h4>
-              <small className="text-muted">
-                {analytics.entryStats.fareEntries} income | {analytics.entryStats.expenseEntries} expense
-              </small>
+          <div className="col-12 col-md-2">
+            <div className="analytics-stats-card">
+              <div className="card-body text-center">
+                <h6 className="card-title text-warning">Total Entries</h6>
+                <h4 className="card-text">{analytics.entryStats.totalEntries}</h4>
+                <small className="text-muted">
+                  {analytics.entryStats.fareEntries} income | {analytics.entryStats.expenseEntries} expense
+                </small>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="col-12 col-md-2">
-          <div className="analytics-stats-card">
-            <div className="card-body text-center">
-              <h6 className="card-title text-secondary">Cash Deposits</h6>
-              <h4 className="card-text">₹{analytics.cashVsBank.cashDeposits.toLocaleString()}</h4>
-              <small className="text-muted">
-                Bank deposits
-              </small>
+          <div className="col-12 col-md-2">
+            <div className="analytics-stats-card">
+              <div className="card-body text-center">
+                <h6 className="card-title text-secondary">Cash Deposits</h6>
+                <h4 className="card-text">₹{analytics.cashVsBank.cashDeposits.toLocaleString()}</h4>
+                <small className="text-muted">
+                  Bank deposits
+                </small>
+              </div>
             </div>
           </div>
-        </div>
         </div>
       )}
 
