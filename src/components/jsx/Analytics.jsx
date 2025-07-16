@@ -56,6 +56,11 @@ function Analytics({
     currentUser
   });
 
+  // Debug: Check sample data structure
+  console.log('📊 Sample fareData:', fareData.slice(0, 3));
+  console.log('📊 Sample expenseData:', expenseData.slice(0, 3));
+  console.log('📊 Sample cashDeposit:', cashDeposit.slice(0, 3));
+
   // Advanced date filtering function
   const filterDataByDateRange = (data) => {
     const now = new Date();
@@ -99,7 +104,19 @@ function Analytics({
     }
 
     return data.filter(item => {
-      const itemDate = new Date(item.date);
+      // Handle different date field formats
+      let itemDate;
+      if (item.date) {
+        itemDate = new Date(item.date);
+      } else if (item.dateFrom) {
+        itemDate = new Date(item.dateFrom);
+      } else if (item.dateTo) {
+        itemDate = new Date(item.dateTo);
+      } else {
+        console.warn('📅 No valid date found for item:', item);
+        return false;
+      }
+      
       return itemDate >= startDate && itemDate <= endDate;
     });
   };
@@ -109,7 +126,9 @@ function Analytics({
     if (userFilter === 'all') return data;
     return data.filter(item => 
       item.submittedBy === userFilter || 
-      item.depositedBy === userFilter
+      item.depositedBy === userFilter ||
+      item.givenBy === userFilter ||
+      item.conductorName === userFilter
     );
   };
 
@@ -290,7 +309,10 @@ function Analytics({
 
     const dailyData = last14Days.map(date => {
       const dayEarnings = fareData
-        .filter(entry => entry.date === date && entry.type !== 'off')
+        .filter(entry => {
+          const entryDate = entry.date || entry.dateFrom;
+          return entryDate === date && entry.type !== 'off';
+        })
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
       
       const dayExpenses = expenseData

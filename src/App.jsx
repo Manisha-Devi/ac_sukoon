@@ -204,11 +204,12 @@ function App() {
         })));
       }
 
-      // Add booking entries
+      // Add booking entries (fix date field mapping)
       if (bookingEntries?.data && Array.isArray(bookingEntries.data)) {
         combinedFareData.push(...bookingEntries.data.map(booking => ({
           ...booking,
-          type: 'booking'
+          type: 'booking',
+          date: booking.dateFrom || booking.date // Use dateFrom as primary date for booking entries
         })));
       }
 
