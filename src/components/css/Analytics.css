@@ -412,6 +412,15 @@
     line-height: 1.2;
   }
   
+  /* Mobile checkbox spacing */
+  .analytics-chart-card .d-flex.align-items-center .gap-1 {
+    gap: 0.25rem !important;
+  }
+  
+  .analytics-chart-card .flex-shrink-1 {
+    margin-right: 0.5rem !important;
+  }
+  
   .analytics-chart-card > div:last-child {
     width: 100% !important;
     height: calc(100% - 50px) !important;

@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback } from "react";
 import "../css/Analytics.css";
 import {
@@ -115,7 +114,7 @@ function Analytics({
       } else {
         return false;
       }
-      
+
       return itemDate >= startDate && itemDate <= endDate;
     });
   }, [dateRange, customDateFrom, customDateTo]);
@@ -185,7 +184,7 @@ function Analytics({
     // Calculate cash vs bank breakdown
     const totalCash = filteredFareData.reduce((sum, item) => sum + (parseFloat(item.cashAmount) || 0), 0);
     const totalBank = filteredFareData.reduce((sum, item) => sum + (parseFloat(item.bankAmount) || 0), 0);
-    
+
     const expenseCash = filteredExpenseData.reduce((sum, item) => sum + (parseFloat(item.cashAmount) || 0), 0);
     const expenseBank = filteredExpenseData.reduce((sum, item) => sum + (parseFloat(item.bankAmount) || 0), 0);
 
@@ -200,7 +199,7 @@ function Analytics({
       const userEarnings = filteredFareData
         .filter(entry => entry.submittedBy === user.name)
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
-      
+
       const userExpenses = filteredExpenseData
         .filter(entry => entry.submittedBy === user.name)
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
@@ -368,7 +367,7 @@ function Analytics({
           return entryDate === date && entry.type !== 'off';
         })
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
-      
+
       let dayExpenses = expenseData
         .filter(entry => entry.date === date)
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
@@ -377,7 +376,7 @@ function Analytics({
       if (addExpenseAdjustment1400) {
         dayExpenses += 1400;
       }
-      
+
       // Add ₹1000 to expenses if second checkbox is checked
       if (addExpenseAdjustment) {
         dayExpenses += 1000;
@@ -403,7 +402,7 @@ function Analytics({
         const backgroundColors = slideData.map(d => 
           d.profit >= 0 ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 107, 107, 0.3)'
         );
-        
+
         const borderColors = slideData.map(d => 
           d.profit >= 0 ? '#2ed573' : '#ff6b6b'
         );
@@ -445,7 +444,7 @@ function Analytics({
       const backgroundColors = dailyData.map(d => 
         d.profit >= 0 ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 107, 107, 0.3)'
       );
-      
+
       const borderColors = dailyData.map(d => 
         d.profit >= 0 ? '#2ed573' : '#ff6b6b'
       );
@@ -792,15 +791,15 @@ function Analytics({
         <div className="col-12">
           <div className="analytics-chart-card">
             <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap">
-              <div className="d-flex align-items-center flex-wrap">
-                <h5 className="mb-0 flex-shrink-1 me-3">
-                  <i className="bi bi-line-chart me-2"></i>
-                  Daily Profit 
-                  <small className="text-muted ms-2 d-none d-md-inline">
-                    ({dailyTrendData.dailyDataCount} days)
-                  </small>
-                </h5>
-                <div className="d-flex gap-2 align-items-center">
+                <div className="d-flex align-items-center flex-wrap">
+                  <h5 className="mb-0 flex-shrink-1 me-1">
+                    <i className="bi bi-line-chart me-2"></i>
+                    Daily Profit 
+                    <small className="text-muted ms-2 d-none d-md-inline">
+                      ({dailyTrendData.dailyDataCount} days)
+                    </small>
+                  </h5>
+                  <div className="d-flex gap-1 align-items-center">
                   <div className="form-check form-switch">
                     <input 
                       className="form-check-input" 
@@ -829,7 +828,7 @@ function Analytics({
                   )}
                 </div>
               </div>
-              
+
               {/* Navigation Controls for Mobile */}
               {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 && (
                 <div className="d-flex align-items-center gap-2">
@@ -850,7 +849,7 @@ function Analytics({
                   </button>
                 </div>
               )}
-              
+
               {!dailyTrendData.isMobile && dailyTrendData.dailyDataCount > 30 && (
                 <small className="text-muted d-none d-lg-block">
                   <i className="bi bi-mouse me-1"></i>
@@ -858,7 +857,7 @@ function Analytics({
                 </small>
               )}
             </div>
-            
+
             <div style={{ 
               height: 'calc(100% - 60px)', 
               minHeight: window.innerWidth <= 576 ? '280px' : '340px',
@@ -923,7 +922,7 @@ function Analytics({
                   }} 
                 />
               )}
-              
+
               {/* Custom pagination dots for mobile */}
               {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 && (
                 <div className="swiper-pagination-custom"></div>
@@ -932,12 +931,12 @@ function Analytics({
           </div>
         </div>
 
-        
+
       </div>
 
-      
 
-      
+
+
     </div>
   );
 }
