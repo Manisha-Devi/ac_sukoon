@@ -398,7 +398,19 @@ function Analytics({
           pointBackgroundColor: borderColors,
           pointBorderColor: borderColors,
           pointRadius: 4,
-          pointHoverRadius: 6
+          pointHoverRadius: 6,
+          segment: {
+            borderColor: function(ctx) {
+              const currentProfit = ctx.p0.parsed.y;
+              const nextProfit = ctx.p1.parsed.y;
+              // If current point is profit, use green, else red
+              return currentProfit >= 0 ? '#2ed573' : '#ff6b6b';
+            },
+            backgroundColor: function(ctx) {
+              const currentProfit = ctx.p0.parsed.y;
+              return currentProfit >= 0 ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 107, 107, 0.1)';
+            }
+          }
         },
       ],
       dailyDataCount: dayCount // Store count for responsive chart sizing
