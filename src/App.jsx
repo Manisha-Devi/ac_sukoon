@@ -813,6 +813,11 @@ function App() {
             expenseData={expenseData}
             totalEarnings={totalEarnings}
             totalExpenses={totalExpenses}
+            cashBookEntries={cashBookEntries}
+            allUsers={allUsers}
+            cashDeposit={cashDeposit}
+            dataStatistics={dataStatistics}
+            currentUser={user}
           />
         )}
         {activeTab === "cash-book" && (

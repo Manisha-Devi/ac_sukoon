@@ -29,45 +29,119 @@ ChartJS.register(
   Filler,
 );
 
-function Analytics({ fareData = [], expenseData = [], totalEarnings = 0, totalExpenses = 0 }) {
+function Analytics({ 
+  fareData = [], 
+  expenseData = [], 
+  totalEarnings = 0, 
+  totalExpenses = 0,
+  cashBookEntries = [],
+  allUsers = [],
+  cashDeposit = [],
+  dataStatistics = {},
+  currentUser = {}
+}) {
   const [dateRange, setDateRange] = useState('thisMonth');
+  const [customDateFrom, setCustomDateFrom] = useState('');
+  const [customDateTo, setCustomDateTo] = useState('');
+  const [userFilter, setUserFilter] = useState('all');
+  const [entryTypeFilter, setEntryTypeFilter] = useState('all');
 
-  // Calculate profit
-  const netProfit = totalEarnings - totalExpenses;
+  console.log('📊 Analytics Props Received:', {
+    fareDataCount: fareData.length,
+    expenseDataCount: expenseData.length,
+    cashBookEntriesCount: cashBookEntries.length,
+    allUsersCount: allUsers.length,
+    cashDepositCount: cashDeposit.length,
+    dataStatistics,
+    currentUser
+  });
 
-  // Filter data based on date range
-  const filterDataByDate = (data) => {
+  // Advanced date filtering function
+  const filterDataByDateRange = (data) => {
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+    let startDate, endDate;
+
+    switch (dateRange) {
+      case 'thisWeek':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - now.getDay());
+        endDate = new Date(now);
+        break;
+      case 'thisMonth':
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now);
+        break;
+      case 'last7Days':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 7);
+        endDate = new Date(now);
+        break;
+      case 'last30Days':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 30);
+        endDate = new Date(now);
+        break;
+      case 'last3Months':
+        startDate = new Date(now);
+        startDate.setMonth(now.getMonth() - 3);
+        endDate = new Date(now);
+        break;
+      case 'custom':
+        if (customDateFrom && customDateTo) {
+          startDate = new Date(customDateFrom);
+          endDate = new Date(customDateTo);
+        } else {
+          return data; // Return all data if custom dates not set
+        }
+        break;
+      default:
+        return data;
+    }
 
     return data.filter(item => {
       const itemDate = new Date(item.date);
-      switch (dateRange) {
-        case 'thisWeek':
-          return itemDate >= startOfWeek;
-        case 'thisMonth':
-          return itemDate >= startOfMonth;
-        case 'last30Days':
-          const last30Days = new Date();
-          last30Days.setDate(last30Days.getDate() - 30);
-          return itemDate >= last30Days;
-        default:
-          return true;
-      }
+      return itemDate >= startDate && itemDate <= endDate;
     });
   };
 
-  // Calculate filtered totals and expense breakdown
-  const analytics = useMemo(() => {
-    const filteredFareData = filterDataByDate(fareData);
-    const filteredExpenseData = filterDataByDate(expenseData);
+  // Filter data by user
+  const filterDataByUser = (data) => {
+    if (userFilter === 'all') return data;
+    return data.filter(item => 
+      item.submittedBy === userFilter || 
+      item.depositedBy === userFilter
+    );
+  };
 
-    const filteredEarnings = filteredFareData
-      .filter(entry => entry.type !== 'off')
+  // Filter data by entry type
+  const filterDataByEntryType = (data) => {
+    if (entryTypeFilter === 'all') return data;
+    return data.filter(item => item.type === entryTypeFilter || item.entryType === entryTypeFilter);
+  };
+
+  // Apply all filters
+  const applyFilters = (data) => {
+    return filterDataByEntryType(filterDataByUser(filterDataByDateRange(data)));
+  };
+
+  // Enhanced analytics calculations
+  const analytics = useMemo(() => {
+    const filteredFareData = applyFilters(fareData);
+    const filteredExpenseData = applyFilters(expenseData);
+    const filteredCashDeposit = applyFilters(cashDeposit);
+
+    // Calculate earnings
+    const dailyEarnings = filteredFareData
+      .filter(entry => entry.type === 'daily')
       .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
-    // Calculate expense breakdown by type
+    const bookingEarnings = filteredFareData
+      .filter(entry => entry.type === 'booking')
+      .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
+
+    const totalFilteredEarnings = dailyEarnings + bookingEarnings;
+
+    // Calculate expenses by type
     const fuelExpenses = filteredExpenseData
       .filter(item => item.type === 'fuel')
       .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
@@ -88,84 +162,73 @@ function Analytics({ fareData = [], expenseData = [], totalEarnings = 0, totalEx
       .filter(item => item.type === 'other')
       .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
-    const filteredExpensesTotal = fuelExpenses + addaExpenses + unionExpenses + serviceExpenses + otherExpenses;
-    const filteredProfit = filteredEarnings - filteredExpensesTotal;
+    const totalFilteredExpenses = fuelExpenses + addaExpenses + unionExpenses + serviceExpenses + otherExpenses;
+
+    // Calculate cash vs bank breakdown
+    const totalCash = filteredFareData.reduce((sum, item) => sum + (parseFloat(item.cashAmount) || 0), 0);
+    const totalBank = filteredFareData.reduce((sum, item) => sum + (parseFloat(item.bankAmount) || 0), 0);
+    
+    const expenseCash = filteredExpenseData.reduce((sum, item) => sum + (parseFloat(item.cashAmount) || 0), 0);
+    const expenseBank = filteredExpenseData.reduce((sum, item) => sum + (parseFloat(item.bankAmount) || 0), 0);
+
+    // Calculate cash deposits total
+    const totalCashDeposits = filteredCashDeposit.reduce((sum, item) => sum + (parseFloat(item.cashAmount) || 0), 0);
+
+    const filteredProfit = totalFilteredEarnings - totalFilteredExpenses;
+
+    // User-wise breakdown
+    const userBreakdown = {};
+    allUsers.forEach(user => {
+      const userEarnings = filteredFareData
+        .filter(entry => entry.submittedBy === user.name)
+        .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
+      
+      const userExpenses = filteredExpenseData
+        .filter(entry => entry.submittedBy === user.name)
+        .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
+
+      userBreakdown[user.name] = {
+        earnings: userEarnings,
+        expenses: userExpenses,
+        profit: userEarnings - userExpenses,
+        fixedCash: user.fixedCash || 0
+      };
+    });
 
     return {
-      earnings: filteredEarnings,
-      expenses: filteredExpensesTotal,
+      earnings: totalFilteredEarnings,
+      dailyEarnings,
+      bookingEarnings,
+      expenses: totalFilteredExpenses,
       profit: filteredProfit,
-      profitMargin: filteredEarnings > 0 ? (filteredProfit / filteredEarnings) * 100 : 0,
+      profitMargin: totalFilteredEarnings > 0 ? (filteredProfit / totalFilteredEarnings) * 100 : 0,
       breakdown: {
         fuel: fuelExpenses,
         adda: addaExpenses,
         union: unionExpenses,
         service: serviceExpenses,
         other: otherExpenses
+      },
+      cashVsBank: {
+        incomeCash: totalCash,
+        incomeBank: totalBank,
+        expenseCash,
+        expenseBank,
+        cashDeposits: totalCashDeposits
+      },
+      userBreakdown,
+      entryStats: {
+        totalEntries: filteredFareData.length + filteredExpenseData.length,
+        fareEntries: filteredFareData.length,
+        expenseEntries: filteredExpenseData.length,
+        offDays: filteredFareData.filter(entry => entry.type === 'off').length
       }
     };
-  }, [fareData, expenseData, dateRange]);
+  }, [fareData, expenseData, cashDeposit, allUsers, dateRange, customDateFrom, customDateTo, userFilter, entryTypeFilter]);
 
-  // Monthly trends chart data with enhanced styling
-  const monthlyTrendsData = useMemo(() => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    
-    const earningsData = months.map((_, index) => {
-      const baseAmount = Math.floor(totalEarnings / 12);
-      const variance = Math.floor(Math.random() * 8000) - 4000;
-      const seasonalFactor = 1 + 0.3 * Math.sin((index / 12) * 2 * Math.PI);
-      return Math.max(0, Math.floor((baseAmount + variance) * seasonalFactor));
-    });
-    
-    const expensesData = months.map((_, index) => {
-      const baseAmount = Math.floor(totalExpenses / 12);
-      const variance = Math.floor(Math.random() * 4000) - 2000;
-      const seasonalFactor = 1 + 0.2 * Math.sin((index / 12) * 2 * Math.PI);
-      return Math.max(0, Math.floor((baseAmount + variance) * seasonalFactor));
-    });
-
-    return {
-      labels: months,
-      datasets: [
-        {
-          label: '💰 Earnings',
-          data: earningsData,
-          backgroundColor: (ctx) => {
-            const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(46, 213, 115, 0.9)');
-            gradient.addColorStop(1, 'rgba(46, 213, 115, 0.1)');
-            return gradient;
-          },
-          borderColor: '#2ed573',
-          borderWidth: 3,
-          borderRadius: 8,
-          borderSkipped: false,
-          hoverBackgroundColor: 'rgba(46, 213, 115, 1)',
-          hoverBorderWidth: 4,
-        },
-        {
-          label: '💸 Expenses',
-          data: expensesData,
-          backgroundColor: (ctx) => {
-            const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(255, 107, 107, 0.9)');
-            gradient.addColorStop(1, 'rgba(255, 107, 107, 0.1)');
-            return gradient;
-          },
-          borderColor: '#ff6b6b',
-          borderWidth: 3,
-          borderRadius: 8,
-          borderSkipped: false,
-          hoverBackgroundColor: 'rgba(255, 107, 107, 1)',
-          hoverBorderWidth: 4,
-        },
-      ],
-    };
-  }, [totalEarnings, totalExpenses]);
-
-  // Enhanced expense breakdown pie chart
+  // Enhanced charts data
   const expenseBreakdownData = useMemo(() => ({
-    labels: ['⛽ Fuel', '🏪 Adda Payments', '🤝 Union Payments', '🔧 Service', '📦 Other'],
+    labels: ['⛽ Fuel', '🏪 Adda', '🤝 Union', '🔧 Service', '📦 Other'],
     datasets: [
       {
         data: [
@@ -186,110 +249,94 @@ function Analytics({ fareData = [], expenseData = [], totalEarnings = 0, totalEx
         borderColor: '#ffffff',
         hoverBorderWidth: 6,
         hoverOffset: 15,
-        hoverBorderColor: '#2c3e50',
-        cutout: '40%',
-        radius: '90%',
-        animation: {
-          animateRotate: true,
-          animateScale: true,
-        },
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              usePointStyle: true,
-              pointStyle: 'circle',
-              padding: 20,
-              font: {
-                size: 12,
-                weight: 'bold'
-              }
-            }
-          }
-        }
       },
     ],
   }), [analytics.breakdown]);
 
-  // Enhanced weekly profit trend
-  const weeklyProfitData = useMemo(() => {
-    const days = Array.from({length: 14}, (_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() - (13 - i));
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    });
-
-    const avgDailyProfit = Math.floor(netProfit / 30);
-    const profitData = days.map((_, index) => {
-      const variance = Math.floor(Math.random() * 3000) - 1500;
-      const trendFactor = 1 + (index / 14) * 0.2; // Slight upward trend
-      return Math.max(0, Math.floor((avgDailyProfit + variance) * trendFactor));
-    });
+  // User-wise performance chart
+  const userPerformanceData = useMemo(() => {
+    const userNames = Object.keys(analytics.userBreakdown);
+    const userEarnings = userNames.map(name => analytics.userBreakdown[name].earnings);
+    const userExpenses = userNames.map(name => analytics.userBreakdown[name].expenses);
 
     return {
-      labels: days,
+      labels: userNames,
       datasets: [
         {
-          label: '📈 Daily Profit Trend',
-          data: profitData,
-          borderColor: '#667eea',
-          backgroundColor: (ctx) => {
-            const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, 'rgba(102, 126, 234, 0.3)');
-            gradient.addColorStop(1, 'rgba(102, 126, 234, 0.05)');
-            return gradient;
-          },
-          borderWidth: 4,
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#667eea',
-          pointBorderColor: '#ffffff',
-          pointBorderWidth: 3,
-          pointRadius: 8,
-          pointHoverRadius: 12,
-          pointHoverBackgroundColor: '#5a67d8',
-          pointHoverBorderColor: '#ffffff',
-          pointHoverBorderWidth: 4,
-          shadowOffsetX: 3,
-          shadowOffsetY: 3,
-          shadowBlur: 10,
-          shadowColor: 'rgba(102, 126, 234, 0.3)',
+          label: '💰 Earnings',
+          data: userEarnings,
+          backgroundColor: 'rgba(46, 213, 115, 0.8)',
+          borderColor: '#2ed573',
+          borderWidth: 2,
+        },
+        {
+          label: '💸 Expenses',
+          data: userExpenses,
+          backgroundColor: 'rgba(255, 107, 107, 0.8)',
+          borderColor: '#ff6b6b',
+          borderWidth: 2,
         },
       ],
     };
-  }, [netProfit]);
+  }, [analytics.userBreakdown]);
 
-  // Enhanced chart options
+  // Daily trend chart
+  const dailyTrendData = useMemo(() => {
+    const last14Days = Array.from({length: 14}, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (13 - i));
+      return date.toISOString().split('T')[0];
+    });
+
+    const dailyData = last14Days.map(date => {
+      const dayEarnings = fareData
+        .filter(entry => entry.date === date && entry.type !== 'off')
+        .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
+      
+      const dayExpenses = expenseData
+        .filter(entry => entry.date === date)
+        .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
+
+      return {
+        date,
+        earnings: dayEarnings,
+        expenses: dayExpenses,
+        profit: dayEarnings - dayExpenses
+      };
+    });
+
+    return {
+      labels: dailyData.map(d => new Date(d.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })),
+      datasets: [
+        {
+          label: '📈 Daily Profit',
+          data: dailyData.map(d => d.profit),
+          borderColor: '#667eea',
+          backgroundColor: 'rgba(102, 126, 234, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+        },
+      ],
+    };
+  }, [fareData, expenseData]);
+
+  // Chart options
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    interaction: {
-      mode: 'index',
-      intersect: false,
-    },
     plugins: {
       legend: {
         position: 'top',
         labels: {
           usePointStyle: true,
           padding: 20,
-          font: {
-            size: 13,
-            weight: 'bold'
-          }
         }
       },
       tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: '#ffffff',
-        bodyColor: '#ffffff',
-        borderColor: '#667eea',
-        borderWidth: 2,
-        cornerRadius: 10,
-        displayColors: true,
         callbacks: {
           label: function(context) {
-            return `${context.dataset.label}: ₹${context.parsed.y.toLocaleString('en-IN')}`;
+            return `${context.dataset.label}: ₹${context.parsed.y?.toLocaleString('en-IN') || context.parsed?.toLocaleString('en-IN')}`;
           }
         }
       }
@@ -297,39 +344,13 @@ function Analytics({ fareData = [], expenseData = [], totalEarnings = 0, totalEx
     scales: {
       y: {
         beginAtZero: true,
-        grid: {
-          color: 'rgba(0, 0, 0, 0.05)',
-          drawBorder: false,
-        },
         ticks: {
-          font: {
-            size: 11,
-            weight: 'bold'
-          },
-          color: '#6b7280',
           callback: function(value) {
             return '₹' + value.toLocaleString('en-IN');
           }
         }
       },
-      x: {
-        grid: {
-          color: 'rgba(0, 0, 0, 0.05)',
-          drawBorder: false,
-        },
-        ticks: {
-          font: {
-            size: 11,
-            weight: 'bold'
-          },
-          color: '#6b7280'
-        }
-      },
     },
-    animation: {
-      duration: 2000,
-      easing: 'easeInOutQuart',
-    }
   };
 
   const doughnutOptions = {
@@ -341,19 +362,9 @@ function Analytics({ fareData = [], expenseData = [], totalEarnings = 0, totalEx
         labels: {
           usePointStyle: true,
           padding: 15,
-          font: {
-            size: 12,
-            weight: 'bold'
-          }
         }
       },
       tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: '#ffffff',
-        bodyColor: '#ffffff',
-        borderColor: '#667eea',
-        borderWidth: 2,
-        cornerRadius: 10,
         callbacks: {
           label: function(context) {
             const total = context.dataset.data.reduce((a, b) => a + b, 0);
@@ -363,171 +374,164 @@ function Analytics({ fareData = [], expenseData = [], totalEarnings = 0, totalEx
         }
       }
     },
-    animation: {
-      animateRotate: true,
-      animateScale: true,
-      duration: 1500,
-    }
   };
-
-  const lineOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: {
-      mode: 'index',
-      intersect: false,
-    },
-    plugins: {
-      legend: {
-        display: true,
-        position: 'top',
-        labels: {
-          usePointStyle: true,
-          padding: 20,
-          font: {
-            size: 13,
-            weight: 'bold'
-          }
-        }
-      },
-      tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: '#ffffff',
-        bodyColor: '#ffffff',
-        borderColor: '#667eea',
-        borderWidth: 2,
-        cornerRadius: 10,
-        callbacks: {
-          label: function(context) {
-            return `${context.dataset.label}: ₹${context.parsed.y.toLocaleString('en-IN')}`;
-          }
-        }
-      }
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        grid: {
-          color: 'rgba(0, 0, 0, 0.05)',
-          drawBorder: false,
-        },
-        ticks: {
-          font: {
-            size: 11,
-            weight: 'bold'
-          },
-          color: '#6b7280',
-          callback: function(value) {
-            return '₹' + value.toLocaleString('en-IN');
-          }
-        }
-      },
-      x: {
-        grid: {
-          display: false,
-        },
-        ticks: {
-          font: {
-            size: 11,
-            weight: 'bold'
-          },
-          color: '#6b7280'
-        }
-      },
-    },
-    animation: {
-      duration: 2000,
-      easing: 'easeInOutQuart',
-    }
-  };
-
-  // Calculate insights
-  const insights = useMemo(() => {
-    const highestExpenseType = Object.entries(analytics.breakdown)
-      .reduce((max, [type, amount]) => amount > max.amount ? { type, amount } : max, { type: '', amount: 0 });
-
-    const totalCash = fareData.reduce((sum, item) => sum + (parseFloat(item.cashAmount) || 0), 0);
-    const totalBank = fareData.reduce((sum, item) => sum + (parseFloat(item.bankAmount) || 0), 0);
-    const total = totalCash + totalBank;
-    
-    const cashPercent = total > 0 ? Math.round((totalCash / total) * 100) : 0;
-    const bankPercent = 100 - cashPercent;
-
-    return {
-      highestExpense: {
-        type: highestExpenseType.type.charAt(0).toUpperCase() + highestExpenseType.type.slice(1),
-        amount: highestExpenseType.amount
-      },
-      avgDailyProfit: Math.round(analytics.profit / 30),
-      cashBankRatio: `${cashPercent}:${bankPercent}`,
-      totalEntries: fareData.length + expenseData.length
-    };
-  }, [analytics, fareData, expenseData]);
 
   return (
     <div className="fade-in">
+      {/* Header with advanced filters */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>
           <i className="bi bi-graph-up me-2"></i>
-          Business Analytics
+          Advanced Analytics
         </h2>
-        <select 
-          className="form-select w-auto" 
-          value={dateRange} 
-          onChange={(e) => setDateRange(e.target.value)}
-        >
-          <option value="thisWeek">This Week</option>
-          <option value="thisMonth">This Month</option>
-          <option value="last30Days">Last 30 Days</option>
-        </select>
       </div>
 
-      {/* Key Metrics Cards */}
+      {/* Advanced Filter Controls */}
+      <div className="row g-3 mb-4">
+        <div className="col-md-3">
+          <label className="form-label">Date Range</label>
+          <select 
+            className="form-select" 
+            value={dateRange} 
+            onChange={(e) => setDateRange(e.target.value)}
+          >
+            <option value="thisWeek">This Week</option>
+            <option value="thisMonth">This Month</option>
+            <option value="last7Days">Last 7 Days</option>
+            <option value="last30Days">Last 30 Days</option>
+            <option value="last3Months">Last 3 Months</option>
+            <option value="custom">Custom Range</option>
+          </select>
+        </div>
+
+        {dateRange === 'custom' && (
+          <>
+            <div className="col-md-2">
+              <label className="form-label">From Date</label>
+              <input
+                type="date"
+                className="form-control"
+                value={customDateFrom}
+                onChange={(e) => setCustomDateFrom(e.target.value)}
+              />
+            </div>
+            <div className="col-md-2">
+              <label className="form-label">To Date</label>
+              <input
+                type="date"
+                className="form-control"
+                value={customDateTo}
+                onChange={(e) => setCustomDateTo(e.target.value)}
+              />
+            </div>
+          </>
+        )}
+
+        <div className="col-md-3">
+          <label className="form-label">User Filter</label>
+          <select 
+            className="form-select" 
+            value={userFilter} 
+            onChange={(e) => setUserFilter(e.target.value)}
+          >
+            <option value="all">All Users</option>
+            {allUsers.map(user => (
+              <option key={user.username} value={user.name}>
+                {user.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="col-md-2">
+          <label className="form-label">Entry Type</label>
+          <select 
+            className="form-select" 
+            value={entryTypeFilter} 
+            onChange={(e) => setEntryTypeFilter(e.target.value)}
+          >
+            <option value="all">All Types</option>
+            <option value="daily">Daily</option>
+            <option value="booking">Booking</option>
+            <option value="fuel">Fuel</option>
+            <option value="adda">Adda</option>
+            <option value="union">Union</option>
+            <option value="service">Service</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Enhanced Key Metrics Cards */}
       <div className="row g-4 mb-4">
-        <div className="col-12 col-md-3">
+        <div className="col-12 col-md-2">
           <div className="analytics-stats-card">
             <div className="card-body text-center">
-              <h5 className="card-title text-success">Total Earnings</h5>
-              <h3 className="card-text">₹{analytics.earnings.toLocaleString()}</h3>
-              <small className="text-success">
-                <i className="bi bi-arrow-up"></i> Revenue
+              <h6 className="card-title text-success">Total Earnings</h6>
+              <h4 className="card-text">₹{analytics.earnings.toLocaleString()}</h4>
+              <small className="text-muted">
+                Daily: ₹{analytics.dailyEarnings.toLocaleString()} | 
+                Booking: ₹{analytics.bookingEarnings.toLocaleString()}
               </small>
             </div>
           </div>
         </div>
 
-        <div className="col-12 col-md-3">
+        <div className="col-12 col-md-2">
           <div className="analytics-stats-card">
             <div className="card-body text-center">
-              <h5 className="card-title text-danger">Total Expenses</h5>
-              <h3 className="card-text">₹{analytics.expenses.toLocaleString()}</h3>
-              <small className="text-danger">
-                <i className="bi bi-arrow-down"></i> Costs
+              <h6 className="card-title text-danger">Total Expenses</h6>
+              <h4 className="card-text">₹{analytics.expenses.toLocaleString()}</h4>
+              <small className="text-muted">
+                {analytics.entryStats.expenseEntries} entries
               </small>
             </div>
           </div>
         </div>
 
-        <div className="col-12 col-md-3">
+        <div className="col-12 col-md-2">
           <div className="analytics-stats-card">
             <div className="card-body text-center">
-              <h5 className="card-title text-primary">Net Profit</h5>
-              <h3 className="card-text">₹{analytics.profit.toLocaleString()}</h3>
+              <h6 className="card-title text-primary">Net Profit</h6>
+              <h4 className="card-text">₹{analytics.profit.toLocaleString()}</h4>
               <small className={analytics.profit > 0 ? "text-success" : "text-danger"}>
-                <i className={`bi bi-arrow-${analytics.profit > 0 ? 'up' : 'down'}`}></i> 
-                {analytics.profitMargin.toFixed(1)}%
+                {analytics.profitMargin.toFixed(1)}% margin
               </small>
             </div>
           </div>
         </div>
 
-        <div className="col-12 col-md-3">
+        <div className="col-12 col-md-2">
           <div className="analytics-stats-card">
             <div className="card-body text-center">
-              <h5 className="card-title text-info">Profit Margin</h5>
-              <h3 className="card-text">{analytics.profitMargin.toFixed(1)}%</h3>
-              <small className="text-info">
-                <i className="bi bi-percent"></i> Efficiency
+              <h6 className="card-title text-info">Cash vs Bank</h6>
+              <h4 className="card-text">₹{analytics.cashVsBank.incomeCash.toLocaleString()}</h4>
+              <small className="text-muted">
+                Cash Income
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-12 col-md-2">
+          <div className="analytics-stats-card">
+            <div className="card-body text-center">
+              <h6 className="card-title text-warning">Total Entries</h6>
+              <h4 className="card-text">{analytics.entryStats.totalEntries}</h4>
+              <small className="text-muted">
+                {analytics.entryStats.fareEntries} income | {analytics.entryStats.expenseEntries} expense
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-12 col-md-2">
+          <div className="analytics-stats-card">
+            <div className="card-body text-center">
+              <h6 className="card-title text-secondary">Cash Deposits</h6>
+              <h4 className="card-text">₹{analytics.cashVsBank.cashDeposits.toLocaleString()}</h4>
+              <small className="text-muted">
+                Bank deposits
               </small>
             </div>
           </div>
@@ -539,10 +543,10 @@ function Analytics({ fareData = [], expenseData = [], totalEarnings = 0, totalEx
         <div className="col-12 col-xl-8">
           <div className="analytics-chart-card">
             <h5>
-              <i className="bi bi-bar-chart me-2"></i>
-              Monthly Earnings vs Expenses
+              <i className="bi bi-line-chart me-2"></i>
+              Daily Profit Trend (Last 14 Days)
             </h5>
-            <Bar data={monthlyTrendsData} options={chartOptions} />
+            <Line data={dailyTrendData} options={chartOptions} />
           </div>
         </div>
 
@@ -557,15 +561,15 @@ function Analytics({ fareData = [], expenseData = [], totalEarnings = 0, totalEx
         </div>
       </div>
 
-      {/* Profit Trend and Insights */}
+      {/* User Performance and Detailed Statistics */}
       <div className="row g-4 mb-4">
         <div className="col-12 col-lg-8">
           <div className="analytics-chart-card">
             <h5>
-              <i className="bi bi-graph-up me-2"></i>
-              Weekly Profit Trend
+              <i className="bi bi-people me-2"></i>
+              User-wise Performance
             </h5>
-            <Line data={weeklyProfitData} options={lineOptions} />
+            <Bar data={userPerformanceData} options={chartOptions} />
           </div>
         </div>
 
@@ -574,36 +578,84 @@ function Analytics({ fareData = [], expenseData = [], totalEarnings = 0, totalEx
             <div className="card-body">
               <h5 className="card-title">
                 <i className="bi bi-clipboard-data me-2"></i>
-                Quick Insights
+                Detailed Insights
               </h5>
               <div className="row g-3">
                 <div className="col-12">
-                  <div className="d-flex justify-content-between">
-                    <span>Highest Expense:</span>
-                    <strong>
-                      {insights.highestExpense.type} (₹{insights.highestExpense.amount.toLocaleString()})
-                    </strong>
+                  <strong>Entry Statistics:</strong>
+                  <div className="ms-2">
+                    <div>Fare Entries: {analytics.entryStats.fareEntries}</div>
+                    <div>Expense Entries: {analytics.entryStats.expenseEntries}</div>
+                    <div>Off Days: {analytics.entryStats.offDays}</div>
                   </div>
                 </div>
                 <div className="col-12">
-                  <div className="d-flex justify-content-between">
-                    <span>Average Daily Profit:</span>
-                    <strong>₹{insights.avgDailyProfit.toLocaleString()}</strong>
+                  <strong>Cash Flow:</strong>
+                  <div className="ms-2">
+                    <div>Income Cash: ₹{analytics.cashVsBank.incomeCash.toLocaleString()}</div>
+                    <div>Income Bank: ₹{analytics.cashVsBank.incomeBank.toLocaleString()}</div>
+                    <div>Expense Cash: ₹{analytics.cashVsBank.expenseCash.toLocaleString()}</div>
+                    <div>Expense Bank: ₹{analytics.cashVsBank.expenseBank.toLocaleString()}</div>
                   </div>
                 </div>
                 <div className="col-12">
-                  <div className="d-flex justify-content-between">
-                    <span>Cash vs Bank Ratio:</span>
-                    <strong>{insights.cashBankRatio}</strong>
-                  </div>
-                </div>
-                <div className="col-12">
-                  <div className="d-flex justify-content-between">
-                    <span>Total Entries:</span>
-                    <strong>{insights.totalEntries}</strong>
+                  <strong>Top Performer:</strong>
+                  <div className="ms-2">
+                    {Object.entries(analytics.userBreakdown)
+                      .sort(([,a], [,b]) => b.profit - a.profit)[0]?.[0] || 'No data'}
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* User-wise Breakdown Table */}
+      <div className="row g-4">
+        <div className="col-12">
+          <div className="analytics-chart-card">
+            <h5>
+              <i className="bi bi-table me-2"></i>
+              User-wise Performance Breakdown
+            </h5>
+            <div className="table-responsive">
+              <table className="table table-hover">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Earnings</th>
+                    <th>Expenses</th>
+                    <th>Profit</th>
+                    <th>Fixed Cash</th>
+                    <th>Performance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(analytics.userBreakdown).map(([userName, data]) => (
+                    <tr key={userName}>
+                      <td><strong>{userName}</strong></td>
+                      <td className="text-success">₹{data.earnings.toLocaleString()}</td>
+                      <td className="text-danger">₹{data.expenses.toLocaleString()}</td>
+                      <td className={data.profit >= 0 ? 'text-success' : 'text-danger'}>
+                        ₹{data.profit.toLocaleString()}
+                      </td>
+                      <td className="text-info">₹{data.fixedCash.toLocaleString()}</td>
+                      <td>
+                        <div className="d-flex align-items-center">
+                          <div className="progress me-2" style={{width: '60px', height: '8px'}}>
+                            <div 
+                              className={`progress-bar ${data.profit >= 0 ? 'bg-success' : 'bg-danger'}`}
+                              style={{width: `${Math.min(100, Math.abs(data.profit) / 1000)}%`}}
+                            ></div>
+                          </div>
+                          <small>{data.profit >= 0 ? 'Profitable' : 'Loss'}</small>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
