@@ -25,8 +25,8 @@ function addFuelPayment(data) {
 
       // Add headers exactly as specified
       sheet.getRange(1, 1, 1, 14).setValues([[
-        "Timestamp", "Date", "PumpName", "Liters", "Rate", "CashAmount", 
-        "BankAmount", "TotalAmount", "Remarks", "SubmittedBy", "EntryType", "EntryId",
+        "Timestamp", "Date", "PumpName", "Liters", "RatePerLiter", "CashAmount", 
+        "BankAmount", "TotalAmount", "Description", "SubmittedBy", "EntryType", "EntryId",
         "EntryStatus", "ApprovedBy"
       ]]);
     }
@@ -44,11 +44,11 @@ function addFuelPayment(data) {
       data.date,                     // B: Date from frontend
       data.pumpName || "",           // C: Pump Name
       data.liters || "",             // D: Liters
-      data.rate || "",               // E: Rate
+      data.ratePerLiter || "",       // E: RatePerLiter
       data.cashAmount || 0,          // F: Cash Amount
       data.bankAmount || 0,          // G: Bank Amount
       data.totalAmount || 0,         // H: Total Amount
-      data.remarks || "",            // I: Remarks
+      data.description || "",        // I: Description
       data.submittedBy || "",        // J: Submitted By
       "fuel",                        // K: Entry Type (static)
       entryId,                       // L: Entry ID
@@ -104,11 +104,11 @@ function getFuelPayments() {
         date: String(row[1] || ''),           // Convert date to string
         pumpName: row[2],                     // Pump name from column C
         liters: row[3],                       // Liters from column D
-        rate: row[4],                         // Rate from column E
+        ratePerLiter: row[4],                 // RatePerLiter from column E
         cashAmount: row[5],                   // Cash amount from column F
         bankAmount: row[6],                   // Bank amount from column G
         totalAmount: row[7],                  // Total amount from column H
-        remarks: row[8],                      // Remarks from column I
+        description: row[8],                  // Description from column I
         submittedBy: row[9],                  // Submitted by from column J
         entryType: row[10],                   // Entry type from column K
         entryStatus: row[12] || "pending",    // Entry status from column M
@@ -176,8 +176,8 @@ function updateFuelPayment(data) {
     if (updatedData.liters !== undefined) {
       sheet.getRange(rowIndex, 4).setValue(updatedData.liters);
     }
-    if (updatedData.rate !== undefined) {
-      sheet.getRange(rowIndex, 5).setValue(updatedData.rate);
+    if (updatedData.ratePerLiter !== undefined) {
+      sheet.getRange(rowIndex, 5).setValue(updatedData.ratePerLiter);
     }
     if (updatedData.cashAmount !== undefined) {
       sheet.getRange(rowIndex, 6).setValue(updatedData.cashAmount);
@@ -188,8 +188,8 @@ function updateFuelPayment(data) {
     if (updatedData.totalAmount !== undefined) {
       sheet.getRange(rowIndex, 8).setValue(updatedData.totalAmount);
     }
-    if (updatedData.remarks !== undefined) {
-      sheet.getRange(rowIndex, 9).setValue(updatedData.remarks);
+    if (updatedData.description !== undefined) {
+      sheet.getRange(rowIndex, 9).setValue(updatedData.description);
     }
 
     console.log(`✅ Fuel payment updated successfully - ID: ${entryId}, Row: ${rowIndex}`);

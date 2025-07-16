@@ -1072,11 +1072,11 @@ class AuthService {
         date: data.date,
         pumpName: data.pumpName || '',
         liters: data.liters || '',
-        rate: data.rate || '',
+        ratePerLiter: data.ratePerLiter || '',
         cashAmount: data.cashAmount || 0,
         bankAmount: data.bankAmount || 0,
         totalAmount: data.totalAmount || 0,
-        remarks: data.remarks || '',
+        description: data.description || '',
         submittedBy: data.submittedBy || 'driver'
       }));
 

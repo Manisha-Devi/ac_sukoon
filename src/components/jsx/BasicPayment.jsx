@@ -163,6 +163,7 @@ function BasicPayment({
               cashAmount: cashAmount,
               bankAmount: bankAmount,
               totalAmount: totalAmount,
+              description: fuelData.description,
             },
           })
           .catch((error) => {
@@ -209,6 +210,7 @@ function BasicPayment({
             cashAmount: cashAmount,
             bankAmount: bankAmount,
             totalAmount: totalAmount,
+            description: fuelData.description,
             submittedBy: submittedBy,
             entryStatus: "pending",
           })
