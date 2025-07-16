@@ -620,7 +620,7 @@ function Analytics({
           </button>
           <button 
             className="btn btn-outline-info btn-sm filter-toggle-btn"
-            onClick={()={() => setShowSummary(!showSummary)}}
+            onClick={() => setShowSummary(!showSummary)}
           >
             <i className={`bi ${showSummary ? 'bi-eye-slash' : 'bi-bar-chart'}`}></i>
             {showSummary ? 'Hide Cards' : 'Show Cards'}
