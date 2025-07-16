@@ -802,9 +802,6 @@ function Analytics({
                     checked={addExpenseAdjustment}
                     onChange={(e) => setAddExpenseAdjustment(e.target.checked)}
                   />
-                  <label className="form-check-label text-muted small" htmlFor="expenseAdjustment">
-                    +₹1000 Expense Adjustment
-                  </label>
                 </div>
               </div>
               
