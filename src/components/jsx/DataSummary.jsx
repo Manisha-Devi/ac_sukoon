@@ -774,7 +774,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
             <div className="entry-row">
               <span className="label">Date:</span>
               <span className="value">
-                        {entry.entryType === 'booking' && entry.dateFrom ? 
+                        {(entry.dataType === 'Booking Entry' || entry.type === 'booking') && entry.dateFrom ? 
                           formatDisplayDate(entry.dateFrom) : 
                           formatDisplayDate(entry.date)
                         }
@@ -1034,7 +1034,12 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                                 <tbody>
                                   {currentEntries.map((entry) => (
                                     <tr key={entry.entryId}>
-                                      <td>{formatDisplayDate(entry.date)}</td>
+                                      <td>
+                                        {entry.dataType === 'Booking Entry' && entry.dateFrom ? 
+                                          formatDisplayDate(entry.dateFrom) : 
+                                          formatDisplayDate(entry.date)
+                                        }
+                                      </td>
                                       <td>
                                         <span className={`badge ${entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'bg-success' : 'bg-danger'}`}>
                                           {entry.dataType === 'Fare Receipt' || entry.dataType === 'Booking Entry' ? 'I' : 'E'}
