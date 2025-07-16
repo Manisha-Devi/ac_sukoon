@@ -56,6 +56,7 @@ function BasicPayment({
 
   const [addaData, setAddaData] = useState({
     date: "",
+    addaName: "",
     description: "",
     cashAmount: "",
     bankAmount: "",
@@ -242,6 +243,7 @@ function BasicPayment({
             ? {
                 ...entry,
                 date: addaData.date,
+                addaName: addaData.addaName,
                 description: addaData.description,
                 cashAmount: cashAmount,
                 bankAmount: bankAmount,
@@ -255,6 +257,7 @@ function BasicPayment({
         setEditingEntry(null);
         setAddaData({
           date: "",
+          addaName: "",
           description: "",
           cashAmount: "",
           bankAmount: "",
@@ -266,6 +269,7 @@ function BasicPayment({
             entryId: editingEntry.entryId,
             updatedData: {
               date: addaData.date,
+              addaName: addaData.addaName,
               description: addaData.description,
               cashAmount: cashAmount,
               bankAmount: bankAmount,
@@ -281,6 +285,7 @@ function BasicPayment({
           timestamp: timeOnly,
           type: "adda",
           date: addaData.date,
+          addaName: addaData.addaName,
           description: addaData.description,
           cashAmount: cashAmount,
           bankAmount: bankAmount,
@@ -294,6 +299,7 @@ function BasicPayment({
         setTotalExpenses((prev) => prev + totalAmount);
         setAddaData({
           date: "",
+          addaName: "",
           description: "",
           cashAmount: "",
           bankAmount: "",
@@ -305,6 +311,7 @@ function BasicPayment({
             entryId: newEntry.entryId,
             timestamp: timeOnly,
             date: addaData.date,
+            addaName: addaData.addaName,
             description: addaData.description,
             cashAmount: cashAmount,
             bankAmount: bankAmount,
@@ -484,6 +491,7 @@ function BasicPayment({
       setActiveTab("adda");
       setAddaData({
         date: entry.date,
+        addaName: entry.addaName,
         description: entry.description,
         cashAmount: entry.cashAmount.toString(),
         bankAmount: entry.bankAmount.toString(),
@@ -511,6 +519,7 @@ function BasicPayment({
     });
     setAddaData({
       date: "",
+      addaName: "",
       description: "",
       cashAmount: "",
       bankAmount: "",
@@ -825,6 +834,18 @@ function BasicPayment({
                       min={getDateRange().min}
                       max={getDateRange().max}
                       required
+                    />
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <label className="form-label">Adda Name (Optional)</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={addaData.addaName}
+                      onChange={(e) =>
+                        setAddaData({ ...addaData, addaName: e.target.value })
+                      }
+                      placeholder="Enter Adda Name"
                     />
                   </div>
                   <div className="col-md-6 mb-3">
