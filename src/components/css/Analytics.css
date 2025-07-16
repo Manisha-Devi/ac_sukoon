@@ -209,10 +209,12 @@
   border-radius: 10px;
 }
 
-/* Chart Swiper Styling */
+/* Enhanced Chart Swiper Styling */
 .chart-swiper {
   height: 100% !important;
   width: 100% !important;
+  overflow: hidden;
+  border-radius: 12px;
 }
 
 .chart-swiper .swiper-slide {
@@ -220,28 +222,56 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background: transparent;
 }
 
 .swiper-btn-prev,
 .swiper-btn-next {
-  min-width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  min-width: 38px;
+  height: 38px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  border: 1px solid #667eea;
-  background: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid #667eea;
+  background: rgba(255, 255, 255, 0.95);
   color: #667eea;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.swiper-btn-prev::before,
+.swiper-btn-next::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  transition: left 0.6s;
 }
 
 .swiper-btn-prev:hover,
 .swiper-btn-next:hover {
   background: #667eea;
   color: white;
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  border-color: #5a67d8;
+}
+
+.swiper-btn-prev:hover::before,
+.swiper-btn-next:hover::before {
+  left: 100%;
+}
+
+.swiper-btn-prev:active,
+.swiper-btn-next:active {
+  transform: scale(0.95);
 }
 
 .swiper-btn-prev:disabled,
@@ -249,30 +279,70 @@
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
 .swiper-pagination-custom {
   position: absolute;
-  bottom: 5px;
+  bottom: 8px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 6px;
+  gap: 8px;
   z-index: 10;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 6px 12px;
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .swiper-pagination-custom .swiper-pagination-bullet {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: rgba(102, 126, 234, 0.5);
+  background: rgba(102, 126, 234, 0.4);
   opacity: 1;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.swiper-pagination-custom .swiper-pagination-bullet:hover {
+  background: rgba(102, 126, 234, 0.6);
+  transform: scale(1.1);
 }
 
 .swiper-pagination-custom .swiper-pagination-bullet-active {
   background: #667eea;
-  transform: scale(1.2);
+  transform: scale(1.3);
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* Chart Swiper Touch Enhancements */
+.chart-swiper .swiper-wrapper {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chart-swiper .swiper-slide-active {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.chart-swiper .swiper-slide-prev,
+.chart-swiper .swiper-slide-next {
+  transform: scale(0.98);
+  opacity: 0.8;
+}
+
+/* Date Range Indicator */
+.text-primary.fw-medium {
+  font-size: 0.875rem;
+  padding: 4px 8px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 6px;
+  border-left: 3px solid #667eea;
 }
 
 /* Enhanced responsive design */
@@ -333,7 +403,7 @@
 @media (max-width: 575.98px) {
   .analytics-chart-card {
     padding: 0.75rem;
-    height: 320px;
+    height: 380px;
     border-radius: 12px;
     margin-bottom: 1rem;
     overflow: hidden;
@@ -347,8 +417,8 @@
   
   .analytics-chart-card > div:last-child {
     width: 100% !important;
-    height: calc(100% - 50px) !important;
-    min-height: 250px !important;
+    height: calc(100% - 70px) !important;
+    min-height: 280px !important;
     overflow: hidden;
   }
   
@@ -360,36 +430,56 @@
     font-size: 1.25rem;
   }
   
-  /* Mobile Swiper Enhancements */
+  /* Enhanced Mobile Swiper */
   .swiper-btn-prev,
   .swiper-btn-next {
-    min-width: 32px;
-    height: 32px;
-    font-size: 0.8rem;
+    min-width: 34px;
+    height: 34px;
+    font-size: 0.85rem;
+    border-width: 1.5px;
   }
   
   .chart-swiper {
     touch-action: pan-x;
+    user-select: none;
   }
   
   .swiper-pagination-custom {
-    bottom: 2px;
+    bottom: 4px;
+    padding: 4px 8px;
   }
   
   .swiper-pagination-custom .swiper-pagination-bullet {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
   }
   
   /* Chart title adjustments for navigation buttons */
   .analytics-chart-card .d-flex.justify-content-between {
     gap: 0.5rem;
     align-items: flex-start;
+    margin-bottom: 0.5rem;
   }
   
   .analytics-chart-card .d-flex .flex-shrink-1 {
     flex: 1;
     min-width: 0;
+  }
+  
+  /* Date Range Indicator on Mobile */
+  .text-primary.fw-medium {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Mobile touch improvements */
+  .chart-swiper .swiper-slide {
+    padding: 0 2px;
+  }
+  
+  .chart-swiper .swiper-wrapper {
+    will-change: transform;
   }
 }
 
