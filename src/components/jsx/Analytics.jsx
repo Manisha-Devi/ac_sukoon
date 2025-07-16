@@ -800,21 +800,6 @@ function Analytics({
                     </small>
                   </h5>
                   <div className="d-flex gap-2 align-items-center">
-                  <div className="form-check form-switch">
-                    <input 
-                      className="form-check-input" 
-                      type="checkbox" 
-                      id="expenseAdjustment"
-                      checked={addExpenseAdjustment}
-                      onChange={(e) => {
-                        setAddExpenseAdjustment(e.target.checked);
-                        // When 1000 checkbox is unchecked, hide and uncheck 1400
-                        if (!e.target.checked) {
-                          setAddExpenseAdjustment1400(false);
-                        }
-                      }}
-                    />
-                  </div>
                   {addExpenseAdjustment && (
                     <div className="form-check form-switch">
                       <input 
@@ -835,6 +820,21 @@ function Analytics({
                       />
                     </div>
                   )}
+                  <div className="form-check form-switch">
+                    <input 
+                      className="form-check-input" 
+                      type="checkbox" 
+                      id="expenseAdjustment"
+                      checked={addExpenseAdjustment}
+                      onChange={(e) => {
+                        setAddExpenseAdjustment(e.target.checked);
+                        // When 1000 checkbox is unchecked, hide and uncheck 1400
+                        if (!e.target.checked) {
+                          setAddExpenseAdjustment1400(false);
+                        }
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
