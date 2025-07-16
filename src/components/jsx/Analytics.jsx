@@ -472,37 +472,31 @@ function Analytics({
     },
   };
 
-  // Simplified chart options for better performance
+  // Simplified chart options for better performance - hide all axis labels
   const trendChartOptions = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top',
+        display: false, // Hide legend also for cleaner look
       },
       tooltip: {
         callbacks: {
           label: function(context) {
             const value = context.parsed.y;
             const color = value >= 0 ? '🟢' : '🔴';
-            return `${color} Profit: ₹${value?.toLocaleString('en-IN')}`;
+            const date = context.label;
+            return `${color} ${date}: ₹${value?.toLocaleString('en-IN')}`;
           }
         }
       }
     },
     scales: {
       x: {
-        ticks: {
-          maxRotation: 45,
-        }
+        display: false, // Hide X-axis completely (dates)
       },
       y: {
-        beginAtZero: true,
-        ticks: {
-          callback: function(value) {
-            return '₹' + value.toLocaleString('en-IN');
-          }
-        }
+        display: false, // Hide Y-axis completely (values)
       },
     },
   }), []);
