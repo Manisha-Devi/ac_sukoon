@@ -671,7 +671,7 @@ function Analytics({
               </>
             )}
 
-            
+
           </div>
         </div>
       )}
@@ -880,8 +880,7 @@ function Analytics({
                       </div>
                     </SwiperSlide>
                   ))}
-                </Swiper>
-              ) : (
+                </Swiper>) : (
                 <Line 
                   data={dailyTrendData.slides[0]} 
                   options={{
