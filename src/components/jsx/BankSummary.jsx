@@ -423,7 +423,7 @@ function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
       {/* Summary Cards */}
       {showSummary && (
       <div className="row mb-4">
-        <div className="col-md-4">
+        <div className="col-md-6">
           <div className="summary-card income-card">
             <div className="card-body">
               <h6><i className="bi bi-arrow-up-circle"></i> Bank Income</h6>
@@ -432,24 +432,12 @@ function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
             </div>
           </div>
         </div>
-        <div className="col-md-4">
+        <div className="col-md-6">
           <div className="summary-card expense-card">
             <div className="card-body">
               <h6><i className="bi bi-arrow-down-circle"></i> Bank Expense</h6>
               <h4 className="text-danger">₹{totalBankExpense.toLocaleString()}</h4>
               <small className="text-muted">Pending payments</small>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="summary-card balance-card">
-            <div className="card-body">
-              <h6><i className="bi bi-calculator"></i> Bank Balance</h6>
-              <h4 className={bankBalance >= 0 ? 'text-success' : 'text-danger'}>
-                ₹{Math.abs(bankBalance).toLocaleString()}
-                {bankBalance < 0 && ' (Deficit)'}
-              </h4>
-              <small className="text-muted">Bank in Hand</small>
             </div>
           </div>
         </div>
