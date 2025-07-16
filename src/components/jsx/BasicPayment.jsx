@@ -1146,11 +1146,7 @@ function BasicPayment({
                         </div>
                         <div className="entry-content">
                           {entry.type === "fuel" && (
-                            <p>
-                              {entry.pumpName || "Fuel Purchase"}
-                              {entry.liters && ` - ${entry.liters}L`}
-                              {entry.ratePerLiter && ` @ ₹${entry.ratePerLiter}/L`}
-                            </p>
+                            <p>{entry.pumpName || "Fuel Purchase"}</p>
                           )}
                           {entry.type === "adda" && (
                             <p>{entry.addaName || "Adda Payment"}</p>
