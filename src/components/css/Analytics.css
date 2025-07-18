@@ -342,6 +342,41 @@
   transform: scale(1.2);
 }
 
+/* Checkbox styling */
+.form-check-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #495057;
+  cursor: pointer;
+  user-select: none;
+}
+
+.form-check-input:checked + .form-check-label {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.form-check-input {
+  cursor: pointer;
+}
+
+.form-check-switch .form-check-input {
+  width: 2em;
+  height: 1em;
+  background-color: #dee2e6;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.form-check-switch .form-check-input:checked {
+  background-color: #667eea;
+  border-color: #667eea;
+}
+
+.form-check-switch .form-check-input:focus {
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
 /* Enhanced responsive design */
 @media (max-width: 1199.98px) {
   .analytics-chart-card {

@@ -933,42 +933,41 @@ function Analytics({
                     </small>
                   </h5>
                   <div className="d-flex gap-2 align-items-center">
-                  {addExpenseAdjustment && (
                     <div className="form-check form-switch">
                       <input 
                         className="form-check-input" 
                         type="checkbox" 
-                        id="expenseAdjustment1400"
-                        checked={addExpenseAdjustment1400}
+                        id="expenseAdjustment"
+                        checked={addExpenseAdjustment}
                         onChange={(e) => {
-                          setAddExpenseAdjustment1400(e.target.checked);
-                          // When 1400 checkbox is unchecked, uncheck 1000 to hide 1400
+                          setAddExpenseAdjustment(e.target.checked);
+                          // When 1000 checkbox is unchecked, hide and uncheck 1400
                           if (!e.target.checked) {
-                            setAddExpenseAdjustment(false);
-                          } else {
-                            // When 1400 is checked, ensure 1000 stays checked
-                            setAddExpenseAdjustment(true);
+                            setAddExpenseAdjustment1400(false);
                           }
                         }}
                       />
+                      <label className="form-check-label ms-1" htmlFor="expenseAdjustment">
+                        ₹1000×days
+                      </label>
                     </div>
-                  )}
-                  <div className="form-check form-switch">
-                    <input 
-                      className="form-check-input" 
-                      type="checkbox" 
-                      id="expenseAdjustment"
-                      checked={addExpenseAdjustment}
-                      onChange={(e) => {
-                        setAddExpenseAdjustment(e.target.checked);
-                        // When 1000 checkbox is unchecked, hide and uncheck 1400
-                        if (!e.target.checked) {
-                          setAddExpenseAdjustment1400(false);
-                        }
-                      }}
-                    />
+                    {addExpenseAdjustment && (
+                      <div className="form-check form-switch">
+                        <input 
+                          className="form-check-input" 
+                          type="checkbox" 
+                          id="expenseAdjustment1400"
+                          checked={addExpenseAdjustment1400}
+                          onChange={(e) => {
+                            setAddExpenseAdjustment1400(e.target.checked);
+                          }}
+                        />
+                        <label className="form-check-label ms-1" htmlFor="expenseAdjustment1400">
+                          ₹1400×days
+                        </label>
+                      </div>
+                    )}
                   </div>
-                </div>
               </div>
 
               {/* Navigation Controls for Mobile */}
@@ -1085,39 +1084,40 @@ function Analytics({
                   </small>
                 </h5>
                 <div className="d-flex gap-2 align-items-center">
-                  
                     <div className="form-check form-switch">
                       <input 
                         className="form-check-input" 
                         type="checkbox" 
-                        id="weeklyExpenseAdjustment1400"
-                        checked={addWeeklyExpenseAdjustment1400}
+                        id="weeklyExpenseAdjustment"
+                        checked={addWeeklyExpenseAdjustment}
                         onChange={(e) => {
-                          setAddWeeklyExpenseAdjustment1400(e.target.checked);
+                          setAddWeeklyExpenseAdjustment(e.target.checked);
                           if (!e.target.checked) {
-                            setAddWeeklyExpenseAdjustment(false);
-                          } else {
-                            setAddWeeklyExpenseAdjustment(true);
+                            setAddWeeklyExpenseAdjustment1400(false);
                           }
                         }}
                       />
+                      <label className="form-check-label ms-1" htmlFor="weeklyExpenseAdjustment">
+                        ₹1000×7 days
+                      </label>
                     </div>
-                 
-                  
-                    <input 
-                      className="form-check-input" 
-                      type="checkbox" 
-                      id="weeklyExpenseAdjustment"
-                      checked={addWeeklyExpenseAdjustment}
-                      onChange={(e) => {
-                        setAddWeeklyExpenseAdjustment(e.target.checked);
-                        if (!e.target.checked) {
-                          setAddWeeklyExpenseAdjustment1400(false);
-                        }
-                      }}
-                    />
-                 
-                </div>
+                    {addWeeklyExpenseAdjustment && (
+                      <div className="form-check form-switch">
+                        <input 
+                          className="form-check-input" 
+                          type="checkbox" 
+                          id="weeklyExpenseAdjustment1400"
+                          checked={addWeeklyExpenseAdjustment1400}
+                          onChange={(e) => {
+                            setAddWeeklyExpenseAdjustment1400(e.target.checked);
+                          }}
+                        />
+                        <label className="form-check-label ms-1" htmlFor="weeklyExpenseAdjustment1400">
+                          ₹1400×7 days
+                        </label>
+                      </div>
+                    )}
+                  </div>
               </div>
             </div>
 
@@ -1160,39 +1160,40 @@ function Analytics({
                   </small>
                 </h5>
                 <div className="d-flex gap-2 align-items-center">
-                  
                     <div className="form-check form-switch">
                       <input 
                         className="form-check-input" 
                         type="checkbox" 
-                        id="monthlyExpenseAdjustment1400"
-                        checked={addMonthlyExpenseAdjustment1400}
+                        id="monthlyExpenseAdjustment"
+                        checked={addMonthlyExpenseAdjustment}
                         onChange={(e) => {
-                          setAddMonthlyExpenseAdjustment1400(e.target.checked);
+                          setAddMonthlyExpenseAdjustment(e.target.checked);
                           if (!e.target.checked) {
-                            setAddMonthlyExpenseAdjustment(false);
-                          } else {
-                            setAddMonthlyExpenseAdjustment(true);
+                            setAddMonthlyExpenseAdjustment1400(false);
                           }
                         }}
                       />
+                      <label className="form-check-label ms-1" htmlFor="monthlyExpenseAdjustment">
+                        ₹1000×days
+                      </label>
                     </div>
-                  
-                  
-                    <input 
-                      className="form-check-input" 
-                      type="checkbox" 
-                      id="monthlyExpenseAdjustment"
-                      checked={addMonthlyExpenseAdjustment}
-                      onChange={(e) => {
-                        setAddMonthlyExpenseAdjustment(e.target.checked);
-                        if (!e.target.checked) {
-                          setAddMonthlyExpenseAdjustment1400(false);
-                        }
-                      }}
-                    />
-                  
-                </div>
+                    {addMonthlyExpenseAdjustment && (
+                      <div className="form-check form-switch">
+                        <input 
+                          className="form-check-input" 
+                          type="checkbox" 
+                          id="monthlyExpenseAdjustment1400"
+                          checked={addMonthlyExpenseAdjustment1400}
+                          onChange={(e) => {
+                            setAddMonthlyExpenseAdjustment1400(e.target.checked);
+                          }}
+                        />
+                        <label className="form-check-label ms-1" htmlFor="monthlyExpenseAdjustment1400">
+                          ₹1400×days
+                        </label>
+                      </div>
+                    )}
+                  </div>
               </div>
             </div>
 
