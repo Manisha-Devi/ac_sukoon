@@ -492,6 +492,166 @@ function Analytics({
     };
   }, [fareData, expenseData, dateRange, customDateFrom, customDateTo, addExpenseAdjustment, addExpenseAdjustment1400]);
 
+  // Weekly Profit Chart Data
+  const weeklyTrendData = useMemo(() => {
+    const now = new Date();
+    const weeksToShow = 12; // Show last 12 weeks
+    
+    const weeklyData = [];
+    
+    for (let i = weeksToShow - 1; i >= 0; i--) {
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - (i * 7) - now.getDay());
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      
+      const weekStartStr = weekStart.toISOString().split('T')[0];
+      const weekEndStr = weekEnd.toISOString().split('T')[0];
+      
+      // Get all dates in this week
+      const weekDates = [];
+      for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
+        weekDates.push(d.toISOString().split('T')[0]);
+      }
+      
+      const weekEarnings = fareData
+        .filter(entry => {
+          const entryDate = entry.date || entry.dateFrom;
+          return weekDates.includes(entryDate) && entry.type !== 'off';
+        })
+        .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
+      
+      let weekExpenses = expenseData
+        .filter(entry => weekDates.includes(entry.date))
+        .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
+      
+      // Add weekly adjustments (7 days * adjustment amounts)
+      if (addExpenseAdjustment1400) {
+        weekExpenses += (1400 * 7);
+      }
+      
+      if (addExpenseAdjustment) {
+        weekExpenses += (1000 * 7);
+      }
+      
+      weeklyData.push({
+        weekStart: weekStartStr,
+        weekEnd: weekEndStr,
+        earnings: weekEarnings,
+        expenses: weekExpenses,
+        profit: weekEarnings - weekExpenses,
+        label: `${weekStart.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}`
+      });
+    }
+    
+    const backgroundColors = weeklyData.map(d => 
+      d.profit >= 0 ? 'rgba(52, 152, 219, 0.3)' : 'rgba(231, 76, 60, 0.3)'
+    );
+    
+    const borderColors = weeklyData.map(d => 
+      d.profit >= 0 ? '#3498db' : '#e74c3c'
+    );
+    
+    return {
+      labels: weeklyData.map(d => d.label),
+      datasets: [
+        {
+          label: '📊 Weekly Profit',
+          data: weeklyData.map(d => d.profit),
+          borderColor: borderColors,
+          backgroundColor: backgroundColors,
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: borderColors,
+          pointBorderColor: borderColors,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+        },
+      ]
+    };
+  }, [fareData, expenseData, addExpenseAdjustment, addExpenseAdjustment1400]);
+
+  // Monthly Profit Chart Data
+  const monthlyTrendData = useMemo(() => {
+    const now = new Date();
+    const monthsToShow = 12; // Show last 12 months
+    
+    const monthlyData = [];
+    
+    for (let i = monthsToShow - 1; i >= 0; i--) {
+      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
+      
+      const monthStartStr = monthStart.toISOString().split('T')[0];
+      const monthEndStr = monthEnd.toISOString().split('T')[0];
+      
+      // Get all dates in this month
+      const monthDates = [];
+      for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
+        monthDates.push(d.toISOString().split('T')[0]);
+      }
+      
+      const monthEarnings = fareData
+        .filter(entry => {
+          const entryDate = entry.date || entry.dateFrom;
+          return monthDates.includes(entryDate) && entry.type !== 'off';
+        })
+        .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
+      
+      let monthExpenses = expenseData
+        .filter(entry => monthDates.includes(entry.date))
+        .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
+      
+      // Add monthly adjustments (number of days in month * adjustment amounts)
+      const daysInMonth = monthDates.length;
+      if (addExpenseAdjustment1400) {
+        monthExpenses += (1400 * daysInMonth);
+      }
+      
+      if (addExpenseAdjustment) {
+        monthExpenses += (1000 * daysInMonth);
+      }
+      
+      monthlyData.push({
+        monthStart: monthStartStr,
+        monthEnd: monthEndStr,
+        earnings: monthEarnings,
+        expenses: monthExpenses,
+        profit: monthEarnings - monthExpenses,
+        label: monthStart.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }),
+        daysInMonth
+      });
+    }
+    
+    const backgroundColors = monthlyData.map(d => 
+      d.profit >= 0 ? 'rgba(155, 89, 182, 0.3)' : 'rgba(241, 196, 15, 0.3)'
+    );
+    
+    const borderColors = monthlyData.map(d => 
+      d.profit >= 0 ? '#9b59b6' : '#f1c40f'
+    );
+    
+    return {
+      labels: monthlyData.map(d => d.label),
+      datasets: [
+        {
+          label: '📅 Monthly Profit',
+          data: monthlyData.map(d => d.profit),
+          borderColor: borderColors,
+          backgroundColor: backgroundColors,
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: borderColors,
+          pointBorderColor: borderColors,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+        },
+      ]
+    };
+  }, [fareData, expenseData, addExpenseAdjustment, addExpenseAdjustment1400]);
+
   // Chart options
   const chartOptions = {
     responsive: true,
@@ -756,6 +916,7 @@ function Analytics({
 
       {/* Charts Section */}
       <div className="row g-4 mb-4">
+        {/* Daily Profit Chart */}
         <div className="col-12">
           <div className="analytics-chart-card">
             <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap">
@@ -907,7 +1068,167 @@ function Analytics({
           </div>
         </div>
 
+        {/* Weekly Profit Chart */}
+        <div className="col-12">
+          <div className="analytics-chart-card">
+            <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap">
+              <div className="d-flex align-items-center flex-wrap">
+                <h5 className="mb-0 flex-shrink-1 me-1">
+                  <i className="bi bi-bar-chart me-2"></i>
+                  Weekly Profit 
+                  <small className="text-muted ms-2 d-none d-md-inline">
+                    (Last 12 weeks)
+                  </small>
+                </h5>
+                <div className="d-flex gap-2 align-items-center">
+                  {addExpenseAdjustment && (
+                    <div className="form-check form-switch">
+                      <input 
+                        className="form-check-input" 
+                        type="checkbox" 
+                        id="weeklyExpenseAdjustment1400"
+                        checked={addExpenseAdjustment1400}
+                        onChange={(e) => {
+                          setAddExpenseAdjustment1400(e.target.checked);
+                          if (!e.target.checked) {
+                            setAddExpenseAdjustment(false);
+                          } else {
+                            setAddExpenseAdjustment(true);
+                          }
+                        }}
+                      />
+                      <label className="form-check-label text-muted small" htmlFor="weeklyExpenseAdjustment1400">
+                        ₹1400×7 days
+                      </label>
+                    </div>
+                  )}
+                  <div className="form-check form-switch">
+                    <input 
+                      className="form-check-input" 
+                      type="checkbox" 
+                      id="weeklyExpenseAdjustment"
+                      checked={addExpenseAdjustment}
+                      onChange={(e) => {
+                        setAddExpenseAdjustment(e.target.checked);
+                        if (!e.target.checked) {
+                          setAddExpenseAdjustment1400(false);
+                        }
+                      }}
+                    />
+                    <label className="form-check-label text-muted small" htmlFor="weeklyExpenseAdjustment">
+                      ₹1000×7 days
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
 
+            <div style={{ 
+              height: 'calc(100% - 60px)', 
+              minHeight: window.innerWidth <= 576 ? '280px' : '340px',
+              width: '100%',
+              position: 'relative'
+            }}>
+              <Line 
+                data={weeklyTrendData} 
+                options={{
+                  ...trendChartOptions,
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  layout: {
+                    padding: {
+                      left: 5,
+                      right: 5,
+                      top: 5,
+                      bottom: 5
+                    }
+                  }
+                }} 
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Monthly Profit Chart */}
+        <div className="col-12">
+          <div className="analytics-chart-card">
+            <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap">
+              <div className="d-flex align-items-center flex-wrap">
+                <h5 className="mb-0 flex-shrink-1 me-1">
+                  <i className="bi bi-calendar-month me-2"></i>
+                  Monthly Profit 
+                  <small className="text-muted ms-2 d-none d-md-inline">
+                    (Last 12 months)
+                  </small>
+                </h5>
+                <div className="d-flex gap-2 align-items-center">
+                  {addExpenseAdjustment && (
+                    <div className="form-check form-switch">
+                      <input 
+                        className="form-check-input" 
+                        type="checkbox" 
+                        id="monthlyExpenseAdjustment1400"
+                        checked={addExpenseAdjustment1400}
+                        onChange={(e) => {
+                          setAddExpenseAdjustment1400(e.target.checked);
+                          if (!e.target.checked) {
+                            setAddExpenseAdjustment(false);
+                          } else {
+                            setAddExpenseAdjustment(true);
+                          }
+                        }}
+                      />
+                      <label className="form-check-label text-muted small" htmlFor="monthlyExpenseAdjustment1400">
+                        ₹1400×days
+                      </label>
+                    </div>
+                  )}
+                  <div className="form-check form-switch">
+                    <input 
+                      className="form-check-input" 
+                      type="checkbox" 
+                      id="monthlyExpenseAdjustment"
+                      checked={addExpenseAdjustment}
+                      onChange={(e) => {
+                        setAddExpenseAdjustment(e.target.checked);
+                        if (!e.target.checked) {
+                          setAddExpenseAdjustment1400(false);
+                        }
+                      }}
+                    />
+                    <label className="form-check-label text-muted small" htmlFor="monthlyExpenseAdjustment">
+                      ₹1000×days
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ 
+              height: 'calc(100% - 60px)', 
+              minHeight: window.innerWidth <= 576 ? '280px' : '340px',
+              width: '100%',
+              position: 'relative'
+            }}>
+              <Line 
+                data={monthlyTrendData} 
+                options={{
+                  ...trendChartOptions,
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  layout: {
+                    padding: {
+                      left: 5,
+                      right: 5,
+                      top: 5,
+                      bottom: 5
+                    }
+                  }
+                }} 
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
 
