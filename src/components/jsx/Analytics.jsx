@@ -545,11 +545,11 @@ function Analytics({
     }
     
     const backgroundColors = weeklyData.map(d => 
-      d.profit >= 0 ? 'rgba(52, 152, 219, 0.3)' : 'rgba(231, 76, 60, 0.3)'
+      d.profit >= 0 ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 107, 107, 0.3)'
     );
     
     const borderColors = weeklyData.map(d => 
-      d.profit >= 0 ? '#3498db' : '#e74c3c'
+      d.profit >= 0 ? '#2ed573' : '#ff6b6b'
     );
     
     return {
@@ -625,11 +625,11 @@ function Analytics({
     }
     
     const backgroundColors = monthlyData.map(d => 
-      d.profit >= 0 ? 'rgba(155, 89, 182, 0.3)' : 'rgba(241, 196, 15, 0.3)'
+      d.profit >= 0 ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 107, 107, 0.3)'
     );
     
     const borderColors = monthlyData.map(d => 
-      d.profit >= 0 ? '#9b59b6' : '#f1c40f'
+      d.profit >= 0 ? '#2ed573' : '#ff6b6b'
     );
     
     return {
@@ -1097,9 +1097,6 @@ function Analytics({
                           }
                         }}
                       />
-                      <label className="form-check-label text-muted small" htmlFor="weeklyExpenseAdjustment1400">
-                        ₹1400×7 days
-                      </label>
                     </div>
                   )}
                   <div className="form-check form-switch">
@@ -1115,9 +1112,6 @@ function Analytics({
                         }
                       }}
                     />
-                    <label className="form-check-label text-muted small" htmlFor="weeklyExpenseAdjustment">
-                      ₹1000×7 days
-                    </label>
                   </div>
                 </div>
               </div>
@@ -1178,9 +1172,6 @@ function Analytics({
                           }
                         }}
                       />
-                      <label className="form-check-label text-muted small" htmlFor="monthlyExpenseAdjustment1400">
-                        ₹1400×days
-                      </label>
                     </div>
                   )}
                   <div className="form-check form-switch">
@@ -1196,9 +1187,6 @@ function Analytics({
                         }
                       }}
                     />
-                    <label className="form-check-label text-muted small" htmlFor="monthlyExpenseAdjustment">
-                      ₹1000×days
-                    </label>
                   </div>
                 </div>
               </div>
