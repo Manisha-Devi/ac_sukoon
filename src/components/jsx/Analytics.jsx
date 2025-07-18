@@ -1075,10 +1075,7 @@ function Analytics({
               <div className="d-flex align-items-center flex-wrap">
                 <h5 className="mb-0 flex-shrink-1 me-1">
                   <i className="bi bi-bar-chart me-2"></i>
-                  Weekly Profit 
-                  <small className="text-muted ms-2 d-none d-md-inline">
-                    (Last 12 weeks)
-                  </small>
+                  Weekly Profit
                 </h5>
                 <div className="d-flex gap-2 align-items-center">
                   {addExpenseAdjustment && (
@@ -1150,10 +1147,7 @@ function Analytics({
               <div className="d-flex align-items-center flex-wrap">
                 <h5 className="mb-0 flex-shrink-1 me-1">
                   <i className="bi bi-calendar-month me-2"></i>
-                  Monthly Profit 
-                  <small className="text-muted ms-2 d-none d-md-inline">
-                    (Last 12 months)
-                  </small>
+                  Monthly Profit
                 </h5>
                 <div className="d-flex gap-2 align-items-center">
                   {addExpenseAdjustment && (
