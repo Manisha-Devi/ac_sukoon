@@ -54,6 +54,10 @@ function Analytics({
   const [showSummary, setShowSummary] = useState(true);
   const [addExpenseAdjustment, setAddExpenseAdjustment] = useState(false);
   const [addExpenseAdjustment1400, setAddExpenseAdjustment1400] = useState(false);
+  const [addWeeklyExpenseAdjustment, setAddWeeklyExpenseAdjustment] = useState(false);
+  const [addWeeklyExpenseAdjustment1400, setAddWeeklyExpenseAdjustment1400] = useState(false);
+  const [addMonthlyExpenseAdjustment, setAddMonthlyExpenseAdjustment] = useState(false);
+  const [addMonthlyExpenseAdjustment1400, setAddMonthlyExpenseAdjustment1400] = useState(false);
 
   // Simplified logging for better performance
   if (process.env.NODE_ENV === 'development') {
@@ -496,44 +500,44 @@ function Analytics({
   const weeklyTrendData = useMemo(() => {
     const now = new Date();
     const weeksToShow = 12; // Show last 12 weeks
-    
+
     const weeklyData = [];
-    
+
     for (let i = weeksToShow - 1; i >= 0; i--) {
       const weekStart = new Date(now);
       weekStart.setDate(now.getDate() - (i * 7) - now.getDay());
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekStart.getDate() + 6);
-      
+
       const weekStartStr = weekStart.toISOString().split('T')[0];
       const weekEndStr = weekEnd.toISOString().split('T')[0];
-      
+
       // Get all dates in this week
       const weekDates = [];
       for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
         weekDates.push(d.toISOString().split('T')[0]);
       }
-      
+
       const weekEarnings = fareData
         .filter(entry => {
           const entryDate = entry.date || entry.dateFrom;
           return weekDates.includes(entryDate) && entry.type !== 'off';
         })
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
-      
+
       let weekExpenses = expenseData
         .filter(entry => weekDates.includes(entry.date))
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
-      
+
       // Add weekly adjustments (7 days * adjustment amounts)
-      if (addExpenseAdjustment1400) {
+      if (addWeeklyExpenseAdjustment1400) {
         weekExpenses += (1400 * 7);
       }
-      
-      if (addExpenseAdjustment) {
+
+      if (addWeeklyExpenseAdjustment) {
         weekExpenses += (1000 * 7);
       }
-      
+
       weeklyData.push({
         weekStart: weekStartStr,
         weekEnd: weekEndStr,
@@ -543,15 +547,15 @@ function Analytics({
         label: `${weekStart.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}`
       });
     }
-    
+
     const backgroundColors = weeklyData.map(d => 
       d.profit >= 0 ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 107, 107, 0.3)'
     );
-    
+
     const borderColors = weeklyData.map(d => 
       d.profit >= 0 ? '#2ed573' : '#ff6b6b'
     );
-    
+
     return {
       labels: weeklyData.map(d => d.label),
       datasets: [
@@ -570,49 +574,49 @@ function Analytics({
         },
       ]
     };
-  }, [fareData, expenseData, addExpenseAdjustment, addExpenseAdjustment1400]);
+  }, [fareData, expenseData, addWeeklyExpenseAdjustment, addWeeklyExpenseAdjustment1400]);
 
   // Monthly Profit Chart Data
   const monthlyTrendData = useMemo(() => {
     const now = new Date();
     const monthsToShow = 12; // Show last 12 months
-    
+
     const monthlyData = [];
-    
+
     for (let i = monthsToShow - 1; i >= 0; i--) {
       const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
-      
+
       const monthStartStr = monthStart.toISOString().split('T')[0];
       const monthEndStr = monthEnd.toISOString().split('T')[0];
-      
+
       // Get all dates in this month
       const monthDates = [];
       for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
         monthDates.push(d.toISOString().split('T')[0]);
       }
-      
+
       const monthEarnings = fareData
         .filter(entry => {
           const entryDate = entry.date || entry.dateFrom;
           return monthDates.includes(entryDate) && entry.type !== 'off';
         })
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
-      
+
       let monthExpenses = expenseData
         .filter(entry => monthDates.includes(entry.date))
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
-      
+
       // Add monthly adjustments (number of days in month * adjustment amounts)
       const daysInMonth = monthDates.length;
-      if (addExpenseAdjustment1400) {
+      if (addMonthlyExpenseAdjustment1400) {
         monthExpenses += (1400 * daysInMonth);
       }
-      
-      if (addExpenseAdjustment) {
+
+      if (addMonthlyExpenseAdjustment) {
         monthExpenses += (1000 * daysInMonth);
       }
-      
+
       monthlyData.push({
         monthStart: monthStartStr,
         monthEnd: monthEndStr,
@@ -623,15 +627,15 @@ function Analytics({
         daysInMonth
       });
     }
-    
+
     const backgroundColors = monthlyData.map(d => 
       d.profit >= 0 ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 107, 107, 0.3)'
     );
-    
+
     const borderColors = monthlyData.map(d => 
       d.profit >= 0 ? '#2ed573' : '#ff6b6b'
     );
-    
+
     return {
       labels: monthlyData.map(d => d.label),
       datasets: [
@@ -650,7 +654,7 @@ function Analytics({
         },
       ]
     };
-  }, [fareData, expenseData, addExpenseAdjustment, addExpenseAdjustment1400]);
+  }, [fareData, expenseData, addMonthlyExpenseAdjustment, addMonthlyExpenseAdjustment1400]);
 
   // Chart options
   const chartOptions = {
@@ -1081,38 +1085,38 @@ function Analytics({
                   </small>
                 </h5>
                 <div className="d-flex gap-2 align-items-center">
-                  {addExpenseAdjustment && (
+                  
                     <div className="form-check form-switch">
                       <input 
                         className="form-check-input" 
                         type="checkbox" 
                         id="weeklyExpenseAdjustment1400"
-                        checked={addExpenseAdjustment1400}
+                        checked={addWeeklyExpenseAdjustment1400}
                         onChange={(e) => {
-                          setAddExpenseAdjustment1400(e.target.checked);
+                          setAddWeeklyExpenseAdjustment1400(e.target.checked);
                           if (!e.target.checked) {
-                            setAddExpenseAdjustment(false);
+                            setAddWeeklyExpenseAdjustment(false);
                           } else {
-                            setAddExpenseAdjustment(true);
+                            setAddWeeklyExpenseAdjustment(true);
                           }
                         }}
                       />
                     </div>
-                  )}
-                  <div className="form-check form-switch">
+                 
+                  
                     <input 
                       className="form-check-input" 
                       type="checkbox" 
                       id="weeklyExpenseAdjustment"
-                      checked={addExpenseAdjustment}
+                      checked={addWeeklyExpenseAdjustment}
                       onChange={(e) => {
-                        setAddExpenseAdjustment(e.target.checked);
+                        setAddWeeklyExpenseAdjustment(e.target.checked);
                         if (!e.target.checked) {
-                          setAddExpenseAdjustment1400(false);
+                          setAddWeeklyExpenseAdjustment1400(false);
                         }
                       }}
                     />
-                  </div>
+                 
                 </div>
               </div>
             </div>
@@ -1156,38 +1160,38 @@ function Analytics({
                   </small>
                 </h5>
                 <div className="d-flex gap-2 align-items-center">
-                  {addExpenseAdjustment && (
+                  
                     <div className="form-check form-switch">
                       <input 
                         className="form-check-input" 
                         type="checkbox" 
                         id="monthlyExpenseAdjustment1400"
-                        checked={addExpenseAdjustment1400}
+                        checked={addMonthlyExpenseAdjustment1400}
                         onChange={(e) => {
-                          setAddExpenseAdjustment1400(e.target.checked);
+                          setAddMonthlyExpenseAdjustment1400(e.target.checked);
                           if (!e.target.checked) {
-                            setAddExpenseAdjustment(false);
+                            setAddMonthlyExpenseAdjustment(false);
                           } else {
-                            setAddExpenseAdjustment(true);
+                            setAddMonthlyExpenseAdjustment(true);
                           }
                         }}
                       />
                     </div>
-                  )}
-                  <div className="form-check form-switch">
+                  
+                  
                     <input 
                       className="form-check-input" 
                       type="checkbox" 
                       id="monthlyExpenseAdjustment"
-                      checked={addExpenseAdjustment}
+                      checked={addMonthlyExpenseAdjustment}
                       onChange={(e) => {
-                        setAddExpenseAdjustment(e.target.checked);
+                        setAddMonthlyExpenseAdjustment(e.target.checked);
                         if (!e.target.checked) {
-                          setAddExpenseAdjustment1400(false);
+                          setAddMonthlyExpenseAdjustment1400(false);
                         }
                       }}
                     />
-                  </div>
+                  
                 </div>
               </div>
             </div>
