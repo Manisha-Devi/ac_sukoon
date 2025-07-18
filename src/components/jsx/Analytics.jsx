@@ -933,6 +933,19 @@ function Analytics({
                     </small>
                   </h5>
                   <div className="d-flex gap-2 align-items-center">
+                    {addExpenseAdjustment && (
+                      <div className="form-check form-switch">
+                        <input 
+                          className="form-check-input" 
+                          type="checkbox" 
+                          id="expenseAdjustment1400"
+                          checked={addExpenseAdjustment1400}
+                          onChange={(e) => {
+                            setAddExpenseAdjustment1400(e.target.checked);
+                          }}
+                        />
+                      </div>
+                    )}
                     <div className="form-check form-switch">
                       <input 
                         className="form-check-input" 
@@ -947,26 +960,7 @@ function Analytics({
                           }
                         }}
                       />
-                      <label className="form-check-label ms-1" htmlFor="expenseAdjustment">
-                        ₹1000×days
-                      </label>
                     </div>
-                    {addExpenseAdjustment && (
-                      <div className="form-check form-switch">
-                        <input 
-                          className="form-check-input" 
-                          type="checkbox" 
-                          id="expenseAdjustment1400"
-                          checked={addExpenseAdjustment1400}
-                          onChange={(e) => {
-                            setAddExpenseAdjustment1400(e.target.checked);
-                          }}
-                        />
-                        <label className="form-check-label ms-1" htmlFor="expenseAdjustment1400">
-                          ₹1400×days
-                        </label>
-                      </div>
-                    )}
                   </div>
               </div>
 
@@ -1084,6 +1078,19 @@ function Analytics({
                   </small>
                 </h5>
                 <div className="d-flex gap-2 align-items-center">
+                    {addWeeklyExpenseAdjustment && (
+                      <div className="form-check form-switch">
+                        <input 
+                          className="form-check-input" 
+                          type="checkbox" 
+                          id="weeklyExpenseAdjustment1400"
+                          checked={addWeeklyExpenseAdjustment1400}
+                          onChange={(e) => {
+                            setAddWeeklyExpenseAdjustment1400(e.target.checked);
+                          }}
+                        />
+                      </div>
+                    )}
                     <div className="form-check form-switch">
                       <input 
                         className="form-check-input" 
@@ -1097,26 +1104,7 @@ function Analytics({
                           }
                         }}
                       />
-                      <label className="form-check-label ms-1" htmlFor="weeklyExpenseAdjustment">
-                        ₹1000×7 days
-                      </label>
                     </div>
-                    {addWeeklyExpenseAdjustment && (
-                      <div className="form-check form-switch">
-                        <input 
-                          className="form-check-input" 
-                          type="checkbox" 
-                          id="weeklyExpenseAdjustment1400"
-                          checked={addWeeklyExpenseAdjustment1400}
-                          onChange={(e) => {
-                            setAddWeeklyExpenseAdjustment1400(e.target.checked);
-                          }}
-                        />
-                        <label className="form-check-label ms-1" htmlFor="weeklyExpenseAdjustment1400">
-                          ₹1400×7 days
-                        </label>
-                      </div>
-                    )}
                   </div>
               </div>
             </div>
@@ -1160,6 +1148,19 @@ function Analytics({
                   </small>
                 </h5>
                 <div className="d-flex gap-2 align-items-center">
+                    {addMonthlyExpenseAdjustment && (
+                      <div className="form-check form-switch">
+                        <input 
+                          className="form-check-input" 
+                          type="checkbox" 
+                          id="monthlyExpenseAdjustment1400"
+                          checked={addMonthlyExpenseAdjustment1400}
+                          onChange={(e) => {
+                            setAddMonthlyExpenseAdjustment1400(e.target.checked);
+                          }}
+                        />
+                      </div>
+                    )}
                     <div className="form-check form-switch">
                       <input 
                         className="form-check-input" 
@@ -1173,26 +1174,7 @@ function Analytics({
                           }
                         }}
                       />
-                      <label className="form-check-label ms-1" htmlFor="monthlyExpenseAdjustment">
-                        ₹1000×days
-                      </label>
                     </div>
-                    {addMonthlyExpenseAdjustment && (
-                      <div className="form-check form-switch">
-                        <input 
-                          className="form-check-input" 
-                          type="checkbox" 
-                          id="monthlyExpenseAdjustment1400"
-                          checked={addMonthlyExpenseAdjustment1400}
-                          onChange={(e) => {
-                            setAddMonthlyExpenseAdjustment1400(e.target.checked);
-                          }}
-                        />
-                        <label className="form-check-label ms-1" htmlFor="monthlyExpenseAdjustment1400">
-                          ₹1400×days
-                        </label>
-                      </div>
-                    )}
                   </div>
               </div>
             </div>
