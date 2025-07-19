@@ -357,7 +357,7 @@ function Analytics({
         dayCount = 14;
     }
 
-    // Generate array of dates (reversed to show most recent first)
+    // Generate array of dates (most recent first - left to right)
     const dateArray = Array.from({length: dayCount}, (_, i) => {
       const date = new Date(endDate);
       date.setDate(endDate.getDate() - i);
@@ -503,7 +503,7 @@ function Analytics({
 
     const weeklyData = [];
 
-    // Generate weeks from most recent to oldest, then reverse to show newest first
+    // Generate weeks from most recent first (left side = current/most recent)
     for (let i = 0; i < weeksToShow; i++) {
       const weekStart = new Date(now);
       weekStart.setDate(now.getDate() - (i * 7) - now.getDay());
@@ -549,8 +549,7 @@ function Analytics({
       });
     }
 
-    // Reverse to show most recent first
-    weeklyData.reverse();
+    // Data is already in correct order (most recent first)
 
     const backgroundColors = weeklyData.map(d => 
       d.profit >= 0 ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 107, 107, 0.3)'
@@ -597,7 +596,7 @@ function Analytics({
 
     const monthlyData = [];
 
-    // Generate months from most recent to oldest, then reverse to show newest first
+    // Generate months from most recent first (left side = current/most recent)
     for (let i = 0; i < monthsToShow; i++) {
       const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
@@ -643,8 +642,7 @@ function Analytics({
       });
     }
 
-    // Reverse to show most recent first
-    monthlyData.reverse();
+    // Data is already in correct order (most recent first)
 
     const backgroundColors = monthlyData.map(d => 
       d.profit >= 0 ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 107, 107, 0.3)'
