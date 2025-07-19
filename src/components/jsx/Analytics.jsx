@@ -510,12 +510,15 @@ function Analytics({
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekStart.getDate() + 6);
 
-      const weekStartStr = weekStart.toISOString().split('T')[0];
-      const weekEndStr = weekEnd.toISOString().split('T')[0];
+      // For current week, use today as end date instead of end of week
+      const actualEndDate = i === 0 ? now : weekEnd;
 
-      // Get all dates in this week
+      const weekStartStr = weekStart.toISOString().split('T')[0];
+      const weekEndStr = actualEndDate.toISOString().split('T')[0];
+
+      // Get all dates in this week up to actual end date
       const weekDates = [];
-      for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
+      for (let d = new Date(weekStart); d <= actualEndDate; d.setDate(d.getDate() + 1)) {
         weekDates.push(d.toISOString().split('T')[0]);
       }
 
@@ -530,13 +533,14 @@ function Analytics({
         .filter(entry => weekDates.includes(entry.date))
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
-      // Add weekly adjustments (7 days * adjustment amounts)
+      // Add weekly adjustments (actual days in week * adjustment amounts)
+      const daysInWeek = weekDates.length;
       if (addWeeklyExpenseAdjustment1400) {
-        weekExpenses += (1400 * 7);
+        weekExpenses += (1400 * daysInWeek);
       }
 
       if (addWeeklyExpenseAdjustment) {
-        weekExpenses += (1000 * 7);
+        weekExpenses += (1000 * daysInWeek);
       }
 
       weeklyData.push({
@@ -545,7 +549,8 @@ function Analytics({
         earnings: weekEarnings,
         expenses: weekExpenses,
         profit: weekEarnings - weekExpenses,
-        label: `${weekStart.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}`
+        label: `${weekStart.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })} - ${actualEndDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}`,
+        daysInWeek
       });
     }
 
@@ -601,24 +606,51 @@ function Analytics({
       const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
 
-      const monthStartStr = monthStart.toISOString().split('T')[0];
-      const monthEndStr = monthEnd.toISOString().split('T')[0];
+      // For current month, use today as end date instead of end of month
+      const actualEndDate = i === 0 ? now : monthEnd;
 
-      // Get all dates in this month
+      const monthStartStr = monthStart.toISOString().split('T')[0];
+      const monthEndStr = actualEndDate.toISOString().split('T')[0];
+
+      // Get all dates in this month up to actual end date
       const monthDates = [];
-      for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
+      for (let d = new Date(monthStart); d <= actualEndDate; d.setDate(d.getDate() + 1)) {
         monthDates.push(d.toISOString().split('T')[0]);
       }
+
+      console.log(`📅 Month ${i === 0 ? '(Current)' : i} - ${monthStart.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}:`, {
+        monthDates: monthDates.length,
+        startDate: monthStartStr,
+        endDate: monthEndStr
+      });
 
       const monthEarnings = fareData
         .filter(entry => {
           const entryDate = entry.date || entry.dateFrom;
-          return monthDates.includes(entryDate) && entry.type !== 'off';
+          const isInRange = monthDates.includes(entryDate) && entry.type !== 'off';
+          if (i === 0 && isInRange) {
+            console.log(`📈 Current month earning entry:`, {
+              date: entryDate,
+              amount: entry.totalAmount,
+              type: entry.type
+            });
+          }
+          return isInRange;
         })
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
       let monthExpenses = expenseData
-        .filter(entry => monthDates.includes(entry.date))
+        .filter(entry => {
+          const isInRange = monthDates.includes(entry.date);
+          if (i === 0 && isInRange) {
+            console.log(`📉 Current month expense entry:`, {
+              date: entry.date,
+              amount: entry.totalAmount,
+              type: entry.type
+            });
+          }
+          return isInRange;
+        })
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
       // Add monthly adjustments (number of days in month * adjustment amounts)
@@ -631,12 +663,27 @@ function Analytics({
         monthExpenses += (1000 * daysInMonth);
       }
 
+      const monthProfit = monthEarnings - monthExpenses;
+
+      if (i === 0) {
+        console.log(`📊 Current Month (${monthStart.toLocaleDateString('en-IN', { month: 'long' })}) Calculation:`, {
+          earnings: monthEarnings,
+          expenses: monthExpenses,
+          profit: monthProfit,
+          daysCalculated: daysInMonth,
+          adjustments: {
+            '1400': addMonthlyExpenseAdjustment1400 ? (1400 * daysInMonth) : 0,
+            '1000': addMonthlyExpenseAdjustment ? (1000 * daysInMonth) : 0
+          }
+        });
+      }
+
       monthlyData.push({
         monthStart: monthStartStr,
         monthEnd: monthEndStr,
         earnings: monthEarnings,
         expenses: monthExpenses,
-        profit: monthEarnings - monthExpenses,
+        profit: monthProfit,
         label: monthStart.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }),
         daysInMonth
       });
