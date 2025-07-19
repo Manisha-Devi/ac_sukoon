@@ -249,114 +249,6 @@ function App() {
           allDataLoaded = true;
 
           // Continue with existing data processing logic...
-
-      // Process fare data (fare receipts + booking entries)
-          let combinedFareData = [];
-
-          // Add fare receipts
-          if (fareReceipts?.data && Array.isArray(fareReceipts.data)) {
-            combinedFareData.push(...fareReceipts.data.map(receipt => ({
-              ...receipt,
-              type: 'daily'
-            })));
-          }
-
-          // Add booking entries (fix date field mapping)
-          if (bookingEntries?.data && Array.isArray(bookingEntries.data)) {
-            combinedFareData.push(...bookingEntries.data.map(booking => ({
-              ...booking,
-              type: 'booking',
-              date: booking.dateFrom || booking.date // Use dateFrom as primary date for booking entries
-            })));
-          }
-
-          // Add off days
-          if (offDays?.data && Array.isArray(offDays.data)) {
-            combinedFareData.push(...offDays.data.map(offDay => ({
-              ...offDay,
-              type: 'off'
-            })));
-          }
-
-          // Process expense data
-          let combinedExpenseData = [];
-
-          if (fuelPayments?.data && Array.isArray(fuelPayments.data)) {
-            combinedExpenseData.push(...fuelPayments.data.map(payment => ({
-              ...payment,
-              type: 'fuel'
-            })));
-          }
-
-          if (addaPayments?.data && Array.isArray(addaPayments.data)) {
-            combinedExpenseData.push(...addaPayments.data.map(payment => ({
-              ...payment,
-              type: 'adda'
-            })));
-          }
-
-          if (unionPayments?.data && Array.isArray(unionPayments.data)) {
-            combinedExpenseData.push(...unionPayments.data.map(payment => ({
-              ...payment,
-              type: 'union'
-            })));
-          }
-
-          if (servicePayments?.data && Array.isArray(servicePayments.data)) {
-            combinedExpenseData.push(...servicePayments.data.map(payment => ({
-              ...payment,
-              type: 'service'
-            })));
-          }
-
-          if (otherPayments?.data && Array.isArray(otherPayments.data)) {
-            combinedExpenseData.push(...otherPayments.data.map(payment => ({
-              ...payment,
-              type: 'other'
-            })));
-          }
-
-
-
-      // Update parent state
-          setFareData(combinedFareData);
-          setExpenseData(combinedExpenseData);
-
-          // Update allUsers state with fetched data
-          if (allUsersData?.success && allUsersData?.data) {
-            console.log('👥 Setting allUsers data:', allUsersData.data.length, 'users');
-            setAllUsers(allUsersData.data);
-          } else {
-            console.warn('⚠️ Failed to load all users data:', allUsersData?.error);
-            // Keep current user in allUsers if fetch fails
-            if (user) {
-              const currentUserForAllUsers = {
-                username: user.username,
-                name: user.fullName,
-                date: new Date().toISOString().split('T')[0],
-                fixedCash: user.fixedCash || 0
-              };
-              setAllUsers([currentUserForAllUsers]);
-            }
-          }
-
-          // Update cashDeposit state with fetched data
-          if (cashDepositsData?.success && cashDepositsData?.data) {
-            console.log('💰 Setting cashDeposit data:', cashDepositsData.data.length, 'deposits');
-            console.log('💰 Cash deposits fetched from Google Sheets:', cashDepositsData.data);
-            console.log('💰 Individual deposits:', cashDepositsData.data.map(d => ({
-              id: d.id || d.entryId,
-              date: d.date,
-              amount: d.cashAmount,
-              depositedBy: d.depositedBy
-            })));
-            setCashDeposit(cashDepositsData.data);
-          } else {
-            console.warn('⚠️ Failed to load cash deposits data:', cashDepositsData?.error);
-            console.warn('⚠️ Full cash deposits response:', cashDepositsData);
-            // Keep existing data instead of clearing it
-            console.log('💰 Keeping existing cash deposits data, current count:', cashDeposit.length);
-          }
         } catch (fetchError) {
           console.warn(`⚠️ Attempt ${retryCount} failed:`, fetchError.message);
           
@@ -372,6 +264,114 @@ function App() {
 
       // Only process final statistics if we have successfully loaded data
       if (allDataLoaded) {
+        // Process fare data (fare receipts + booking entries)
+        let combinedFareData = [];
+
+        // Add fare receipts
+        if (fareReceipts?.data && Array.isArray(fareReceipts.data)) {
+          combinedFareData.push(...fareReceipts.data.map(receipt => ({
+            ...receipt,
+            type: 'daily'
+          })));
+        }
+
+        // Add booking entries (fix date field mapping)
+        if (bookingEntries?.data && Array.isArray(bookingEntries.data)) {
+          combinedFareData.push(...bookingEntries.data.map(booking => ({
+            ...booking,
+            type: 'booking',
+            date: booking.dateFrom || booking.date // Use dateFrom as primary date for booking entries
+          })));
+        }
+
+        // Add off days
+        if (offDays?.data && Array.isArray(offDays.data)) {
+          combinedFareData.push(...offDays.data.map(offDay => ({
+            ...offDay,
+            type: 'off'
+          })));
+        }
+
+        // Process expense data
+        let combinedExpenseData = [];
+
+        if (fuelPayments?.data && Array.isArray(fuelPayments.data)) {
+          combinedExpenseData.push(...fuelPayments.data.map(payment => ({
+            ...payment,
+            type: 'fuel'
+          })));
+        }
+
+        if (addaPayments?.data && Array.isArray(addaPayments.data)) {
+          combinedExpenseData.push(...addaPayments.data.map(payment => ({
+            ...payment,
+            type: 'adda'
+          })));
+        }
+
+        if (unionPayments?.data && Array.isArray(unionPayments.data)) {
+          combinedExpenseData.push(...unionPayments.data.map(payment => ({
+            ...payment,
+            type: 'union'
+          })));
+        }
+
+        if (servicePayments?.data && Array.isArray(servicePayments.data)) {
+          combinedExpenseData.push(...servicePayments.data.map(payment => ({
+            ...payment,
+            type: 'service'
+          })));
+        }
+
+        if (otherPayments?.data && Array.isArray(otherPayments.data)) {
+          combinedExpenseData.push(...otherPayments.data.map(payment => ({
+            ...payment,
+            type: 'other'
+          })));
+        }
+
+
+
+      // Update parent state
+        setFareData(combinedFareData);
+        setExpenseData(combinedExpenseData);
+
+        // Update allUsers state with fetched data
+        if (allUsersData?.success && allUsersData?.data) {
+          console.log('👥 Setting allUsers data:', allUsersData.data.length, 'users');
+          setAllUsers(allUsersData.data);
+        } else {
+          console.warn('⚠️ Failed to load all users data:', allUsersData?.error);
+          // Keep current user in allUsers if fetch fails
+          if (user) {
+            const currentUserForAllUsers = {
+              username: user.username,
+              name: user.fullName,
+              date: new Date().toISOString().split('T')[0],
+              fixedCash: user.fixedCash || 0
+            };
+            setAllUsers([currentUserForAllUsers]);
+          }
+        }
+
+        // Update cashDeposit state with fetched data
+        if (cashDepositsData?.success && cashDepositsData?.data) {
+          console.log('💰 Setting cashDeposit data:', cashDepositsData.data.length, 'deposits');
+          console.log('💰 Cash deposits fetched from Google Sheets:', cashDepositsData.data);
+          console.log('💰 Individual deposits:', cashDepositsData.data.map(d => ({
+            id: d.id || d.entryId,
+            date: d.date,
+            amount: d.cashAmount,
+            depositedBy: d.depositedBy
+          })));
+          setCashDeposit(cashDepositsData.data);
+        } else {
+          console.warn('⚠️ Failed to load cash deposits data:', cashDepositsData?.error);
+          console.warn('⚠️ Full cash deposits response:', cashDepositsData);
+          // Keep existing data instead of clearing it
+          console.log('💰 Keeping existing cash deposits data, current count:', cashDeposit.length);
+        }
+
         // Calculate and update totals (using the latest fetched data)
         const totalEarningsAmount = combinedFareData
           .filter(entry => entry.type !== 'off')
