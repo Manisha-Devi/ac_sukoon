@@ -140,19 +140,35 @@ function App() {
     setUser(userData);
     console.log('👤 User logged in via React state:', userData);
 
+    // Show loading screen for auto-refresh after login
+    setIsRefreshing(true);
+    setLoadingProgress(0);
+    setCurrentLoadingAction('Initializing post-login data refresh...');
+
     // Automatically trigger complete data refresh after login
     console.log('🔄 Auto-triggering complete data refresh after login...');
 
     try {
       // First refresh users data
+      setLoadingProgress(5);
+      setCurrentLoadingAction('Fetching user data...');
       await fetchAllUsersData();
 
       // Then trigger the complete data refresh cycle (same as navbar refresh)
+      setLoadingProgress(10);
+      setCurrentLoadingAction('Starting complete data refresh...');
       await handleDataRefresh();
 
       console.log('✅ Auto data refresh completed after login');
     } catch (error) {
       console.error('❌ Auto data refresh failed after login:', error);
+    } finally {
+      // Hide loading screen after auto-refresh
+      setTimeout(() => {
+        setIsRefreshing(false);
+        setLoadingProgress(0);
+        setCurrentLoadingAction('');
+      }, 1000);
     }
   };
 
