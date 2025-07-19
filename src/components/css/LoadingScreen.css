@@ -171,7 +171,6 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  animation: rotate 2s linear infinite;
 }
 
 .progress-bar::before {
