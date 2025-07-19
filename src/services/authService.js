@@ -109,76 +109,77 @@ class AuthService {
     }
   }
 
-  // Get all users (for admin purposes)
+  // Get all users (for admin purposes) with retry mechanism
   async getAllUsers() {
-    try {
-      console.log('👥 Fetching all users from Google Sheets...');
+    const maxRetries = 3;
+    let retryCount = 0;
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+    while (retryCount < maxRetries) {
+      try {
+        console.log(`👥 Fetching all users from Google Sheets... (Attempt ${retryCount + 1}/${maxRetries})`);
 
-      // Ensure API key is properly added to the request
-      const requestData = this.apiKeyService.addAPIKey({
-        action: 'getAllUsers'
-      });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
-      console.log('🔐 getAllUsers request data:', { 
-        action: requestData.action, 
-        hasApiKey: !!requestData.apiKey,
-        apiKeyPreview: requestData.apiKey ? `${requestData.apiKey.substring(0, 10)}...` : 'none'
-      });
+        // Ensure API key is properly added to the request
+        const requestData = this.apiKeyService.addAPIKey({
+          action: 'getAllUsers'
+        });
 
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify(requestData)
-      });
+        console.log('🔐 getAllUsers request data:', { 
+          action: requestData.action, 
+          hasApiKey: !!requestData.apiKey,
+          apiKeyPreview: requestData.apiKey ? `${requestData.apiKey.substring(0, 10)}...` : 'none'
+        });
 
-      clearTimeout(timeoutId);
+        const response = await fetch(this.API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8',
+          },
+          mode: 'cors',
+          redirect: 'follow',
+          signal: controller.signal,
+          body: JSON.stringify(requestData)
+        });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('HTTP Error Response:', errorText);
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('HTTP Error Response:', errorText);
+          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ getAllUsers API response:', result);
+
+        if (result.success) {
+          return result;
+        } else {
+          throw new Error(result.error || result.message || 'API returned unsuccessful response');
+        }
+      } catch (error) {
+        retryCount++;
+        console.error(`❌ Error fetching users (Attempt ${retryCount}):`, error.message);
+
+        if (error.name === 'AbortError') {
+          console.error('❌ Request timeout for getAllUsers');
+        }
+
+        if (retryCount >= maxRetries) {
+          console.error('❌ Final attempt failed for getAllUsers');
+          return { 
+            success: false, 
+            error: `Failed after ${maxRetries} attempts: ${error.message}`,
+            data: [],
+            count: 0
+          };
+        } else {
+          console.log(`🔄 Retrying getAllUsers fetch in 2 seconds...`);
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
       }
-
-      const result = await response.json();
-      console.log('✅ getAllUsers API response:', result);
-
-      if (result.success) {
-        return result;
-      } else {
-        console.error('❌ API returned error:', result.error || result.message);
-        return { 
-          success: false, 
-          error: result.error || result.message || 'Failed to fetch users',
-          data: [],
-          count: 0
-        };
-      }
-    } catch (error) {
-      console.error('❌ Error fetching users:', error);
-
-      if (error.name === 'AbortError') {
-        return { 
-          success: false, 
-          error: 'Request timeout - API took too long to respond',
-          data: [],
-          count: 0
-        };
-      }
-
-      return { 
-        success: false, 
-        error: error.message || 'Failed to fetch users',
-        data: [],
-        count: 0
-      };
     }
   }
 
@@ -1220,44 +1221,61 @@ class AuthService {
     }
   }
 
-  // Get all Fare Receipts from Google Sheets
+  // Get all Fare Receipts from Google Sheets with retry mechanism
   async getFareReceipts() {
-    try {
-      console.log('📋 Fetching fare receipts from Google Sheets...');
+    const maxRetries = 3;
+    let retryCount = 0;
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+    while (retryCount < maxRetries) {
+      try {
+        console.log(`📋 Fetching fare receipts from Google Sheets... (Attempt ${retryCount + 1}/${maxRetries})`);
 
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify(this.apiKeyService.addAPIKey({
-          action: 'getFareReceipts'
-        }))
-      });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
-      clearTimeout(timeoutId);
+        const response = await fetch(this.API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8',
+          },
+          mode: 'cors',
+          redirect: 'follow',
+          signal: controller.signal,
+          body: JSON.stringify(this.apiKeyService.addAPIKey({
+            action: 'getFareReceipts'
+          }))
+        });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (result.success) {
+          console.log('✅ Fare receipts fetched successfully:', result);
+          return result;
+        } else {
+          throw new Error(result.error || 'API returned unsuccessful response');
+        }
+      } catch (error) {
+        retryCount++;
+        console.error(`❌ Error fetching fare receipts (Attempt ${retryCount}):`, error.message);
+        
+        if (retryCount >= maxRetries) {
+          console.error('❌ Final attempt failed for fare receipts');
+          return { 
+            success: false, 
+            error: `Failed after ${maxRetries} attempts: ${error.message}`,
+            data: []
+          };
+        } else {
+          console.log(`🔄 Retrying fare receipts fetch in 2 seconds...`);
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
       }
-
-      const result = await response.json();
-      console.log('✅ Fare receipts fetched:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error fetching fare receipts:', error);
-      // Return empty datastructure instead of error to prevent UI crashes
-      return { 
-        success: true, 
-        data: [],
-        message: 'Fare receipts loaded from local cache (API temporarily unavailable)'
-      };
     }
   }
 

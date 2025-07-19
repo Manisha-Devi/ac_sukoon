@@ -178,52 +178,73 @@ function App() {
         retryCount++;
         console.log(`🔄 Attempt ${retryCount}/${maxRetries} to fetch all data...`);
 
-        const [
-          fareReceipts, 
-          bookingEntries, 
-          offDays, 
-          fuelPayments, 
-          addaPayments,
-          unionPayments,
-          servicePayments,
-          otherPayments,
-          allUsersData,
-          cashDepositsData,
-        ] = await Promise.all([
-          authService.getFareReceipts(),
-          authService.getBookingEntries(),
-          authService.getOffDays(),
-          authService.getFuelPayments(),
-          authService.getAddaPayments(),
-          authService.getUnionPayments(),
-          authService.getServicePayments(),
-          authService.getOtherPayments(),
-          authService.getAllUsers(),
-          authService.getCashDeposits(),
-        ]);
+        // Individual fetch with retry for each data type
+        let fareReceipts, bookingEntries, offDays, fuelPayments, addaPayments;
+        let unionPayments, servicePayments, otherPayments, allUsersData, cashDepositsData;
 
-        // Verify all data types are successfully loaded
-        const dataVerification = {
-          fareReceipts: fareReceipts?.success === true,
-          bookingEntries: bookingEntries?.success === true,
-          offDays: offDays?.success === true,
-          fuelPayments: fuelPayments?.success === true,
-          addaPayments: addaPayments?.success === true,
-          unionPayments: unionPayments?.success === true,
-          servicePayments: servicePayments?.success === true,
-          otherPayments: otherPayments?.success === true,
-          allUsersData: allUsersData?.success === true,
-          cashDepositsData: cashDepositsData?.success === true
-        };
+        try {
+          // Fetch each data type individually with verification
+          console.log('📋 Fetching fareReceipts...');
+          fareReceipts = await authService.getFareReceipts();
+          if (!fareReceipts?.success) {
+            throw new Error(`FareReceipts fetch failed: ${fareReceipts?.error || 'Unknown error'}`);
+          }
 
-        console.log('📊 Data fetch verification:', dataVerification);
+          console.log('🎫 Fetching bookingEntries...');
+          bookingEntries = await authService.getBookingEntries();
+          if (!bookingEntries?.success) {
+            throw new Error(`BookingEntries fetch failed: ${bookingEntries?.error || 'Unknown error'}`);
+          }
 
-        // Check if all data types are successfully loaded
-        const failedTypes = Object.entries(dataVerification)
-          .filter(([key, success]) => !success)
-          .map(([key, success]) => key);
+          console.log('🚫 Fetching offDays...');
+          offDays = await authService.getOffDays();
+          if (!offDays?.success) {
+            throw new Error(`OffDays fetch failed: ${offDays?.error || 'Unknown error'}`);
+          }
 
-        if (failedTypes.length === 0) {
+          console.log('⛽ Fetching fuelPayments...');
+          fuelPayments = await authService.getFuelPayments();
+          if (!fuelPayments?.success) {
+            throw new Error(`FuelPayments fetch failed: ${fuelPayments?.error || 'Unknown error'}`);
+          }
+
+          console.log('🏛️ Fetching addaPayments...');
+          addaPayments = await authService.getAddaPayments();
+          if (!addaPayments?.success) {
+            throw new Error(`AddaPayments fetch failed: ${addaPayments?.error || 'Unknown error'}`);
+          }
+
+          console.log('👥 Fetching unionPayments...');
+          unionPayments = await authService.getUnionPayments();
+          if (!unionPayments?.success) {
+            throw new Error(`UnionPayments fetch failed: ${unionPayments?.error || 'Unknown error'}`);
+          }
+
+          console.log('🔧 Fetching servicePayments...');
+          servicePayments = await authService.getServicePayments();
+          if (!servicePayments?.success) {
+            throw new Error(`ServicePayments fetch failed: ${servicePayments?.error || 'Unknown error'}`);
+          }
+
+          console.log('📦 Fetching otherPayments...');
+          otherPayments = await authService.getOtherPayments();
+          if (!otherPayments?.success) {
+            throw new Error(`OtherPayments fetch failed: ${otherPayments?.error || 'Unknown error'}`);
+          }
+
+          console.log('👤 Fetching allUsersData...');
+          allUsersData = await authService.getAllUsers();
+          if (!allUsersData?.success) {
+            throw new Error(`AllUsersData fetch failed: ${allUsersData?.error || 'Unknown error'}`);
+          }
+
+          console.log('💰 Fetching cashDepositsData...');
+          cashDepositsData = await authService.getCashDeposits();
+          if (!cashDepositsData?.success) {
+            throw new Error(`CashDepositsData fetch failed: ${cashDepositsData?.error || 'Unknown error'}`);
+          }
+
+          // If we reach here, all data was fetched successfully
           console.log('✅ All data types successfully fetched!');
           allDataLoaded = true;
 
@@ -336,15 +357,15 @@ function App() {
             // Keep existing data instead of clearing it
             console.log('💰 Keeping existing cash deposits data, current count:', cashDeposit.length);
           }
-        } else {
-          console.warn(`⚠️ Attempt ${retryCount} failed. Missing data types:`, failedTypes);
+        } catch (fetchError) {
+          console.warn(`⚠️ Attempt ${retryCount} failed:`, fetchError.message);
           
           if (retryCount < maxRetries) {
-            console.log(`🔄 Retrying in 2 seconds... (${retryCount}/${maxRetries})`);
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retry
+            console.log(`🔄 Retrying in 3 seconds... (${retryCount}/${maxRetries})`);
+            await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 3 seconds before retry
           } else {
-            console.error('❌ Maximum retry attempts reached. Some data may be incomplete.');
-            throw new Error(`Failed to fetch all data types after ${maxRetries} attempts. Missing: ${failedTypes.join(', ')}`);
+            console.error('❌ Maximum retry attempts reached. Data fetch failed.');
+            throw new Error(`Failed to fetch all data after ${maxRetries} attempts: ${fetchError.message}`);
           }
         }
       }

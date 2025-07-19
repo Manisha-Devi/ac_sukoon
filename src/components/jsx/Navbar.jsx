@@ -4,6 +4,7 @@ import "../css/Navbar.css";
 function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime, setLastRefreshTime, onDataRefresh, onToggleSidebar }) {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
+  const [refreshStatus, setRefreshStatus] = useState('idle'); // 'idle', 'refreshing', 'success', 'error'
 
   // Toggle user dropdown
   const toggleUserDropdown = (e) => {
@@ -43,26 +44,39 @@ function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime
     setIsRefreshing(true);
     setLastRefreshTime(null); // Reset tick mark
 
+    console.log('🔄 Starting centralized data refresh...');
+    setIsRefreshing(true);
+    setRefreshStatus('refreshing');
+
     try {
-      console.log('🔄 Navbar: Starting centralized data refresh...');
+      await onDataRefresh();
 
-      // Call the refresh function passed from App.jsx
-      if (onDataRefresh) {
-        await onDataRefresh();
-      }
-
-      // Set completion time to show tick mark
       setLastRefreshTime(new Date());
-      console.log('✅ Navbar: Centralized refresh completed');
+      console.log('✅ Data refresh completed successfully');
 
-      // Auto hide tick mark after 3 seconds
-      setTimeout(() => {
-        setLastRefreshTime(null);
-      }, 3000);
+      // Show success message briefly
+      setRefreshStatus('success');
+      setTimeout(() => setRefreshStatus('idle'), 2000);
 
     } catch (error) {
-      console.error('❌ Navbar: Centralized refresh failed:', error);
-      alert('Unable to refresh data. Please check your internet connection.');
+      console.error('❌ Data refresh failed:', error);
+      setRefreshStatus('error');
+
+      // Show retry option
+      console.log('🔄 Will auto-retry in 5 seconds...');
+      setTimeout(async () => {
+        console.log('🔄 Auto-retrying data refresh...');
+        try {
+          await onDataRefresh();
+          setLastRefreshTime(new Date());
+          setRefreshStatus('success');
+          setTimeout(() => setRefreshStatus('idle'), 2000);
+        } catch (retryError) {
+          console.error('❌ Retry also failed:', retryError);
+          setRefreshStatus('error');
+          setTimeout(() => setRefreshStatus('idle'), 3000);
+        }
+      }, 5000);
     } finally {
       setIsRefreshing(false);
     }
@@ -146,6 +160,7 @@ function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime
                   ? 'bi-check-circle-fill text-success' 
                   : 'bi-arrow-clockwise'
             } fs-5`}></i>
+            {refreshStatus === 'error' && <span className="text-warning ms-1">Retry in 5s...</span>}
           </button>
 
           {/* Desktop Toggle and User Info */}
