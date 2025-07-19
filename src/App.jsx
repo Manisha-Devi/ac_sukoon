@@ -783,127 +783,130 @@ function App() {
         refreshCount={dataStatistics.refreshCount}
       />
       
-      {/* Navbar Component */}
-      <Navbar 
-          user={user} 
-          onLogout={handleLogout}
-          isRefreshing={isRefreshing}
-          setIsRefreshing={setIsRefreshing}
-          lastRefreshTime={lastRefreshTime}
-          setLastRefreshTime={setLastRefreshTime}
-          onDataRefresh={handleDataRefresh}
-          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        />
+      {/* Hide all content when loading screen is active */}
+      {!isRefreshing && (
+        <>
+          {/* Navbar Component */}
+          <Navbar 
+              user={user} 
+              onLogout={handleLogout}
+              isRefreshing={isRefreshing}
+              setIsRefreshing={setIsRefreshing}
+              lastRefreshTime={lastRefreshTime}
+              setLastRefreshTime={setLastRefreshTime}
+              onDataRefresh={handleDataRefresh}
+              onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+            />
 
-      {/* Sidebar Overlay - Only for mobile */}
-      <div
-        className={`sidebar-overlay ${sidebarOpen && window.innerWidth < 992 ? "show" : ""}`}
-        onClick={() => setSidebarOpen(false)}
-      ></div>
+          {/* Sidebar Overlay - Only for mobile */}
+          <div
+            className={`sidebar-overlay ${sidebarOpen && window.innerWidth < 992 ? "show" : ""}`}
+            onClick={() => setSidebarOpen(false)}
+          ></div>
 
-      {/* Sidebar */}
-      <div className={`sidebar ${sidebarOpen ? "show" : ""}`}>
-        <div className="sidebar-menu">
-          <div className="menu-section">
-            <h6>MAIN</h6>
-            <button
-              className={`menu-item ${activeTab === "dashboard" ? "active" : ""}`}
-              onClick={() => handleMenuClick("dashboard")}
-            >
-              <i className="bi bi-speedometer2"></i>
-              Dashboard
-            </button>
-          </div>
-
-          <div className="menu-section">
-            <h6>DATA ENTRY</h6>
-            <button
-              className={`menu-item ${activeTab === "fare-entry" ? "active" : ""}`}
-              onClick={() => handleMenuClick("fare-entry")}
-            >
-              <i className="bi bi-receipt"></i>
-              Fare Receipt
-            </button>
-            <button
-              className={`menu-item ${activeTab === "basic-payment" ? "active" : ""}`}
-              onClick={() => handleMenuClick("basic-payment")}
-            >
-              <i className="bi bi-credit-card"></i>
-              Basic Payment
-            </button>
-            <button
-              className={`menu-item ${activeTab === "misc-payment" ? "active" : ""}`}
-              onClick={() => handleMenuClick("misc-payment")}
-            >
-              <i className="bi bi-credit-card"></i>
-              Misc Payment
-            </button>
-          </div>
-
-          {user.userType === "Admin" && (
-            <div className="menu-section">
-              <h6>AUTOMATION</h6>
-              <button
-                className={`menu-item ${activeTab === "cash-book" ? "active" : ""}`}
-                onClick={() => handleMenuClick("cash-book")}
-              >
-                <i className="bi bi-book"></i>
-                Cash Book (Double Column)
-              </button>
-              <button
-                className={`menu-item ${activeTab === "bonus-calc" ? "active" : ""}`}
-                onClick={() => handleMenuClick("bonus-calc")}
-              >
-                <i className="bi bi-calculator"></i>
-                Bonus Calculator
-              </button>
-            </div>
-          )}
-
-          {(user.userType === "Manager" || user.userType === "Admin" || user.userType === "Conductor") && (
-            <div className="menu-section">
-              <h6>MANAGEMENT</h6>
-              {(user.userType === "Manager" || user.userType === "Admin") && (
+          {/* Sidebar */}
+          <div className={`sidebar ${sidebarOpen ? "show" : ""}`}>
+            <div className="sidebar-menu">
+              <div className="menu-section">
+                <h6>MAIN</h6>
                 <button
-                  className={`menu-item ${activeTab === "data-summary" ? "active" : ""}`}
-                  onClick={() => handleMenuClick("data-summary")}
+                  className={`menu-item ${activeTab === "dashboard" ? "active" : ""}`}
+                  onClick={() => handleMenuClick("dashboard")}
                 >
-                  <i className="bi bi-clipboard-check"></i>
-                  Data
+                  <i className="bi bi-speedometer2"></i>
+                  Dashboard
                 </button>
+              </div>
+
+              <div className="menu-section">
+                <h6>DATA ENTRY</h6>
+                <button
+                  className={`menu-item ${activeTab === "fare-entry" ? "active" : ""}`}
+                  onClick={() => handleMenuClick("fare-entry")}
+                >
+                  <i className="bi bi-receipt"></i>
+                  Fare Receipt
+                </button>
+                <button
+                  className={`menu-item ${activeTab === "basic-payment" ? "active" : ""}`}
+                  onClick={() => handleMenuClick("basic-payment")}
+                >
+                  <i className="bi bi-credit-card"></i>
+                  Basic Payment
+                </button>
+                <button
+                  className={`menu-item ${activeTab === "misc-payment" ? "active" : ""}`}
+                  onClick={() => handleMenuClick("misc-payment")}
+                >
+                  <i className="bi bi-credit-card"></i>
+                  Misc Payment
+                </button>
+              </div>
+
+              {user.userType === "Admin" && (
+                <div className="menu-section">
+                  <h6>AUTOMATION</h6>
+                  <button
+                    className={`menu-item ${activeTab === "cash-book" ? "active" : ""}`}
+                    onClick={() => handleMenuClick("cash-book")}
+                  >
+                    <i className="bi bi-book"></i>
+                    Cash Book (Double Column)
+                  </button>
+                  <button
+                    className={`menu-item ${activeTab === "bonus-calc" ? "active" : ""}`}
+                    onClick={() => handleMenuClick("bonus-calc")}
+                  >
+                    <i className="bi bi-calculator"></i>
+                    Bonus Calculator
+                  </button>
+                </div>
               )}
-              <button
-                className={`menu-item ${activeTab === "cash-summary" ? "active" : ""}`}
-                onClick={() => handleMenuClick("cash-summary")}
-              >
-                <i className="bi bi-cash-stack"></i>
-                Cash
-              </button>
-              <button
-                className={`menu-item ${activeTab === "bank-summary" ? "active" : ""}`}
-                onClick={() => handleMenuClick("bank-summary")}
-              >
-                <i className="bi bi-bank"></i>
-                Bank
-              </button>
+
+              {(user.userType === "Manager" || user.userType === "Admin" || user.userType === "Conductor") && (
+                <div className="menu-section">
+                  <h6>MANAGEMENT</h6>
+                  {(user.userType === "Manager" || user.userType === "Admin") && (
+                    <button
+                      className={`menu-item ${activeTab === "data-summary" ? "active" : ""}`}
+                      onClick={() => handleMenuClick("data-summary")}
+                    >
+                      <i className="bi bi-clipboard-check"></i>
+                      Data
+                    </button>
+                  )}
+                  <button
+                    className={`menu-item ${activeTab === "cash-summary" ? "active" : ""}`}
+                    onClick={() => handleMenuClick("cash-summary")}
+                  >
+                    <i className="bi bi-cash-stack"></i>
+                    Cash
+                  </button>
+                  <button
+                    className={`menu-item ${activeTab === "bank-summary" ? "active" : ""}`}
+                    onClick={() => handleMenuClick("bank-summary")}
+                  >
+                    <i className="bi bi-bank"></i>
+                    Bank
+                  </button>
+                </div>
+              )}
+
+              <div className="menu-section">
+                <h6>REPORTS</h6>
+                <button
+                  className={`menu-item ${activeTab === "analytics" ? "active" : ""}`}
+                  onClick={() => handleMenuClick("analytics")}
+                >
+                  <i className="bi bi-graph-up"></i>
+                  Analytics
+                </button>
+              </div>
             </div>
-          )}
-
-          <div className="menu-section">
-            <h6>REPORTS</h6>
-            <button
-              className={`menu-item ${activeTab === "analytics" ? "active" : ""}`}
-              onClick={() => handleMenuClick("analytics")}
-            >
-              <i className="bi bi-graph-up"></i>
-              Analytics
-            </button>
           </div>
-        </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="main-content">
+          {/* Main Content */}
+          <div className="main-content">
         {activeTab === "dashboard" && (
           <Dashboard 
             expenseData={expenseData} 
@@ -992,7 +995,8 @@ function App() {
             allUsers={allUsers}
           />
         )}
-      </div>
+        </>
+      )}
     </div>
   );
 }
