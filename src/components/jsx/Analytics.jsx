@@ -503,7 +503,8 @@ function Analytics({
 
     const weeklyData = [];
 
-    for (let i = weeksToShow - 1; i >= 0; i--) {
+    // Generate weeks from most recent to oldest, then reverse to show newest first
+    for (let i = 0; i < weeksToShow; i++) {
       const weekStart = new Date(now);
       weekStart.setDate(now.getDate() - (i * 7) - now.getDay());
       const weekEnd = new Date(weekStart);
@@ -548,6 +549,9 @@ function Analytics({
       });
     }
 
+    // Reverse to show most recent first
+    weeklyData.reverse();
+
     const backgroundColors = weeklyData.map(d => 
       d.profit >= 0 ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 107, 107, 0.3)'
     );
@@ -569,8 +573,18 @@ function Analytics({
           tension: 0.4,
           pointBackgroundColor: borderColors,
           pointBorderColor: borderColors,
-          pointRadius: 5,
-          pointHoverRadius: 7,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          segment: {
+            borderColor: function(ctx) {
+              const currentProfit = ctx.p0.parsed.y;
+              return currentProfit >= 0 ? '#2ed573' : '#ff6b6b';
+            },
+            backgroundColor: function(ctx) {
+              const currentProfit = ctx.p0.parsed.y;
+              return currentProfit >= 0 ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 107, 107, 0.3)';
+            }
+          }
         },
       ]
     };
@@ -583,7 +597,8 @@ function Analytics({
 
     const monthlyData = [];
 
-    for (let i = monthsToShow - 1; i >= 0; i--) {
+    // Generate months from most recent to oldest, then reverse to show newest first
+    for (let i = 0; i < monthsToShow; i++) {
       const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
 
@@ -628,6 +643,9 @@ function Analytics({
       });
     }
 
+    // Reverse to show most recent first
+    monthlyData.reverse();
+
     const backgroundColors = monthlyData.map(d => 
       d.profit >= 0 ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 107, 107, 0.3)'
     );
@@ -649,8 +667,18 @@ function Analytics({
           tension: 0.4,
           pointBackgroundColor: borderColors,
           pointBorderColor: borderColors,
-          pointRadius: 5,
-          pointHoverRadius: 7,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          segment: {
+            borderColor: function(ctx) {
+              const currentProfit = ctx.p0.parsed.y;
+              return currentProfit >= 0 ? '#2ed573' : '#ff6b6b';
+            },
+            backgroundColor: function(ctx) {
+              const currentProfit = ctx.p0.parsed.y;
+              return currentProfit >= 0 ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 107, 107, 0.3)';
+            }
+          }
         },
       ]
     };
