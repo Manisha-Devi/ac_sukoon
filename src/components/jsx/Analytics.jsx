@@ -586,8 +586,8 @@ function Analytics({
 
     const weeklyData = [];
 
-    // Generate weeks from oldest to newest (left to right timeline)
-    for (let i = weeksToShow - 1; i >= 0; i--) {
+    // Generate weeks from newest to oldest (most recent on left)
+    for (let i = 0; i < weeksToShow; i++) {
       const weekStart = new Date(now);
       weekStart.setDate(now.getDate() - (i * 7) - now.getDay());
       weekStart.setHours(0, 0, 0, 0); // Set to start of day
@@ -705,8 +705,8 @@ function Analytics({
 
     const monthlyData = [];
 
-    // Generate months from oldest to newest (left to right timeline)
-    for (let i = monthsToShow - 1; i >= 0; i--) {
+    // Generate months from newest to oldest (most recent on left)
+    for (let i = 0; i < monthsToShow; i++) {
       const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
       monthStart.setHours(0, 0, 0, 0); // Set to start of day
       
