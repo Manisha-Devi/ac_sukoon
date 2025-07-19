@@ -365,15 +365,20 @@ function Analytics({
     });
 
     const dailyData = dateArray.map(date => {
-      const dayEarnings = fareData
-        .filter(entry => {
-          const entryDate = entry.date || entry.dateFrom;
-          return entryDate === date && entry.type !== 'off';
-        })
+      // Apply filters to get filtered data for this day
+      const filteredFareDataForDay = applyFilters(fareData.filter(entry => {
+        const entryDate = entry.date || entry.dateFrom;
+        return entryDate === date && entry.type !== 'off';
+      }));
+
+      const filteredExpenseDataForDay = applyFilters(expenseData.filter(entry => 
+        entry.date === date
+      ));
+
+      const dayEarnings = filteredFareDataForDay
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
-      let dayExpenses = expenseData
-        .filter(entry => entry.date === date)
+      let dayExpenses = filteredExpenseDataForDay
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
       // Add ₹1400 to expenses if first checkbox is checked
@@ -507,49 +512,55 @@ function Analytics({
     for (let i = 0; i < weeksToShow; i++) {
       const weekStart = new Date(now);
       weekStart.setDate(now.getDate() - (i * 7) - now.getDay());
+      weekStart.setHours(0, 0, 0, 0); // Set to start of day
+      
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekStart.getDate() + 6);
+      weekEnd.setHours(23, 59, 59, 999); // Set to end of day
 
       // For current week, use today as end date instead of end of week
-      const actualEndDate = i === 0 ? now : weekEnd;
+      const actualEndDate = i === 0 ? new Date(now) : new Date(weekEnd);
+      if (i === 0) {
+        actualEndDate.setHours(23, 59, 59, 999);
+      }
 
       const weekStartStr = weekStart.toISOString().split('T')[0];
       const weekEndStr = actualEndDate.toISOString().split('T')[0];
 
-      // Get all dates in this week up to actual end date
-      const weekDates = [];
-      for (let d = new Date(weekStart); d <= actualEndDate; d.setDate(d.getDate() + 1)) {
-        weekDates.push(d.toISOString().split('T')[0]);
-      }
+      // Apply filters to get filtered data for this week
+      const filteredFareDataForWeek = applyFilters(fareData.filter(entry => {
+        const entryDate = entry.date || entry.dateFrom;
+        if (!entryDate) return false;
+        
+        const entryDateObj = new Date(entryDate + 'T00:00:00');
+        const isInWeekRange = entryDateObj >= weekStart && entryDateObj <= actualEndDate;
+        const isValidEntry = entry.type !== 'off';
+        
+        return isInWeekRange && isValidEntry;
+      }));
 
-      // Calculate week earnings properly
-      const weekEarnings = fareData
-        .filter(entry => {
-          const entryDate = entry.date || entry.dateFrom;
-          if (!entryDate) return false;
-          
-          const entryDateObj = new Date(entryDate);
-          const isInWeekRange = entryDateObj >= weekStart && entryDateObj <= actualEndDate;
-          const isValidEntry = entry.type !== 'off';
-          
-          return isInWeekRange && isValidEntry;
-        })
+      const filteredExpenseDataForWeek = applyFilters(expenseData.filter(entry => {
+        if (!entry.date) return false;
+        
+        const entryDateObj = new Date(entry.date + 'T00:00:00');
+        const isInWeekRange = entryDateObj >= weekStart && entryDateObj <= actualEndDate;
+        
+        return isInWeekRange;
+      }));
+
+      // Calculate week earnings from filtered data
+      const weekEarnings = filteredFareDataForWeek
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
-      // Calculate week expenses properly
-      let weekExpenses = expenseData
-        .filter(entry => {
-          if (!entry.date) return false;
-          
-          const entryDateObj = new Date(entry.date);
-          const isInWeekRange = entryDateObj >= weekStart && entryDateObj <= actualEndDate;
-          
-          return isInWeekRange;
-        })
+      // Calculate week expenses from filtered data
+      let weekExpenses = filteredExpenseDataForWeek
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
-      // Calculate actual days in the week period
-      const actualDaysInWeek = Math.ceil((actualEndDate - weekStart) / (1000 * 60 * 60 * 24)) + 1;
+      // Calculate actual days in the week period (excluding future days)
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      const endDateForCount = actualEndDate > today ? today : actualEndDate;
+      const actualDaysInWeek = Math.max(1, Math.ceil((endDateForCount - weekStart) / (1000 * 60 * 60 * 24)) + 1);
       
       // Add weekly adjustments (actual days * adjustment amounts)
       if (addWeeklyExpenseAdjustment1400) {
@@ -621,48 +632,54 @@ function Analytics({
     // Generate months from most recent first (left side = current/most recent)
     for (let i = 0; i < monthsToShow; i++) {
       const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      monthStart.setHours(0, 0, 0, 0); // Set to start of day
+      
       const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
+      monthEnd.setHours(23, 59, 59, 999); // Set to end of day
 
       // For current month, use today as end date instead of end of month
-      const actualEndDate = i === 0 ? now : monthEnd;
+      const actualEndDate = i === 0 ? new Date(now) : new Date(monthEnd);
+      if (i === 0) {
+        actualEndDate.setHours(23, 59, 59, 999);
+      }
 
       const monthStartStr = monthStart.toISOString().split('T')[0];
       const monthEndStr = actualEndDate.toISOString().split('T')[0];
 
-      // Get all dates in this month up to actual end date
-      const monthDates = [];
-      for (let d = new Date(monthStart); d <= actualEndDate; d.setDate(d.getDate() + 1)) {
-        monthDates.push(d.toISOString().split('T')[0]);
-      }
+      // Apply filters to get filtered data for this month
+      const filteredFareDataForMonth = applyFilters(fareData.filter(entry => {
+        const entryDate = entry.date || entry.dateFrom;
+        if (!entryDate) return false;
+        
+        const entryDateObj = new Date(entryDate + 'T00:00:00');
+        const isInMonthRange = entryDateObj >= monthStart && entryDateObj <= actualEndDate;
+        const isValidEntry = entry.type !== 'off';
+        
+        return isInMonthRange && isValidEntry;
+      }));
 
-      // Calculate month earnings properly
-      const monthEarnings = fareData
-        .filter(entry => {
-          const entryDate = entry.date || entry.dateFrom;
-          if (!entryDate) return false;
-          
-          const entryDateObj = new Date(entryDate);
-          const isInMonthRange = entryDateObj >= monthStart && entryDateObj <= actualEndDate;
-          const isValidEntry = entry.type !== 'off';
-          
-          return isInMonthRange && isValidEntry;
-        })
+      const filteredExpenseDataForMonth = applyFilters(expenseData.filter(entry => {
+        if (!entry.date) return false;
+        
+        const entryDateObj = new Date(entry.date + 'T00:00:00');
+        const isInMonthRange = entryDateObj >= monthStart && entryDateObj <= actualEndDate;
+        
+        return isInMonthRange;
+      }));
+
+      // Calculate month earnings from filtered data
+      const monthEarnings = filteredFareDataForMonth
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
-      // Calculate month expenses properly  
-      let monthExpenses = expenseData
-        .filter(entry => {
-          if (!entry.date) return false;
-          
-          const entryDateObj = new Date(entry.date);
-          const isInMonthRange = entryDateObj >= monthStart && entryDateObj <= actualEndDate;
-          
-          return isInMonthRange;
-        })
+      // Calculate month expenses from filtered data
+      let monthExpenses = filteredExpenseDataForMonth
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
-      // Calculate actual days in the period (not dates array length)
-      const actualDays = Math.ceil((actualEndDate - monthStart) / (1000 * 60 * 60 * 24)) + 1;
+      // Calculate actual days in the period (excluding future days)
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      const endDateForCount = actualEndDate > today ? today : actualEndDate;
+      const actualDays = Math.max(1, Math.ceil((endDateForCount - monthStart) / (1000 * 60 * 60 * 24)) + 1);
       
       // Add monthly adjustments (actual days * adjustment amounts)
       if (addMonthlyExpenseAdjustment1400) {
