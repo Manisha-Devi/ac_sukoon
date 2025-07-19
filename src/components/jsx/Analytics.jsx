@@ -443,20 +443,20 @@ function Analytics({
     });
 
     const dailyData = dateArray.map(date => {
-      // Apply filters to get filtered data for this day
-      const filteredFareDataForDay = applyFilters(fareData.filter(entry => {
+      // Use direct props data for consistent calculations
+      const fareDataForDay = fareData.filter(entry => {
         const entryDate = entry.date || entry.dateFrom;
         return entryDate === date && entry.type !== 'off';
-      }));
+      });
 
-      const filteredExpenseDataForDay = applyFilters(expenseData.filter(entry => 
+      const expenseDataForDay = expenseData.filter(entry => 
         entry.date === date
-      ));
+      );
 
-      const dayEarnings = filteredFareDataForDay
+      const dayEarnings = fareDataForDay
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
-      let dayExpenses = filteredExpenseDataForDay
+      let dayExpenses = expenseDataForDay
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
       // Add ₹1400 to expenses if first checkbox is checked
@@ -586,8 +586,8 @@ function Analytics({
 
     const weeklyData = [];
 
-    // Generate weeks from most recent first (left side = current/most recent)
-    for (let i = 0; i < weeksToShow; i++) {
+    // Generate weeks from oldest to newest (left to right timeline)
+    for (let i = weeksToShow - 1; i >= 0; i--) {
       const weekStart = new Date(now);
       weekStart.setDate(now.getDate() - (i * 7) - now.getDay());
       weekStart.setHours(0, 0, 0, 0); // Set to start of day
@@ -605,8 +605,8 @@ function Analytics({
       const weekStartStr = weekStart.toISOString().split('T')[0];
       const weekEndStr = actualEndDate.toISOString().split('T')[0];
 
-      // Apply filters to get filtered data for this week
-      const filteredFareDataForWeek = applyFilters(fareData.filter(entry => {
+      // Use direct props data instead of filtered data for accurate calculations
+      const fareDataForWeek = fareData.filter(entry => {
         const entryDate = entry.date || entry.dateFrom;
         if (!entryDate) return false;
         
@@ -615,23 +615,23 @@ function Analytics({
         const isValidEntry = entry.type !== 'off';
         
         return isInWeekRange && isValidEntry;
-      }));
+      });
 
-      const filteredExpenseDataForWeek = applyFilters(expenseData.filter(entry => {
+      const expenseDataForWeek = expenseData.filter(entry => {
         if (!entry.date) return false;
         
         const entryDateObj = new Date(entry.date + 'T00:00:00');
         const isInWeekRange = entryDateObj >= weekStart && entryDateObj <= actualEndDate;
         
         return isInWeekRange;
-      }));
+      });
 
-      // Calculate week earnings from filtered data
-      const weekEarnings = filteredFareDataForWeek
+      // Calculate week earnings from direct props data
+      const weekEarnings = fareDataForWeek
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
-      // Calculate week expenses from filtered data
-      let weekExpenses = filteredExpenseDataForWeek
+      // Calculate week expenses from direct props data
+      let weekExpenses = expenseDataForWeek
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
       // Calculate actual days in the week period (excluding future days)
@@ -659,8 +659,6 @@ function Analytics({
         daysInWeek: actualDaysInWeek
       });
     }
-
-    // Data is already in correct order (most recent first)
 
     const backgroundColors = weeklyData.map(d => 
       d.profit >= 0 ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 107, 107, 0.3)'
@@ -707,8 +705,8 @@ function Analytics({
 
     const monthlyData = [];
 
-    // Generate months from most recent first (left side = current/most recent)
-    for (let i = 0; i < monthsToShow; i++) {
+    // Generate months from oldest to newest (left to right timeline)
+    for (let i = monthsToShow - 1; i >= 0; i--) {
       const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
       monthStart.setHours(0, 0, 0, 0); // Set to start of day
       
@@ -724,8 +722,8 @@ function Analytics({
       const monthStartStr = monthStart.toISOString().split('T')[0];
       const monthEndStr = actualEndDate.toISOString().split('T')[0];
 
-      // Apply filters to get filtered data for this month
-      const filteredFareDataForMonth = applyFilters(fareData.filter(entry => {
+      // Use direct props data instead of filtered data for accurate calculations
+      const fareDataForMonth = fareData.filter(entry => {
         const entryDate = entry.date || entry.dateFrom;
         if (!entryDate) return false;
         
@@ -734,23 +732,23 @@ function Analytics({
         const isValidEntry = entry.type !== 'off';
         
         return isInMonthRange && isValidEntry;
-      }));
+      });
 
-      const filteredExpenseDataForMonth = applyFilters(expenseData.filter(entry => {
+      const expenseDataForMonth = expenseData.filter(entry => {
         if (!entry.date) return false;
         
         const entryDateObj = new Date(entry.date + 'T00:00:00');
         const isInMonthRange = entryDateObj >= monthStart && entryDateObj <= actualEndDate;
         
         return isInMonthRange;
-      }));
+      });
 
-      // Calculate month earnings from filtered data
-      const monthEarnings = filteredFareDataForMonth
+      // Calculate month earnings from direct props data
+      const monthEarnings = fareDataForMonth
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
-      // Calculate month expenses from filtered data
-      let monthExpenses = filteredExpenseDataForMonth
+      // Calculate month expenses from direct props data
+      let monthExpenses = expenseDataForMonth
         .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
       // Calculate actual days in the period (excluding future days)
@@ -780,8 +778,6 @@ function Analytics({
         daysInMonth: actualDays
       });
     }
-
-    // Data is already in correct order (most recent first)
 
     const backgroundColors = monthlyData.map(d => 
       d.profit >= 0 ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 107, 107, 0.3)'
