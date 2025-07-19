@@ -144,6 +144,11 @@ function App() {
     console.log('🔄 Auto-triggering complete data refresh after login...');
 
     try {
+      // Show loading screen during auto refresh after login
+      setIsRefreshing(true);
+      setLoadingProgress(0);
+      setCurrentLoadingAction('Initializing data after login...');
+
       // First refresh users data
       await fetchAllUsersData();
 
@@ -153,6 +158,13 @@ function App() {
       console.log('✅ Auto data refresh completed after login');
     } catch (error) {
       console.error('❌ Auto data refresh failed after login:', error);
+    } finally {
+      // Hide loading screen after auto refresh is complete
+      setTimeout(() => {
+        setIsRefreshing(false);
+        setLoadingProgress(0);
+        setCurrentLoadingAction('');
+      }, 1000);
     }
   };
 

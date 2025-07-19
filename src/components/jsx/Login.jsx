@@ -223,7 +223,7 @@ function Login({ onLogin }) {
                         {isLoading ? (
                           <>
                             <span className="spinner-border spinner-border-sm me-2"></span>
-                            Signing In & Loading Data...
+                            Signing In & Fetching Data...
                           </>
                         ) : (
                           <>
