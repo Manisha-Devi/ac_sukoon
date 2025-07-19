@@ -5,6 +5,7 @@ import "./App.css";
 import Login from "./components/jsx/Login";
 import Navbar from "./components/jsx/Navbar";
 import Dashboard from "./components/jsx/Dashboard";
+import LoadingScreen from "./components/jsx/LoadingScreen";
 import FareEntry from "./components/jsx/FareRecipt";
 import BasicPayment from "./components/jsx/BasicPayment.jsx";
 import MiscPayment from "./components/jsx/MiscPayment";
@@ -28,6 +29,8 @@ function App() {
   const [user, setUser] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState(null);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [currentLoadingAction, setCurrentLoadingAction] = useState('');
   const [dataStats, setDataStats] = useState({
     totalRecords: 0,
     fareRecords: 0,
@@ -162,6 +165,9 @@ function App() {
   // Data refresh function for Navbar component
   const handleDataRefresh = async () => {
     console.log('🔄 App.jsx: Starting data refresh from Navbar...');
+    
+    setLoadingProgress(0);
+    setCurrentLoadingAction('Initializing data refresh...');
 
     try {
       // Direct data loading in App.jsx instead of Dashboard
@@ -188,60 +194,80 @@ function App() {
           let unionPayments, servicePayments, otherPayments, allUsersData, cashDepositsData;
 
           // Fetch each data type individually with verification
+          setLoadingProgress(10);
+          setCurrentLoadingAction('Fetching fare receipts...');
           console.log('📋 Fetching fareReceipts...');
           fareReceipts = await authService.getFareReceipts();
           if (!fareReceipts?.success) {
             throw new Error(`FareReceipts fetch failed: ${fareReceipts?.error || 'Unknown error'}`);
           }
 
+          setLoadingProgress(20);
+          setCurrentLoadingAction('Fetching booking entries...');
           console.log('🎫 Fetching bookingEntries...');
           bookingEntries = await authService.getBookingEntries();
           if (!bookingEntries?.success) {
             throw new Error(`BookingEntries fetch failed: ${bookingEntries?.error || 'Unknown error'}`);
           }
 
+          setLoadingProgress(30);
+          setCurrentLoadingAction('Fetching off days...');
           console.log('🚫 Fetching offDays...');
           offDays = await authService.getOffDays();
           if (!offDays?.success) {
             throw new Error(`OffDays fetch failed: ${offDays?.error || 'Unknown error'}`);
           }
 
+          setLoadingProgress(40);
+          setCurrentLoadingAction('Fetching fuel payments...');
           console.log('⛽ Fetching fuelPayments...');
           fuelPayments = await authService.getFuelPayments();
           if (!fuelPayments?.success) {
             throw new Error(`FuelPayments fetch failed: ${fuelPayments?.error || 'Unknown error'}`);
           }
 
+          setLoadingProgress(50);
+          setCurrentLoadingAction('Fetching adda payments...');
           console.log('🏛️ Fetching addaPayments...');
           addaPayments = await authService.getAddaPayments();
           if (!addaPayments?.success) {
             throw new Error(`AddaPayments fetch failed: ${addaPayments?.error || 'Unknown error'}`);
           }
 
+          setLoadingProgress(60);
+          setCurrentLoadingAction('Fetching union payments...');
           console.log('👥 Fetching unionPayments...');
           unionPayments = await authService.getUnionPayments();
           if (!unionPayments?.success) {
             throw new Error(`UnionPayments fetch failed: ${unionPayments?.error || 'Unknown error'}`);
           }
 
+          setLoadingProgress(70);
+          setCurrentLoadingAction('Fetching service payments...');
           console.log('🔧 Fetching servicePayments...');
           servicePayments = await authService.getServicePayments();
           if (!servicePayments?.success) {
             throw new Error(`ServicePayments fetch failed: ${servicePayments?.error || 'Unknown error'}`);
           }
 
+          setLoadingProgress(80);
+          setCurrentLoadingAction('Fetching other payments...');
           console.log('📦 Fetching otherPayments...');
           otherPayments = await authService.getOtherPayments();
           if (!otherPayments?.success) {
             throw new Error(`OtherPayments fetch failed: ${otherPayments?.error || 'Unknown error'}`);
           }
 
+          setLoadingProgress(90);
+          setCurrentLoadingAction('Fetching user data...');
           console.log('👤 Fetching allUsersData...');
           allUsersData = await authService.getAllUsers();
           if (!allUsersData?.success) {
             throw new Error(`AllUsersData fetch failed: ${allUsersData?.error || 'Unknown error'}`);
           }
 
+          setLoadingProgress(95);
+          setCurrentLoadingAction('Fetching cash deposits...');
           console.log('💰 Fetching cashDepositsData...');
           cashDepositsData = await authService.getCashDeposits();
           if (!cashDepositsData?.success) {
@@ -399,11 +425,18 @@ function App() {
             }
           }));
 
+          setLoadingProgress(100);
+          setCurrentLoadingAction('Processing complete!');
+          
           console.log('✅ App.jsx: Data refresh completed from Navbar');
           console.log(`📊 Loaded ${combinedFareData.length} fare entries and ${combinedExpenseData.length} expense entries`);
           console.log(`🔄 Total retry attempts: ${retryCount}`);
 
-          // Continue with existing data processing logic...
+          // Brief delay to show completion
+          setTimeout(() => {
+            setLoadingProgress(0);
+            setCurrentLoadingAction('');
+          }, 1000);
         } catch (fetchError) {
           console.warn(`⚠️ Attempt ${retryCount} failed:`, fetchError.message);
           
@@ -724,6 +757,16 @@ function App() {
 
   return (
     <div className="app">
+      {/* Loading Screen - Show during data refresh */}
+      <LoadingScreen 
+        type="progress" // You can change this to "spinner" or "logo"
+        isVisible={isRefreshing}
+        loadingText="Refreshing data from Google Sheets..."
+        progress={loadingProgress}
+        currentAction={currentLoadingAction}
+        refreshCount={dataStatistics.refreshCount}
+      />
+      
       {/* Navbar Component */}
       <Navbar 
           user={user} 
