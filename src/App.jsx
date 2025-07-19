@@ -140,12 +140,19 @@ function App() {
     setUser(userData);
     console.log('👤 User logged in via React state:', userData);
 
-    // Only fetch users data without full refresh
+    // Automatically trigger complete data refresh after login
+    console.log('🔄 Auto-triggering complete data refresh after login...');
+
     try {
+      // First refresh users data
       await fetchAllUsersData();
-      console.log('✅ User data loaded after login');
+
+      // Then trigger the complete data refresh cycle (same as navbar refresh)
+      await handleDataRefresh();
+
+      console.log('✅ Auto data refresh completed after login');
     } catch (error) {
-      console.error('❌ User data fetch failed after login:', error);
+      console.error('❌ Auto data refresh failed after login:', error);
     }
   };
 
@@ -158,7 +165,7 @@ function App() {
   // Data refresh function for Navbar component
   const handleDataRefresh = async () => {
     console.log('🔄 App.jsx: Starting data refresh from Navbar...');
-
+    
     setLoadingProgress(0);
     setCurrentLoadingAction('Initializing data refresh...');
 
@@ -420,7 +427,7 @@ function App() {
 
           setLoadingProgress(100);
           setCurrentLoadingAction('Processing complete!');
-
+          
           console.log('✅ App.jsx: Data refresh completed from Navbar');
           console.log(`📊 Loaded ${combinedFareData.length} fare entries and ${combinedExpenseData.length} expense entries`);
           console.log(`🔄 Total retry attempts: ${retryCount}`);
@@ -432,7 +439,7 @@ function App() {
           }, 1000);
         } catch (fetchError) {
           console.warn(`⚠️ Attempt ${retryCount} failed:`, fetchError.message);
-
+          
           if (retryCount < maxRetries) {
             console.log(`🔄 Retrying in 3 seconds... (${retryCount}/${maxRetries})`);
             await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 3 seconds before retry
@@ -443,7 +450,7 @@ function App() {
         }
       }
 
-
+      
 
     } catch (error) {
       console.error('❌ App.jsx: Error in data refresh:', error);
@@ -759,7 +766,7 @@ function App() {
         currentAction={currentLoadingAction}
         refreshCount={dataStatistics.refreshCount}
       />
-
+      
       {/* Navbar Component */}
       <Navbar 
           user={user} 
