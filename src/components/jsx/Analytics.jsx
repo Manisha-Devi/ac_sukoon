@@ -183,7 +183,85 @@ function Analytics({
       .filter(item => item.type === 'other')
       .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
-    const totalFilteredExpenses = fuelExpenses + addaExpenses + unionExpenses + serviceExpenses + otherExpenses;
+    let totalFilteredExpenses = fuelExpenses + addaExpenses + unionExpenses + serviceExpenses + otherExpenses;
+
+    // Calculate actual days in the filtered period for expense adjustments
+    const now = new Date();
+    let startDate, endDate;
+
+    switch (dateRange) {
+      case 'thisWeek':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - now.getDay());
+        endDate = new Date(now);
+        break;
+      case 'thisMonth':
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now);
+        break;
+      case 'last7Days':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 7);
+        endDate = new Date(now);
+        break;
+      case 'last30Days':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 30);
+        endDate = new Date(now);
+        break;
+      case 'last3Months':
+        startDate = new Date(now);
+        startDate.setMonth(now.getMonth() - 3);
+        endDate = new Date(now);
+        break;
+      case 'custom':
+        if (customDateFrom && customDateTo) {
+          startDate = new Date(customDateFrom);
+          endDate = new Date(customDateTo);
+        } else {
+          startDate = new Date(now);
+          startDate.setDate(now.getDate() - 30);
+          endDate = new Date(now);
+        }
+        break;
+      default:
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 30);
+        endDate = new Date(now);
+    }
+
+    // Calculate actual days in the period (excluding future days)
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    const endDateForCount = endDate > today ? today : endDate;
+    const actualDays = Math.max(1, Math.ceil((endDateForCount - startDate) / (1000 * 60 * 60 * 24)) + 1);
+
+    // Apply expense adjustments to match chart calculations
+    if (dateRange === 'thisMonth' || dateRange === 'last30Days' || dateRange === 'last3Months' || dateRange === 'custom') {
+      // Monthly calculations
+      if (addMonthlyExpenseAdjustment1400) {
+        totalFilteredExpenses += (1400 * actualDays);
+      }
+      if (addMonthlyExpenseAdjustment) {
+        totalFilteredExpenses += (1000 * actualDays);
+      }
+    } else if (dateRange === 'thisWeek' || dateRange === 'last7Days') {
+      // Weekly calculations
+      if (addWeeklyExpenseAdjustment1400) {
+        totalFilteredExpenses += (1400 * actualDays);
+      }
+      if (addWeeklyExpenseAdjustment) {
+        totalFilteredExpenses += (1000 * actualDays);
+      }
+    } else {
+      // Daily calculations (default)
+      if (addExpenseAdjustment1400) {
+        totalFilteredExpenses += (1400 * actualDays);
+      }
+      if (addExpenseAdjustment) {
+        totalFilteredExpenses += (1000 * actualDays);
+      }
+    }
 
     // Calculate cash vs bank breakdown
     const totalCash = filteredFareData.reduce((sum, item) => sum + (parseFloat(item.cashAmount) || 0), 0);
