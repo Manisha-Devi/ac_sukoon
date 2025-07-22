@@ -88,23 +88,7 @@ function testConnection(data) {
   }
 }
 
-/**
- * Format current timestamp in IST (Indian Standard Time)
- * Returns format: DD-MM-YYYY HH:MM:SS
- */
-function formatISTTimestamp() {
-  const now = new Date();
-  const istDate = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
-
-  const day = String(istDate.getDate()).padStart(2, '0');
-  const month = String(istDate.getMonth() + 1).padStart(2, '0');
-  const year = istDate.getFullYear();
-  const hours = String(istDate.getHours()).padStart(2, '0');
-  const minutes = String(istDate.getMinutes()).padStart(2, '0');
-  const seconds = String(istDate.getSeconds()).padStart(2, '0');
-
-  return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-}
+// Duplicate function removed - using main formatISTTimestamp below
 
 /**
  * Format timestamp for display - IST format
@@ -134,6 +118,8 @@ function formatTimestampForDisplay(timestamp) {
   }
 }
 
+// Main formatISTTimestamp function - keeping this one
+
 /**
  * Format IST Timestamp - Returns current IST timestamp
  */
@@ -159,6 +145,9 @@ function formatTimeForDisplay(date) {
   const istTime = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
   return Utilities.formatDate(istTime, 'Asia/Kolkata', 'dd-MM-yyyy HH:mm:ss');
 }
+
+// API Key constant - defined here to avoid missing reference errors
+const API_KEY = "adsfsyierya778ysafgkiuadgakjdgkjfgdkjf78";
 
 // Properties are handled directly in Code.gs and LegacyFunctions.gs
 // No separate setup functions needed since fallback mechanism is already implemented

@@ -720,6 +720,182 @@ function approveFoodPaymentLegacy(data) {
   return approveFoodPayment(data);
 }
 
+// Direct function aliases for Food Payments
+function updateFoodPayment(data) {
+  try {
+    const entryId = data.entryId;
+    const updatedData = data.updatedData;
+
+    console.log(`📝 Updating food payment ID: ${entryId}`, updatedData);
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.FOOD_PAYMENTS);
+
+    if (!sheet) {
+      throw new Error('FoodPayments sheet not found');
+    }
+
+    const entryIdColumn = 11; // Column K contains Entry ID
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error(`Food payment not found with ID: ${entryId}`);
+    }
+
+    // Update only provided fields
+    if (updatedData.date !== undefined) {
+      sheet.getRange(rowIndex, 2).setValue(updatedData.date);
+    }
+    if (updatedData.paymentType !== undefined) {
+      sheet.getRange(rowIndex, 3).setValue(updatedData.paymentType);
+    }
+    if (updatedData.description !== undefined) {
+      sheet.getRange(rowIndex, 4).setValue(updatedData.description);
+    }
+    if (updatedData.cashAmount !== undefined) {
+      sheet.getRange(rowIndex, 5).setValue(updatedData.cashAmount);
+    }
+    if (updatedData.bankAmount !== undefined) {
+      sheet.getRange(rowIndex, 6).setValue(updatedData.bankAmount);
+    }
+    if (updatedData.totalAmount !== undefined) {
+      sheet.getRange(rowIndex, 7).setValue(updatedData.totalAmount);
+    }
+
+    console.log(`✅ Food payment updated successfully - ID: ${entryId}, Row: ${rowIndex}`);
+
+    return {
+      success: true,
+      message: 'Food payment updated successfully',
+      entryId: entryId,
+      updatedRow: rowIndex
+    };
+  } catch (error) {
+    console.error('❌ updateFoodPayment error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+function deleteFoodPayment(data) {
+  try {
+    const entryId = data.entryId;
+
+    console.log(`🗑️ Deleting food payment ID: ${entryId}`);
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.FOOD_PAYMENTS);
+
+    if (!sheet) {
+      throw new Error('FoodPayments sheet not found');
+    }
+
+    const entryIdColumn = 11; // Column K contains Entry ID
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error(`Food payment not found with ID: ${entryId}`);
+    }
+
+    sheet.deleteRow(rowIndex);
+
+    console.log(`✅ Food payment deleted successfully - ID: ${entryId}, Row: ${rowIndex}`);
+
+    return {
+      success: true,
+      message: 'Food payment deleted successfully',
+      entryId: entryId,
+      deletedRow: rowIndex
+    };
+  } catch (error) {
+    console.error('❌ deleteFoodPayment error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+function updateFoodPaymentStatus(data) {
+  try {
+    const entryId = data.entryId;
+    const newStatus = data.newStatus;
+    const approverName = data.approverName || "";
+
+    console.log(`🔄 Updating food payment status - ID: ${entryId}, Status: ${newStatus}`);
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
+      .getSheetByName(SHEET_NAMES.FOOD_PAYMENTS);
+
+    if (!sheet) {
+      throw new Error('FoodPayments sheet not found');
+    }
+
+    const entryIdColumn = 11; // Column K contains Entry ID
+    const values = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][entryIdColumn - 1]) === String(entryId)) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      throw new Error(`Food payment not found with ID: ${entryId}`);
+    }
+
+    // Update status and approver (columns L and M)
+    sheet.getRange(rowIndex, 12).setValue(newStatus);
+    if (approverName) {
+      sheet.getRange(rowIndex, 13).setValue(approverName);
+    }
+
+    console.log(`✅ Food payment status updated - ID: ${entryId}, Status: ${newStatus}`);
+
+    return {
+      success: true,
+      message: 'Food payment status updated successfully',
+      entryId: entryId,
+      newStatus: newStatus
+    };
+  } catch (error) {
+    console.error('❌ updateFoodPaymentStatus error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+function approveFoodPayment(data) {
+  try {
+    const entryId = data.entryId;
+    const approverName = data.approverName;
+
+    console.log(`✅ Approving food payment ID: ${entryId} by ${approverName}`);
+
+    return updateFoodPaymentStatus({
+      entryId: entryId,
+      newStatus: 'approved',
+      approverName: approverName
+    });
+  } catch (error) {
+    console.error('❌ approveFoodPayment error:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
 // Legacy FareReceipts status functions
 function updateFareReceiptStatusLegacy(data) {
   console.log('🔄 Legacy updateFareReceiptStatus called, routing to modern implementation');

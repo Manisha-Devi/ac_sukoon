@@ -201,6 +201,23 @@ function doPost(e) {
         result = updateOtherPaymentStatus(data);
         break;
 
+      // ==================== FOOD PAYMENTS ====================
+      case "addFoodPayment":
+        result = addFoodPayment(data);
+        break;
+      case "getFoodPayments":
+        result = getFoodPayments();
+        break;
+      case "updateFoodPayment":
+        result = updateFoodPayment(data);
+        break;
+      case "deleteFoodPayment":
+        result = deleteFoodPayment(data);
+        break;
+      case "updateFoodPaymentStatus":
+        result = updateFoodPaymentStatus(data);
+        break;
+
       // ==================== CASH DEPOSITS ====================
       case "addCashDeposit":
         result = addCashDeposit(data);
@@ -262,6 +279,14 @@ function doPost(e) {
         break;
       case 'resendUnionPayment':
         result = resendUnionPayment(data);
+        break;
+
+      // Food Payments Approval
+      case 'approveFoodPayment':
+        result = approveFoodPayment(data);
+        break;
+      case 'resendFoodPayment':
+        result = resendFoodPayment(data);
         break;
 
       // Booking Entries Approval
@@ -368,6 +393,9 @@ function doGet(e) {
       case "getOtherPayments":
         result = getOtherPayments();
         break;
+      case "getFoodPayments":
+        result = getFoodPayments();
+        break;
       case "getCashDeposits":
         result = getCashDeposits();
         break;
@@ -393,16 +421,4 @@ function doGet(e) {
   }
 }
 
-const SHEET_NAMES = {
-  USERS: 'Users',
-  FARE_RECEIPTS: 'FareReceipts',
-  BOOKING_ENTRIES: 'BookingEntries',
-  OFF_DAYS: 'OffDays',
-  FUEL_PAYMENTS: 'FuelPayments',
-  ADDA_PAYMENTS: 'AddaPayments',
-  UNION_PAYMENTS: 'UnionPayments',
-  SERVICE_PAYMENTS: 'ServicePayments',
-  OTHER_PAYMENTS: 'OtherPayments',
-  FOOD_PAYMENTS: 'FoodPayments',
-  CASH_DEPOSITS: 'CashDeposits'
-};
+// SHEET_NAMES constant is defined in Utils.gs
