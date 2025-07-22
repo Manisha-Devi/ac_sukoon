@@ -201,21 +201,21 @@ function doPost(e) {
         result = updateOtherPaymentStatus(data);
         break;
 
-      // ==================== EMPLOYEE PAYMENTS ====================
-      case "addEmployeePayment":
-        result = addEmployPayment(data);
+      // ==================== FOOD PAYMENTS ====================
+      case "addFoodPayment":
+        result = addFoodPayment(data);
         break;
-      case "getEmployeePayments":
-        result = getEmployPayments();
+      case "getFoodPayments":
+        result = getFoodPayments();
         break;
-      case "updateEmployeePayment":
-        result = updateEmployPayment(data);
+      case "updateFoodPayment":
+        result = updateFoodPayment(data);
         break;
-      case "deleteEmployeePayment":
-        result = deleteEmployPayment(data);
+      case "deleteFoodPayment":
+        result = deleteFoodPayment(data);
         break;
-      case "updateEmployeePaymentStatus":
-        result = updateEmployPaymentStatus(data);
+      case "updateFoodPaymentStatus":
+        result = updateFoodPaymentStatus(data);
         break;
 
       // ==================== CASH DEPOSITS ====================
@@ -281,12 +281,12 @@ function doPost(e) {
         result = resendUnionPayment(data);
         break;
 
-      // Employee Payments Approval
-      case 'approveEmployPayment':
-        result = approveEmployPayment(data);
+      // Food Payments Approval
+      case 'approveFoodPayment':
+        result = approveFoodPayment(data);
         break;
-      case 'resendEmployPayment':
-        result = resendEmployPayment(data);
+      case 'resendFoodPayment':
+        result = resendFoodPayment(data);
         break;
 
       // Booking Entries Approval
@@ -393,8 +393,8 @@ function doGet(e) {
       case "getOtherPayments":
         result = getOtherPayments();
         break;
-      case "getEmployeePayments":
-        result = getEmployPayments();
+      case "getFoodPayments":
+        result = getFoodPayments();
         break;
       case "getCashDeposits":
         result = getCashDeposits();
