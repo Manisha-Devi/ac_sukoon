@@ -517,6 +517,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         servicePayments: servicePayments.data || [],
         otherPayments: otherPayments.data || [],
         foodPayments: foodPayments.data || [],
+        transportPayments: transportPayments.data || [],
         totalRecords: combinedFareData.length + combinedExpenseData.length
       });
 
@@ -530,6 +531,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         servicePayments: servicePayments.data?.length || 0,
         otherPayments: otherPayments.data?.length || 0,
         foodPayments: foodPayments.data?.length || 0,
+        transportPayments: transportPayments.data?.length || 0,
         totalRecords: combinedFareData.length + combinedExpenseData.length
       });
       console.log('🔍 Breakdown - Fuel:', fuelPayments.data?.length || 0, 
@@ -538,7 +540,8 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
                    'Union:', unionPayments.data?.length || 0, 
                    'Service:', servicePayments.data?.length || 0,
                    'Other:', otherPayments.data?.length || 0,
-                   'Food:', foodPayments.data?.length || 0);
+                   'Food:', foodPayments.data?.length || 0,
+                   'Transport:', transportPayments.data?.length || 0);
 
     } catch (error) {
       console.error('❌ Dashboard: Error loading data:', error);
@@ -856,6 +859,11 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
                       <span className="breakdown-icon">🍽️</span>
                       <span className="breakdown-label">Food Payments</span>
                       <span className="breakdown-value">{dataStatistics.dataBreakdown.foodPayments}</span>
+                    </div>
+                    <div className="breakdown-item expense-type">
+                      <span className="breakdown-icon">🚛</span>
+                      <span className="breakdown-label">Transport Payments</span>
+                      <span className="breakdown-value">{dataStatistics.dataBreakdown.transportPayments || 0}</span>
                     </div>
                   </div>
                 </div>
