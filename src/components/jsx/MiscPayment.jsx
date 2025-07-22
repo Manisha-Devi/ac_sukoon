@@ -194,6 +194,12 @@ function MiscPayment({
   ];
 
   const otherPaymentDescriptions = [
+    "Lunch",
+    "Breakfast", 
+    "Dinner",
+    "Tea",
+    "Cold Drink",
+    "Water Bottle",
     "Parking Fee",
     "Toll Tax",
     "Police Challan",
