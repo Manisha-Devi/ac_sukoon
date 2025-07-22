@@ -19,7 +19,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
     description: '',
     date: new Date().toISOString().split('T')[0]
   });
-  
+
   // Pagination states for summary tables
   const [approvedEntriesPage, setApprovedEntriesPage] = useState(1);
   const [cashDepositsPage, setCashDepositsPage] = useState(1);
@@ -405,9 +405,9 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
     const cashExpenses = calculateCashExpenses();
     const cashDeposits = calculateTotalCashDeposits();
     const fixedCashGiven = calculateFixedCashGivenByCurrentUser();
-    
+
     const cashInHand = incomeCash - (cashExpenses + cashDeposits + fixedCashGiven);
-    
+
     console.log('💰 CASH IN HAND CALCULATION - DataSummary:');
     console.log('📊 Income Cash:', incomeCash);
     console.log('📊 Cash Expenses:', cashExpenses);
@@ -415,7 +415,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
     console.log('📊 Fixed Cash Given by Current User:', fixedCashGiven);
     console.log('📊 Formula: Income - (Expenses + Deposits + Fixed Cash Given)');
     console.log('📊 Result:', incomeCash, '-', '(', cashExpenses, '+', cashDeposits, '+', fixedCashGiven, ') =', cashInHand);
-    
+
     return cashInHand;
   };
 
@@ -1033,7 +1033,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                           const dateB = new Date(b.dateFrom || b.date);
                           return dateB - dateA;
                         });
-                        
+
                         if (incomeEntries.length === 0) {
                           return (
                             <div className="no-approved-entries">
@@ -1154,7 +1154,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                           const dateB = new Date(b.dateFrom || b.date);
                           return dateB - dateA;
                         });
-                        
+
                         if (expenseEntries.length === 0) {
                           return (
                             <div className="no-approved-entries">
