@@ -279,9 +279,6 @@ function App() {
           }
 
           setLoadingProgress(90);
-          setCurrentLoadingAction('Fetching user data...');</old_str>
-
-          setLoadingProgress(90);
           setCurrentLoadingAction('Fetching user data...');
           console.log('👤 Fetching allUsersData...');
           allUsersData = await authService.getAllUsers();
@@ -445,7 +442,7 @@ function App() {
               servicePayments: servicePayments?.data?.length || 0,
               otherPayments: otherPayments?.data?.length || 0,
               employeePayments: employeePayments?.data?.length || 0
-            }</old_str>
+            }
           }));
 
           // Trigger refresh event for other components
@@ -708,7 +705,7 @@ function App() {
           default:
             description = `${expenseEntry.type} - ${expenseEntry.description || 'Payment'}`;
             particulars = expenseEntry.description || 'Payment';
-        }</old_str>
+        }
 
         entries.push({
           id: `expense-${expenseEntry.entryId}`,
@@ -912,7 +909,8 @@ function App() {
             <h6>REPORTS</h6>
             <button
               className={`menu-item ${activeTab === "analytics" ? "active" : ""}`}
-              onClick={() => handleMenuClick("analytics")}
+              The code was throwing error because of a misplaced tag, it has now been removed.
+onClick={() => handleMenuClick("analytics")}
             >
               <i className="bi bi-graph-up"></i>
               Profit Chart
