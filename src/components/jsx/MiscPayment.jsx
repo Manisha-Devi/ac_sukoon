@@ -451,6 +451,14 @@ function MiscPayment({
         second: "2-digit",
       });
 
+      // Define employee payment types (food items)
+      const employeePaymentTypes = [
+        "Lunch", "Breakfast", "Dinner", "Tea", "Cold Drink", "Water Bottle"
+      ];
+
+      // Check if this is an employee payment
+      const isEmployeePayment = employeePaymentTypes.includes(otherData.paymentType);
+
       if (editingEntry) {
         const oldTotal = editingEntry.totalAmount;
         const updatedData = expenseData.map((entry) =>
@@ -479,26 +487,45 @@ function MiscPayment({
         });
         setIsLoading(false);
 
-        authService
-          .updateOtherPayment({
-            entryId: editingEntry.entryId,
-            updatedData: {
-              date: otherData.date,
-              paymentType: otherData.paymentType,
-              description: otherData.description,
-              cashAmount: cashAmount,
-              bankAmount: bankAmount,
-              totalAmount: totalAmount,
-            },
-          })
-          .catch((error) => {
-            console.error("Background other update sync failed:", error);
-          });
+        // Update in appropriate sheet based on payment type
+        if (isEmployeePayment) {
+          authService
+            .updateEmployeePayment({
+              entryId: editingEntry.entryId,
+              updatedData: {
+                date: otherData.date,
+                paymentType: otherData.paymentType,
+                description: otherData.description,
+                cashAmount: cashAmount,
+                bankAmount: bankAmount,
+                totalAmount: totalAmount,
+              },
+            })
+            .catch((error) => {
+              console.error("Background employee update sync failed:", error);
+            });
+        } else {
+          authService
+            .updateOtherPayment({
+              entryId: editingEntry.entryId,
+              updatedData: {
+                date: otherData.date,
+                paymentType: otherData.paymentType,
+                description: otherData.description,
+                cashAmount: cashAmount,
+                bankAmount: bankAmount,
+                totalAmount: totalAmount,
+              },
+            })
+            .catch((error) => {
+              console.error("Background other update sync failed:", error);
+            });
+        }
       } else {
         const newEntry = {
           entryId: Date.now(),
           timestamp: timeOnly,
-          type: "other",
+          type: isEmployeePayment ? "employee" : "other",
           date: otherData.date,
           paymentType: otherData.paymentType,
           description: otherData.description,
@@ -521,22 +548,42 @@ function MiscPayment({
         });
         setIsLoading(false);
 
-        authService
-          .addOtherPayment({
-            entryId: newEntry.entryId,
-            timestamp: timeOnly,
-            date: otherData.date,
-            paymentType: otherData.paymentType,
-            description: otherData.description,
-            cashAmount: cashAmount,
-            bankAmount: bankAmount,
-            totalAmount: totalAmount,
-            submittedBy: submittedBy,
-            entryStatus: "pending",
-          })
-          .catch((error) => {
-            console.error("Background other add sync failed:", error);
-          });
+        // Add to appropriate sheet based on payment type
+        if (isEmployeePayment) {
+          authService
+            .addEmployeePayment({
+              entryId: newEntry.entryId,
+              timestamp: timeOnly,
+              date: otherData.date,
+              paymentType: otherData.paymentType,
+              description: otherData.description,
+              cashAmount: cashAmount,
+              bankAmount: bankAmount,
+              totalAmount: totalAmount,
+              submittedBy: submittedBy,
+              entryStatus: "pending",
+            })
+            .catch((error) => {
+              console.error("Background employee add sync failed:", error);
+            });
+        } else {
+          authService
+            .addOtherPayment({
+              entryId: newEntry.entryId,
+              timestamp: timeOnly,
+              date: otherData.date,
+              paymentType: otherData.paymentType,
+              description: otherData.description,
+              cashAmount: cashAmount,
+              bankAmount: bankAmount,
+              totalAmount: totalAmount,
+              submittedBy: submittedBy,
+              entryStatus: "pending",
+            })
+            .catch((error) => {
+              console.error("Background other add sync failed:", error);
+            });
+        }
       }
     } catch (error) {
       console.error("Error submitting other payment:", error);
@@ -567,6 +614,10 @@ function MiscPayment({
           deleteResult = await authService.deleteServicePayment({
             entryId: entryToDelete.entryId,
           });
+        } else if (entryToDelete.type === "employee") {
+          deleteResult = await authService.deleteEmployeePayment({
+            entryId: entryToDelete.entryId,
+          });
         } else if (entryToDelete.type === "other") {
           deleteResult = await authService.deleteOtherPayment({
             entryId: entryToDelete.entryId,
@@ -593,7 +644,7 @@ function MiscPayment({
         cashAmount: entry.cashAmount.toString(),
         bankAmount: entry.bankAmount.toString(),
       });
-    } else if (entry.type === "other") {
+    } else if (entry.type === "other" || entry.type === "employee") {
       setActiveTab("other");
       setOtherData({
         date: entry.date,
@@ -631,7 +682,7 @@ function MiscPayment({
       (entry) =>
         entry.submittedBy === currentUserName &&
         entry.entryStatus !== "approved" &&
-        (entry.type === "service" || entry.type === "other"),
+        (entry.type === "service" || entry.type === "other" || entry.type === "employee"),
     );
 
     const totalCash = userExpenseData.reduce(
@@ -653,7 +704,7 @@ function MiscPayment({
       (entry) =>
         entry.submittedBy === currentUserName &&
         entry.entryStatus !== "approved" &&
-        (entry.type === "service" || entry.type === "other"),
+        (entry.type === "service" || entry.type === "other" || entry.type === "employee"),
     );
     
     // Sort by entryId (timestamp) in descending order to show newest first
@@ -1059,7 +1110,8 @@ function MiscPayment({
                       <div className="card-body">
                         <div className="entry-header">
                           <span className={`entry-type ${entry.type}`}>
-                            {entry.type === "service" ? "Service" : "Other"}
+                            {entry.type === "service" ? "Service" : 
+                             entry.type === "employee" ? "Employee" : "Other"}
                           </span>
 
                           {entry.entryStatus === "pending" && (
@@ -1101,7 +1153,7 @@ function MiscPayment({
                               )}
                             </div>
                           )}
-                          {entry.type === "other" && (
+                          {(entry.type === "other" || entry.type === "employee") && (
                             <div>
                               <p><strong>{entry.paymentType}</strong></p>
                               {entry.description && (

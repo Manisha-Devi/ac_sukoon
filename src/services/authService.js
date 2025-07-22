@@ -972,7 +972,8 @@ class AuthService {
       console.error('❌ Error fetching other payments:', error);
       // Return empty data structure instead of error to prevent UI crashes
       return { 
-        success: true, 
+        ```text
+success: true, 
         data: [],
         message: 'Other payments loaded from local cache (API temporarily unavailable)'
       };
@@ -1253,7 +1254,7 @@ class AuthService {
         }
 
         const result = await response.json();
-        
+
         if (result.success) {
           console.log('✅ Fare receipts fetched successfully:', result);
           return result;
@@ -1263,7 +1264,11 @@ class AuthService {
       } catch (error) {
         retryCount++;
         console.error(`❌ Error fetching fare receipts (Attempt ${retryCount}):`, error.message);
-        
+
+        if (error.name === 'AbortError') {
+          console.error('❌ Request timeout for getFareReceipts');
+        }
+
         if (retryCount >= maxRetries) {
           console.error('❌ Final attempt failed for fare receipts');
           return { 
@@ -1984,6 +1989,7 @@ class AuthService {
       console.log('✅ Cash deposits API response:', result);
 
       if (result.success && result.data) {
+```text
         console.log(`💰 Successfully fetched ${result.data.length} cash deposits from Google Sheets`);
         result.data.forEach((deposit, index) => {
           console.log(`${index + 1}. Cash Deposit:`, {
@@ -2137,6 +2143,200 @@ class AuthService {
   // Delegate API key testing to the API key service
   async testAPIKeyValidity() {
     return await this.apiKeyService.testAPIKey();
+  }
+
+  // ============================================================================
+  // EMPLOYEE PAYMENT OPERATIONS
+  // ============================================================================
+
+  async addEmployeePayment(data) {
+    try {
+      console.log('📝 Adding employee payment to Google Sheets:', data);
+
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
+        action: 'addEmployeePayment',
+        entryId: data.entryId,
+        timestamp: data.timestamp,
+        date: data.date,
+        paymentType: data.paymentType || '',
+        description: data.description || '',
+        cashAmount: data.cashAmount || 0,
+        bankAmount: data.bankAmount || 0,
+        totalAmount: data.totalAmount || 0,
+        category: data.category || '',
+        submittedBy: data.submittedBy || '',
+        entryType: data.entryType || '',
+        entryStatus: data.entryStatus || '',
+        approvedBy: data.approvedBy || ''
+      }));
+
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
+
+      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
+        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
+        return { success: false, error: 'API temporarily unavailable - data saved locally' };
+      }
+
+      console.log('✅ Employee payment response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error adding employee payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getEmployeePayments() {
+    try {
+      console.log('📋 Fetching employee payments from Google Sheets...');
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
+          action: 'getEmployeePayments'
+        }))
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Employee payments fetched:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error fetching employee payments:', error);
+      // Return empty data structure instead of error to prevent UI crashes
+      return {
+        success: true,
+        data: [],
+        message: 'Employee payments loaded from local cache (API temporarily unavailable)'
+      };
+    }
+  }
+
+  async updateEmployeePayment(data) {
+    try {
+      console.log('📝 Updating employee payment in Google Sheets:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
+          action: 'updateEmployeePayment',
+          entryId: data.entryId,
+          updatedData: data.updatedData
+        }))
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Employee payment updated:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating employee payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteEmployeePayment(data) {
+    try {
+      console.log('🗑️ Deleting employee payment from Google Sheets:', data);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
+          action: 'deleteEmployeePayment',
+          entryId: data.entryId
+        }))
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('HTTP Error Response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Employee payment deleted successfully:', result);
+
+      // Validate response structure
+      if (result && typeof result === 'object') {
+        return result;
+      } else {
+        console.warn('⚠️ Invalid response format:', result);
+        return { success: true, message: 'Employee payment deleted (response format issue)' };
+      }
+    } catch (error) {
+      console.error('❌ Error deleting employee payment:', error);
+      if (error.name === 'AbortError') {
+        return { success: false, error: 'Request timeout - delete operation took too long' };
+      }
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateEmployeePaymentStatus(entryId, newStatus, approverName) {
+    try {
+      const data = {
+        entryId: entryId,
+        newStatus: newStatus,
+        approverName: approverName
+      };
+      const response = await this.makeApprovalAPIRequest('updateEmployeePaymentStatus', data);
+      return response;
+    } catch (error) {
+      console.error('Error updating employee payment status:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async approveEmployeePayment(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('approveEmployeePayment', data);
+      return response;
+    } catch (error) {
+      console.error('Error approving employee payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async resendEmployeePayment(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('resendEmployeePayment', data);
+      return response;
+    } catch (error) {
+      console.error('Error resending employee payment:', error);
+      return { success: false, error: error.message };
+    }
   }
 }
 
