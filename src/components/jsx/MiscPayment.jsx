@@ -1099,7 +1099,12 @@ function MiscPayment({
                     </button>
                   )}
                 </div>
-              <i className="bi bi-x-circle"></i> Cancel
+                  <button
+                    type="button"
+                    className="btn btn-secondary ms-2"
+                    onClick={handleCancelEdit}
+                  >
+                    <i className="bi bi-x-circle"></i> Cancel
                     </button>
                   )}
                 </div>
