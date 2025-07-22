@@ -193,7 +193,9 @@ function ProfitChart({
       .filter(item => item.type === 'employee')
       .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
-    let totalFilteredExpenses = fuelExpenses + addaExpenses + unionExpenses + serviceExpenses + otherExpenses + employeeExpenses;</old_str>
+    let totalFilteredExpenses = fuelExpenses + addaExpenses + unionExpenses + serviceExpenses + otherExpenses + employeeExpenses;
+
+    // Calculate actual days in the filtered period for expense adjustments</old_str>
 
     // Calculate actual days in the filtered period for expense adjustments
     const now = new Date();
