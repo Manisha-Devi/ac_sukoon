@@ -478,6 +478,8 @@
     min-width: 32px;
     height: 32px;
     font-size: 0.8rem;
+    padding: 0;
+    border-radius: 50%;
   }
   
   .chart-swiper {
@@ -491,17 +493,49 @@
   .swiper-pagination-custom .swiper-pagination-bullet {
     width: 6px;
     height: 6px;
+    margin: 0 2px;
+    background: rgba(0, 123, 255, 0.3);
+  }
+  
+  .swiper-pagination-custom .swiper-pagination-bullet-active {
+    background: #007bff;
   }
   
   /* Chart title adjustments for navigation buttons */
   .profit-chart-card .d-flex.justify-content-between {
     gap: 0.5rem;
     align-items: flex-start;
+    flex-wrap: nowrap;
   }
   
   .profit-chart-card .d-flex .flex-shrink-1 {
     flex: 1;
     min-width: 0;
+  }
+  
+  /* Fix mobile pagination navigation controls */
+  .profit-chart-card .d-flex.align-items-center.gap-2 {
+    flex-shrink: 0;
+    gap: 0.25rem !important;
+    white-space: nowrap;
+  }
+  
+  .profit-chart-card .d-flex.align-items-center.gap-2 .btn {
+    min-width: 28px !important;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .profit-chart-card .d-flex.align-items-center.gap-2 small {
+    font-size: 0.7rem;
+    margin: 0 0.25rem;
+    flex-shrink: 0;
   }
 }
 

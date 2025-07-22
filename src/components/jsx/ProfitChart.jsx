@@ -1099,16 +1099,29 @@ function ProfitChart({
 
               {/* Navigation Controls for Mobile */}
               {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 && (
-                <div className="d-flex align-items-center gap-2">
+                <div className="d-flex align-items-center gap-2" style={{flexShrink: 0}}>
                   <button 
                     ref={prevRef}
                     className="btn btn-sm btn-outline-primary swiper-btn-prev"
                     type="button"
                     onClick={() => dailySwiperRef.current?.slidePrev()}
+                    style={{
+                      minWidth: '28px',
+                      width: '28px',
+                      height: '28px',
+                      padding: '0',
+                      borderRadius: '50%',
+                      fontSize: '0.75rem'
+                    }}
                   >
                     <i className="bi bi-chevron-left"></i>
                   </button>
-                  <small className="text-muted">
+                  <small className="text-muted" style={{
+                    fontSize: '0.7rem',
+                    margin: '0 0.25rem',
+                    flexShrink: '0',
+                    whiteSpace: 'nowrap'
+                  }}>
                     {currentSlide + 1}/{dailyTrendData.totalSlides}
                   </small>
                   <button 
@@ -1116,6 +1129,14 @@ function ProfitChart({
                     className="btn btn-sm btn-outline-primary swiper-btn-next"
                     type="button"
                     onClick={() => dailySwiperRef.current?.slideNext()}
+                    style={{
+                      minWidth: '28px',
+                      width: '28px',
+                      height: '28px',
+                      padding: '0',
+                      borderRadius: '50%',
+                      fontSize: '0.75rem'
+                    }}
                   >
                     <i className="bi bi-chevron-right"></i>
                   </button>
