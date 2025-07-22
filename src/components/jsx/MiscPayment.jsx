@@ -638,9 +638,11 @@ function MiscPayment({
     }
     
     // If in DD-MM-YYYY format, convert to YYYY-MM-DD
+    // IMPORTANT: DD-MM-YYYY me [0]=day, [1]=month, [2]=year
+    // YYYY-MM-DD me year-month-day hona chahiye, DD aur MM swap nahi karna
     if (typeof dateStr === "string" && dateStr.match(/^\d{2}-\d{2}-\d{4}$/)) {
       const [day, month, year] = dateStr.split('-');
-      return `${year}-${month}-${day}`;
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     }
     
     // If it's an ISO string or other format, try to parse and convert
