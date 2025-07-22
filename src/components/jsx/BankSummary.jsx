@@ -573,11 +573,6 @@ function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                     </button>
                   </li>
                 </ul>
-                <div className="pagination-info">
-                  <small className="text-muted">
-                    Page {currentPage} of {totalPages}
-                  </small>
-                </div>
               </nav>
             )}
 

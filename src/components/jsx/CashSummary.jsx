@@ -831,11 +831,6 @@ function CashSummary({ fareData, expenseData, currentUser, allUsers }) {
                     </button>
                   </li>
                 </ul>
-                <div className="pagination-info">
-                  <small className="text-muted">
-                    Page {currentPage} of {totalPages}
-                  </small>
-                </div>
               </nav>
             )}
 
