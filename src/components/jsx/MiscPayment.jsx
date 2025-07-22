@@ -1181,7 +1181,7 @@ function MiscPayment({
             </div>
           ) : null;
         })()}
-      </div>v>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 
 // ============================================================================
-// FOOD PAYMENTS - COMPLETE CRUD OPERATIONS
+// FOOD PAYMENTS - COMPLETE CRUD OPERATIONS (FoodPayments.gs)
 // ============================================================================
 
 /**
@@ -34,11 +34,10 @@ function addFoodPayment(data) {
     }
 
     // Generate entry ID if not provided
-    const entryId = data.entryId;
+    const entryId = data.entryId || Date.now();
 
     // Format timestamp (store only time part)
-    const timeOnly = data.timestamp || 
-      formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
+    const timeOnly = data.timestamp || formatISTTimestamp();
 
     // Insert new row at position 2 (keeps newest entries at top)
     sheet.insertRowBefore(2);
@@ -56,7 +55,7 @@ function addFoodPayment(data) {
       data.submittedBy || "",        // I: Submitted By
       "food",                        // J: Entry Type (static)
       entryId,                       // K: Entry ID
-      "pending",                     // L: Entry Status (pending/waiting/approved)
+      data.entryStatus || "pending", // L: Entry Status (pending/waiting/approved)
       "",                            // M: Approved By (initially empty)
     ]]);
 
@@ -92,7 +91,12 @@ function getFoodPayments() {
 
     if (!sheet) {
       console.log("ℹ️ FoodPayments sheet not found, returning empty data");
-      return { success: true, data: [] };
+      return { 
+        success: true, 
+        data: [],
+        count: 0,
+        timestamp: formatISTTimestamp()
+      };
     }
 
     // Get all data from sheet
@@ -101,7 +105,12 @@ function getFoodPayments() {
     // Check if sheet has data beyond headers
     if (values.length <= 1) {
       console.log("ℹ️ No food payments found");
-      return { success: true, data: [] };
+      return { 
+        success: true, 
+        data: [],
+        count: 0,
+        timestamp: formatISTTimestamp()
+      };
     }
 
     // Process and format data
@@ -109,15 +118,15 @@ function getFoodPayments() {
       return {
         entryId: row[10],                    // Entry ID from column K
         timestamp: String(row[0] || ''),      // Convert timestamp to string
-        date: String(row[1] || ''),           // Convert date to string
-        paymentType: row[2],                 // Payment type from column C
-        description: row[3],                 // Description from column D
-        cashAmount: row[4],                  // Cash amount from column E
-        bankAmount: row[5],                  // Bank amount from column F
-        totalAmount: row[6],                 // Total amount from column G
-        category: row[7],                    // Category from column H
-        submittedBy: row[8],                 // Submitted by from column I
-        entryType: row[9],                   // Entry type from column J
+        date: formatDateForDisplay(row[1]),   // Convert date to string
+        paymentType: row[2] || '',           // Payment type from column C
+        description: row[3] || '',           // Description from column D
+        cashAmount: Number(row[4]) || 0,     // Cash amount from column E
+        bankAmount: Number(row[5]) || 0,     // Bank amount from column F
+        totalAmount: Number(row[6]) || 0,    // Total amount from column G
+        category: row[7] || 'food',          // Category from column H
+        submittedBy: row[8] || '',           // Submitted by from column I
+        entryType: row[9] || 'food',         // Entry type from column J
         entryStatus: row[11] || "pending",   // Entry status from column L
         approvedBy: row[12] || "",           // Approved by from column M
         rowIndex: index + 2,                 // Store row index for updates/deletes
@@ -130,7 +139,8 @@ function getFoodPayments() {
     return { 
       success: true, 
       data: data.reverse(),
-      count: data.length 
+      count: data.length,
+      timestamp: formatISTTimestamp()
     };
 
   } catch (error) {
@@ -138,6 +148,7 @@ function getFoodPayments() {
     return {
       success: false,
       error: "Get food payments error: " + error.toString(),
+      timestamp: formatISTTimestamp()
     };
   }
 }
@@ -209,14 +220,16 @@ function updateFoodPayment(data) {
       success: true,
       message: 'Food payment updated successfully',
       entryId: entryId,
-      updatedRow: rowIndex
+      updatedRow: rowIndex,
+      timestamp: formatISTTimestamp()
     };
 
   } catch (error) {
     console.error('❌ Error updating food payment:', error);
     return {
       success: false,
-      error: 'Update food payment error: ' + error.toString()
+      error: 'Update food payment error: ' + error.toString(),
+      timestamp: formatISTTimestamp()
     };
   }
 }
@@ -267,14 +280,16 @@ function deleteFoodPayment(data) {
       success: true,
       message: 'Food payment deleted successfully',
       entryId: entryId,
-      deletedRow: rowIndex
+      deletedRow: rowIndex,
+      timestamp: formatISTTimestamp()
     };
 
   } catch (error) {
     console.error('❌ Error deleting food payment:', error);
     return {
       success: false,
-      error: 'Delete food payment error: ' + error.toString()
+      error: 'Delete food payment error: ' + error.toString(),
+      timestamp: formatISTTimestamp()
     };
   }
 }
@@ -331,14 +346,16 @@ function updateFoodPaymentStatus(data) {
       message: 'Food payment status updated successfully',
       entryId: entryId,
       newStatus: newStatus,
-      approverName: approverName
+      approverName: approverName,
+      timestamp: formatISTTimestamp()
     };
 
   } catch (error) {
     console.error('❌ Error updating food payment status:', error);
     return {
       success: false,
-      error: 'Update food payment status error: ' + error.toString()
+      error: 'Update food payment status error: ' + error.toString(),
+      timestamp: formatISTTimestamp()
     };
   }
 }
@@ -365,7 +382,8 @@ function approveFoodPayment(data) {
     console.error('❌ Error approving food payment:', error);
     return {
       success: false,
-      error: 'Approve food payment error: ' + error.toString()
+      error: 'Approve food payment error: ' + error.toString(),
+      timestamp: formatISTTimestamp()
     };
   }
 }
@@ -391,7 +409,8 @@ function resendFoodPayment(data) {
     console.error('❌ Error resending food payment:', error);
     return {
       success: false,
-      error: 'Resend food payment error: ' + error.toString()
+      error: 'Resend food payment error: ' + error.toString(),
+      timestamp: formatISTTimestamp()
     };
   }
 }
