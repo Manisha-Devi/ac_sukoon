@@ -58,7 +58,8 @@ function App() {
       addaPayments: 0,
       unionPayments: 0,
       servicePayments: 0,
-      otherPayments: 0
+      otherPayments: 0,
+      transportPayments: 0
     }
   });
 
@@ -198,12 +199,12 @@ function App() {
 
         // Individual fetch with retry for each data type
         let fareReceipts, bookingEntries, offDays, fuelPayments, addaPayments;
-        let unionPayments, servicePayments, otherPayments, allUsersData, cashDepositsData, foodPayments;
+        let unionPayments, servicePayments, otherPayments, allUsersData, cashDepositsData, foodPayments, transportPayments;
 
         try {
           // Declare variables first
           let fareReceipts, bookingEntries, offDays, fuelPayments, addaPayments;
-          let unionPayments, servicePayments, otherPayments, allUsersData, cashDepositsData, foodPayments;
+          let unionPayments, servicePayments, otherPayments, allUsersData, cashDepositsData, foodPayments, transportPayments;
 
           // Fetch each data type individually with verification
           setLoadingProgress(10);
@@ -268,6 +269,14 @@ function App() {
           otherPayments = await authService.getOtherPayments();
           if (!otherPayments?.success) {
             throw new Error(`OtherPayments fetch failed: ${otherPayments?.error || 'Unknown error'}`);
+          }
+
+          setLoadingProgress(78);
+          setCurrentLoadingAction('Fetching transport payments...');
+          console.log('🚚 Fetching transportPayments...');
+          transportPayments = await authService.getTransportPayments();
+          if (!transportPayments?.success) {
+            throw new Error(`TransportPayments fetch failed: ${transportPayments?.error || 'Unknown error'}`);
           }
 
           setLoadingProgress(80);
@@ -365,6 +374,13 @@ function App() {
             })));
           }
 
+           if (transportPayments?.data && Array.isArray(transportPayments.data)) {
+            combinedExpenseData.push(...transportPayments.data.map(payment => ({
+              ...payment,
+              type: 'transport'
+            })));
+          }
+
           if (foodPayments?.data && Array.isArray(foodPayments.data)) {
             combinedExpenseData.push(...foodPayments.data.map(payment => ({
               ...payment,
@@ -441,7 +457,8 @@ function App() {
               unionPayments: unionPayments?.data?.length || 0,
               servicePayments: servicePayments?.data?.length || 0,
               otherPayments: otherPayments?.data?.length || 0,
-              foodPayments: foodPayments?.data?.length || 0
+              foodPayments: foodPayments?.data?.length || 0,
+              transportPayments: transportPayments?.data?.length || 0
             }
           }));
 
@@ -457,6 +474,14 @@ function App() {
           setCurrentLoadingAction('Processing complete!');
 
           console.log('✅ App.jsx: Data refresh completed from Navbar');
+           console.log('🔍 Breakdown - Fuel:', fuelPayments?.data?.length || 0,
+                    'Adda:', addaPayments?.data?.length || 0,
+                    'OffDays:', offDays?.data?.length || 0,
+                    'Union:', unionPayments?.data?.length || 0,
+                    'Service:', servicePayments?.data?.length || 0,
+                    'Other:', otherPayments?.data?.length || 0,
+                    'Food:', foodPayments?.data?.length || 0,
+                    'Transport:', transportPayments?.data?.length || 0);
           console.log(`📊 Loaded ${combinedFareData.length} fare entries and ${combinedExpenseData.length} expense entries`);
           console.log(`🔄 Total retry attempts: ${retryCount}`);
 
@@ -697,6 +722,10 @@ function App() {
           case 'other':
             description = `Other Payment - ${expenseEntry.paymentDetails || expenseEntry.description || 'Other'}`;
             particulars = expenseEntry.paymentDetails || expenseEntry.description || 'Other';
+            break;
+           case 'transport':
+            description = `Transport Payment - ${expenseEntry.paymentDetails || expenseEntry.description || 'Transport'}`;
+            particulars = expenseEntry.paymentDetails || expenseEntry.description || 'Transport';
             break;
           default:
             description = `${expenseEntry.type} - ${expenseEntry.description || 'Payment'}`;

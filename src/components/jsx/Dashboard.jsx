@@ -462,7 +462,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
       }
 
        // Process Transport Payments - Only required fields for CashSummary
-       if (transportPayments.success && transportPayments.data) {
+      if (transportPayments.success && transportPayments.data) {
         const processedTransportPayments = transportPayments.data.map(entry => ({
           entryId: entry.entryId,
           date: convertToDateString(entry.date),
