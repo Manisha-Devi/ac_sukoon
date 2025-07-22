@@ -628,12 +628,40 @@ function MiscPayment({
     }
   };
 
+  // Helper function to convert date to YYYY-MM-DD format for date input
+  const convertToInputDateFormat = (dateStr) => {
+    if (!dateStr) return "";
+    
+    // If already in YYYY-MM-DD format, return as is
+    if (typeof dateStr === "string" && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      return dateStr;
+    }
+    
+    // If in DD-MM-YYYY format, convert to YYYY-MM-DD
+    if (typeof dateStr === "string" && dateStr.match(/^\d{2}-\d{2}-\d{4}$/)) {
+      const [day, month, year] = dateStr.split('-');
+      return `${year}-${month}-${day}`;
+    }
+    
+    // If it's an ISO string or other format, try to parse and convert
+    try {
+      const date = new Date(dateStr);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString().split('T')[0];
+      }
+    } catch (error) {
+      console.warn('Error converting date:', dateStr, error);
+    }
+    
+    return dateStr;
+  };
+
   const handleEditEntry = (entry) => {
     setEditingEntry(entry);
     if (entry.type === "service") {
       setActiveTab("service");
       setServiceData({
-        date: entry.date,
+        date: convertToInputDateFormat(entry.date),
         serviceDetails: entry.serviceDetails || "",
         description: entry.description || "",
         mechanicCenter: entry.mechanicCenter || "",
@@ -643,7 +671,7 @@ function MiscPayment({
     } else if (entry.type === "other" || entry.type === "food") {
       setActiveTab("other");
       setOtherData({
-        date: entry.date,
+        date: convertToInputDateFormat(entry.date),
         paymentType: entry.paymentType,
         description: entry.description,
         cashAmount: entry.cashAmount.toString(),
