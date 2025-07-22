@@ -1005,7 +1005,7 @@ function ProfitChart({
       {/* Enhanced Key Metrics Cards */}
       {showSummary && (
         <div className="row g-4 mb-4">
-          <div className="col-12 col-md-2">
+          <div className="col-12 col-md-4">
             <div className="profit-chart-stats-card">
               <div className="card-body text-center">
                 <h6 className="card-title text-success">Total Earnings</h6>
@@ -1018,7 +1018,7 @@ function ProfitChart({
             </div>
           </div>
 
-          <div className="col-12 col-md-2">
+          <div className="col-12 col-md-4">
             <div className="profit-chart-stats-card">
               <div className="card-body text-center">
                 <h6 className="card-title text-danger">Total Expenses</h6>
@@ -1030,7 +1030,7 @@ function ProfitChart({
             </div>
           </div>
 
-          <div className="col-12 col-md-2">
+          <div className="col-12 col-md-4">
             <div className="profit-chart-stats-card">
               <div className="card-body text-center">
                 <h6 className="card-title text-primary">Net Profit</h6>
@@ -1042,41 +1042,7 @@ function ProfitChart({
             </div>
           </div>
 
-          <div className="col-12 col-md-2">
-            <div className="profit-chart-stats-card">
-              <div className="card-body text-center">
-                <h6 className="card-title text-info">Cash vs Bank</h6>
-                <h4 className="card-text">₹{analytics.cashVsBank.incomeCash.toLocaleString()}</h4>
-                <small className="text-muted">
-                  Cash Income
-                </small>
-              </div>
-            </div>
-          </div>
-
-          <div className="col-12 col-md-2">
-            <div className="profit-chart-stats-card">
-              <div className="card-body text-center">
-                <h6 className="card-title text-warning">Total Entries</h6>
-                <h4 className="card-text">{analytics.entryStats.totalEntries}</h4>
-                <small className="text-muted">
-                  {analytics.entryStats.fareEntries} income | {analytics.entryStats.expenseEntries} expense
-                </small>
-              </div>
-            </div>
-          </div>
-
-          <div className="col-12 col-md-2">
-            <div className="profit-chart-stats-card">
-              <div className="card-body text-center">
-                <h6 className="card-title text-secondary">Cash Deposits</h6>
-                <h4 className="card-text">₹{analytics.cashVsBank.cashDeposits.toLocaleString()}</h4>
-                <small className="text-muted">
-                  Bank deposits
-                </small>
-              </div>
-            </div>
-          </div>
+          
         </div>
       )}
 
