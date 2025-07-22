@@ -981,7 +981,8 @@ class AuthService {
   }
 
   // Update Other Payment
-  async updateOtherPayment(data) {    try {
+  async updateOtherPayment(data) {
+    try {
       console.log('📝 Updating other payment in Google Sheets:', data);
 
       const response = await fetch(this.API_URL, {
@@ -1988,7 +1989,8 @@ class AuthService {
       const result = await response.json();
       console.log('✅ Cash deposits API response:', result);
 
-      if (result.success && result.data) {```text
+      if (result.success && result.data)```text
+ {
         console.log(`💰 Successfully fetched ${result.data.length} cash deposits from Google Sheets`);
         result.data.forEach((deposit, index) => {
           console.log(`${index + 1}. Cash Deposit:`, {
@@ -2272,129 +2274,6 @@ class AuthService {
       return result;
     } catch (error) {
       console.error('❌ Error updating employee payment status:', error);
-      return { success: false, error: error.message };
-    }
-  } {
-      console.error('❌ Error fetching employee payments:', error);
-      // Return empty data structure instead of error to prevent UI crashes
-      return {
-        success: true,
-        data: [],
-        message: 'Employee payments loaded from local cache (API temporarily unavailable)'
-      };
-    }
-  }
-
-  async updateEmployeePayment(data) {
-    try {
-      console.log('📝 Updating employee payment in Google Sheets:', data);
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify(this.apiKeyService.addAPIKey({
-          action: 'updateEmployeePayment',
-          entryId: data.entryId,
-          updatedData: data.updatedData
-        }))
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Employee payment updated:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error updating employee payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  async deleteEmployeePayment(data) {
-    try {
-      console.log('🗑️ Deleting employee payment from Google Sheets:', data);
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify(this.apiKeyService.addAPIKey({
-          action: 'deleteEmployeePayment',
-          entryId: data.entryId
-        }))
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('HTTP Error Response:', errorText);
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Employee payment deleted successfully:', result);
-
-      // Validate response structure
-      if (result && typeof result === 'object') {
-        return result;
-      } else {
-        console.warn('⚠️ Invalid response format:', result);
-        return { success: true, message: 'Employee payment deleted (response format issue)' };
-      }
-    } catch (error) {
-      console.error('❌ Error deleting employee payment:', error);
-      if (error.name === 'AbortError') {
-        return { success: false, error: 'Request timeout - delete operation took too long' };
-      }
-      return { success: false, error: error.message };
-    }
-  }
-
-  async updateEmployeePaymentStatus(entryId, newStatus, approverName) {
-    try {
-      const data = {
-        entryId: entryId,
-        newStatus: newStatus,
-        approverName: approverName
-      };
-      const response = await this.makeApprovalAPIRequest('updateEmployeePaymentStatus', data);
-      return response;
-    } catch (error) {
-      console.error('Error updating employee payment status:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  async approveEmployeePayment(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('approveEmployeePayment', data);
-      return response;
-    } catch (error) {
-      console.error('Error approving employee payment:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  async resendEmployeePayment(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('resendEmployeePayment', data);
-      return response;
-    } catch (error) {
-      console.error('Error resending employee payment:', error);
       return { success: false, error: error.message };
     }
   }
