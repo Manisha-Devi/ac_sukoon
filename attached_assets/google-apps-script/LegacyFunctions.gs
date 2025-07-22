@@ -187,32 +187,39 @@ function deleteFoodPaymentLegacy(data) {
   return deleteFoodPayment(data);
 }
 
-// Legacy function aliases for Food Payments
+// Direct function aliases for Food Payments (Legacy Support)
 function addEmployeePayment(data) {
+  console.log('🔄 Legacy addEmployeePayment called, routing to addFoodPayment');
   return addFoodPayment(data);
 }
 
 function getEmployeePayments() {
+  console.log('🔄 Legacy getEmployeePayments called, routing to getFoodPayments');
   return getFoodPayments();
 }
 
 function updateEmployeePayment(data) {
+  console.log('🔄 Legacy updateEmployeePayment called, routing to updateFoodPayment');
   return updateFoodPayment(data);
 }
 
 function deleteEmployeePayment(data) {
+  console.log('🔄 Legacy deleteEmployeePayment called, routing to deleteFoodPayment');
   return deleteFoodPayment(data);
 }
 
 function updateEmployeePaymentStatus(data) {
+  console.log('🔄 Legacy updateEmployeePaymentStatus called, routing to updateFoodPaymentStatus');
   return updateFoodPaymentStatus(data);
 }
 
 function approveEmployeePayment(data) {
+  console.log('🔄 Legacy approveEmployeePayment called, routing to approveFoodPayment');
   return approveFoodPayment(data);
 }
 
 function resendEmployeePayment(data) {
+  console.log('🔄 Legacy resendEmployeePayment called, routing to resendFoodPayment');
   return resendFoodPayment(data);
 }
 

@@ -1099,6 +1099,10 @@ function MiscPayment({
                     </button>
                   )}
                 </div>
+              </                      i className="bi bi-x-circle"></i> Cancel
+                    </button>
+                  )}
+                </div>
               </form>
             </div>
           )}
@@ -1192,3 +1196,4 @@ function MiscPayment({
 }
 
 export default MiscPayment;
+// Apply change: Update API call to use addFoodPayment for food types
