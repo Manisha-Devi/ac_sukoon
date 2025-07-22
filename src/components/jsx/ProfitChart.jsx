@@ -1063,7 +1063,7 @@ function ProfitChart({
         {/* Daily Profit Chart */}
         <div className="col-12">
           <div className="profit-chart-card">
-            <div className="d-flex justify-content-between align-items-center mb-2 flex-nowrap">
+            <div className="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
               <div className="d-flex align-items-center gap-2 flex-wrap">
                 <h5 className="mb-0">
                   <i className="bi bi-line-chart me-2"></i>
@@ -1106,9 +1106,9 @@ function ProfitChart({
                 </div>
               </div>
 
-              {/* Navigation Controls for Mobile - right aligned on same row */}
+              {/* Navigation Controls for Mobile - right aligned */}
               {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 && (
-                <div className="d-flex align-items-center gap-1 flex-shrink-0 ms-2">
+                <div className="d-flex align-items-center gap-1 ms-auto">
                   <button 
                     ref={prevRef}
                     className="btn btn-sm btn-outline-primary swiper-btn-prev"
@@ -1153,7 +1153,7 @@ function ProfitChart({
               )}
 
               {!dailyTrendData.isMobile && dailyTrendData.dailyDataCount > 30 && (
-                <small className="text-muted d-none d-lg-block flex-shrink-0">
+                <small className="text-muted d-none d-lg-block">
                   <i className="bi bi-mouse me-1"></i>
                   Scroll/Zoom to view all data
                 </small>
