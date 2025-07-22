@@ -269,7 +269,7 @@ function App() {
           if (!otherPayments?.success) {
             throw new Error(`OtherPayments fetch failed: ${otherPayments?.error || 'Unknown error'}`);
           }
-          
+
           setLoadingProgress(80);
           setCurrentLoadingAction('Fetching food payments...');
           console.log('🍔 Fetching foodPayments...');
@@ -364,7 +364,7 @@ function App() {
               type: 'other'
             })));
           }
-          
+
           if (foodPayments?.data && Array.isArray(foodPayments.data)) {
             combinedExpenseData.push(...foodPayments.data.map(payment => ({
               ...payment,
@@ -440,7 +440,8 @@ function App() {
               addaPayments: addaPayments?.data?.length || 0,
               unionPayments: unionPayments?.data?.length || 0,
               servicePayments: servicePayments?.data?.length || 0,
-              otherPayments: otherPayments?.data?.length || 0
+              otherPayments: otherPayments?.data?.length || 0,
+              foodPayments: foodPayments?.data?.length || 0
             }
           }));
 
@@ -914,7 +915,7 @@ function App() {
       </div>
 
       {/* Main Content */}
-      <div className="main-content">
+      <div className=`"main-content">
         {activeTab === "dashboard" && (
           <Dashboard 
             expenseData={expenseData} 
