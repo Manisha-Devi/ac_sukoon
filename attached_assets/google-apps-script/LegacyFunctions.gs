@@ -176,6 +176,17 @@ function deleteOtherPaymentLegacy(data) {
   return deleteOtherPayment(data);
 }
 
+// Legacy Employee Payment functions
+function updateEmployPaymentLegacy(data) {
+  console.log('🔄 Legacy updateEmployPayment called, routing to modern implementation');
+  return updateEmployPayment(data);
+}
+
+function deleteEmployPaymentLegacy(data) {
+  console.log('🔄 Legacy deleteEmployPayment called, routing to modern implementation');
+  return deleteEmployPayment(data);
+}
+
 // Direct function aliases for Adda Payments
 function updateAddaPayment(data) {
   try {
@@ -699,6 +710,17 @@ function approveOtherPaymentLegacy(data) {
   return approveOtherPayment(data);
 }
 
+// Legacy EmployeePayments status functions
+function updateEmployPaymentStatusLegacy(data) {
+  console.log('🔄 Legacy updateEmployPaymentStatus called, routing to modern implementation');
+  return updateEmployPaymentStatus(data);
+}
+
+function approveEmployPaymentLegacy(data) {
+  console.log('🔄 Legacy approveEmployPayment called, routing to modern implementation');
+  return approveEmployPayment(data);
+}
+
 // Legacy FareReceipts status functions
 function updateFareReceiptStatusLegacy(data) {
   console.log('🔄 Legacy updateFareReceiptStatus called, routing to modern implementation');
@@ -771,6 +793,8 @@ function updateFareEntryLegacy(data) {
       return updateServicePayment(data);
     } else if (entryType === 'other') {
       return updateOtherPayment(data);
+    } else if (entryType === 'employ') {
+      return updateEmployPayment(data);
     } else {
       throw new Error(`Invalid entry type: ${entryType}`);
     }
@@ -811,6 +835,8 @@ function deleteFareEntryLegacy(data) {
       return deleteServicePayment(data);
     } else if (entryType === 'other') {
       return deleteOtherPayment(data);
+    } else if (entryType === 'employ') {
+      return deleteEmployPayment(data);
     } else {
       throw new Error(`Invalid entry type: ${entryType}`);
     }

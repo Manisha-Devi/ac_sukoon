@@ -201,6 +201,23 @@ function doPost(e) {
         result = updateOtherPaymentStatus(data);
         break;
 
+      // ==================== EMPLOYEE PAYMENTS ====================
+      case "addEmployPayment":
+        result = addEmployPayment(data);
+        break;
+      case "getEmployPayments":
+        result = getEmployPayments();
+        break;
+      case "updateEmployPayment":
+        result = updateEmployPayment(data);
+        break;
+      case "deleteEmployPayment":
+        result = deleteEmployPayment(data);
+        break;
+      case "updateEmployPaymentStatus":
+        result = updateEmployPaymentStatus(data);
+        break;
+
       // ==================== CASH DEPOSITS ====================
       case "addCashDeposit":
         result = addCashDeposit(data);
@@ -262,6 +279,14 @@ function doPost(e) {
         break;
       case 'resendUnionPayment':
         result = resendUnionPayment(data);
+        break;
+
+      // Employee Payments Approval
+      case 'approveEmployPayment':
+        result = approveEmployPayment(data);
+        break;
+      case 'resendEmployPayment':
+        result = resendEmployPayment(data);
         break;
 
       // Booking Entries Approval
@@ -367,6 +392,9 @@ function doGet(e) {
         break;
       case "getOtherPayments":
         result = getOtherPayments();
+        break;
+      case "getEmployPayments":
+        result = getEmployPayments();
         break;
       case "getCashDeposits":
         result = getCashDeposits();
