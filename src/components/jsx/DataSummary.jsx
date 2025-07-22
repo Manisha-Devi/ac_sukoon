@@ -145,6 +145,11 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
               displayName = `Other: ${entry.paymentType || entry.paymentDetails || 'Other Payment'}`;
               description = entry.paymentDetails || entry.paymentType || 'Other payment';
               break;
+            case 'food':
+              dataType = 'Food Payment';
+              displayName = `Food: ${entry.paymentType || entry.description || 'Food Expense'}`;
+              description = entry.description || entry.paymentType || 'Food payment';
+              break;
             default:
               dataType = 'Payment';
               displayName = `Payment: ${entry.description || 'Payment Entry'}`;

@@ -189,7 +189,11 @@ function ProfitChart({
       .filter(item => item.type === 'other')
       .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
 
-    let totalFilteredExpenses = fuelExpenses + addaExpenses + unionExpenses + serviceExpenses + otherExpenses;
+    const foodExpenses = filteredExpenseData
+      .filter(item => item.type === 'food')
+      .reduce((sum, item) => sum + (parseFloat(item.totalAmount) || 0), 0);
+
+    let totalFilteredExpenses = fuelExpenses + addaExpenses + unionExpenses + serviceExpenses + otherExpenses + foodExpenses;
 
     // Calculate actual days in the filtered period for expense adjustments
     const now = new Date();
@@ -312,7 +316,8 @@ function ProfitChart({
         adda: addaExpenses,
         union: unionExpenses,
         service: serviceExpenses,
-        other: otherExpenses
+        other: otherExpenses,
+        food: foodExpenses
       },
       cashVsBank: {
         incomeCash: totalCash,
@@ -333,7 +338,7 @@ function ProfitChart({
 
   // Enhanced charts data
   const expenseBreakdownData = useMemo(() => ({
-    labels: ['⛽ Fuel', '🏪 Adda', '🤝 Union', '🔧 Service', '📦 Other'],
+    labels: ['⛽ Fuel', '🏪 Adda', '🤝 Union', '🔧 Service', '📦 Other', '🍽️ Food'],
     datasets: [
       {
         data: [
@@ -341,14 +346,16 @@ function ProfitChart({
           analytics.breakdown.adda,
           analytics.breakdown.union,
           analytics.breakdown.service,
-          analytics.breakdown.other
+          analytics.breakdown.other,
+          analytics.breakdown.food
         ],
         backgroundColor: [
           '#e74c3c', // Red for fuel
           '#3498db', // Blue for adda
           '#f39c12', // Orange for union
           '#2ecc71', // Green for service
-          '#9b59b6'  // Purple for other
+          '#9b59b6', // Purple for other
+          '#ff6b35'  // Orange-red for food
         ],
         borderWidth: 4,
         borderColor: '#ffffff',
