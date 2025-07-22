@@ -176,53 +176,6 @@ function deleteOtherPaymentLegacy(data) {
   return deleteOtherPayment(data);
 }
 
-// Legacy Food Payment functions
-function updateFoodPaymentLegacy(data) {
-  console.log('🔄 Legacy updateFoodPayment called, routing to modern implementation');
-  return updateFoodPayment(data);
-}
-
-function deleteFoodPaymentLegacy(data) {
-  console.log('🔄 Legacy deleteFoodPayment called, routing to modern implementation');
-  return deleteFoodPayment(data);
-}
-
-// Direct function aliases for Food Payments (Legacy Support)
-function addEmployeePayment(data) {
-  console.log('🔄 Legacy addEmployeePayment called, routing to addFoodPayment');
-  return addFoodPayment(data);
-}
-
-function getEmployeePayments() {
-  console.log('🔄 Legacy getEmployeePayments called, routing to getFoodPayments');
-  return getFoodPayments();
-}
-
-function updateEmployeePayment(data) {
-  console.log('🔄 Legacy updateEmployeePayment called, routing to updateFoodPayment');
-  return updateFoodPayment(data);
-}
-
-function deleteEmployeePayment(data) {
-  console.log('🔄 Legacy deleteEmployeePayment called, routing to deleteFoodPayment');
-  return deleteFoodPayment(data);
-}
-
-function updateEmployeePaymentStatus(data) {
-  console.log('🔄 Legacy updateEmployeePaymentStatus called, routing to updateFoodPaymentStatus');
-  return updateFoodPaymentStatus(data);
-}
-
-function approveEmployeePayment(data) {
-  console.log('🔄 Legacy approveEmployeePayment called, routing to approveFoodPayment');
-  return approveFoodPayment(data);
-}
-
-function resendEmployeePayment(data) {
-  console.log('🔄 Legacy resendEmployeePayment called, routing to resendFoodPayment');
-  return resendFoodPayment(data);
-}
-
 // Direct function aliases for Adda Payments
 function updateAddaPayment(data) {
   try {
@@ -746,22 +699,6 @@ function approveOtherPaymentLegacy(data) {
   return approveOtherPayment(data);
 }
 
-// Legacy FoodPayments status functions
-function updateEmployeePaymentStatusLegacy(data) {
-  console.log('🔄 Legacy updateEmployeePaymentStatus called, routing to modern implementation');
-  return updateFoodPaymentStatus(data);
-}
-
-function approveEmployeePaymentLegacy(data) {
-  console.log('🔄 Legacy approveEmployeePayment called, routing to modern implementation');
-  return approveFoodPayment(data);
-}
-
-function resendEmployeePaymentLegacy(data) {
-  console.log('🔄 Legacy resendEmployeePayment called, routing to modern implementation');
-  return resendFoodPayment(data);
-}
-
 // Legacy FareReceipts status functions
 function updateFareReceiptStatusLegacy(data) {
   console.log('🔄 Legacy updateFareReceiptStatus called, routing to modern implementation');
@@ -834,8 +771,6 @@ function updateFareEntryLegacy(data) {
       return updateServicePayment(data);
     } else if (entryType === 'other') {
       return updateOtherPayment(data);
-    } else if (entryType === 'food') {
-      return updateFoodPayment(data);
     } else {
       throw new Error(`Invalid entry type: ${entryType}`);
     }
@@ -876,8 +811,6 @@ function deleteFareEntryLegacy(data) {
       return deleteServicePayment(data);
     } else if (entryType === 'other') {
       return deleteOtherPayment(data);
-    } else if (entryType === 'food') {
-      return deleteFoodPayment(data);
     } else {
       throw new Error(`Invalid entry type: ${entryType}`);
     }

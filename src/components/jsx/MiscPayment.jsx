@@ -71,12 +71,12 @@ function MiscPayment({
     const today = new Date();
     const todayISO = today.toISOString().split("T")[0];
     const userType = currentUser?.userType;
-
+    
     if (userType === "Conductor") {
       // Conductor: 7 days past to current date + future dates enabled
       const pastDate = new Date(today);
       pastDate.setDate(today.getDate() - 7);
-
+      
       return {
         min: pastDate.toISOString().split("T")[0],
         max: null // No max limit for future dates
@@ -451,14 +451,6 @@ function MiscPayment({
         second: "2-digit",
       });
 
-      // Define employee payment types (food items)
-      const employeePaymentTypes = [
-        "Lunch", "Breakfast", "Dinner", "Tea", "Cold Drink", "Water Bottle"
-      ];
-
-      // Check if this is an employee payment
-      const isEmployeePayment = employeePaymentTypes.includes(otherData.paymentType);
-
       if (editingEntry) {
         const oldTotal = editingEntry.totalAmount;
         const updatedData = expenseData.map((entry) =>
@@ -487,50 +479,26 @@ function MiscPayment({
         });
         setIsLoading(false);
 
-        // API call to update entry
-        let apiResult;
-        try {
-          if (isEmployeePayment) {
-            apiResult = await authService.updateFoodPayment({
-              entryId: editingEntry.entryId,
-              updatedData: {
-                date: otherData.date,
-                paymentType: otherData.paymentType,
-                description: otherData.description,
-                cashAmount: cashAmount,
-                bankAmount: bankAmount,
-                totalAmount: totalAmount,
-              },
-            });
-          } else {
-            apiResult = await authService.updateOtherPayment({
-              entryId: editingEntry.entryId,
-              updatedData: {
-                date: otherData.date,
-                paymentType: otherData.paymentType,
-                description: otherData.description,
-                cashAmount: cashAmount,
-                bankAmount: bankAmount,
-                totalAmount: totalAmount,
-              },
-            });
-          }
-
-          if (!apiResult.success) {
-            throw new Error(apiResult.error || "Update failed");
-          }
-        } catch (error) {
-          console.error("API sync failed:", error);
-          alert("Warning: Changes saved locally but may not sync to server");
-        }
+        authService
+          .updateOtherPayment({
+            entryId: editingEntry.entryId,
+            updatedData: {
+              date: otherData.date,
+              paymentType: otherData.paymentType,
+              description: otherData.description,
+              cashAmount: cashAmount,
+              bankAmount: bankAmount,
+              totalAmount: totalAmount,
+            },
+          })
+          .catch((error) => {
+            console.error("Background other update sync failed:", error);
+          });
       } else {
-        const generateEntryId = () => {
-            return Date.now();
-        };
-
         const newEntry = {
-          entryId: generateEntryId(),
+          entryId: Date.now(),
           timestamp: timeOnly,
+          type: "other",
           date: otherData.date,
           paymentType: otherData.paymentType,
           description: otherData.description,
@@ -538,9 +506,7 @@ function MiscPayment({
           bankAmount: bankAmount,
           totalAmount: totalAmount,
           submittedBy: submittedBy,
-          entryType: isEmployeePayment ? "food" : "other",
           entryStatus: "pending",
-          approvedBy: "",
         };
 
         const updatedData = [newEntry, ...expenseData];
@@ -555,42 +521,22 @@ function MiscPayment({
         });
         setIsLoading(false);
 
-        // Add to appropriate sheet based on payment type
-        if (isEmployeePayment) {
-          authService
-            .addFoodPayment({
-              entryId: newEntry.entryId,
-              timestamp: timeOnly,
-              date: otherData.date,
-              paymentType: otherData.paymentType,
-              description: otherData.description,
-              cashAmount: cashAmount,
-              bankAmount: bankAmount,
-              totalAmount: totalAmount,
-              submittedBy: submittedBy,
-              entryStatus: "pending",
-            })
-            .catch((error) => {
-              console.error("Background employee add sync failed:", error);
-            });
-        } else {
-          authService
-            .addOtherPayment({
-              entryId: newEntry.entryId,
-              timestamp: timeOnly,
-              date: otherData.date,
-              paymentType: otherData.paymentType,
-              description: otherData.description,
-              cashAmount: cashAmount,
-              bankAmount: bankAmount,
-              totalAmount: totalAmount,
-              submittedBy: submittedBy,
-              entryStatus: "pending",
-            })
-            .catch((error) => {
-              console.error("Background other add sync failed:", error);
-            });
-        }
+        authService
+          .addOtherPayment({
+            entryId: newEntry.entryId,
+            timestamp: timeOnly,
+            date: otherData.date,
+            paymentType: otherData.paymentType,
+            description: otherData.description,
+            cashAmount: cashAmount,
+            bankAmount: bankAmount,
+            totalAmount: totalAmount,
+            submittedBy: submittedBy,
+            entryStatus: "pending",
+          })
+          .catch((error) => {
+            console.error("Background other add sync failed:", error);
+          });
       }
     } catch (error) {
       console.error("Error submitting other payment:", error);
@@ -621,10 +567,6 @@ function MiscPayment({
           deleteResult = await authService.deleteServicePayment({
             entryId: entryToDelete.entryId,
           });
-        } else if (entryToDelete.type === "employee") {
-          deleteResult = await authService.deleteEmployeePayment({
-            entryId: entryToDelete.entryId,
-          });
         } else if (entryToDelete.type === "other") {
           deleteResult = await authService.deleteOtherPayment({
             entryId: entryToDelete.entryId,
@@ -651,7 +593,7 @@ function MiscPayment({
         cashAmount: entry.cashAmount.toString(),
         bankAmount: entry.bankAmount.toString(),
       });
-    } else if (entry.type === "other" || entry.type === "employee") {
+    } else if (entry.type === "other") {
       setActiveTab("other");
       setOtherData({
         date: entry.date,
@@ -689,7 +631,7 @@ function MiscPayment({
       (entry) =>
         entry.submittedBy === currentUserName &&
         entry.entryStatus !== "approved" &&
-        (entry.type === "service" || entry.type === "other" || entry.type === "employee"),
+        (entry.type === "service" || entry.type === "other"),
     );
 
     const totalCash = userExpenseData.reduce(
@@ -711,9 +653,9 @@ function MiscPayment({
       (entry) =>
         entry.submittedBy === currentUserName &&
         entry.entryStatus !== "approved" &&
-        (entry.type === "service" || entry.type === "other" || entry.type === "employee"),
+        (entry.type === "service" || entry.type === "other"),
     );
-
+    
     // Sort by entryId (timestamp) in descending order to show newest first
     return userEntries.sort((a, b) => {
       const timeA = a.entryId || 0;
@@ -1099,15 +1041,6 @@ function MiscPayment({
                     </button>
                   )}
                 </div>
-                  <button
-                    type="button"
-                    className="btn btn-secondary ms-2"
-                    onClick={handleCancelEdit}
-                  >
-                    <i className="bi bi-x-circle"></i> Cancel
-                    </button>
-                  )}
-                </div>
               </form>
             </div>
           )}
@@ -1126,8 +1059,7 @@ function MiscPayment({
                       <div className="card-body">
                         <div className="entry-header">
                           <span className={`entry-type ${entry.type}`}>
-                            {entry.type === "service" ? "Service" : 
-                             entry.type === "employee" ? "Food" : "Other"}
+                            {entry.type === "service" ? "Service" : "Other"}
                           </span>
 
                           {entry.entryStatus === "pending" && (
@@ -1169,7 +1101,7 @@ function MiscPayment({
                               )}
                             </div>
                           )}
-                          {(entry.type === "other" || entry.type === "employee") && (
+                          {entry.type === "other" && (
                             <div>
                               <p><strong>{entry.paymentType}</strong></p>
                               {entry.description && (
@@ -1201,4 +1133,3 @@ function MiscPayment({
 }
 
 export default MiscPayment;
-// Apply change: Update API call to use addFoodPayment for food types

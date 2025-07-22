@@ -115,8 +115,6 @@ const CashBook = ({ cashBookEntries, setCashBookEntries, allUsers }) => {
         return `By Union Payment - ${entry.particulars || entry.description}`;
       case 'other-payment':
         return `By Other Payment - ${entry.particulars || entry.description}`;
-      case 'food-payment':
-        return `By Food Payment - ${entry.particulars || entry.description}`;
       case 'cash-deposit':
         return `By Cash Deposit - ${entry.submittedBy || entry.depositedBy || entry.particulars || entry.description}`;
       case 'fixed-cash-payment':

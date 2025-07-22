@@ -174,8 +174,7 @@ const SHEET_NAMES = {
   UNION_PAYMENTS: "UnionPayments",
   SERVICE_PAYMENTS: "ServicePayments",
   OTHER_PAYMENTS: "OtherPayments",
-  CASH_DEPOSITS: "CashDeposits",
-  FOOD_PAYMENTS: "FoodPayments"
+  CASH_DEPOSITS: "CashDeposits"
 };
 
 /**

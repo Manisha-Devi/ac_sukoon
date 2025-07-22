@@ -37,26 +37,69 @@ function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  // Simple refresh trigger - All logic is in App.jsx
-  const handleRefreshClick = async () => {
+  // Centralized refresh function - Navbar में हो रहा है
+  const handleCentralizedRefresh = async () => {
     if (isRefreshing) return; // Prevent multiple simultaneous refreshes
 
-    console.log('🔄 Navbar: Refresh button clicked - delegating to App.jsx');
+    setIsRefreshing(true);
+    setLastRefreshTime(null); // Reset tick mark
+
+    console.log('🔄 Starting centralized data refresh...');
+    setIsRefreshing(true);
     setRefreshStatus('refreshing');
 
     try {
-      // Call App.jsx's centralized refresh function
       await onDataRefresh();
 
       setLastRefreshTime(new Date());
-      console.log('✅ Navbar: Data refresh completed successfully');
+      console.log('✅ Data refresh completed successfully');
+
+      // Show success message briefly
       setRefreshStatus('success');
       setTimeout(() => setRefreshStatus('idle'), 2000);
 
     } catch (error) {
-      console.error('❌ Navbar: Data refresh failed:', error);
+      console.error('❌ Data refresh failed:', error);
       setRefreshStatus('error');
-      setTimeout(() => setRefreshStatus('idle'), 3000);
+
+      // Show retry option
+      console.log('🔄 Will auto-retry in 5 seconds...');
+      setTimeout(async () => {
+        console.log('🔄 Auto-retrying data refresh...');
+        try {
+          await onDataRefresh();
+          setLastRefreshTime(new Date());
+          setRefreshStatus('success');
+          setTimeout(() => setRefreshStatus('idle'), 2000);
+        } catch (retryError) {
+          console.error('❌ Retry also failed:', retryError);
+          setRefreshStatus('error');
+          setTimeout(() => setRefreshStatus('idle'), 3000);
+        }
+      }, 5000);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const refreshData = () => {
+    console.log('🔄 Navbar: Refresh button clicked - triggering all components');
+
+    // Trigger parent's refresh function (App.jsx)
+    if (onDataRefresh) {
+      onDataRefresh();
+    }
+
+    // Dispatch centralized refresh event for all components
+    window.dispatchEvent(new CustomEvent('dataRefreshed'));
+
+    // Show user feedback
+    const refreshIcon = document.querySelector('.bi-arrow-clockwise');
+    if (refreshIcon) {
+      refreshIcon.classList.add('spin');
+      setTimeout(() => {
+        refreshIcon.classList.remove('spin');
+      }, 1000);
     }
   };
 
@@ -99,7 +142,7 @@ function Navbar({ user, onLogout, isRefreshing, setIsRefreshing, lastRefreshTime
           {/* Centralized Refresh Icon - Navbar में implement किया गया */}
           <button 
             className={`btn btn-link text-white p-2 me-2 ${isRefreshing ? 'disabled' : ''}`}
-            onClick={handleRefreshClick}
+            onClick={handleCentralizedRefresh}
             disabled={isRefreshing}
             title={
               isRefreshing 
