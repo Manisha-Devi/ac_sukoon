@@ -65,7 +65,8 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         addaPayments,
         unionPayments,
         servicePayments,
-        otherPayments
+        otherPayments,
+        foodPayments
       ] = await Promise.all([
         loadWithRetry(() => authService.getFareReceipts()),
         loadWithRetry(() => authService.getBookingEntries()),
@@ -74,7 +75,8 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         loadWithRetry(() => authService.getAddaPayments()),
         loadWithRetry(() => authService.getUnionPayments()),
         loadWithRetry(() => authService.getServicePayments()),
-        loadWithRetry(() => authService.getOtherPayments())
+        loadWithRetry(() => authService.getOtherPayments()),
+        loadWithRetry(() => authService.getFoodPayments())
       ]);
 
       // Process and combine all data
@@ -420,6 +422,42 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
          }));
          combinedCashBookEntries = [...combinedCashBookEntries, ...otherCashEntries];
        }
+
+      // Process Food Payments - Only required fields for CashSummary
+      if (foodPayments.success && foodPayments.data) {
+        const processedFoodPayments = foodPayments.data.map(entry => ({
+          entryId: entry.entryId,
+          date: convertToDateString(entry.date),
+          cashAmount: entry.cashAmount || 0,
+          type: 'food',
+          submittedBy: entry.submittedBy,
+          entryStatus: entry.entryStatus || 'pending',
+          approvedBy: entry.approvedBy || '',
+          // Keep full data for other components
+          id: entry.entryId,
+          timestamp: convertToTimeString(entry.timestamp),
+          paymentType: entry.paymentType,
+          description: entry.description,
+          bankAmount: entry.bankAmount || 0,
+          totalAmount: entry.totalAmount || 0
+        }));
+        combinedExpenseData = [...combinedExpenseData, ...processedFoodPayments];
+
+        // Generate cash book entries from food payments
+        const foodCashEntries = processedFoodPayments.map(entry => ({
+          id: `food-${entry.entryId}`,
+          date: entry.date,
+          particulars: "Food Payment",
+          description: `Food payment - ${entry.description || entry.paymentType || 'Food'}`,
+          jfNo: `FOOD-${entry.entryId}`,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          type: 'cr',
+          timestamp: entry.timestamp,
+          source: 'food-payment'
+        }));
+        combinedCashBookEntries = [...combinedCashBookEntries, ...foodCashEntries];
+      }
       // Sort all data by timestamp (newest first)
       combinedFareData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       combinedExpenseData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -440,6 +478,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         unionPayments: unionPayments.data || [],
         servicePayments: servicePayments.data || [],
         otherPayments: otherPayments.data || [],
+        foodPayments: foodPayments.data || [],
         totalRecords: combinedFareData.length + combinedExpenseData.length
       });
 
@@ -452,6 +491,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         unionPayments: unionPayments.data?.length || 0,
         servicePayments: servicePayments.data?.length || 0,
         otherPayments: otherPayments.data?.length || 0,
+        foodPayments: foodPayments.data?.length || 0,
         totalRecords: combinedFareData.length + combinedExpenseData.length
       });
       console.log('🔍 Breakdown - Fuel:', fuelPayments.data?.length || 0, 
@@ -459,7 +499,8 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
                    'OffDays:', offDays.data?.length || 0,
                    'Union:', unionPayments.data?.length || 0, 
                    'Service:', servicePayments.data?.length || 0,
-                   'Other:', otherPayments.data?.length || 0);
+                   'Other:', otherPayments.data?.length || 0,
+                   'Food:', foodPayments.data?.length || 0);
 
     } catch (error) {
       console.error('❌ Dashboard: Error loading data:', error);

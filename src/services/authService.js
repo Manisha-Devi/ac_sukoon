@@ -1985,6 +1985,69 @@ class AuthService {
       return result;
     } catch (error) {
       console.error('❌ Error fetching food payments:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Update Food Payment Status
+  async updateFoodPaymentStatus(entryId, newStatus, approverName) {
+    try {
+      console.log(`🔄 Updating food payment status - ID: ${entryId}, Status: ${newStatus}, Approver: ${approverName}`);
+
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
+        action: 'updateFoodPaymentStatus',
+        entryId: entryId,
+        newStatus: newStatus,
+        approverName: approverName || ''
+      }));
+
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 30000, 2);
+
+      console.log('✅ Food payment status update response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating food payment status:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Update Food Payment
+  async updateFoodPayment(data) {
+    try {
+      console.log('📝 Updating food payment:', data);
+
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
+        action: 'updateFoodPayment',
+        entryId: data.entryId,
+        updatedData: data.updatedData
+      }));
+
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 30000, 2);
+
+      console.log('✅ Food payment update response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating food payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Delete Food Payment
+  async deleteFoodPayment(data) {
+    try {
+      console.log('🗑️ Deleting food payment:', data);
+
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
+        action: 'deleteFoodPayment',
+        entryId: data.entryId
+      }));
+
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 30000, 2);
+
+      console.log('✅ Food payment delete response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error deleting food payment:', error);
       // Return empty data structure instead of error to prevent UI crashes
       return { 
         success: true, 

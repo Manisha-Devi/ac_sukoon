@@ -145,6 +145,11 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
               displayName = `Other: ${entry.paymentType || entry.paymentDetails || 'Other Payment'}`;
               description = entry.paymentDetails || entry.paymentType || 'Other payment';
               break;
+            case 'food':
+              dataType = 'Food Payment';
+              displayName = `Food: ${entry.paymentType || entry.description || 'Food Payment'}`;
+              description = entry.description || entry.paymentType || 'Food payment';
+              break;
             default:
               dataType = 'Payment';
               displayName = `Payment: ${entry.description || 'Payment Entry'}`;
@@ -510,6 +515,9 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
               break;
             case 'Other Payment':
               result = await authService.updateOtherPaymentStatus(entryId, newStatus, approverName);
+              break;
+            case 'Food Payment':
+              result = await authService.updateFoodPaymentStatus(entryId, newStatus, approverName);
               break;
             default:
               console.error(`Unsupported data type: ${entry.dataType}`);
