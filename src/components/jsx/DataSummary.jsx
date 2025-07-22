@@ -511,6 +511,9 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
             case 'Other Payment':
               result = await authService.updateOtherPaymentStatus(entryId, newStatus, approverName);
               break;
+            case 'Food Payment':
+              result = await authService.updateFoodPaymentStatus(entryId, newStatus, approverName);
+              break;
             default:
               console.error(`Unsupported data type: ${entry.dataType}`);
               return { success: false, error: 'Unsupported data type' };

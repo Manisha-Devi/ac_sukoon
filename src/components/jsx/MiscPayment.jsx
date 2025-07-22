@@ -71,12 +71,12 @@ function MiscPayment({
     const today = new Date();
     const todayISO = today.toISOString().split("T")[0];
     const userType = currentUser?.userType;
-    
+
     if (userType === "Conductor") {
       // Conductor: 7 days past to current date + future dates enabled
       const pastDate = new Date(today);
       pastDate.setDate(today.getDate() - 7);
-      
+
       return {
         min: pastDate.toISOString().split("T")[0],
         max: null // No max limit for future dates
@@ -487,10 +487,11 @@ function MiscPayment({
         });
         setIsLoading(false);
 
-        // Update in appropriate sheet based on payment type
-        if (isEmployeePayment) {
-          authService
-            .updateEmployeePayment({
+        // API call to update entry
+        let apiResult;
+        try {
+          if (isEmployeePayment) {
+            apiResult = await authService.updateFoodPayment({
               entryId: editingEntry.entryId,
               updatedData: {
                 date: otherData.date,
@@ -500,13 +501,9 @@ function MiscPayment({
                 bankAmount: bankAmount,
                 totalAmount: totalAmount,
               },
-            })
-            .catch((error) => {
-              console.error("Background employee update sync failed:", error);
             });
-        } else {
-          authService
-            .updateOtherPayment({
+          } else {
+            apiResult = await authService.updateOtherPayment({
               entryId: editingEntry.entryId,
               updatedData: {
                 date: otherData.date,
@@ -516,16 +513,24 @@ function MiscPayment({
                 bankAmount: bankAmount,
                 totalAmount: totalAmount,
               },
-            })
-            .catch((error) => {
-              console.error("Background other update sync failed:", error);
             });
+          }
+
+          if (!apiResult.success) {
+            throw new Error(apiResult.error || "Update failed");
+          }
+        } catch (error) {
+          console.error("API sync failed:", error);
+          alert("Warning: Changes saved locally but may not sync to server");
         }
       } else {
+        const generateEntryId = () => {
+            return Date.now();
+        };
+
         const newEntry = {
-          entryId: Date.now(),
+          entryId: generateEntryId(),
           timestamp: timeOnly,
-          type: isEmployeePayment ? "employee" : "other",
           date: otherData.date,
           paymentType: otherData.paymentType,
           description: otherData.description,
@@ -533,7 +538,9 @@ function MiscPayment({
           bankAmount: bankAmount,
           totalAmount: totalAmount,
           submittedBy: submittedBy,
+          entryType: isEmployeePayment ? "food" : "other",
           entryStatus: "pending",
+          approvedBy: "",
         };
 
         const updatedData = [newEntry, ...expenseData];
@@ -551,7 +558,7 @@ function MiscPayment({
         // Add to appropriate sheet based on payment type
         if (isEmployeePayment) {
           authService
-            .addEmployeePayment({
+            .addFoodPayment({
               entryId: newEntry.entryId,
               timestamp: timeOnly,
               date: otherData.date,
@@ -706,7 +713,7 @@ function MiscPayment({
         entry.entryStatus !== "approved" &&
         (entry.type === "service" || entry.type === "other" || entry.type === "employee"),
     );
-    
+
     // Sort by entryId (timestamp) in descending order to show newest first
     return userEntries.sort((a, b) => {
       const timeA = a.entryId || 0;
