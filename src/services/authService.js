@@ -1,3 +1,4 @@
+
 import APIKeyService from './key.js';
 
 // Authentication service for Google Sheets database
@@ -970,9 +971,8 @@ class AuthService {
       return result;
     } catch (error) {
       console.error('❌ Error fetching other payments:', error);
-      // Return empty datastructure instead of error to prevent UI crashes
+      // Return empty data structure instead of error to prevent UI crashes
       return { 
-```text
         success: true, 
         data: [],
         message: 'Other payments loaded from local cache (API temporarily unavailable)'
@@ -1458,86 +1458,6 @@ class AuthService {
     }
   }
 
-  async getServicePayments() {
-    try {
-      console.log('📋 Fetching service payments from Google Sheets...');
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify(this.apiKeyService.addAPIKey({
-          action: 'getServicePayments'
-        }))
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Service payments fetched:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error fetching service payments:', error);
-      // Return empty data structure instead of error to prevent UI crashes
-      return { 
-        success: true, 
-        data: [],
-        message: 'Service payments loaded from local cache (API temporarily unavailable)'
-      };
-    }
-  }
-
-  async getOtherPayments() {
-    try {
-      console.log('📋 Fetching other payments from Google Sheets...');
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        mode: 'cors',
-        redirect: 'follow',
-        signal: controller.signal,
-        body: JSON.stringify(this.apiKeyService.addAPIKey({
-          action: 'getOtherPayments'
-        }))
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Other payments fetched:', result);
-      return result;
-    } catch (error) {
-      console.error('❌ Error fetching other payments:', error);
-      // Return empty data structure instead of error to prevent UI crashes
-      return { 
-        success: true, 
-        data: [],
-        message: 'Other payments loaded from local cache (API temporarily unavailable)'
-      };
-    }
-  }
-
   // ============================================================================
   // APPROVAL WORKFLOW FUNCTIONS
   // ============================================================================
@@ -1659,8 +1579,6 @@ class AuthService {
     }
   }
 
-
-
   // Generic approval functions for other data types (to be implemented similarly)
   async approveFareReceipt(data) {
     try {
@@ -1721,8 +1639,6 @@ class AuthService {
       return { success: false, error: error.message };
     }
   }
-
-
 
   // ============================================================================
   // STATUS UPDATE FUNCTIONS
@@ -1989,8 +1905,7 @@ class AuthService {
       const result = await response.json();
       console.log('✅ Cash deposits API response:', result);
 
-      if (result.success && result.data)```text
- {
+      if (result.success && result.data) {
         console.log(`💰 Successfully fetched ${result.data.length} cash deposits from Google Sheets`);
         result.data.forEach((deposit, index) => {
           console.log(`${index + 1}. Cash Deposit:`, {
@@ -2225,14 +2140,26 @@ class AuthService {
     try {
       console.log('📝 Updating employee payment in Google Sheets:', data);
 
-      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
-        action: 'updateEmployeePayment',
-        entryId: data.entryId,
-        updatedData: data.updatedData
-      }));
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
+          action: 'updateEmployeePayment',
+          entryId: data.entryId,
+          updatedData: data.updatedData
+        }))
+      });
 
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 30000, 3);
-      console.log('✅ Employee payment update response:', result);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Employee payment updated:', result);
       return result;
     } catch (error) {
       console.error('❌ Error updating employee payment:', error);
@@ -2244,36 +2171,81 @@ class AuthService {
     try {
       console.log('🗑️ Deleting employee payment from Google Sheets:', data);
 
-      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
-        action: 'deleteEmployeePayment',
-        entryId: data.entryId
-      }));
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 30000, 3);
-      console.log('✅ Employee payment delete response:', result);
-      return result;
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
+          action: 'deleteEmployeePayment',
+          entryId: data.entryId
+        }))
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('HTTP Error Response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Employee payment deleted successfully:', result);
+
+      // Validate response structure
+      if (result && typeof result === 'object') {
+        return result;
+      } else {
+        console.warn('⚠️ Invalid response format:', result);
+        return { success: true, message: 'Employee payment deleted (response format issue)' };
+      }
     } catch (error) {
       console.error('❌ Error deleting employee payment:', error);
+      if (error.name === 'AbortError') {
+        return { success: false, error: 'Request timeout - delete operation took too long' };
+      }
       return { success: false, error: error.message };
     }
   }
 
   async updateEmployeePaymentStatus(entryId, newStatus, approverName) {
     try {
-      console.log(`🔄 Updating employee payment status - ID: ${entryId}, Status: ${newStatus}, Approver: ${approverName}`);
-
-      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
-        action: 'updateEmployeePaymentStatus',
+      const data = {
         entryId: entryId,
         newStatus: newStatus,
         approverName: approverName
-      }));
-
-      const result = await this.makeAPIRequest(this.API_URL, requestBody, 30000, 3);
-      console.log('✅ Employee payment status update response:', result);
-      return result;
+      };
+      const response = await this.makeApprovalAPIRequest('updateEmployeePaymentStatus', data);
+      return response;
     } catch (error) {
-      console.error('❌ Error updating employee payment status:', error);
+      console.error('Error updating employee payment status:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async approveEmployeePayment(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('approveEmployeePayment', data);
+      return response;
+    } catch (error) {
+      console.error('Error approving employee payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async resendEmployeePayment(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('resendEmployeePayment', data);
+      return response;
+    } catch (error) {
+      console.error('Error resending employee payment:', error);
       return { success: false, error: error.message };
     }
   }
