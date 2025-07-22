@@ -1063,50 +1063,50 @@ function ProfitChart({
         {/* Daily Profit Chart */}
         <div className="col-12">
           <div className="profit-chart-card">
-            <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap">
-                <div className="d-flex align-items-center flex-wrap">
-                  <h5 className="mb-0 flex-shrink-1 me-1">
-                    <i className="bi bi-line-chart me-2"></i>
-                    Daily Profit 
-                    <small className="text-muted ms-2 d-none d-md-inline">
-                      ({dailyTrendData.dailyDataCount} days)
-                    </small>
-                  </h5>
-                  <div className="d-flex gap-2 align-items-center">
-                    {addExpenseAdjustment && (
-                      <div className="form-check form-switch">
-                        <input 
-                          className="form-check-input" 
-                          type="checkbox" 
-                          id="expenseAdjustment1400"
-                          checked={addExpenseAdjustment1400}
-                          onChange={(e) => {
-                            setAddExpenseAdjustment1400(e.target.checked);
-                          }}
-                        />
-                      </div>
-                    )}
-                    <div className="form-check form-switch">
-                      <input 
-                        className="form-check-input" 
-                        type="checkbox" 
-                        id="expenseAdjustment"
-                        checked={addExpenseAdjustment}
-                        onChange={(e) => {
-                          setAddExpenseAdjustment(e.target.checked);
-                          // When 1000 checkbox is unchecked, hide and uncheck 1400
-                          if (!e.target.checked) {
-                            setAddExpenseAdjustment1400(false);
-                          }
-                        }}
-                      />
-                    </div>
+            <div className="d-flex align-items-center mb-2 flex-wrap gap-2">
+              <h5 className="mb-0 me-2">
+                <i className="bi bi-line-chart me-2"></i>
+                Daily Profit 
+                <small className="text-muted ms-2 d-none d-md-inline">
+                  ({dailyTrendData.dailyDataCount} days)
+                </small>
+              </h5>
+              
+              {/* Checkboxes */}
+              <div className="d-flex gap-2 align-items-center">
+                {addExpenseAdjustment && (
+                  <div className="form-check form-switch">
+                    <input 
+                      className="form-check-input" 
+                      type="checkbox" 
+                      id="expenseAdjustment1400"
+                      checked={addExpenseAdjustment1400}
+                      onChange={(e) => {
+                        setAddExpenseAdjustment1400(e.target.checked);
+                      }}
+                    />
                   </div>
+                )}
+                <div className="form-check form-switch">
+                  <input 
+                    className="form-check-input" 
+                    type="checkbox" 
+                    id="expenseAdjustment"
+                    checked={addExpenseAdjustment}
+                    onChange={(e) => {
+                      setAddExpenseAdjustment(e.target.checked);
+                      // When 1000 checkbox is unchecked, hide and uncheck 1400
+                      if (!e.target.checked) {
+                        setAddExpenseAdjustment1400(false);
+                      }
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Navigation Controls for Mobile */}
               {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 && (
-                <div className="d-flex align-items-center gap-2" style={{flexShrink: 0}}>
+                <div className="d-flex align-items-center gap-2">
                   <button 
                     ref={prevRef}
                     className="btn btn-sm btn-outline-primary swiper-btn-prev"
@@ -1247,44 +1247,44 @@ function ProfitChart({
         {/* Weekly Profit Chart */}
         <div className="col-12">
           <div className="profit-chart-card">
-            <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap">
-              <div className="d-flex align-items-center flex-wrap">
-                <h5 className="mb-0 flex-shrink-1 me-1">
-                  <i className="bi bi-bar-chart me-2"></i>
-                  Weekly Profit 
-                  <small className="text-muted ms-2 d-none d-md-inline">
-                    (Last 12 weeks)
-                  </small>
-                </h5>
-                <div className="d-flex gap-2 align-items-center">
-                    {addWeeklyExpenseAdjustment && (
-                      <div className="form-check form-switch">
-                        <input 
-                          className="form-check-input" 
-                          type="checkbox" 
-                          id="weeklyExpenseAdjustment1400"
-                          checked={addWeeklyExpenseAdjustment1400}
-                          onChange={(e) => {
-                            setAddWeeklyExpenseAdjustment1400(e.target.checked);
-                          }}
-                        />
-                      </div>
-                    )}
-                    <div className="form-check form-switch">
-                      <input 
-                        className="form-check-input" 
-                        type="checkbox" 
-                        id="weeklyExpenseAdjustment"
-                        checked={addWeeklyExpenseAdjustment}
-                        onChange={(e) => {
-                          setAddWeeklyExpenseAdjustment(e.target.checked);
-                          if (!e.target.checked) {
-                            setAddWeeklyExpenseAdjustment1400(false);
-                          }
-                        }}
-                      />
-                    </div>
+            <div className="d-flex align-items-center mb-2 flex-wrap gap-2">
+              <h5 className="mb-0 me-2">
+                <i className="bi bi-bar-chart me-2"></i>
+                Weekly Profit 
+                <small className="text-muted ms-2 d-none d-md-inline">
+                  (Last 12 weeks)
+                </small>
+              </h5>
+              
+              {/* Checkboxes */}
+              <div className="d-flex gap-2 align-items-center">
+                {addWeeklyExpenseAdjustment && (
+                  <div className="form-check form-switch">
+                    <input 
+                      className="form-check-input" 
+                      type="checkbox" 
+                      id="weeklyExpenseAdjustment1400"
+                      checked={addWeeklyExpenseAdjustment1400}
+                      onChange={(e) => {
+                        setAddWeeklyExpenseAdjustment1400(e.target.checked);
+                      }}
+                    />
                   </div>
+                )}
+                <div className="form-check form-switch">
+                  <input 
+                    className="form-check-input" 
+                    type="checkbox" 
+                    id="weeklyExpenseAdjustment"
+                    checked={addWeeklyExpenseAdjustment}
+                    onChange={(e) => {
+                      setAddWeeklyExpenseAdjustment(e.target.checked);
+                      if (!e.target.checked) {
+                        setAddWeeklyExpenseAdjustment1400(false);
+                      }
+                    }}
+                  />
+                </div>
               </div>
             </div>
 
@@ -1317,44 +1317,44 @@ function ProfitChart({
         {/* Monthly Profit Chart */}
         <div className="col-12">
           <div className="profit-chart-card">
-            <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap">
-              <div className="d-flex align-items-center flex-wrap">
-                <h5 className="mb-0 flex-shrink-1 me-1">
-                  <i className="bi bi-calendar-month me-2"></i>
-                  Monthly Profit 
-                  <small className="text-muted ms-2 d-none d-md-inline">
-                    (Last 12 months)
-                  </small>
-                </h5>
-                <div className="d-flex gap-2 align-items-center">
-                    {addMonthlyExpenseAdjustment && (
-                      <div className="form-check form-switch">
-                        <input 
-                          className="form-check-input" 
-                          type="checkbox" 
-                          id="monthlyExpenseAdjustment1400"
-                          checked={addMonthlyExpenseAdjustment1400}
-                          onChange={(e) => {
-                            setAddMonthlyExpenseAdjustment1400(e.target.checked);
-                          }}
-                        />
-                      </div>
-                    )}
-                    <div className="form-check form-switch">
-                      <input 
-                        className="form-check-input" 
-                        type="checkbox" 
-                        id="monthlyExpenseAdjustment"
-                        checked={addMonthlyExpenseAdjustment}
-                        onChange={(e) => {
-                          setAddMonthlyExpenseAdjustment(e.target.checked);
-                          if (!e.target.checked) {
-                            setAddMonthlyExpenseAdjustment1400(false);
-                          }
-                        }}
-                      />
-                    </div>
+            <div className="d-flex align-items-center mb-2 flex-wrap gap-2">
+              <h5 className="mb-0 me-2">
+                <i className="bi bi-calendar-month me-2"></i>
+                Monthly Profit 
+                <small className="text-muted ms-2 d-none d-md-inline">
+                  (Last 12 months)
+                </small>
+              </h5>
+              
+              {/* Checkboxes */}
+              <div className="d-flex gap-2 align-items-center">
+                {addMonthlyExpenseAdjustment && (
+                  <div className="form-check form-switch">
+                    <input 
+                      className="form-check-input" 
+                      type="checkbox" 
+                      id="monthlyExpenseAdjustment1400"
+                      checked={addMonthlyExpenseAdjustment1400}
+                      onChange={(e) => {
+                        setAddMonthlyExpenseAdjustment1400(e.target.checked);
+                      }}
+                    />
                   </div>
+                )}
+                <div className="form-check form-switch">
+                  <input 
+                    className="form-check-input" 
+                    type="checkbox" 
+                    id="monthlyExpenseAdjustment"
+                    checked={addMonthlyExpenseAdjustment}
+                    onChange={(e) => {
+                      setAddMonthlyExpenseAdjustment(e.target.checked);
+                      if (!e.target.checked) {
+                        setAddMonthlyExpenseAdjustment1400(false);
+                      }
+                    }}
+                  />
+                </div>
               </div>
             </div>
 
