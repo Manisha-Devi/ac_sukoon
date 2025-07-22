@@ -1,28 +1,29 @@
+
 // ============================================================================
-// EMPLOYEE PAYMENTS - COMPLETE CRUD OPERATIONS
+// FOOD PAYMENTS - COMPLETE CRUD OPERATIONS
 // ============================================================================
 
 /**
- * Add new Employee Payment
+ * Add new Food Payment
  * Sheet Columns: A=Timestamp, B=Date, C=PaymentType, D=Description, E=CashAmount, 
  *                F=BankAmount, G=TotalAmount, H=Category, I=SubmittedBy, J=EntryType, K=EntryId,
  *                L=EntryStatus, M=ApprovedBy
- * @param {Object} data - Employee payment data
+ * @param {Object} data - Food payment data
  * @returns {Object} Success/error response with entry details
  */
-function addEmployPayment(data) {
+function addFoodPayment(data) {
   try {
-    console.log("📝 Adding new employee payment:", data);
+    console.log("📝 Adding new food payment:", data);
 
-    // Get or create EmployPayments sheet
+    // Get or create FoodPayments sheet
     let sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
-      .getSheetByName(SHEET_NAMES.EMPLOY_PAYMENTS);
+      .getSheetByName(SHEET_NAMES.FOOD_PAYMENTS);
 
     // Create sheet if it doesn't exist
     if (!sheet) {
-      console.log("📋 Creating EmployPayments sheet...");
+      console.log("📋 Creating FoodPayments sheet...");
       sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
-        .insertSheet(SHEET_NAMES.EMPLOY_PAYMENTS);
+        .insertSheet(SHEET_NAMES.FOOD_PAYMENTS);
 
       // Add headers exactly as specified
       sheet.getRange(1, 1, 1, 13).setValues([[
@@ -51,46 +52,46 @@ function addEmployPayment(data) {
       data.cashAmount || 0,          // E: Cash Amount
       data.bankAmount || 0,          // F: Bank Amount
       data.totalAmount || 0,         // G: Total Amount
-      "employ",                      // H: Category (static)
+      "food",                        // H: Category (static)
       data.submittedBy || "",        // I: Submitted By
-      "employ",                      // J: Entry Type (static)
+      "food",                        // J: Entry Type (static)
       entryId,                       // K: Entry ID
       "pending",                     // L: Entry Status (pending/waiting/approved)
       ""                             // M: Approved By
     ]]);
 
-    console.log("✅ Employee payment added successfully with ID:", entryId);
+    console.log("✅ Food payment added successfully with ID:", entryId);
 
     return {
       success: true,
-      message: 'Employee payment added successfully',
+      message: 'Food payment added successfully',
       entryId: entryId,
       timestamp: timeOnly
     };
 
   } catch (error) {
-    console.error('❌ Error adding employee payment:', error);
+    console.error('❌ Error adding food payment:', error);
     return {
       success: false,
-      error: 'Add employee payment error: ' + error.toString()
+      error: 'Add food payment error: ' + error.toString()
     };
   }
 }
 
 /**
- * Get all Employee Payments
- * @returns {Object} Array of employee payment data or error
+ * Get all Food Payments
+ * @returns {Object} Array of food payment data or error
  */
-function getEmployPayments() {
+function getFoodPayments() {
   try {
-    console.log("📋 Fetching all employee payments...");
+    console.log("📋 Fetching all food payments...");
 
-    // Get EmployPayments sheet
+    // Get FoodPayments sheet
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
-      .getSheetByName(SHEET_NAMES.EMPLOY_PAYMENTS);
+      .getSheetByName(SHEET_NAMES.FOOD_PAYMENTS);
 
     if (!sheet) {
-      console.log("ℹ️ EmployPayments sheet not found, returning empty data");
+      console.log("ℹ️ FoodPayments sheet not found, returning empty data");
       return { success: true, data: [] };
     }
 
@@ -99,7 +100,7 @@ function getEmployPayments() {
 
     // Check if sheet has data beyond headers
     if (values.length <= 1) {
-      console.log("ℹ️ No employee payments found");
+      console.log("ℹ️ No food payments found");
       return { success: true, data: [] };
     }
 
@@ -123,7 +124,7 @@ function getEmployPayments() {
       };
     });
 
-    console.log(`✅ Found ${data.length} employee payments`);
+    console.log(`✅ Found ${data.length} food payments`);
 
     // Return data in reverse order (newest first)
     return { 
@@ -133,32 +134,32 @@ function getEmployPayments() {
     };
 
   } catch (error) {
-    console.error("❌ Error fetching employee payments:", error);
+    console.error("❌ Error fetching food payments:", error);
     return {
       success: false,
-      error: "Get employee payments error: " + error.toString(),
+      error: "Get food payments error: " + error.toString(),
     };
   }
 }
 
 /**
- * Update existing Employee Payment
+ * Update existing Food Payment
  * @param {Object} data - Update data containing entryId and updatedData
  * @returns {Object} Success/error response
  */
-function updateEmployPayment(data) {
+function updateFoodPayment(data) {
   try {
     const entryId = data.entryId;
     const updatedData = data.updatedData;
 
-    console.log(`📝 Updating employee payment ID: ${entryId}`, updatedData);
+    console.log(`📝 Updating food payment ID: ${entryId}`, updatedData);
 
-    // Get EmployPayments sheet
+    // Get FoodPayments sheet
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
-      .getSheetByName(SHEET_NAMES.EMPLOY_PAYMENTS);
+      .getSheetByName(SHEET_NAMES.FOOD_PAYMENTS);
 
     if (!sheet) {
-      throw new Error('EmployPayments sheet not found');
+      throw new Error('FoodPayments sheet not found');
     }
 
     const entryIdColumn = 11; // Column K contains Entry ID
@@ -176,7 +177,7 @@ function updateEmployPayment(data) {
 
     // Check if entry was found
     if (rowIndex === -1) {
-      throw new Error(`Employee payment not found with ID: ${entryId}`);
+      throw new Error(`Food payment not found with ID: ${entryId}`);
     }
 
     // Update fields that are provided in updatedData
@@ -202,41 +203,41 @@ function updateEmployPayment(data) {
       sheet.getRange(rowIndex, 9).setValue(updatedData.submittedBy);
     }
 
-    console.log(`✅ Employee payment updated successfully - ID: ${entryId}, Row: ${rowIndex}`);
+    console.log(`✅ Food payment updated successfully - ID: ${entryId}, Row: ${rowIndex}`);
 
     return {
       success: true,
-      message: 'Employee payment updated successfully',
+      message: 'Food payment updated successfully',
       entryId: entryId,
       updatedRow: rowIndex
     };
 
   } catch (error) {
-    console.error('❌ Error updating employee payment:', error);
+    console.error('❌ Error updating food payment:', error);
     return {
       success: false,
-      error: 'Update employee payment error: ' + error.toString()
+      error: 'Update food payment error: ' + error.toString()
     };
   }
 }
 
 /**
- * Delete Employee Payment
+ * Delete Food Payment
  * @param {Object} data - Delete data containing entryId
  * @returns {Object} Success/error response
  */
-function deleteEmployPayment(data) {
+function deleteFoodPayment(data) {
   try {
     const entryId = data.entryId;
 
-    console.log(`🗑️ Deleting employee payment ID: ${entryId}`);
+    console.log(`🗑️ Deleting food payment ID: ${entryId}`);
 
-    // Get EmployPayments sheet
+    // Get FoodPayments sheet
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
-      .getSheetByName(SHEET_NAMES.EMPLOY_PAYMENTS);
+      .getSheetByName(SHEET_NAMES.FOOD_PAYMENTS);
 
     if (!sheet) {
-      throw new Error('EmployPayments sheet not found');
+      throw new Error('FoodPayments sheet not found');
     }
 
     const entryIdColumn = 11; // Column K contains Entry ID
@@ -254,49 +255,49 @@ function deleteEmployPayment(data) {
 
     // Check if entry was found
     if (rowIndex === -1) {
-      throw new Error(`Employee payment not found with ID: ${entryId}`);
+      throw new Error(`Food payment not found with ID: ${entryId}`);
     }
 
     // Delete the entire row
     sheet.deleteRow(rowIndex);
 
-    console.log(`✅ Employee payment deleted successfully - ID: ${entryId}, Row: ${rowIndex}`);
+    console.log(`✅ Food payment deleted successfully - ID: ${entryId}, Row: ${rowIndex}`);
 
     return {
       success: true,
-      message: 'Employee payment deleted successfully',
+      message: 'Food payment deleted successfully',
       entryId: entryId,
       deletedRow: rowIndex
     };
 
   } catch (error) {
-    console.error('❌ Error deleting employee payment:', error);
+    console.error('❌ Error deleting food payment:', error);
     return {
       success: false,
-      error: 'Delete employee payment error: ' + error.toString()
+      error: 'Delete food payment error: ' + error.toString()
     };
   }
 }
 
 /**
- * Update Employee Payment Status (for approval workflow)
+ * Update Food Payment Status (for approval workflow)
  * @param {Object} data - Status update data containing entryId, newStatus, and approverName
  * @returns {Object} Success/error response
  */
-function updateEmployPaymentStatus(data) {
+function updateFoodPaymentStatus(data) {
   try {
     const entryId = data.entryId;
     const newStatus = data.newStatus;
     const approverName = data.approverName || "";
 
-    console.log(`🔄 Updating employee payment status - ID: ${entryId}, Status: ${newStatus}, Approver: ${approverName}`);
+    console.log(`🔄 Updating food payment status - ID: ${entryId}, Status: ${newStatus}, Approver: ${approverName}`);
 
-    // Get EmployPayments sheet
+    // Get FoodPayments sheet
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID)
-      .getSheetByName(SHEET_NAMES.EMPLOY_PAYMENTS);
+      .getSheetByName(SHEET_NAMES.FOOD_PAYMENTS);
 
     if (!sheet) {
-      throw new Error('EmployPayments sheet not found');
+      throw new Error('FoodPayments sheet not found');
     }
 
     const entryIdColumn = 11; // Column K contains Entry ID
@@ -314,7 +315,7 @@ function updateEmployPaymentStatus(data) {
 
     // Check if entry was found
     if (rowIndex === -1) {
-      throw new Error(`Employee payment not found with ID: ${entryId}`);
+      throw new Error(`Food payment not found with ID: ${entryId}`);
     }
 
     // Update status and approver (columns L and M)
@@ -323,74 +324,74 @@ function updateEmployPaymentStatus(data) {
       sheet.getRange(rowIndex, 13).setValue(approverName); // Column M: ApprovedBy
     }
 
-    console.log(`✅ Employee payment status updated - ID: ${entryId}, Status: ${newStatus}, Row: ${rowIndex}`);
+    console.log(`✅ Food payment status updated - ID: ${entryId}, Status: ${newStatus}, Row: ${rowIndex}`);
 
     return {
       success: true,
-      message: 'Employee payment status updated successfully',
+      message: 'Food payment status updated successfully',
       entryId: entryId,
       newStatus: newStatus,
       approverName: approverName
     };
 
   } catch (error) {
-    console.error('❌ Error updating employee payment status:', error);
+    console.error('❌ Error updating food payment status:', error);
     return {
       success: false,
-      error: 'Update employee payment status error: ' + error.toString()
+      error: 'Update food payment status error: ' + error.toString()
     };
   }
 }
 
 /**
- * Approve Employee Payment
+ * Approve Food Payment
  * @param {Object} data - Approval data containing entryId and approverName
  * @returns {Object} Success/error response
  */
-function approveEmployPayment(data) {
+function approveFoodPayment(data) {
   try {
     const entryId = data.entryId;
     const approverName = data.approverName;
 
-    console.log(`✅ Approving employee payment ID: ${entryId} by ${approverName}`);
+    console.log(`✅ Approving food payment ID: ${entryId} by ${approverName}`);
 
-    return updateEmployPaymentStatus({
+    return updateFoodPaymentStatus({
       entryId: entryId,
       newStatus: 'approved',
       approverName: approverName
     });
 
   } catch (error) {
-    console.error('❌ Error approving employee payment:', error);
+    console.error('❌ Error approving food payment:', error);
     return {
       success: false,
-      error: 'Approve employee payment error: ' + error.toString()
+      error: 'Approve food payment error: ' + error.toString()
     };
   }
 }
 
 /**
- * Resend Employee Payment (Reset to pending status)
+ * Resend Food Payment (Reset to pending status)
  * @param {Object} data - Resend data containing entryId
  * @returns {Object} Success/error response
  */
-function resendEmployPayment(data) {
+function resendFoodPayment(data) {
   try {
     const entryId = data.entryId;
 
-    console.log(`🔄 Resending employee payment ID: ${entryId}`);
+    console.log(`🔄 Resending food payment ID: ${entryId}`);
 
-    return updateEmployPaymentStatus({
+    return updateFoodPaymentStatus({
       entryId: entryId,
       newStatus: 'pending',
       approverName: ''
     });
 
   } catch (error) {
-    console.error('❌ Error resending employee payment:', error);
+    console.error('❌ Error resending food payment:', error);
     return {
       success: false,
-      error: 'Resend employee payment error: ' + error.toString()
+      error: 'Resend food payment error: ' + error.toString()
     };
   }
 }
