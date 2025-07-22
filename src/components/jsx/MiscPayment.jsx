@@ -1099,7 +1099,7 @@ function MiscPayment({
                     </button>
                   )}
                 </div>
-              </                      i className="bi bi-x-circle"></i> Cancel
+              <i className="bi bi-x-circle"></i> Cancel
                     </button>
                   )}
                 </div>
@@ -1122,7 +1122,7 @@ function MiscPayment({
                         <div className="entry-header">
                           <span className={`entry-type ${entry.type}`}>
                             {entry.type === "service" ? "Service" : 
-                             entry.type === "employee" ? "Employee" : "Other"}
+                             entry.type === "employee" ? "Food" : "Other"}
                           </span>
 
                           {entry.entryStatus === "pending" && (

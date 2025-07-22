@@ -834,7 +834,7 @@ function updateFareEntryLegacy(data) {
       return updateServicePayment(data);
     } else if (entryType === 'other') {
       return updateOtherPayment(data);
-    } else if (entryType === 'employ') {
+    } else if (entryType === 'food') {
       return updateFoodPayment(data);
     } else {
       throw new Error(`Invalid entry type: ${entryType}`);
@@ -876,7 +876,7 @@ function deleteFareEntryLegacy(data) {
       return deleteServicePayment(data);
     } else if (entryType === 'other') {
       return deleteOtherPayment(data);
-    } else if (entryType === 'employ') {
+    } else if (entryType === 'food') {
       return deleteFoodPayment(data);
     } else {
       throw new Error(`Invalid entry type: ${entryType}`);
