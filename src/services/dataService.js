@@ -28,7 +28,7 @@ class DataService {
       this.checkOnlineStatus();
       console.log('🚀 Loading data from Google Sheets...');
 
-      const [fareReceipts, bookingEntries, offDays, fuelPayments, addaPayments, unionPayments, servicePayments, otherPayments] = await Promise.all([
+      const [fareReceipts, bookingEntries, offDays, fuelPayments, addaPayments, unionPayments, servicePayments, otherPayments, foodPayments] = await Promise.all([
         authService.getFareReceipts(),
         authService.getBookingEntries(),
         authService.getOffDays(),
@@ -36,7 +36,8 @@ class DataService {
         authService.getAddaPayments(),
         authService.getUnionPayments(),
         authService.getServicePayments(),
-        authService.getOtherPayments()
+        authService.getOtherPayments(),
+        authService.getFoodPayments()
       ]);
 
       let allData = [];
@@ -103,6 +104,14 @@ class DataService {
           ...entry,
           type: 'other',
           entryType: 'other'
+        }))];
+      }
+
+      if (foodPayments.success && foodPayments.data) {
+        allData = [...allData, ...foodPayments.data.map(entry => ({
+          ...entry,
+          type: 'food',
+          entryType: 'food'
         }))];
       }
 

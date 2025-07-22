@@ -1917,6 +1917,165 @@ class AuthService {
   }
 
   // ============================================================================
+  // FOOD PAYMENTS API METHODS
+  // ============================================================================
+
+  // Add Food Payment to Google Sheets
+  async addFoodPayment(data) {
+    try {
+      console.log('🍽️ Adding food payment to Google Sheets:', data);
+
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
+        action: 'addFoodPayment',
+        entryId: data.entryId,
+        timestamp: data.timestamp,
+        date: data.date,
+        paymentType: data.paymentType || '',
+        description: data.description || '',
+        cashAmount: data.cashAmount || 0,
+        bankAmount: data.bankAmount || 0,
+        totalAmount: data.totalAmount || 0,
+        submittedBy: data.submittedBy || 'driver'
+      }));
+
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
+
+      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
+        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
+        return { success: false, error: 'API temporarily unavailable - data saved locally' };
+      }
+
+      console.log('✅ Food payment response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error adding food payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Get all Food Payments from Google Sheets
+  async getFoodPayments() {
+    try {
+      console.log('🍽️ Fetching food payments from Google Sheets...');
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
+          action: 'getFoodPayments'
+        }))
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Food payments fetched:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error fetching food payments:', error);
+      // Return empty data structure instead of error to prevent UI crashes
+      return { 
+        success: true, 
+        data: [],
+        message: 'Food payments loaded from local cache (API temporarily unavailable)'
+      };
+    }
+  }
+
+  // Update Food Payment
+  async updateFoodPayment(data) {
+    try {
+      console.log('📝 Updating food payment in Google Sheets:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
+          action: 'updateFoodPayment',
+          entryId: data.entryId,
+          updatedData: data.updatedData
+        }))
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Food payment updated:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating food payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Delete Food Payment
+  async deleteFoodPayment(data) {
+    try {
+      console.log('🗑️ Deleting food payment from Google Sheets:', data);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
+          action: 'deleteFoodPayment',
+          entryId: data.entryId
+        }))
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('HTTP Error Response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Food payment deleted successfully:', result);
+
+      // Validate response structure
+      if (result && typeof result === 'object') {
+        return result;
+      } else {
+        console.warn('⚠️ Invalid response format:', result);
+        return { success: true, message: 'Food payment deleted (response format issue)' };
+      }
+    } catch (error) {
+      console.error('❌ Error deleting food payment:', error);
+      if (error.name === 'AbortError') {
+        return { success: false, error: 'Request timeout - delete operation took too long' };
+      }
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ============================================================================
   // CASH DEPOSITS API METHODS
   // ============================================================================
 

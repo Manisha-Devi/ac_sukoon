@@ -392,3 +392,17 @@ function doGet(e) {
     })).setMimeType(ContentService.MimeType.JSON);
   }
 }
+
+const SHEET_NAMES = {
+  USERS: 'Users',
+  FARE_RECEIPTS: 'FareReceipts',
+  BOOKING_ENTRIES: 'BookingEntries',
+  OFF_DAYS: 'OffDays',
+  FUEL_PAYMENTS: 'FuelPayments',
+  ADDA_PAYMENTS: 'AddaPayments',
+  UNION_PAYMENTS: 'UnionPayments',
+  SERVICE_PAYMENTS: 'ServicePayments',
+  OTHER_PAYMENTS: 'OtherPayments',
+  FOOD_PAYMENTS: 'FoodPayments',
+  CASH_DEPOSITS: 'CashDeposits'
+};

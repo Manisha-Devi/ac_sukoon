@@ -699,6 +699,27 @@ function approveOtherPaymentLegacy(data) {
   return approveOtherPayment(data);
 }
 
+// Legacy FoodPayments functions
+function updateFoodPaymentLegacy(data) {
+  console.log('🔄 Legacy updateFoodPayment called, routing to modern implementation');
+  return updateFoodPayment(data);
+}
+
+function deleteFoodPaymentLegacy(data) {
+  console.log('🔄 Legacy deleteFoodPayment called, routing to modern implementation');
+  return deleteFoodPayment(data);
+}
+
+function updateFoodPaymentStatusLegacy(data) {
+  console.log('🔄 Legacy updateFoodPaymentStatus called, routing to modern implementation');
+  return updateFoodPaymentStatus(data);
+}
+
+function approveFoodPaymentLegacy(data) {
+  console.log('🔄 Legacy approveFoodPayment called, routing to modern implementation');
+  return approveFoodPayment(data);
+}
+
 // Legacy FareReceipts status functions
 function updateFareReceiptStatusLegacy(data) {
   console.log('🔄 Legacy updateFareReceiptStatus called, routing to modern implementation');
@@ -771,6 +792,8 @@ function updateFareEntryLegacy(data) {
       return updateServicePayment(data);
     } else if (entryType === 'other') {
       return updateOtherPayment(data);
+    } else if (entryType === 'food') {
+      return updateFoodPayment(data);
     } else {
       throw new Error(`Invalid entry type: ${entryType}`);
     }
@@ -811,6 +834,8 @@ function deleteFareEntryLegacy(data) {
       return deleteServicePayment(data);
     } else if (entryType === 'other') {
       return deleteOtherPayment(data);
+    } else if (entryType === 'food') {
+      return deleteFoodPayment(data);
     } else {
       throw new Error(`Invalid entry type: ${entryType}`);
     }

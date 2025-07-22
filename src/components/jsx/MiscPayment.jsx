@@ -71,12 +71,12 @@ function MiscPayment({
     const today = new Date();
     const todayISO = today.toISOString().split("T")[0];
     const userType = currentUser?.userType;
-    
+
     if (userType === "Conductor") {
       // Conductor: 7 days past to current date + future dates enabled
       const pastDate = new Date(today);
       pastDate.setDate(today.getDate() - 7);
-      
+
       return {
         min: pastDate.toISOString().split("T")[0],
         max: null // No max limit for future dates
@@ -434,25 +434,64 @@ function MiscPayment({
     }
   };
 
+  // Food items list - these will be stored as EntryType: 'food'
+  const foodItems = [
+    "Lunch", "Breakfast", "Dinner", "Tea", "Cold Drink", "Water Bottle"
+  ];
+
+  // Check if selected payment type is a food item
+  const isFoodItem = (paymentType) => {
+    return foodItems.includes(paymentType);
+  };
+
+  // Handle Other Payment submission
   const handleOtherSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+
+    if (!otherData.paymentType || !otherData.date) {
+      alert("Please fill all required fields");
+      return;
+    }
+
+    const formatISTTimestamp = () => {
+      const now = new Date();
+
+      // Get the individual date and time components
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+      const day = String(now.getDate()).padStart(2, '0');
+      const hour = String(now.getHours()).padStart(2, '0');
+      const minute = String(now.getMinutes()).padStart(2, '0');
+      const second = String(now.getSeconds()).padStart(2, '0');
+
+      // Build the date and time strings
+      const dateString = `${year}-${month}-${day}`;
+      const timeString = `${hour}:${minute}:${second}`;
+
+      // Get AM/PM
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+
+      return `${dateString} ${timeString} ${ampm}`;
+    };
+    const submittedBy = currentUser?.fullName || currentUser?.username || "Unknown User";
 
     try {
+      setIsLoading(true);
+
       const cashAmount = parseInt(otherData.cashAmount) || 0;
       const bankAmount = parseInt(otherData.bankAmount) || 0;
       const totalAmount = cashAmount + bankAmount;
-      const submittedBy = currentUser?.fullName || currentUser?.username || "Unknown User";
-      const now = new Date();
-      const timeOnly = now.toLocaleTimeString("en-US", {
-        hour12: true,
-        hour: "numeric",
-        minute: "2-digit",
-        second: "2-digit",
-      });
+
+      if (totalAmount <= 0) {
+        alert("Total amount must be greater than zero");
+        return;
+      }
+
+      const timeOnly = formatISTTimestamp().split(' ')[1] + ' ' + formatISTTimestamp().split(' ')[2];
+      const isFood = isFoodItem(otherData.paymentType);
 
       if (editingEntry) {
-        const oldTotal = editingEntry.totalAmount;
+        // Update existing entry
         const updatedData = expenseData.map((entry) =>
           entry.entryId === editingEntry.entryId
             ? {
@@ -463,24 +502,18 @@ function MiscPayment({
                 cashAmount: cashAmount,
                 bankAmount: bankAmount,
                 totalAmount: totalAmount,
+                type: isFood ? 'food' : 'other',
+                entryType: isFood ? 'food' : 'other'
               }
-            : entry,
+            : entry
         );
 
         setExpenseData(updatedData);
-        setTotalExpenses((prev) => prev - oldTotal + totalAmount);
-        setEditingEntry(null);
-        setOtherData({
-          date: "",
-          paymentType: "",
-          description: "",
-          cashAmount: "",
-          bankAmount: "",
-        });
-        setIsLoading(false);
 
-        authService
-          .updateOtherPayment({
+        // Route to appropriate API based on food item or not
+        let result;
+        if (isFood) {
+          result = await authService.updateFoodPayment({
             entryId: editingEntry.entryId,
             updatedData: {
               date: otherData.date,
@@ -489,16 +522,30 @@ function MiscPayment({
               cashAmount: cashAmount,
               bankAmount: bankAmount,
               totalAmount: totalAmount,
-            },
-          })
-          .catch((error) => {
-            console.error("Background other update sync failed:", error);
+            }
           });
+        } else {
+          result = await authService.updateOtherPayment({
+            entryId: editingEntry.entryId,
+            updatedData: {
+              date: otherData.date,
+              paymentType: otherData.paymentType,
+              description: otherData.description,
+              cashAmount: cashAmount,
+              bankAmount: bankAmount,
+              totalAmount: totalAmount,
+            }
+          });
+        }
+
+        setIsLoading(false);
+
       } else {
+        // Add new entry
         const newEntry = {
           entryId: Date.now(),
           timestamp: timeOnly,
-          type: "other",
+          type: isFood ? "food" : "other",
           date: otherData.date,
           paymentType: otherData.paymentType,
           description: otherData.description,
@@ -507,22 +554,15 @@ function MiscPayment({
           totalAmount: totalAmount,
           submittedBy: submittedBy,
           entryStatus: "pending",
+          entryType: isFood ? "food" : "other"
         };
 
-        const updatedData = [newEntry, ...expenseData];
-        setExpenseData(updatedData);
-        setTotalExpenses((prev) => prev + totalAmount);
-        setOtherData({
-          date: "",
-          paymentType: "",
-          description: "",
-          cashAmount: "",
-          bankAmount: "",
-        });
-        setIsLoading(false);
+        setExpenseData([newEntry, ...expenseData]);
 
-        authService
-          .addOtherPayment({
+        // Route to appropriate API based on food item or not
+        let result;
+        if (isFood) {
+          result = await authService.addFoodPayment({
             entryId: newEntry.entryId,
             timestamp: timeOnly,
             date: otherData.date,
@@ -533,11 +573,32 @@ function MiscPayment({
             totalAmount: totalAmount,
             submittedBy: submittedBy,
             entryStatus: "pending",
-          })
-          .catch((error) => {
-            console.error("Background other add sync failed:", error);
           });
+        } else {
+          result = await authService.addOtherPayment({
+            entryId: newEntry.entryId,
+            timestamp: timeOnly,
+            date: otherData.date,
+            paymentType: otherData.paymentType,
+            description: otherData.description,
+            cashAmount: cashAmount,
+            bankAmount: bankAmount,
+            totalAmount: totalAmount,
+            submittedBy: submittedBy,
+            entryStatus: "pending",
+          });
+        }
+
+        setIsLoading(false);
       }
+
+      setOtherData({
+        date: "",
+        paymentType: "",
+        description: "",
+        cashAmount: "",
+        bankAmount: "",
+      });
     } catch (error) {
       console.error("Error submitting other payment:", error);
       setIsLoading(false);
@@ -545,39 +606,25 @@ function MiscPayment({
     }
   };
 
-  const handleDeleteEntry = async (entryId) => {
-    try {
-      const entryToDelete = expenseData.find((entry) => entry.entryId === entryId);
-
-      if (!entryToDelete) {
-        alert("Entry not found!");
-        return;
-      }
-
-      const updatedData = expenseData.filter((entry) => entry.entryId !== entryId);
+  const handleDeleteEntry = async (entry) => {
+    if (window.confirm("Are you sure you want to delete this entry?")) {
+      const updatedData = expenseData.filter((item) => item.entryId !== entry.entryId);
       setExpenseData(updatedData);
 
-      if (entryToDelete && entryToDelete.totalAmount) {
-        setTotalExpenses((prev) => prev - entryToDelete.totalAmount);
-      }
-
       try {
-        let deleteResult;
-        if (entryToDelete.type === "service") {
-          deleteResult = await authService.deleteServicePayment({
-            entryId: entryToDelete.entryId,
-          });
-        } else if (entryToDelete.type === "other") {
-          deleteResult = await authService.deleteOtherPayment({
-            entryId: entryToDelete.entryId,
-          });
+        // Route to appropriate delete API based on entry type
+        if (entry.type === 'food' || entry.entryType === 'food') {
+          await authService.deleteFoodPayment({ entryId: entry.entryId });
+        } else {
+          await authService.deleteOtherPayment({ entryId: entry.entryId });
         }
-      } catch (syncError) {
-        console.warn("Background delete sync failed:", syncError.message);
+        alert("Entry deleted successfully!");
+      } catch (error) {
+        console.error("Error deleting entry:", error);
+        // Revert on error
+        setExpenseData(expenseData);
+        alert("Failed to delete entry. Please try again.");
       }
-    } catch (error) {
-      console.error("Error in delete process:", error);
-      alert("Error deleting entry. Please try again.");
     }
   };
 
@@ -593,7 +640,7 @@ function MiscPayment({
         cashAmount: entry.cashAmount.toString(),
         bankAmount: entry.bankAmount.toString(),
       });
-    } else if (entry.type === "other") {
+    } else if (entry.type === "other" || entry.type === "food") {
       setActiveTab("other");
       setOtherData({
         date: entry.date,
@@ -628,10 +675,9 @@ function MiscPayment({
   const calculateSummaryTotals = () => {
     const currentUserName = currentUser?.fullName || currentUser?.username;
     const userExpenseData = expenseData.filter(
-      (entry) =>
-        entry.submittedBy === currentUserName &&
-        entry.entryStatus !== "approved" &&
-        (entry.type === "service" || entry.type === "other"),
+      (entry) => entry.submittedBy === currentUserName &&
+                 entry.entryStatus !== "approved" &&
+                 (entry.type === "service" || entry.type === "other" || entry.type === "food")
     );
 
     const totalCash = userExpenseData.reduce(
@@ -653,9 +699,9 @@ function MiscPayment({
       (entry) =>
         entry.submittedBy === currentUserName &&
         entry.entryStatus !== "approved" &&
-        (entry.type === "service" || entry.type === "other"),
+        (entry.type === "service" || entry.type === "other" || entry.type === "food"),
     );
-    
+
     // Sort by entryId (timestamp) in descending order to show newest first
     return userEntries.sort((a, b) => {
       const timeA = a.entryId || 0;
@@ -1073,7 +1119,7 @@ function MiscPayment({
                               </button>
                               <button
                                 className="btn btn-sm btn-delete"
-                                onClick={() => handleDeleteEntry(entry.entryId)}
+                                onClick={() => handleDeleteEntry(entry)}
                                 title="Delete Entry"
                               >
                                 <i className="bi bi-trash"></i>
@@ -1102,6 +1148,14 @@ function MiscPayment({
                             </div>
                           )}
                           {entry.type === "other" && (
+                            <div>
+                              <p><strong>{entry.paymentType}</strong></p>
+                              {entry.description && (
+                                <p><small>{entry.description.substring(0, 60)}...</small></p>
+                              )}
+                            </div>
+                          )}
+                           {entry.type === "food" && (
                             <div>
                               <p><strong>{entry.paymentType}</strong></p>
                               {entry.description && (
