@@ -1063,92 +1063,94 @@ function ProfitChart({
         {/* Daily Profit Chart */}
         <div className="col-12">
           <div className="profit-chart-card">
-            <div className="d-flex align-items-center mb-2 flex-wrap gap-2">
-              <h5 className="mb-0 me-2">
-                <i className="bi bi-line-chart me-2"></i>
-                Daily Profit 
-                <small className="text-muted ms-2 d-none d-md-inline">
-                  ({dailyTrendData.dailyDataCount} days)
-                </small>
-              </h5>
-              
-              {/* Checkboxes */}
-              <div className="d-flex gap-2 align-items-center">
-                {addExpenseAdjustment && (
+            <div className="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+              <div className="d-flex align-items-center gap-2 flex-wrap">
+                <h5 className="mb-0">
+                  <i className="bi bi-line-chart me-2"></i>
+                  Daily Profit 
+                  <small className="text-muted ms-2 d-none d-md-inline">
+                    ({dailyTrendData.dailyDataCount} days)
+                  </small>
+                </h5>
+                
+                {/* Checkboxes - positioned next to title */}
+                <div className="d-flex gap-1 align-items-center">
+                  {addExpenseAdjustment && (
+                    <div className="form-check form-switch">
+                      <input 
+                        className="form-check-input" 
+                        type="checkbox" 
+                        id="expenseAdjustment1400"
+                        checked={addExpenseAdjustment1400}
+                        onChange={(e) => {
+                          setAddExpenseAdjustment1400(e.target.checked);
+                        }}
+                      />
+                    </div>
+                  )}
                   <div className="form-check form-switch">
                     <input 
                       className="form-check-input" 
                       type="checkbox" 
-                      id="expenseAdjustment1400"
-                      checked={addExpenseAdjustment1400}
+                      id="expenseAdjustment"
+                      checked={addExpenseAdjustment}
                       onChange={(e) => {
-                        setAddExpenseAdjustment1400(e.target.checked);
+                        setAddExpenseAdjustment(e.target.checked);
+                        // When 1000 checkbox is unchecked, hide and uncheck 1400
+                        if (!e.target.checked) {
+                          setAddExpenseAdjustment1400(false);
+                        }
                       }}
                     />
                   </div>
-                )}
-                <div className="form-check form-switch">
-                  <input 
-                    className="form-check-input" 
-                    type="checkbox" 
-                    id="expenseAdjustment"
-                    checked={addExpenseAdjustment}
-                    onChange={(e) => {
-                      setAddExpenseAdjustment(e.target.checked);
-                      // When 1000 checkbox is unchecked, hide and uncheck 1400
-                      if (!e.target.checked) {
-                        setAddExpenseAdjustment1400(false);
-                      }
-                    }}
-                  />
                 </div>
-              </div>
 
-              {/* Navigation Controls for Mobile */}
-              {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 && (
-                <div className="d-flex align-items-center gap-2">
-                  <button 
-                    ref={prevRef}
-                    className="btn btn-sm btn-outline-primary swiper-btn-prev"
-                    type="button"
-                    onClick={() => dailySwiperRef.current?.slidePrev()}
-                    style={{
-                      minWidth: '28px',
-                      width: '28px',
-                      height: '28px',
-                      padding: '0',
-                      borderRadius: '50%',
-                      fontSize: '0.75rem'
-                    }}
-                  >
-                    <i className="bi bi-chevron-left"></i>
-                  </button>
-                  <small className="text-muted" style={{
-                    fontSize: '0.7rem',
-                    margin: '0 0.25rem',
-                    flexShrink: '0',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {currentSlide + 1}/{dailyTrendData.totalSlides}
-                  </small>
-                  <button 
-                    ref={nextRef}
-                    className="btn btn-sm btn-outline-primary swiper-btn-next"
-                    type="button"
-                    onClick={() => dailySwiperRef.current?.slideNext()}
-                    style={{
-                      minWidth: '28px',
-                      width: '28px',
-                      height: '28px',
-                      padding: '0',
-                      borderRadius: '50%',
-                      fontSize: '0.75rem'
-                    }}
-                  >
-                    <i className="bi bi-chevron-right"></i>
-                  </button>
-                </div>
-              )}
+                {/* Navigation Controls for Mobile - on same line */}
+                {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 && (
+                  <div className="d-flex align-items-center gap-1">
+                    <button 
+                      ref={prevRef}
+                      className="btn btn-sm btn-outline-primary swiper-btn-prev"
+                      type="button"
+                      onClick={() => dailySwiperRef.current?.slidePrev()}
+                      style={{
+                        minWidth: '28px',
+                        width: '28px',
+                        height: '28px',
+                        padding: '0',
+                        borderRadius: '50%',
+                        fontSize: '0.75rem'
+                      }}
+                    >
+                      <i className="bi bi-chevron-left"></i>
+                    </button>
+                    <small className="text-muted" style={{
+                      fontSize: '0.7rem',
+                      margin: '0 0.25rem',
+                      flexShrink: '0',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {currentSlide + 1}/{dailyTrendData.totalSlides}
+                    </small>
+                    <button 
+                      ref={nextRef}
+                      className="btn btn-sm btn-outline-primary swiper-btn-next"
+                      type="button"
+                      onClick={() => dailySwiperRef.current?.slideNext()}
+                      style={{
+                        minWidth: '28px',
+                        width: '28px',
+                        height: '28px',
+                        padding: '0',
+                        borderRadius: '50%',
+                        fontSize: '0.75rem'
+                      }}
+                    >
+                      <i className="bi bi-chevron-right"></i>
+                    </button>
+                  </div>
+                )}
+              </div>
 
               {!dailyTrendData.isMobile && dailyTrendData.dailyDataCount > 30 && (
                 <small className="text-muted d-none d-lg-block">
@@ -1248,7 +1250,7 @@ function ProfitChart({
         <div className="col-12">
           <div className="profit-chart-card">
             <div className="d-flex align-items-center mb-2 flex-wrap gap-2">
-              <h5 className="mb-0 me-2">
+              <h5 className="mb-0">
                 <i className="bi bi-bar-chart me-2"></i>
                 Weekly Profit 
                 <small className="text-muted ms-2 d-none d-md-inline">
@@ -1256,8 +1258,8 @@ function ProfitChart({
                 </small>
               </h5>
               
-              {/* Checkboxes */}
-              <div className="d-flex gap-2 align-items-center">
+              {/* Checkboxes - positioned next to title */}
+              <div className="d-flex gap-1 align-items-center">
                 {addWeeklyExpenseAdjustment && (
                   <div className="form-check form-switch">
                     <input 
@@ -1318,7 +1320,7 @@ function ProfitChart({
         <div className="col-12">
           <div className="profit-chart-card">
             <div className="d-flex align-items-center mb-2 flex-wrap gap-2">
-              <h5 className="mb-0 me-2">
+              <h5 className="mb-0">
                 <i className="bi bi-calendar-month me-2"></i>
                 Monthly Profit 
                 <small className="text-muted ms-2 d-none d-md-inline">
@@ -1326,8 +1328,8 @@ function ProfitChart({
                 </small>
               </h5>
               
-              {/* Checkboxes */}
-              <div className="d-flex gap-2 align-items-center">
+              {/* Checkboxes - positioned next to title */}
+              <div className="d-flex gap-1 align-items-center">
                 {addMonthlyExpenseAdjustment && (
                   <div className="form-check form-switch">
                     <input 
