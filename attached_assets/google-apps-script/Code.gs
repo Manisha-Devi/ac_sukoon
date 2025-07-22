@@ -218,6 +218,23 @@ function doPost(e) {
         result = updateFoodPaymentStatus(data);
         break;
 
+      // ==================== TRANSPORT PAYMENTS ====================
+      case "addTransportPayment":
+        result = addTransportPayment(data);
+        break;
+      case "getTransportPayments":
+        result = getTransportPayments();
+        break;
+      case "updateTransportPayment":
+        result = updateTransportPayment(data);
+        break;
+      case "deleteTransportPayment":
+        result = deleteTransportPayment(data);
+        break;
+      case "updateTransportPaymentStatus":
+        result = updateTransportPaymentStatus(data);
+        break;
+
       // ==================== CASH DEPOSITS ====================
       case "addCashDeposit":
         result = addCashDeposit(data);
@@ -287,6 +304,14 @@ function doPost(e) {
         break;
       case 'resendFoodPayment':
         result = resendFoodPayment(data);
+        break;
+
+      // Transport Payments Approval
+      case 'approveTransportPayment':
+        result = approveTransportPayment(data);
+        break;
+      case 'resendTransportPayment':
+        result = resendTransportPayment(data);
         break;
 
       // Booking Entries Approval
@@ -395,6 +420,9 @@ function doGet(e) {
         break;
       case "getFoodPayments":
         result = getFoodPayments();
+        break;
+      case "getTransportPayments":
+        result = getTransportPayments();
         break;
       case "getCashDeposits":
         result = getCashDeposits();

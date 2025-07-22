@@ -710,6 +710,17 @@ function deleteFoodPaymentLegacy(data) {
   return deleteFoodPayment(data);
 }
 
+// Legacy Transport Payment functions
+function updateTransportPaymentLegacy(data) {
+  console.log('🔄 Legacy updateTransportPayment called, routing to modern implementation');
+  return updateTransportPayment(data);
+}
+
+function deleteTransportPaymentLegacy(data) {
+  console.log('🔄 Legacy deleteTransportPayment called, routing to modern implementation');
+  return deleteTransportPayment(data);
+}
+
 function updateFoodPaymentStatusLegacy(data) {
   console.log('🔄 Legacy updateFoodPaymentStatus called, routing to modern implementation');
   return updateFoodPaymentStatus(data);
@@ -718,6 +729,16 @@ function updateFoodPaymentStatusLegacy(data) {
 function approveFoodPaymentLegacy(data) {
   console.log('🔄 Legacy approveFoodPayment called, routing to modern implementation');
   return approveFoodPayment(data);
+}
+
+function updateTransportPaymentStatusLegacy(data) {
+  console.log('🔄 Legacy updateTransportPaymentStatus called, routing to modern implementation');
+  return updateTransportPaymentStatus(data);
+}
+
+function approveTransportPaymentLegacy(data) {
+  console.log('🔄 Legacy approveTransportPayment called, routing to modern implementation');
+  return approveTransportPayment(data);
 }
 
 // Direct function aliases for Food Payments
@@ -970,6 +991,8 @@ function updateFareEntryLegacy(data) {
       return updateOtherPayment(data);
     } else if (entryType === 'food') {
       return updateFoodPayment(data);
+    } else if (entryType === 'transport') {
+      return updateTransportPayment(data);
     } else {
       throw new Error(`Invalid entry type: ${entryType}`);
     }
@@ -1012,6 +1035,8 @@ function deleteFareEntryLegacy(data) {
       return deleteOtherPayment(data);
     } else if (entryType === 'food') {
       return deleteFoodPayment(data);
+    } else if (entryType === 'transport') {
+      return deleteTransportPayment(data);
     } else {
       throw new Error(`Invalid entry type: ${entryType}`);
     }
