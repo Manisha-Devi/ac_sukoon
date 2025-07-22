@@ -535,14 +535,15 @@ function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
             {/* Pagination */}
             {totalPages > 1 && (
               <nav aria-label="Transaction pagination">
-                <ul className="pagination justify-content-center">
+                <ul className="pagination justify-content-center" data-current={currentPage} data-total={totalPages}>
                   <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
                     <button 
                       className="page-link" 
                       onClick={() => setCurrentPage(currentPage - 1)}
                       disabled={currentPage === 1}
                     >
-                      Previous
+                      <span className="d-none d-sm-inline">Previous</span>
+                      <span className="d-sm-none">&laquo;</span>
                     </button>
                   </li>
 
@@ -566,10 +567,16 @@ function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                       onClick={() => setCurrentPage(currentPage + 1)}
                       disabled={currentPage === totalPages}
                     >
-                      Next
+                      <span className="d-none d-sm-inline">Next</span>
+                      <span className="d-sm-none">&raquo;</span>
                     </button>
                   </li>
                 </ul>
+                <div className="text-center d-sm-none">
+                  <small className="text-muted">
+                    Page {currentPage} of {totalPages}
+                  </small>
+                </div>
               </nav>
             )}
 
