@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback, useRef } from "react";
 import "../css/ProfitChart.css";
 import {
@@ -195,7 +194,7 @@ function ProfitChart({
 
     let totalFilteredExpenses = fuelExpenses + addaExpenses + unionExpenses + serviceExpenses + otherExpenses + employeeExpenses;
 
-    // Calculate actual days in the filtered period for expense adjustments</old_str>
+    // Calculate actual days in the filtered period for expense adjustments
 
     // Calculate actual days in the filtered period for expense adjustments
     const now = new Date();
@@ -359,11 +358,6 @@ function ProfitChart({
           '#9b59b6', // Purple for other
           '#ff6b6b'  // Light red for employee
         ],
-        borderWidth: 4,
-        borderColor: '#ffffff',
-        hoverBorderWidth: 6,
-        hoverOffset: 15,
-      },</old_str>
         borderWidth: 4,
         borderColor: '#ffffff',
         hoverBorderWidth: 6,
@@ -611,7 +605,7 @@ function ProfitChart({
       const weekStart = new Date(now);
       weekStart.setDate(now.getDate() - (i * 7) - now.getDay());
       weekStart.setHours(0, 0, 0, 0); // Set to start of day
-      
+
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekStart.getDate() + 6);
       weekEnd.setHours(23, 59, 59, 999); // Set to end of day
@@ -629,20 +623,20 @@ function ProfitChart({
       const fareDataForWeek = fareData.filter(entry => {
         const entryDate = entry.date || entry.dateFrom;
         if (!entryDate) return false;
-        
+
         const entryDateObj = new Date(entryDate + 'T00:00:00');
         const isInWeekRange = entryDateObj >= weekStart && entryDateObj <= actualEndDate;
         const isValidEntry = entry.type !== 'off';
-        
+
         return isInWeekRange && isValidEntry;
       });
 
       const expenseDataForWeek = expenseData.filter(entry => {
         if (!entry.date) return false;
-        
+
         const entryDateObj = new Date(entry.date + 'T00:00:00');
         const isInWeekRange = entryDateObj >= weekStart && entryDateObj <= actualEndDate;
-        
+
         return isInWeekRange;
       });
 
@@ -659,7 +653,7 @@ function ProfitChart({
       today.setHours(23, 59, 59, 999);
       const endDateForCount = actualEndDate > today ? today : actualEndDate;
       const actualDaysInWeek = Math.max(1, Math.ceil((endDateForCount - weekStart) / (1000 * 60 * 60 * 24)) + 1);
-      
+
       // Add weekly adjustments (actual days * adjustment amounts)
       if (addWeeklyExpenseAdjustment1400) {
         weekExpenses += (1400 * actualDaysInWeek);
@@ -729,7 +723,7 @@ function ProfitChart({
     for (let i = 0; i < monthsToShow; i++) {
       const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
       monthStart.setHours(0, 0, 0, 0); // Set to start of day
-      
+
       const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
       monthEnd.setHours(23, 59, 59, 999); // Set to end of day
 
@@ -746,20 +740,20 @@ function ProfitChart({
       const fareDataForMonth = fareData.filter(entry => {
         const entryDate = entry.date || entry.dateFrom;
         if (!entryDate) return false;
-        
+
         const entryDateObj = new Date(entryDate + 'T00:00:00');
         const isInMonthRange = entryDateObj >= monthStart && entryDateObj <= actualEndDate;
         const isValidEntry = entry.type !== 'off';
-        
+
         return isInMonthRange && isValidEntry;
       });
 
       const expenseDataForMonth = expenseData.filter(entry => {
         if (!entry.date) return false;
-        
+
         const entryDateObj = new Date(entry.date + 'T00:00:00');
         const isInMonthRange = entryDateObj >= monthStart && entryDateObj <= actualEndDate;
-        
+
         return isInMonthRange;
       });
 
@@ -776,7 +770,7 @@ function ProfitChart({
       today.setHours(23, 59, 59, 999);
       const endDateForCount = actualEndDate > today ? today : actualEndDate;
       const actualDays = Math.max(1, Math.ceil((endDateForCount - monthStart) / (1000 * 60 * 60 * 24)) + 1);
-      
+
       // Add monthly adjustments (actual days * adjustment amounts)
       if (addMonthlyExpenseAdjustment1400) {
         monthExpenses += (1400 * actualDays);
@@ -1061,7 +1055,7 @@ function ProfitChart({
             </div>
           </div>
 
-          
+
         </div>
       )}
 
