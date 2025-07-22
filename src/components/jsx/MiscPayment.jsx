@@ -176,13 +176,6 @@ const SmartSearchableSelect = ({
       
       {isOpen && (
         <div className="searchable-dropdown smart-searchable-dropdown">
-          {showCategoryHint && (
-            <div className="category-hint">
-              <small className="text-muted">
-                🎯 Smart filter active - showing relevant category
-              </small>
-            </div>
-          )}
           <ul ref={listRef} className="searchable-options">
             {filteredOptions.length > 0 ? (
               filteredOptions.map((option, index) => (
