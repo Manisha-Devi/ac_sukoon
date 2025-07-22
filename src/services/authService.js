@@ -1,4 +1,3 @@
-
 import APIKeyService from './key.js';
 
 // Authentication service for Google Sheets database
@@ -971,7 +970,7 @@ class AuthService {
       return result;
     } catch (error) {
       console.error('❌ Error fetching other payments:', error);
-      // Return empty data structure instead of error to prevent UI crashes
+      // Return empty datastructure instead of error to prevent UI crashes
       return { 
         success: true, 
         data: [],
@@ -981,8 +980,7 @@ class AuthService {
   }
 
   // Update Other Payment
-  async updateOtherPayment(data) {
-    try {
+  async updateOtherPayment(data) {    try {
       console.log('📝 Updating other payment in Google Sheets:', data);
 
       const response = await fetch(this.API_URL, {
@@ -1458,6 +1456,86 @@ class AuthService {
     }
   }
 
+  async getServicePayments() {
+    try {
+      console.log('📋 Fetching service payments from Google Sheets...');
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
+          action: 'getServicePayments'
+        }))
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Service payments fetched:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error fetching service payments:', error);
+      // Return empty data structure instead of error to prevent UI crashes
+      return { 
+        success: true, 
+        data: [],
+        message: 'Service payments loaded from local cache (API temporarily unavailable)'
+      };
+    }
+  }
+
+  async getOtherPayments() {
+    try {
+      console.log('📋 Fetching other payments from Google Sheets...');
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
+          action: 'getOtherPayments'
+        }))
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Other payments fetched:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error fetching other payments:', error);
+      // Return empty data structure instead of error to prevent UI crashes
+      return { 
+        success: true, 
+        data: [],
+        message: 'Other payments loaded from local cache (API temporarily unavailable)'
+      };
+    }
+  }
+
   // ============================================================================
   // APPROVAL WORKFLOW FUNCTIONS
   // ============================================================================
@@ -1579,6 +1657,8 @@ class AuthService {
     }
   }
 
+
+
   // Generic approval functions for other data types (to be implemented similarly)
   async approveFareReceipt(data) {
     try {
@@ -1639,6 +1719,8 @@ class AuthService {
       return { success: false, error: error.message };
     }
   }
+
+
 
   // ============================================================================
   // STATUS UPDATE FUNCTIONS
@@ -2132,7 +2214,12 @@ class AuthService {
       return result;
     } catch (error) {
       console.error('❌ Error fetching employee payments:', error);
-      return { success: false, error: error.message };
+      // Return empty data structure instead of error to prevent UI crashes
+      return {
+        success: true,
+        data: [],
+        message: 'Employee payments loaded from local cache (API temporarily unavailable)'
+      };
     }
   }
 

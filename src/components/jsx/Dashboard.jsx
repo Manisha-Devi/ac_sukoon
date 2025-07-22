@@ -65,8 +65,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         addaPayments,
         unionPayments,
         servicePayments,
-        otherPayments,
-        employeePayments
+        otherPayments
       ] = await Promise.all([
         loadWithRetry(() => authService.getFareReceipts()),
         loadWithRetry(() => authService.getBookingEntries()),
@@ -75,8 +74,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         loadWithRetry(() => authService.getAddaPayments()),
         loadWithRetry(() => authService.getUnionPayments()),
         loadWithRetry(() => authService.getServicePayments()),
-        loadWithRetry(() => authService.getOtherPayments()),
-        loadWithRetry(() => authService.getEmployeePayments())
+        loadWithRetry(() => authService.getOtherPayments())
       ]);
 
       // Process and combine all data
@@ -422,42 +420,6 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
          }));
          combinedCashBookEntries = [...combinedCashBookEntries, ...otherCashEntries];
        }
-    // Process Employee Payments - Only required fields for CashSummary
-      if (employeePayments.success && employeePayments.data) {
-        const processedEmployeePayments = employeePayments.data.map(entry => ({
-          entryId: entry.entryId,
-          date: convertToDateString(entry.date),
-          cashAmount: entry.cashAmount || 0,
-          type: 'employee',
-          submittedBy: entry.submittedBy,
-          entryStatus: entry.entryStatus || 'pending',
-          approvedBy: entry.approvedBy || '',
-          // Keep full data for other components
-          id: entry.entryId,
-          timestamp: convertToTimeString(entry.timestamp),
-          employeeName: entry.employeeName,
-          paymentDetails: entry.paymentDetails,
-          bankAmount: entry.bankAmount || 0,
-          totalAmount: entry.totalAmount || 0
-        }));
-        combinedExpenseData = [...combinedExpenseData, ...processedEmployeePayments];
-
-        // Generate cash book entries from employee payments
-        const employeeCashEntries = processedEmployeePayments.map(entry => ({
-          id: `employee-${entry.entryId}`,
-          date: entry.date,
-          particulars: "Employee Payment",
-          description: `Employee payment - ${entry.employeeName || 'Employee'}`,
-          jfNo: `EMP-${entry.entryId}`,
-          cashAmount: entry.cashAmount || 0,
-          bankAmount: entry.bankAmount || 0,
-          type: 'cr',
-          timestamp: entry.timestamp,
-          source: 'employee-payment'
-        }));
-        combinedCashBookEntries = [...combinedCashBookEntries, ...employeeCashEntries];
-      }
-
       // Sort all data by timestamp (newest first)
       combinedFareData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       combinedExpenseData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -478,7 +440,6 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         unionPayments: unionPayments.data || [],
         servicePayments: servicePayments.data || [],
         otherPayments: otherPayments.data || [],
-        employeePayments: employeePayments.data || [],
         totalRecords: combinedFareData.length + combinedExpenseData.length
       });
 
@@ -491,7 +452,6 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         unionPayments: unionPayments.data?.length || 0,
         servicePayments: servicePayments.data?.length || 0,
         otherPayments: otherPayments.data?.length || 0,
-        employeePayments: employeePayments.data?.length || 0,
         totalRecords: combinedFareData.length + combinedExpenseData.length
       });
       console.log('🔍 Breakdown - Fuel:', fuelPayments.data?.length || 0, 
@@ -499,8 +459,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
                    'OffDays:', offDays.data?.length || 0,
                    'Union:', unionPayments.data?.length || 0, 
                    'Service:', servicePayments.data?.length || 0,
-                   'Other:', otherPayments.data?.length || 0,
-                   'Employee:', employeePayments.data?.length || 0);
+                   'Other:', otherPayments.data?.length || 0);
 
     } catch (error) {
       console.error('❌ Dashboard: Error loading data:', error);
@@ -812,11 +771,6 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
                       <span className="breakdown-icon">💸</span>
                       <span className="breakdown-label">Other Payments</span>
                       <span className="breakdown-value">{dataStatistics.dataBreakdown.otherPayments}</span>
-                    </div>
-                     <div className="breakdown-item expense-type">
-                      <span className="breakdown-icon">🧑‍💼</span>
-                      <span className="breakdown-label">Employee Payments</span>
-                      <span className="breakdown-value">{dataStatistics.dataBreakdown.employeePayments}</span>
                     </div>
                   </div>
                 </div>

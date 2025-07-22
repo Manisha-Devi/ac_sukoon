@@ -27,7 +27,7 @@ class HybridDataService {
       console.log('🔄 Starting background sync...');
       this.syncInProgress = true;
 
-      const [fareReceipts, bookingEntries, offDays, fuelPayments, addaPayments, unionPayments, servicePayments, otherPayments, employeePayments, cashDeposits] = await Promise.all([
+      const [fareReceipts, bookingEntries, offDays, fuelPayments, addaPayments, unionPayments, servicePayments, otherPayments] = await Promise.all([
         authService.getFareReceipts(),
         authService.getBookingEntries(),
         authService.getOffDays(),
@@ -35,9 +35,7 @@ class HybridDataService {
         authService.getAddaPayments(),
         authService.getUnionPayments(),
         authService.getServicePayments(),
-        authService.getOtherPayments(),
-        authService.getEmployeePayments(),
-        authService.getCashDeposits()
+        authService.getOtherPayments()
       ]);
 
       let allData = [];
@@ -156,7 +154,7 @@ class HybridDataService {
         return [];
       }
 
-      const [fareReceipts, bookingEntries, offDays, fuelPayments, addaPayments, unionPayments, servicePayments, otherPayments, employeePayments, cashDeposits] = await Promise.all([
+      const [fareReceipts, bookingEntries, offDays, fuelPayments, addaPayments, unionPayments, servicePayments, otherPayments] = await Promise.all([
         authService.getFareReceipts(),
         authService.getBookingEntries(),
         authService.getOffDays(),
@@ -164,9 +162,7 @@ class HybridDataService {
         authService.getAddaPayments(),
         authService.getUnionPayments(),
         authService.getServicePayments(),
-        authService.getOtherPayments(),
-        authService.getEmployeePayments(),
-        authService.getCashDeposits()
+        authService.getOtherPayments()
       ]);
 
       let allData = [];
