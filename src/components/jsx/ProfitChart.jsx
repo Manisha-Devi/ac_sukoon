@@ -358,7 +358,12 @@ function ProfitChart({
           '#2ecc71', // Green for service
           '#9b59b6', // Purple for other
           '#ff6b6b'  // Light red for employee
-        ],</old_str>
+        ],
+        borderWidth: 4,
+        borderColor: '#ffffff',
+        hoverBorderWidth: 6,
+        hoverOffset: 15,
+      },</old_str>
         borderWidth: 4,
         borderColor: '#ffffff',
         hoverBorderWidth: 6,

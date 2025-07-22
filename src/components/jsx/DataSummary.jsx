@@ -153,7 +153,10 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
             default:
               dataType = 'Payment';
               displayName = `Payment: ${entry.description || 'Payment Entry'}`;
-              description = entry.description || 'Payment';</old_str>
+              description = entry.description || 'Payment';
+          }
+
+          allEntries.push({</old_str>
           }
 
           allEntries.push({
