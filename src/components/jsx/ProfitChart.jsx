@@ -1249,43 +1249,45 @@ function ProfitChart({
         {/* Weekly Profit Chart */}
         <div className="col-12">
           <div className="profit-chart-card">
-            <div className="d-flex align-items-center mb-2 flex-wrap gap-2">
-              <h5 className="mb-0">
-                <i className="bi bi-bar-chart me-2"></i>
-                Weekly Profit 
-                <small className="text-muted ms-2 d-none d-md-inline">
-                  (Last 12 weeks)
-                </small>
-              </h5>
-              
-              {/* Checkboxes - positioned next to title */}
-              <div className="d-flex gap-1 align-items-center">
-                {addWeeklyExpenseAdjustment && (
+            <div className="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+              <div className="d-flex align-items-center gap-2 flex-wrap">
+                <h5 className="mb-0">
+                  <i className="bi bi-bar-chart me-2"></i>
+                  Weekly Profit 
+                  <small className="text-muted ms-2 d-none d-md-inline">
+                    (Last 12 weeks)
+                  </small>
+                </h5>
+                
+                {/* Checkboxes - positioned next to title */}
+                <div className="d-flex gap-1 align-items-center">
+                  {addWeeklyExpenseAdjustment && (
+                    <div className="form-check form-switch">
+                      <input 
+                        className="form-check-input" 
+                        type="checkbox" 
+                        id="weeklyExpenseAdjustment1400"
+                        checked={addWeeklyExpenseAdjustment1400}
+                        onChange={(e) => {
+                          setAddWeeklyExpenseAdjustment1400(e.target.checked);
+                        }}
+                      />
+                    </div>
+                  )}
                   <div className="form-check form-switch">
                     <input 
                       className="form-check-input" 
                       type="checkbox" 
-                      id="weeklyExpenseAdjustment1400"
-                      checked={addWeeklyExpenseAdjustment1400}
+                      id="weeklyExpenseAdjustment"
+                      checked={addWeeklyExpenseAdjustment}
                       onChange={(e) => {
-                        setAddWeeklyExpenseAdjustment1400(e.target.checked);
+                        setAddWeeklyExpenseAdjustment(e.target.checked);
+                        if (!e.target.checked) {
+                          setAddWeeklyExpenseAdjustment1400(false);
+                        }
                       }}
                     />
                   </div>
-                )}
-                <div className="form-check form-switch">
-                  <input 
-                    className="form-check-input" 
-                    type="checkbox" 
-                    id="weeklyExpenseAdjustment"
-                    checked={addWeeklyExpenseAdjustment}
-                    onChange={(e) => {
-                      setAddWeeklyExpenseAdjustment(e.target.checked);
-                      if (!e.target.checked) {
-                        setAddWeeklyExpenseAdjustment1400(false);
-                      }
-                    }}
-                  />
                 </div>
               </div>
             </div>
@@ -1319,43 +1321,45 @@ function ProfitChart({
         {/* Monthly Profit Chart */}
         <div className="col-12">
           <div className="profit-chart-card">
-            <div className="d-flex align-items-center mb-2 flex-wrap gap-2">
-              <h5 className="mb-0">
-                <i className="bi bi-calendar-month me-2"></i>
-                Monthly Profit 
-                <small className="text-muted ms-2 d-none d-md-inline">
-                  (Last 12 months)
-                </small>
-              </h5>
-              
-              {/* Checkboxes - positioned next to title */}
-              <div className="d-flex gap-1 align-items-center">
-                {addMonthlyExpenseAdjustment && (
+            <div className="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+              <div className="d-flex align-items-center gap-2 flex-wrap">
+                <h5 className="mb-0">
+                  <i className="bi bi-calendar-month me-2"></i>
+                  Monthly Profit 
+                  <small className="text-muted ms-2 d-none d-md-inline">
+                    (Last 12 months)
+                  </small>
+                </h5>
+                
+                {/* Checkboxes - positioned next to title */}
+                <div className="d-flex gap-1 align-items-center">
+                  {addMonthlyExpenseAdjustment && (
+                    <div className="form-check form-switch">
+                      <input 
+                        className="form-check-input" 
+                        type="checkbox" 
+                        id="monthlyExpenseAdjustment1400"
+                        checked={addMonthlyExpenseAdjustment1400}
+                        onChange={(e) => {
+                          setAddMonthlyExpenseAdjustment1400(e.target.checked);
+                        }}
+                      />
+                    </div>
+                  )}
                   <div className="form-check form-switch">
                     <input 
                       className="form-check-input" 
                       type="checkbox" 
-                      id="monthlyExpenseAdjustment1400"
-                      checked={addMonthlyExpenseAdjustment1400}
+                      id="monthlyExpenseAdjustment"
+                      checked={addMonthlyExpenseAdjustment}
                       onChange={(e) => {
-                        setAddMonthlyExpenseAdjustment1400(e.target.checked);
+                        setAddMonthlyExpenseAdjustment(e.target.checked);
+                        if (!e.target.checked) {
+                          setAddMonthlyExpenseAdjustment1400(false);
+                        }
                       }}
                     />
                   </div>
-                )}
-                <div className="form-check form-switch">
-                  <input 
-                    className="form-check-input" 
-                    type="checkbox" 
-                    id="monthlyExpenseAdjustment"
-                    checked={addMonthlyExpenseAdjustment}
-                    onChange={(e) => {
-                      setAddMonthlyExpenseAdjustment(e.target.checked);
-                      if (!e.target.checked) {
-                        setAddMonthlyExpenseAdjustment1400(false);
-                      }
-                    }}
-                  />
                 </div>
               </div>
             </div>
