@@ -1104,53 +1104,53 @@ function ProfitChart({
                     />
                   </div>
                 </div>
-
-                {/* Navigation Controls for Mobile - on same line */}
-                {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 && (
-                  <div className="d-flex align-items-center gap-1">
-                    <button 
-                      ref={prevRef}
-                      className="btn btn-sm btn-outline-primary swiper-btn-prev"
-                      type="button"
-                      onClick={() => dailySwiperRef.current?.slidePrev()}
-                      style={{
-                        minWidth: '28px',
-                        width: '28px',
-                        height: '28px',
-                        padding: '0',
-                        borderRadius: '50%',
-                        fontSize: '0.75rem'
-                      }}
-                    >
-                      <i className="bi bi-chevron-left"></i>
-                    </button>
-                    <small className="text-muted" style={{
-                      fontSize: '0.7rem',
-                      margin: '0 0.25rem',
-                      flexShrink: '0',
-                      whiteSpace: 'nowrap'
-                    }}>
-                      {currentSlide + 1}/{dailyTrendData.totalSlides}
-                    </small>
-                    <button 
-                      ref={nextRef}
-                      className="btn btn-sm btn-outline-primary swiper-btn-next"
-                      type="button"
-                      onClick={() => dailySwiperRef.current?.slideNext()}
-                      style={{
-                        minWidth: '28px',
-                        width: '28px',
-                        height: '28px',
-                        padding: '0',
-                        borderRadius: '50%',
-                        fontSize: '0.75rem'
-                      }}
-                    >
-                      <i className="bi bi-chevron-right"></i>
-                    </button>
-                  </div>
-                )}
               </div>
+
+              {/* Navigation Controls for Mobile - right aligned */}
+              {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 && (
+                <div className="d-flex align-items-center gap-1 ms-auto">
+                  <button 
+                    ref={prevRef}
+                    className="btn btn-sm btn-outline-primary swiper-btn-prev"
+                    type="button"
+                    onClick={() => dailySwiperRef.current?.slidePrev()}
+                    style={{
+                      minWidth: '28px',
+                      width: '28px',
+                      height: '28px',
+                      padding: '0',
+                      borderRadius: '50%',
+                      fontSize: '0.75rem'
+                    }}
+                  >
+                    <i className="bi bi-chevron-left"></i>
+                  </button>
+                  <small className="text-muted" style={{
+                    fontSize: '0.7rem',
+                    margin: '0 0.25rem',
+                    flexShrink: '0',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {currentSlide + 1}/{dailyTrendData.totalSlides}
+                  </small>
+                  <button 
+                    ref={nextRef}
+                    className="btn btn-sm btn-outline-primary swiper-btn-next"
+                    type="button"
+                    onClick={() => dailySwiperRef.current?.slideNext()}
+                    style={{
+                      minWidth: '28px',
+                      width: '28px',
+                      height: '28px',
+                      padding: '0',
+                      borderRadius: '50%',
+                      fontSize: '0.75rem'
+                    }}
+                  >
+                    <i className="bi bi-chevron-right"></i>
+                  </button>
+                </div>
+              )}
 
               {!dailyTrendData.isMobile && dailyTrendData.dailyDataCount > 30 && (
                 <small className="text-muted d-none d-lg-block">
