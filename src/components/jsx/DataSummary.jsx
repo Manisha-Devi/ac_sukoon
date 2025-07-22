@@ -19,7 +19,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
     description: '',
     date: new Date().toISOString().split('T')[0]
   });
-
+  
   // Pagination states for summary tables
   const [approvedEntriesPage, setApprovedEntriesPage] = useState(1);
   const [cashDepositsPage, setCashDepositsPage] = useState(1);
@@ -144,11 +144,6 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
               dataType = 'Other Payment';
               displayName = `Other: ${entry.paymentType || entry.paymentDetails || 'Other Payment'}`;
               description = entry.paymentDetails || entry.paymentType || 'Other payment';
-              break;
-            case 'employee':
-              dataType = 'Employee Payment';
-              displayName = `Employee: ${entry.paymentType || entry.description || 'Employee Payment'}`;
-              description = entry.paymentType || entry.description || 'Employee payment';
               break;
             default:
               dataType = 'Payment';
@@ -400,9 +395,9 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
     const cashExpenses = calculateCashExpenses();
     const cashDeposits = calculateTotalCashDeposits();
     const fixedCashGiven = calculateFixedCashGivenByCurrentUser();
-
+    
     const cashInHand = incomeCash - (cashExpenses + cashDeposits + fixedCashGiven);
-
+    
     console.log('💰 CASH IN HAND CALCULATION - DataSummary:');
     console.log('📊 Income Cash:', incomeCash);
     console.log('📊 Cash Expenses:', cashExpenses);
@@ -410,7 +405,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
     console.log('📊 Fixed Cash Given by Current User:', fixedCashGiven);
     console.log('📊 Formula: Income - (Expenses + Deposits + Fixed Cash Given)');
     console.log('📊 Result:', incomeCash, '-', '(', cashExpenses, '+', cashDeposits, '+', fixedCashGiven, ') =', cashInHand);
-
+    
     return cashInHand;
   };
 
@@ -515,9 +510,6 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
               break;
             case 'Other Payment':
               result = await authService.updateOtherPaymentStatus(entryId, newStatus, approverName);
-              break;
-            case 'Employee Payment':
-              result = await authService.updateEmployeePaymentStatus(entryId, newStatus, approverName);
               break;
             default:
               console.error(`Unsupported data type: ${entry.dataType}`);
@@ -907,7 +899,6 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
 
         {/* Summary Card */}
         {showSummary && (
-          ```
           <div className="summary-card-container">
             <div className="summary-card-content">
               <h5><i className="bi bi-bar-chart"></i> Data Summary</h5>
@@ -1026,7 +1017,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                           const dateB = new Date(b.dateFrom || b.date);
                           return dateB - dateA;
                         });
-
+                        
                         if (incomeEntries.length === 0) {
                           return (
                             <div className="no-approved-entries">
@@ -1147,7 +1138,7 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                           const dateB = new Date(b.dateFrom || b.date);
                           return dateB - dateA;
                         });
-
+                        
                         if (expenseEntries.length === 0) {
                           return (
                             <div className="no-approved-entries">

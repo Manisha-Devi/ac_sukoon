@@ -270,14 +270,6 @@ function App() {
             throw new Error(`OtherPayments fetch failed: ${otherPayments?.error || 'Unknown error'}`);
           }
 
-          setLoadingProgress(85);
-          setCurrentLoadingAction('Fetching employee payments...');
-          console.log('👥 Fetching employeePayments...');
-          const employeePayments = await authService.getEmployeePayments();
-          if (!employeePayments?.success) {
-            throw new Error(`EmployeePayments fetch failed: ${employeePayments?.error || 'Unknown error'}`);
-          }
-
           setLoadingProgress(90);
           setCurrentLoadingAction('Fetching user data...');
           console.log('👤 Fetching allUsersData...');
@@ -365,13 +357,6 @@ function App() {
             })));
           }
 
-          if (employeePayments?.data && Array.isArray(employeePayments.data)) {
-            combinedExpenseData.push(...employeePayments.data.map(payment => ({
-              ...payment,
-              type: 'employee'
-            })));
-          }
-
           // Update parent state
           setFareData(combinedFareData);
           setExpenseData(combinedExpenseData);
@@ -440,8 +425,7 @@ function App() {
               addaPayments: addaPayments?.data?.length || 0,
               unionPayments: unionPayments?.data?.length || 0,
               servicePayments: servicePayments?.data?.length || 0,
-              otherPayments: otherPayments?.data?.length || 0,
-              employeePayments: employeePayments?.data?.length || 0
+              otherPayments: otherPayments?.data?.length || 0
             }
           }));
 
@@ -697,10 +681,6 @@ function App() {
           case 'other':
             description = `Other Payment - ${expenseEntry.paymentDetails || expenseEntry.description || 'Other'}`;
             particulars = expenseEntry.paymentDetails || expenseEntry.description || 'Other';
-            break;
-          case 'employee':
-            description = `Employee Payment - ${expenseEntry.paymentType || expenseEntry.description || 'Employee Expense'}`;
-            particulars = expenseEntry.paymentType || expenseEntry.description || 'Employee Expense';
             break;
           default:
             description = `${expenseEntry.type} - ${expenseEntry.description || 'Payment'}`;
