@@ -814,7 +814,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
                       <span className="breakdown-label">Other Payments</span>
                       <span className="breakdown-value">{dataStatistics.dataBreakdown.otherPayments}</span>
                     </div>
-                     <div className="breakdown-item expense-type">
+                    <div className="breakdown-item expense-type">
                       <span className="breakdown-icon">🍽️</span>
                       <span className="breakdown-label">Food Payments</span>
                       <span className="breakdown-value">{dataStatistics.dataBreakdown.foodPayments}</span>
