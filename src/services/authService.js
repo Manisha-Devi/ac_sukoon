@@ -2214,6 +2214,67 @@ class AuthService {
       return result;
     } catch (error) {
       console.error('❌ Error fetching employee payments:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateEmployeePayment(data) {
+    try {
+      console.log('📝 Updating employee payment in Google Sheets:', data);
+
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
+        action: 'updateEmployeePayment',
+        entryId: data.entryId,
+        updatedData: data.updatedData
+      }));
+
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 30000, 3);
+      console.log('✅ Employee payment update response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating employee payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteEmployeePayment(data) {
+    try {
+      console.log('🗑️ Deleting employee payment from Google Sheets:', data);
+
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
+        action: 'deleteEmployeePayment',
+        entryId: data.entryId
+      }));
+
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 30000, 3);
+      console.log('✅ Employee payment delete response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error deleting employee payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateEmployeePaymentStatus(entryId, newStatus, approverName) {
+    try {
+      console.log(`🔄 Updating employee payment status - ID: ${entryId}, Status: ${newStatus}, Approver: ${approverName}`);
+
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
+        action: 'updateEmployeePaymentStatus',
+        entryId: entryId,
+        newStatus: newStatus,
+        approverName: approverName
+      }));
+
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 30000, 3);
+      console.log('✅ Employee payment status update response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating employee payment status:', error);
+      return { success: false, error: error.message };
+    }
+  } {
+      console.error('❌ Error fetching employee payments:', error);
       // Return empty data structure instead of error to prevent UI crashes
       return {
         success: true,
