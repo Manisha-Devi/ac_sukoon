@@ -972,6 +972,7 @@ class AuthService {
       console.error('❌ Error fetching other payments:', error);
       // Return empty datastructure instead of error to prevent UI crashes
       return { 
+```text
         success: true, 
         data: [],
         message: 'Other payments loaded from local cache (API temporarily unavailable)'
@@ -1987,7 +1988,7 @@ class AuthService {
       const result = await response.json();
       console.log('✅ Cash deposits API response:', result);
 
-      if (result.success && result.data) {
+      if (result.success && result.data) {```text
         console.log(`💰 Successfully fetched ${result.data.length} cash deposits from Google Sheets`);
         result.data.forEach((deposit, index) => {
           console.log(`${index + 1}. Cash Deposit:`, {
