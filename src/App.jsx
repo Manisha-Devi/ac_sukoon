@@ -278,7 +278,8 @@ function App() {
             throw new Error(`EmployeePayments fetch failed: ${employeePayments?.error || 'Unknown error'}`);
           }
 
-          setLoadingProgress(90);</old_str>
+          setLoadingProgress(90);
+          setCurrentLoadingAction('Fetching user data...');</old_str>
 
           setLoadingProgress(90);
           setCurrentLoadingAction('Fetching user data...');
