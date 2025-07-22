@@ -1063,101 +1063,46 @@ function ProfitChart({
         {/* Daily Profit Chart */}
         <div className="col-12">
           <div className="profit-chart-card">
-            <div className="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
-              <div className="d-flex align-items-center gap-2 flex-wrap">
-                <h5 className="mb-0">
-                  <i className="bi bi-line-chart me-2"></i>
-                  Daily Profit 
-                  <small className="text-muted ms-2 d-none d-md-inline">
-                    ({dailyTrendData.dailyDataCount} days)
-                  </small>
-                </h5>
-                
-                {/* Checkboxes - positioned next to title */}
-                <div className="d-flex gap-1 align-items-center">
-                  {addExpenseAdjustment && (
-                    <div className="form-check form-switch">
-                      <input 
-                        className="form-check-input" 
-                        type="checkbox" 
-                        id="expenseAdjustment1400"
-                        checked={addExpenseAdjustment1400}
-                        onChange={(e) => {
-                          setAddExpenseAdjustment1400(e.target.checked);
-                        }}
-                      />
-                    </div>
-                  )}
+            <div className="d-flex justify-content-start align-items-center mb-2 gap-2">
+              <h5 className="mb-0">
+                <i className="bi bi-line-chart me-2"></i>
+                Daily Profit 
+                <small className="text-muted ms-2 d-none d-md-inline">
+                  ({dailyTrendData.dailyDataCount} days)
+                </small>
+              </h5>
+              
+              {/* Checkboxes - positioned next to title */}
+              <div className="d-flex gap-1 align-items-center">
+                {addExpenseAdjustment && (
                   <div className="form-check form-switch">
                     <input 
                       className="form-check-input" 
                       type="checkbox" 
-                      id="expenseAdjustment"
-                      checked={addExpenseAdjustment}
+                      id="expenseAdjustment1400"
+                      checked={addExpenseAdjustment1400}
                       onChange={(e) => {
-                        setAddExpenseAdjustment(e.target.checked);
-                        // When 1000 checkbox is unchecked, hide and uncheck 1400
-                        if (!e.target.checked) {
-                          setAddExpenseAdjustment1400(false);
-                        }
+                        setAddExpenseAdjustment1400(e.target.checked);
                       }}
                     />
                   </div>
+                )}
+                <div className="form-check form-switch">
+                  <input 
+                    className="form-check-input" 
+                    type="checkbox" 
+                    id="expenseAdjustment"
+                    checked={addExpenseAdjustment}
+                    onChange={(e) => {
+                      setAddExpenseAdjustment(e.target.checked);
+                      // When 1000 checkbox is unchecked, hide and uncheck 1400
+                      if (!e.target.checked) {
+                        setAddExpenseAdjustment1400(false);
+                      }
+                    }}
+                  />
                 </div>
               </div>
-
-              {/* Navigation Controls for Mobile - right aligned */}
-              {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 && (
-                <div className="d-flex align-items-center gap-1 ms-auto">
-                  <button 
-                    ref={prevRef}
-                    className="btn btn-sm btn-outline-primary swiper-btn-prev"
-                    type="button"
-                    onClick={() => dailySwiperRef.current?.slidePrev()}
-                    style={{
-                      minWidth: '28px',
-                      width: '28px',
-                      height: '28px',
-                      padding: '0',
-                      borderRadius: '50%',
-                      fontSize: '0.75rem'
-                    }}
-                  >
-                    <i className="bi bi-chevron-left"></i>
-                  </button>
-                  <small className="text-muted" style={{
-                    fontSize: '0.7rem',
-                    margin: '0 0.25rem',
-                    flexShrink: '0',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {currentSlide + 1}/{dailyTrendData.totalSlides}
-                  </small>
-                  <button 
-                    ref={nextRef}
-                    className="btn btn-sm btn-outline-primary swiper-btn-next"
-                    type="button"
-                    onClick={() => dailySwiperRef.current?.slideNext()}
-                    style={{
-                      minWidth: '28px',
-                      width: '28px',
-                      height: '28px',
-                      padding: '0',
-                      borderRadius: '50%',
-                      fontSize: '0.75rem'
-                    }}
-                  >
-                    <i className="bi bi-chevron-right"></i>
-                  </button>
-                </div>
-              )}
-
-              {!dailyTrendData.isMobile && dailyTrendData.dailyDataCount > 30 && (
-                <small className="text-muted d-none d-lg-block">
-                  <i className="bi bi-mouse me-1"></i>
-                  Scroll/Zoom to view all data
-                </small>
-              )}
             </div>
 
             <div style={{ 
@@ -1166,82 +1111,22 @@ function ProfitChart({
               width: '100%',
               position: 'relative'
             }}>
-              {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 ? (
-                <Swiper
-                  ref={dailySwiperRef}
-                  modules={[Navigation, Pagination]}
-                  spaceBetween={10}
-                  slidesPerView={1}
-                  navigation={{
-                    prevEl: prevRef.current,
-                    nextEl: nextRef.current,
-                    enabled: true,
-                  }}
-                  pagination={{ 
-                    clickable: true,
-                    el: '.swiper-pagination-custom',
-                    enabled: true,
-                  }}
-                  onSlideChange={(swiper) => setCurrentSlide(swiper.activeIndex)}
-                  onSwiper={(swiper) => {
-                    // Update navigation after swiper is initialized
-                    setTimeout(() => {
-                      if (swiper.navigation) {
-                        swiper.navigation.prevEl = prevRef.current;
-                        swiper.navigation.nextEl = nextRef.current;
-                        swiper.navigation.init();
-                        swiper.navigation.update();
-                      }
-                    }, 100);
-                  }}
-                  style={{ height: '100%' }}
-                  className="chart-swiper"
-                >
-                  {dailyTrendData.slides.map((slideData, index) => (
-                    <SwiperSlide key={index}>
-                      <div style={{ height: '100%', padding: '0 5px' }}>
-                        <Line 
-                          data={slideData} 
-                          options={{
-                            ...trendChartOptions,
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            layout: {
-                              padding: {
-                                left: 5,
-                                right: 5,
-                                top: 5,
-                                bottom: 15
-                              }
-                            }
-                          }} 
-                        />
-                      </div>
-                    </SwiperSlide>
-                  ))}
-                </Swiper>) : (
-                <Line 
-                  data={dailyTrendData.slides[0]} 
-                  options={{
-                    ...trendChartOptions,
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    layout: {
-                      padding: {
-                        left: 5,
-                        right: 5,
-                        top: 5,
-                        bottom: 5
-                      }
+              <Line 
+                data={dailyTrendData.slides[0]} 
+                options={{
+                  ...trendChartOptions,
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  layout: {
+                    padding: {
+                      left: 5,
+                      right: 5,
+                      top: 5,
+                      bottom: 5
                     }
-                  }} 
-                />
-              )}
-
-              {/* Custom pagination dots for mobile */}
-              {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 && (
-                <div className="swiper-pagination-custom"></div>
-              )}
+                  }
+                }} 
+              />
             </div>
           </div>
         </div>
