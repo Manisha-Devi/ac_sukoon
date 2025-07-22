@@ -10,7 +10,7 @@ import FareEntry from "./components/jsx/FareRecipt";
 import BasicPayment from "./components/jsx/BasicPayment.jsx";
 import MiscPayment from "./components/jsx/MiscPayment";
 import BonusCalculator from "./components/jsx/BonusCalculator";
-import Analytics from "./components/jsx/Analytics";
+import ProfitChart from './components/jsx/ProfitChart';
 import CashBook from "./components/jsx/CashBook";
 import DataSummary from './components/jsx/DataSummary.jsx';
 import CashSummary from './components/jsx/CashSummary.jsx';
@@ -177,7 +177,7 @@ function App() {
   // Data refresh function for Navbar component
   const handleDataRefresh = async () => {
     console.log('🔄 App.jsx: Starting data refresh from Navbar...');
-    
+
     setLoadingProgress(0);
     setCurrentLoadingAction('Initializing data refresh...');
 
@@ -439,7 +439,7 @@ function App() {
 
           setLoadingProgress(100);
           setCurrentLoadingAction('Processing complete!');
-          
+
           console.log('✅ App.jsx: Data refresh completed from Navbar');
           console.log(`📊 Loaded ${combinedFareData.length} fare entries and ${combinedExpenseData.length} expense entries`);
           console.log(`🔄 Total retry attempts: ${retryCount}`);
@@ -451,7 +451,7 @@ function App() {
           }, 1000);
         } catch (fetchError) {
           console.warn(`⚠️ Attempt ${retryCount} failed:`, fetchError.message);
-          
+
           if (retryCount < maxRetries) {
             console.log(`🔄 Retrying in 3 seconds... (${retryCount}/${maxRetries})`);
             await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 3 seconds before retry
@@ -462,7 +462,7 @@ function App() {
         }
       }
 
-      
+
 
     } catch (error) {
       console.error('❌ App.jsx: Error in data refresh:', error);
@@ -778,7 +778,7 @@ function App() {
         currentAction={currentLoadingAction}
         refreshCount={dataStatistics.refreshCount}
       />
-      
+
       {/* Navbar Component */}
       <Navbar 
           user={user} 
@@ -892,7 +892,7 @@ function App() {
               onClick={() => handleMenuClick("analytics")}
             >
               <i className="bi bi-graph-up"></i>
-              Analytics
+              Profit Chart
             </button>
           </div>
         </div>
@@ -940,7 +940,7 @@ function App() {
         )}
         {activeTab === "bonus-calc" && <BonusCalculator currentUser={user} />}
         {activeTab === "analytics" && (
-          <Analytics 
+          <ProfitChart
             fareData={fareData}
             expenseData={expenseData}
             totalEarnings={totalEarnings}
