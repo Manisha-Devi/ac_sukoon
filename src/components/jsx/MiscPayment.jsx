@@ -669,6 +669,14 @@ function MiscPayment({
   // Handle Other Payment submission
   const handleOtherSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate payment type - prevent generic "food" or "transport" entries
+    const paymentType = otherData.paymentType.toLowerCase().trim();
+    if (paymentType === 'food' || paymentType === 'transport') {
+      alert('⚠️ Please select a specific payment type from the dropdown options instead of just typing "food" or "transport".');
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
@@ -1273,6 +1281,12 @@ function MiscPayment({
                       name="paymentType"
                       className="payment-type-selector"
                     />
+                    {(otherData.paymentType.toLowerCase().trim() === 'food' || 
+                      otherData.paymentType.toLowerCase().trim() === 'transport') && (
+                      <div className="alert alert-warning mt-2 mb-0" style={{padding: '8px 12px', fontSize: '14px'}}>
+                        <i className="bi bi-exclamation-triangle"></i> Please select a specific item from the dropdown instead of just "{otherData.paymentType}".
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="row">
