@@ -909,8 +909,7 @@ function App() {
             <h6>REPORTS</h6>
             <button
               className={`menu-item ${activeTab === "analytics" ? "active" : ""}`}
-              The code was throwing error because of a misplaced tag, it has now been removed.
-onClick={() => handleMenuClick("analytics")}
+              onClick={() => handleMenuClick("analytics")}
             >
               <i className="bi bi-graph-up"></i>
               Profit Chart
