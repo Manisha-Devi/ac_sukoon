@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useRef } from "react";
 import "../css/ProfitChart.css";
 import {
   Chart as ChartJS,
@@ -59,6 +59,11 @@ function ProfitChart({
   const [addWeeklyExpenseAdjustment1400, setAddWeeklyExpenseAdjustment1400] = useState(false);
   const [addMonthlyExpenseAdjustment, setAddMonthlyExpenseAdjustment] = useState(false);
   const [addMonthlyExpenseAdjustment1400, setAddMonthlyExpenseAdjustment1400] = useState(false);
+
+  // Swiper refs for navigation
+  const dailySwiperRef = useRef(null);
+  const prevRef = useRef(null);
+  const nextRef = useRef(null);
 
   // Simplified logging for better performance
   if (process.env.NODE_ENV === 'development') {
@@ -1096,8 +1101,10 @@ function ProfitChart({
               {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 && (
                 <div className="d-flex align-items-center gap-2">
                   <button 
+                    ref={prevRef}
                     className="btn btn-sm btn-outline-primary swiper-btn-prev"
                     type="button"
+                    onClick={() => dailySwiperRef.current?.slidePrev()}
                   >
                     <i className="bi bi-chevron-left"></i>
                   </button>
@@ -1105,8 +1112,10 @@ function ProfitChart({
                     {currentSlide + 1}/{dailyTrendData.totalSlides}
                   </small>
                   <button 
+                    ref={nextRef}
                     className="btn btn-sm btn-outline-primary swiper-btn-next"
                     type="button"
+                    onClick={() => dailySwiperRef.current?.slideNext()}
                   >
                     <i className="bi bi-chevron-right"></i>
                   </button>
@@ -1129,18 +1138,32 @@ function ProfitChart({
             }}>
               {dailyTrendData.isMobile && dailyTrendData.totalSlides > 1 ? (
                 <Swiper
+                  ref={dailySwiperRef}
                   modules={[Navigation, Pagination]}
                   spaceBetween={10}
                   slidesPerView={1}
                   navigation={{
-                    prevEl: '.swiper-btn-prev',
-                    nextEl: '.swiper-btn-next',
+                    prevEl: prevRef.current,
+                    nextEl: nextRef.current,
+                    enabled: true,
                   }}
                   pagination={{ 
                     clickable: true,
-                    el: '.swiper-pagination-custom'
+                    el: '.swiper-pagination-custom',
+                    enabled: true,
                   }}
                   onSlideChange={(swiper) => setCurrentSlide(swiper.activeIndex)}
+                  onSwiper={(swiper) => {
+                    // Update navigation after swiper is initialized
+                    setTimeout(() => {
+                      if (swiper.navigation) {
+                        swiper.navigation.prevEl = prevRef.current;
+                        swiper.navigation.nextEl = nextRef.current;
+                        swiper.navigation.init();
+                        swiper.navigation.update();
+                      }
+                    }, 100);
+                  }}
                   style={{ height: '100%' }}
                   className="chart-swiper"
                 >
