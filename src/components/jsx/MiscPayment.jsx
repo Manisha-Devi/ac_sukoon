@@ -34,19 +34,34 @@ const SmartSearchableSelect = ({
       setFilteredOptions(allOptions);
       setShowCategoryHint(false);
     } else {
-      const smartFiltered = getFilteredOptions(searchTerm);
-      const finalFiltered = smartFiltered.filter(option => 
-        option.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredOptions(finalFiltered);
-      
-      // Show category hint if smart filtering detected a category
       const lowerSearchTerm = searchTerm.toLowerCase();
-      setShowCategoryHint(
-        lowerSearchTerm.includes('food') || 
-        lowerSearchTerm.includes('transport') || 
-        lowerSearchTerm.includes('challan')
+      const smartFiltered = getFilteredOptions(searchTerm);
+      
+      // Check if smart filtering detected a category keyword
+      const isCategoryKeyword = (
+        lowerSearchTerm === 'food' || 
+        lowerSearchTerm === 'transport' || 
+        lowerSearchTerm === 'challan'
       );
+      
+      let finalFiltered;
+      if (isCategoryKeyword) {
+        // If it's exactly a category keyword, show all items from that category
+        finalFiltered = smartFiltered;
+        setShowCategoryHint(true);
+      } else {
+        // Otherwise, filter normally by search term
+        finalFiltered = smartFiltered.filter(option => 
+          option.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setShowCategoryHint(
+          lowerSearchTerm.includes('food') || 
+          lowerSearchTerm.includes('transport') || 
+          lowerSearchTerm.includes('challan')
+        );
+      }
+      
+      setFilteredOptions(finalFiltered);
     }
     setFocusedIndex(-1);
   }, [searchTerm, allOptions, getFilteredOptions]);
