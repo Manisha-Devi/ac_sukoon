@@ -551,21 +551,22 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
   };
 
   const doughnutData = {
-    labels: ["Fare Collection", "Fuel Expense", "Service Cost", "Other"],
-    datasets: [
-      {
-        data: [60, 25, 10, 5],
-        backgroundColor: [
-          "#667eea",
-          "#ff6b6b", 
-          "#26de81",
-          "#feca57"
+        labels: ["Fare Collection", "Fuel Expense", "Service Cost", "Food Expense", "Other"],
+        datasets: [
+          {
+            data: [55, 20, 10, 10, 5],
+            backgroundColor: [
+              "#667eea",
+              "#ff6b6b", 
+              "#26de81",
+              "#ff9f43",
+              "#feca57"
+            ],
+            borderWidth: 0,
+            hoverOffset: 10,
+          },
         ],
-        borderWidth: 0,
-        hoverOffset: 10,
-      },
-    ],
-  };
+      };
 
   const chartOptions = {
     responsive: true,
@@ -812,6 +813,11 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
                       <span className="breakdown-icon">💸</span>
                       <span className="breakdown-label">Other Payments</span>
                       <span className="breakdown-value">{dataStatistics.dataBreakdown.otherPayments}</span>
+                    </div>
+                     <div className="breakdown-item expense-type">
+                      <span className="breakdown-icon">🍽️</span>
+                      <span className="breakdown-label">Food Payments</span>
+                      <span className="breakdown-value">{dataStatistics.dataBreakdown.foodPayments}</span>
                     </div>
                   </div>
                 </div>

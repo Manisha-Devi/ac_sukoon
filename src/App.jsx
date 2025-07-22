@@ -198,12 +198,12 @@ function App() {
 
         // Individual fetch with retry for each data type
         let fareReceipts, bookingEntries, offDays, fuelPayments, addaPayments;
-        let unionPayments, servicePayments, otherPayments, allUsersData, cashDepositsData;
+        let unionPayments, servicePayments, otherPayments, allUsersData, cashDepositsData, foodPayments;
 
         try {
           // Declare variables first
           let fareReceipts, bookingEntries, offDays, fuelPayments, addaPayments;
-          let unionPayments, servicePayments, otherPayments, allUsersData, cashDepositsData;
+          let unionPayments, servicePayments, otherPayments, allUsersData, cashDepositsData, foodPayments;
 
           // Fetch each data type individually with verification
           setLoadingProgress(10);
@@ -262,12 +262,20 @@ function App() {
             throw new Error(`ServicePayments fetch failed: ${servicePayments?.error || 'Unknown error'}`);
           }
 
-          setLoadingProgress(80);
+          setLoadingProgress(75);
           setCurrentLoadingAction('Fetching other payments...');
           console.log('📦 Fetching otherPayments...');
           otherPayments = await authService.getOtherPayments();
           if (!otherPayments?.success) {
             throw new Error(`OtherPayments fetch failed: ${otherPayments?.error || 'Unknown error'}`);
+          }
+          
+          setLoadingProgress(80);
+          setCurrentLoadingAction('Fetching food payments...');
+          console.log('🍔 Fetching foodPayments...');
+          foodPayments = await authService.getFoodPayments();
+          if (!foodPayments?.success) {
+            throw new Error(`FoodPayments fetch failed: ${foodPayments?.error || 'Unknown error'}`);
           }
 
           setLoadingProgress(90);
@@ -354,6 +362,13 @@ function App() {
             combinedExpenseData.push(...otherPayments.data.map(payment => ({
               ...payment,
               type: 'other'
+            })));
+          }
+          
+          if (foodPayments?.data && Array.isArray(foodPayments.data)) {
+            combinedExpenseData.push(...foodPayments.data.map(payment => ({
+              ...payment,
+              type: 'food'
             })));
           }
 
