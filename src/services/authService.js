@@ -2144,15 +2144,15 @@ class AuthService {
   }
 
   // ============================================================================
-  // EMPLOYEE PAYMENT OPERATIONS
+  // FOOD PAYMENT OPERATIONS (Previously Employee Payments)
   // ============================================================================
 
-  async addEmployeePayment(data) {
+  async addFoodPayment(data) {
     try {
-      console.log('📝 Adding employee payment to Google Sheets:', data);
+      console.log('📝 Adding food payment to Google Sheets:', data);
 
       const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
-        action: 'addEmployeePayment',
+        action: 'addFoodPayment',
         entryId: data.entryId,
         timestamp: data.timestamp,
         date: data.date,
@@ -2163,8 +2163,8 @@ class AuthService {
         totalAmount: data.totalAmount || 0,
         category: data.category || '',
         submittedBy: data.submittedBy || '',
-        entryType: data.entryType || '',
-        entryStatus: data.entryStatus || '',
+        entryType: data.entryType || 'food',
+        entryStatus: data.entryStatus || 'pending',
         approvedBy: data.approvedBy || ''
       }));
 
@@ -2172,20 +2172,26 @@ class AuthService {
 
       if (!result.success && result.error && result.error.includes('Failed to fetch')) {
         console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
-        return { success: true, message: 'Employee payment saved locally', offline: true };
+        return { success: true, message: 'Food payment saved locally', offline: true };
       }
 
-      console.log('✅ Employee payment response:', result);
+      console.log('✅ Food payment response:', result);
       return result;
     } catch (error) {
-      console.error('❌ Error adding employee payment:', error);
+      console.error('❌ Error adding food payment:', error);
       return { success: false, error: error.message };
     }
   }
 
-  async getEmployeePayments() {
+  // Legacy support - Keep employee payment function for backward compatibility
+  async addEmployeePayment(data) {
+    console.log('🔄 Legacy addEmployeePayment called, routing to addFoodPayment');
+    return this.addFoodPayment(data);
+  }
+
+  async getFoodPayments() {
     try {
-      console.log('📋 Fetching employee payments from Google Sheets...');
+      console.log('📋 Fetching food payments from Google Sheets...');
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
@@ -2199,7 +2205,7 @@ class AuthService {
         redirect: 'follow',
         signal: controller.signal,
         body: JSON.stringify(this.apiKeyService.addAPIKey({
-          action: 'getEmployeePayments'
+          action: 'getFoodPayments'
         }))
       });
 
@@ -2210,22 +2216,28 @@ class AuthService {
       }
 
       const result = await response.json();
-      console.log('✅ Employee payments fetched:', result);
+      console.log('✅ Food payments fetched:', result);
       return result;
     } catch (error) {
-      console.error('❌ Error fetching employee payments:', error);
+      console.error('❌ Error fetching food payments:', error);
       // Return empty data structure instead of error to prevent UI crashes
       return {
         success: true,
         data: [],
-        message: 'Employee payments loaded from local cache (API temporarily unavailable)'
+        message: 'Food payments loaded from local cache (API temporarily unavailable)'
       };
     }
   }
 
-  async updateEmployeePayment(data) {
+  // Legacy support
+  async getEmployeePayments() {
+    console.log('🔄 Legacy getEmployeePayments called, routing to getFoodPayments');
+    return this.getFoodPayments();
+  }
+
+  async updateFoodPayment(data) {
     try {
-      console.log('📝 Updating employee payment in Google Sheets:', data);
+      console.log('📝 Updating food payment in Google Sheets:', data);
 
       const response = await fetch(this.API_URL, {
         method: 'POST',
@@ -2235,7 +2247,7 @@ class AuthService {
         mode: 'cors',
         redirect: 'follow',
         body: JSON.stringify(this.apiKeyService.addAPIKey({
-          action: 'updateEmployeePayment',
+          action: 'updateFoodPayment',
           entryId: data.entryId,
           updatedData: data.updatedData
         }))
@@ -2246,17 +2258,23 @@ class AuthService {
       }
 
       const result = await response.json();
-      console.log('✅ Employee payment updated:', result);
+      console.log('✅ Food payment updated:', result);
       return result;
     } catch (error) {
-      console.error('❌ Error updating employee payment:', error);
+      console.error('❌ Error updating food payment:', error);
       return { success: false, error: error.message };
     }
   }
 
-  async deleteEmployeePayment(data) {
+  // Legacy support
+  async updateEmployeePayment(data) {
+    console.log('🔄 Legacy updateEmployeePayment called, routing to updateFoodPayment');
+    return this.updateFoodPayment(data);
+  }
+
+  async deleteFoodPayment(data) {
     try {
-      console.log('🗑️ Deleting employee payment from Google Sheets:', data);
+      console.log('🗑️ Deleting food payment from Google Sheets:', data);
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
@@ -2270,7 +2288,7 @@ class AuthService {
         redirect: 'follow',
         signal: controller.signal,
         body: JSON.stringify(this.apiKeyService.addAPIKey({
-          action: 'deleteEmployeePayment',
+          action: 'deleteFoodPayment',
           entryId: data.entryId
         }))
       });
@@ -2284,17 +2302,17 @@ class AuthService {
       }
 
       const result = await response.json();
-      console.log('✅ Employee payment deleted successfully:', result);
+      console.log('✅ Food payment deleted successfully:', result);
 
       // Validate response structure
       if (result && typeof result === 'object') {
         return result;
       } else {
         console.warn('⚠️ Invalid response format:', result);
-        return { success: true, message: 'Employee payment deleted (response format issue)' };
+        return { success: true, message: 'Food payment deleted (response format issue)' };
       }
     } catch (error) {
-      console.error('❌ Error deleting employee payment:', error);
+      console.error('❌ Error deleting food payment:', error);
       if (error.name === 'AbortError') {
         return { success: false, error: 'Request timeout - delete operation took too long' };
       }
@@ -2302,39 +2320,61 @@ class AuthService {
     }
   }
 
-  async updateEmployeePaymentStatus(entryId, newStatus, approverName) {
+  // Legacy support
+  async deleteEmployeePayment(data) {
+    console.log('🔄 Legacy deleteEmployeePayment called, routing to deleteFoodPayment');
+    return this.deleteFoodPayment(data);
+  }
+
+  async updateFoodPaymentStatus(entryId, newStatus, approverName) {
     try {
       const data = {
         entryId: entryId,
         newStatus: newStatus,
         approverName: approverName
       };
-      const response = await this.makeApprovalAPIRequest('updateEmployeePaymentStatus', data);
+      const response = await this.makeApprovalAPIRequest('updateFoodPaymentStatus', data);
       return response;
     } catch (error) {
-      console.error('Error updating employee payment status:', error);
+      console.error('Error updating food payment status:', error);
       return { success: false, error: error.message };
     }
+  }
+
+  async approveFoodPayment(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('approveFoodPayment', data);
+      return response;
+    } catch (error) {
+      console.error('Error approving food payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async resendFoodPayment(data) {
+    try {
+      const response = await this.makeApprovalAPIRequest('resendFoodPayment', data);
+      return response;
+    } catch (error) {
+      console.error('Error resending food payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Legacy support for employee payment status functions
+  async updateEmployeePaymentStatus(entryId, newStatus, approverName) {
+    console.log('🔄 Legacy updateEmployeePaymentStatus called, routing to updateFoodPaymentStatus');
+    return this.updateFoodPaymentStatus(entryId, newStatus, approverName);
   }
 
   async approveEmployeePayment(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('approveEmployeePayment', data);
-      return response;
-    } catch (error) {
-      console.error('Error approving employee payment:', error);
-      return { success: false, error: error.message };
-    }
+    console.log('🔄 Legacy approveEmployeePayment called, routing to approveFoodPayment');
+    return this.approveFoodPayment(data);
   }
 
   async resendEmployeePayment(data) {
-    try {
-      const response = await this.makeApprovalAPIRequest('resendEmployeePayment', data);
-      return response;
-    } catch (error) {
-      console.error('Error resending employee payment:', error);
-      return { success: false, error: error.message };
-    }
+    console.log('🔄 Legacy resendEmployeePayment called, routing to resendFoodPayment');
+    return this.resendFoodPayment(data);
   }
 }
 

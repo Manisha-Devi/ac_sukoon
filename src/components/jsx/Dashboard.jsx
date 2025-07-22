@@ -841,7 +841,7 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
               <i className="bi bi-currency-rupee"></i>
             </div>
             <div className="stat-details">
-              <h3 className="stat-number">₹{(totalEarnings || 0).toLocaleString()}}</h3>
+              <h3 className="stat-number">₹{(totalEarnings || 0).toLocaleString()}</h3>
               <p className="stat-title">Total Earnings</p>
               <div className="stat-trend positive">
                 <i className="bi bi-trending-up"></i>
