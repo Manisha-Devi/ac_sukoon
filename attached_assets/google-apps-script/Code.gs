@@ -202,19 +202,19 @@ function doPost(e) {
         break;
 
       // ==================== EMPLOYEE PAYMENTS ====================
-      case "addEmployPayment":
+      case "addEmployeePayment":
         result = addEmployPayment(data);
         break;
-      case "getEmployPayments":
+      case "getEmployeePayments":
         result = getEmployPayments();
         break;
-      case "updateEmployPayment":
+      case "updateEmployeePayment":
         result = updateEmployPayment(data);
         break;
-      case "deleteEmployPayment":
+      case "deleteEmployeePayment":
         result = deleteEmployPayment(data);
         break;
-      case "updateEmployPaymentStatus":
+      case "updateEmployeePaymentStatus":
         result = updateEmployPaymentStatus(data);
         break;
 
@@ -393,7 +393,7 @@ function doGet(e) {
       case "getOtherPayments":
         result = getOtherPayments();
         break;
-      case "getEmployPayments":
+      case "getEmployeePayments":
         result = getEmployPayments();
         break;
       case "getCashDeposits":

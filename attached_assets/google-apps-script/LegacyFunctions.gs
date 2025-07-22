@@ -177,14 +177,43 @@ function deleteOtherPaymentLegacy(data) {
 }
 
 // Legacy Employee Payment functions
-function updateEmployPaymentLegacy(data) {
-  console.log('🔄 Legacy updateEmployPayment called, routing to modern implementation');
+function updateEmployeePaymentLegacy(data) {
+  console.log('🔄 Legacy updateEmployeePayment called, routing to modern implementation');
   return updateEmployPayment(data);
 }
 
-function deleteEmployPaymentLegacy(data) {
-  console.log('🔄 Legacy deleteEmployPayment called, routing to modern implementation');
+function deleteEmployeePaymentLegacy(data) {
+  console.log('🔄 Legacy deleteEmployeePayment called, routing to modern implementation');
   return deleteEmployPayment(data);
+}
+
+// Legacy function aliases for Employee Payments
+function addEmployeePayment(data) {
+  return addEmployPayment(data);
+}
+
+function getEmployeePayments() {
+  return getEmployPayments();
+}
+
+function updateEmployeePayment(data) {
+  return updateEmployPayment(data);
+}
+
+function deleteEmployeePayment(data) {
+  return deleteEmployPayment(data);
+}
+
+function updateEmployeePaymentStatus(data) {
+  return updateEmployPaymentStatus(data);
+}
+
+function approveEmployeePayment(data) {
+  return approveEmployPayment(data);
+}
+
+function resendEmployeePayment(data) {
+  return resendEmployPayment(data);
 }
 
 // Direct function aliases for Adda Payments
@@ -711,14 +740,19 @@ function approveOtherPaymentLegacy(data) {
 }
 
 // Legacy EmployeePayments status functions
-function updateEmployPaymentStatusLegacy(data) {
-  console.log('🔄 Legacy updateEmployPaymentStatus called, routing to modern implementation');
+function updateEmployeePaymentStatusLegacy(data) {
+  console.log('🔄 Legacy updateEmployeePaymentStatus called, routing to modern implementation');
   return updateEmployPaymentStatus(data);
 }
 
-function approveEmployPaymentLegacy(data) {
-  console.log('🔄 Legacy approveEmployPayment called, routing to modern implementation');
+function approveEmployeePaymentLegacy(data) {
+  console.log('🔄 Legacy approveEmployeePayment called, routing to modern implementation');
   return approveEmployPayment(data);
+}
+
+function resendEmployeePaymentLegacy(data) {
+  console.log('🔄 Legacy resendEmployeePayment called, routing to modern implementation');
+  return resendEmployPayment(data);
 }
 
 // Legacy FareReceipts status functions
