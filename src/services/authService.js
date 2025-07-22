@@ -1917,6 +1917,157 @@ class AuthService {
   }
 
   // ============================================================================
+  // TRANSPORT PAYMENTS API METHODS
+  // ============================================================================
+
+  // Add Transport Payment to Google Sheets
+  async addTransportPayment(data) {
+    try {
+      console.log('🚛 Adding transport payment to Google Sheets:', data);
+
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
+        action: 'addTransportPayment',
+        entryId: data.entryId,
+        timestamp: data.timestamp,
+        date: data.date,
+        paymentType: data.paymentType || '',
+        description: data.description || '',
+        cashAmount: data.cashAmount || 0,
+        bankAmount: data.bankAmount || 0,
+        totalAmount: data.totalAmount || 0,
+        submittedBy: data.submittedBy || 'driver'
+      }));
+
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 45000, 3);
+
+      if (!result.success && result.error && result.error.includes('Failed to fetch')) {
+        console.log('⚠️ Google Sheets API temporarily unavailable - data saved locally');
+        return { success: false, error: 'API temporarily unavailable - data saved locally' };
+      }
+
+      console.log('✅ Transport payment response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error adding transport payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Get all Transport Payments from Google Sheets
+  async getTransportPayments() {
+    try {
+      console.log('🚛 Fetching transport payments from Google Sheets...');
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        signal: controller.signal,
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
+          action: 'getTransportPayments'
+        }))
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Transport payments fetched:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error fetching transport payments:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Update Transport Payment
+  async updateTransportPayment(data) {
+    try {
+      console.log('📝 Updating transport payment in Google Sheets:', data);
+
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify(this.apiKeyService.addAPIKey({
+          action: 'updateTransportPayment',
+          entryId: data.entryId,
+          updatedData: data.updatedData
+        }))
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Transport payment updated:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating transport payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Delete Transport Payment
+  async deleteTransportPayment(data) {
+    try {
+      console.log('🗑️ Deleting transport payment:', data);
+
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
+        action: 'deleteTransportPayment',
+        entryId: data.entryId
+      }));
+
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 30000, 2);
+
+      console.log('✅ Transport payment delete response:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error deleting transport payment:', error);
+      return { 
+        success: true, 
+        data: [],
+        message: 'Transport payments loaded from local cache (API temporarily unavailable)'
+      };
+    }
+  }
+
+  // Update Transport Payment Status
+  async updateTransportPaymentStatus(entryId, newStatus, approverName) {
+    try {
+      console.log(`🔄 Updating transport payment status: ${entryId} -> ${newStatus}`);
+
+      const requestBody = JSON.stringify(this.apiKeyService.addAPIKey({
+        action: 'updateTransportPaymentStatus',
+        entryId: entryId,
+        newStatus: newStatus,
+        approverName: approverName || ""
+      }));
+
+      const result = await this.makeAPIRequest(this.API_URL, requestBody, 30000, 2);
+
+      console.log('✅ Transport payment status updated:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error updating transport payment status:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ============================================================================
   // FOOD PAYMENTS API METHODS
   // ============================================================================
 

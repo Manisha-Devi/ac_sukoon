@@ -66,7 +66,8 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         unionPayments,
         servicePayments,
         otherPayments,
-        foodPayments
+        foodPayments,
+        transportPayments
       ] = await Promise.all([
         loadWithRetry(() => authService.getFareReceipts()),
         loadWithRetry(() => authService.getBookingEntries()),
@@ -76,7 +77,8 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
         loadWithRetry(() => authService.getUnionPayments()),
         loadWithRetry(() => authService.getServicePayments()),
         loadWithRetry(() => authService.getOtherPayments()),
-        loadWithRetry(() => authService.getFoodPayments())
+        loadWithRetry(() => authService.getFoodPayments()),
+        loadWithRetry(() => authService.getTransportPayments())
       ]);
 
       // Process and combine all data
@@ -457,6 +459,42 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
           source: 'food-payment'
         }));
         combinedCashBookEntries = [...combinedCashBookEntries, ...foodCashEntries];
+      }
+
+       // Process Transport Payments - Only required fields for CashSummary
+       if (transportPayments.success && transportPayments.data) {
+        const processedTransportPayments = transportPayments.data.map(entry => ({
+          entryId: entry.entryId,
+          date: convertToDateString(entry.date),
+          cashAmount: entry.cashAmount || 0,
+          type: 'transport',
+          submittedBy: entry.submittedBy,
+          entryStatus: entry.entryStatus || 'pending',
+          approvedBy: entry.approvedBy || '',
+          // Keep full data for other components
+          id: entry.entryId,
+          timestamp: convertToTimeString(entry.timestamp),
+          paymentType: entry.paymentType,
+          description: entry.description,
+          bankAmount: entry.bankAmount || 0,
+          totalAmount: entry.totalAmount || 0
+        }));
+        combinedExpenseData = [...combinedExpenseData, ...processedTransportPayments];
+
+        // Generate cash book entries from transport payments
+        const transportCashEntries = processedTransportPayments.map(entry => ({
+          id: `transport-${entry.entryId}`,
+          date: entry.date,
+          particulars: "Transport Payment",
+          description: `Transport payment - ${entry.description || entry.paymentType || 'Transport'}`,
+          jfNo: `TRANSPORT-${entry.entryId}`,
+          cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
+          type: 'cr',
+          timestamp: entry.timestamp,
+          source: 'transport-payment'
+        }));
+        combinedCashBookEntries = [...combinedCashBookEntries, ...transportCashEntries];
       }
       // Sort all data by timestamp (newest first)
       combinedFareData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
