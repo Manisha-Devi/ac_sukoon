@@ -276,7 +276,9 @@ function App() {
           const employeePayments = await authService.getEmployeePayments();
           if (!employeePayments?.success) {
             throw new Error(`EmployeePayments fetch failed: ${employeePayments?.error || 'Unknown error'}`);
-          }</old_str>
+          }
+
+          setLoadingProgress(90);</old_str>
 
           setLoadingProgress(90);
           setCurrentLoadingAction('Fetching user data...');
