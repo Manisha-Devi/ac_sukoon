@@ -644,25 +644,29 @@ function MiscPayment({
       // IMMEDIATE STATE UPDATE
       const updatedData = expenseData.filter((item) => item.entryId !== entry.entryId);
       setExpenseData(updatedData);
-      
+
       if (entry && entry.totalAmount) {
         setTotalExpenses((prev) => prev - entry.totalAmount);
       }
 
+      const entryToDelete = entry;
+
       // BACKGROUND SYNC - Don't wait for this
-      try {
-        if (entry.type === 'food' || entry.entryType === 'food') {
-          authService.deleteFoodPayment({ entryId: entry.entryId }).catch((error) => {
+      if (entryToDelete.type === 'food' || entryToDelete.entryType === 'food') {
+        authService.deleteFoodPayment({ entryId: entryToDelete.entryId })
+          .catch((error) => {
             console.error("Background food delete sync failed:", error);
           });
-        } else {
-          // Transport/legal items are stored as 'other' in backend for now
-          authService.deleteOtherPayment({ entryId: entry.entryId }).catch((error) => {
-            console.error("Background delete sync failed:", error);
+      } else if (entryToDelete.type === 'transport') {
+        authService.deleteOtherPayment({ entryId: entryToDelete.entryId })
+          .catch((error) => {
+            console.error("Background transport delete sync failed:", error);
           });
-        }
-      } catch (syncError) {
-        console.warn("Background delete sync failed:", syncError.message);
+      } else {
+        authService.deleteOtherPayment({ entryId: entryToDelete.entryId })
+          .catch((error) => {
+            console.error("Background other delete sync failed:", error);
+          });
       }
     }
   };
@@ -670,12 +674,12 @@ function MiscPayment({
   // Helper function to convert date to YYYY-MM-DD format for date input
   const convertToInputDateFormat = (dateStr) => {
     if (!dateStr) return "";
-    
+
     // If already in YYYY-MM-DD format, return as is
     if (typeof dateStr === "string" && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
       return dateStr;
     }
-    
+
     // If in DD-MM-YYYY format, convert to YYYY-MM-DD
     // IMPORTANT: DD-MM-YYYY me [0]=day, [1]=month, [2]=year
     // YYYY-MM-DD me year-month-day hona chahiye, DD aur MM swap nahi karna
@@ -683,7 +687,7 @@ function MiscPayment({
       const [day, month, year] = dateStr.split('-');
       return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     }
-    
+
     // If it's an ISO string or other format, try to parse and convert
     try {
       const date = new Date(dateStr);
@@ -693,7 +697,7 @@ function MiscPayment({
     } catch (error) {
       console.warn('Error converting date:', dateStr, error);
     }
-    
+
     return dateStr;
   };
 
