@@ -535,15 +535,15 @@ function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
             {/* Pagination */}
             {totalPages > 1 && (
               <nav aria-label="Transaction pagination">
-                <ul className="pagination justify-content-center" data-current={currentPage} data-total={totalPages}>
+                <ul className="pagination justify-content-center">
                   <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
                     <button 
                       className="page-link" 
                       onClick={() => setCurrentPage(currentPage - 1)}
                       disabled={currentPage === 1}
+                      title="Previous Page"
                     >
-                      <span className="d-none d-sm-inline">Previous</span>
-                      <span className="d-sm-none">&laquo;</span>
+                      Previous
                     </button>
                   </li>
 
@@ -554,6 +554,7 @@ function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                         <button 
                           className="page-link" 
                           onClick={() => setCurrentPage(pageNumber)}
+                          title={`Go to page ${pageNumber}`}
                         >
                           {pageNumber}
                         </button>
@@ -566,13 +567,13 @@ function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
                       className="page-link" 
                       onClick={() => setCurrentPage(currentPage + 1)}
                       disabled={currentPage === totalPages}
+                      title="Next Page"
                     >
-                      <span className="d-none d-sm-inline">Next</span>
-                      <span className="d-sm-none">&raquo;</span>
+                      Next
                     </button>
                   </li>
                 </ul>
-                <div className="text-center d-sm-none">
+                <div className="pagination-info">
                   <small className="text-muted">
                     Page {currentPage} of {totalPages}
                   </small>
