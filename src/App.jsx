@@ -915,7 +915,7 @@ function App() {
       </div>
 
       {/* Main Content */}
-      <div className=`"main-content">
+      <div className="main-content">
         {activeTab === "dashboard" && (
           <Dashboard 
             expenseData={expenseData} 
