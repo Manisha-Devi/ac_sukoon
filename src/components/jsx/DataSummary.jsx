@@ -145,10 +145,15 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
               displayName = `Other: ${entry.paymentType || entry.paymentDetails || 'Other Payment'}`;
               description = entry.paymentDetails || entry.paymentType || 'Other payment';
               break;
+            case 'employee':
+              dataType = 'Employee Payment';
+              displayName = `Employee: ${entry.paymentType || entry.description || 'Employee Payment'}`;
+              description = entry.paymentType || entry.description || 'Employee payment';
+              break;
             default:
               dataType = 'Payment';
               displayName = `Payment: ${entry.description || 'Payment Entry'}`;
-              description = entry.description || 'Payment';
+              description = entry.description || 'Payment';</old_str>
           }
 
           allEntries.push({
@@ -511,9 +516,12 @@ function DataSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
             case 'Other Payment':
               result = await authService.updateOtherPaymentStatus(entryId, newStatus, approverName);
               break;
+            case 'Employee Payment':
+              result = await authService.updateEmployeePaymentStatus(entryId, newStatus, approverName);
+              break;
             default:
               console.error(`Unsupported data type: ${entry.dataType}`);
-              return { success: false, error: 'Unsupported data type' };
+              return { success: false, error: 'Unsupported data type' };</old_str>
           }
         } catch (error) {
           console.error(`Error updating ${entry.dataType} status:`, error);
