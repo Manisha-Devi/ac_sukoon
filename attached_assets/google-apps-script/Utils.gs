@@ -174,6 +174,7 @@ const SHEET_NAMES = {
   UNION_PAYMENTS: "UnionPayments",
   SERVICE_PAYMENTS: "ServicePayments",
   OTHER_PAYMENTS: "OtherPayments",
+  FOOD_PAYMENTS: "FoodPayments",
   CASH_DEPOSITS: "CashDeposits"
 };
 
