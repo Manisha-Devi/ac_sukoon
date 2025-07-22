@@ -200,6 +200,7 @@ function MiscPayment({
     "Tea",
     "Cold Drink",
     "Water Bottle",
+    "Challan",
     "Parking Fee",
     "Toll Tax",
     "Police Challan",
