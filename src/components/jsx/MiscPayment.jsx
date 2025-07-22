@@ -439,9 +439,21 @@ function MiscPayment({
     "Lunch", "Breakfast", "Dinner", "Tea", "Cold Drink", "Water Bottle"
   ];
 
+  // Transport & Legal items list - these will be stored as EntryType: 'transport'
+  const transportLegalItems = [
+    "Challan", "Parking Fee", "Toll Tax", "Police Challan", "RTO Fee", 
+    "Insurance Premium", "Permit Fee", "Registration Fee", "Fitness Certificate", 
+    "Pollution Certificate", "Route Permit", "Tax Payment", "Fine Payment", "Document Fee"
+  ];
+
   // Check if selected payment type is a food item
   const isFoodItem = (paymentType) => {
     return foodItems.includes(paymentType);
+  };
+
+  // Check if selected payment type is a transport/legal item
+  const isTransportLegalItem = (paymentType) => {
+    return transportLegalItems.includes(paymentType);
   };
 
   // Handle Other Payment submission
@@ -463,6 +475,7 @@ function MiscPayment({
       });
 
       const isFood = isFoodItem(otherData.paymentType);
+      const isTransportLegal = isTransportLegalItem(otherData.paymentType);
 
       if (editingEntry) {
         // Update existing entry - IMMEDIATE STATE UPDATE
@@ -477,8 +490,8 @@ function MiscPayment({
                 cashAmount: cashAmount,
                 bankAmount: bankAmount,
                 totalAmount: totalAmount,
-                type: isFood ? 'food' : 'other',
-                entryType: isFood ? 'food' : 'other'
+                type: isFood ? 'food' : isTransportLegal ? 'transport' : 'other',
+                entryType: isFood ? 'food' : isTransportLegal ? 'transport' : 'other'
               }
             : entry
         );
@@ -510,6 +523,21 @@ function MiscPayment({
           }).catch((error) => {
             console.error("Background food update sync failed:", error);
           });
+        } else if (isTransportLegal) {
+          // For now, store transport/legal items as 'other' type in backend
+          authService.updateOtherPayment({
+            entryId: editingEntry.entryId,
+            updatedData: {
+              date: otherData.date,
+              paymentType: otherData.paymentType,
+              description: otherData.description,
+              cashAmount: cashAmount,
+              bankAmount: bankAmount,
+              totalAmount: totalAmount,
+            }
+          }).catch((error) => {
+            console.error("Background transport update sync failed:", error);
+          });
         } else {
           authService.updateOtherPayment({
             entryId: editingEntry.entryId,
@@ -531,7 +559,7 @@ function MiscPayment({
         const newEntry = {
           entryId: Date.now(),
           timestamp: timeOnly,
-          type: isFood ? "food" : "other",
+          type: isFood ? "food" : isTransportLegal ? "transport" : "other",
           date: otherData.date,
           paymentType: otherData.paymentType,
           description: otherData.description,
@@ -540,7 +568,7 @@ function MiscPayment({
           totalAmount: totalAmount,
           submittedBy: submittedBy,
           entryStatus: "pending",
-          entryType: isFood ? "food" : "other"
+          entryType: isFood ? "food" : isTransportLegal ? "transport" : "other"
         };
 
         const updatedData = [newEntry, ...expenseData];
@@ -570,6 +598,22 @@ function MiscPayment({
             entryStatus: "pending",
           }).catch((error) => {
             console.error("Background food add sync failed:", error);
+          });
+        } else if (isTransportLegal) {
+          // For now, store transport/legal items as 'other' type in backend
+          authService.addOtherPayment({
+            entryId: newEntry.entryId,
+            timestamp: timeOnly,
+            date: otherData.date,
+            paymentType: otherData.paymentType,
+            description: otherData.description,
+            cashAmount: cashAmount,
+            bankAmount: bankAmount,
+            totalAmount: totalAmount,
+            submittedBy: submittedBy,
+            entryStatus: "pending",
+          }).catch((error) => {
+            console.error("Background transport add sync failed:", error);
           });
         } else {
           authService.addOtherPayment({
@@ -612,8 +656,9 @@ function MiscPayment({
             console.error("Background food delete sync failed:", error);
           });
         } else {
+          // Transport/legal items are stored as 'other' in backend for now
           authService.deleteOtherPayment({ entryId: entry.entryId }).catch((error) => {
-            console.error("Background other delete sync failed:", error);
+            console.error("Background delete sync failed:", error);
           });
         }
       } catch (syncError) {
@@ -664,7 +709,7 @@ function MiscPayment({
         cashAmount: entry.cashAmount.toString(),
         bankAmount: entry.bankAmount.toString(),
       });
-    } else if (entry.type === "other" || entry.type === "food") {
+    } else if (entry.type === "other" || entry.type === "food" || entry.type === "transport") {
       setActiveTab("other");
       setOtherData({
         date: convertToInputDateFormat(entry.date),
@@ -701,7 +746,7 @@ function MiscPayment({
     const userExpenseData = expenseData.filter(
       (entry) => entry.submittedBy === currentUserName &&
                  entry.entryStatus !== "approved" &&
-                 (entry.type === "service" || entry.type === "other" || entry.type === "food")
+                 (entry.type === "service" || entry.type === "other" || entry.type === "food" || entry.type === "transport")
     );
 
     const totalCash = userExpenseData.reduce(
@@ -723,7 +768,7 @@ function MiscPayment({
       (entry) =>
         entry.submittedBy === currentUserName &&
         entry.entryStatus !== "approved" &&
-        (entry.type === "service" || entry.type === "other" || entry.type === "food"),
+        (entry.type === "service" || entry.type === "other" || entry.type === "food" || entry.type === "transport"),
     );
 
     // Sort by entryId (timestamp) in descending order to show newest first
@@ -1129,7 +1174,9 @@ function MiscPayment({
                       <div className="card-body">
                         <div className="entry-header">
                           <span className={`entry-type ${entry.type}`}>
-                            {entry.type === "service" ? "Service" : "Other"}
+                            {entry.type === "service" ? "Service" : 
+                             entry.type === "food" ? "Food" : 
+                             entry.type === "transport" ? "Transport" : "Other"}
                           </span>
 
                           {entry.entryStatus === "pending" && (
@@ -1180,6 +1227,14 @@ function MiscPayment({
                             </div>
                           )}
                            {entry.type === "food" && (
+                            <div>
+                              <p><strong>{entry.paymentType}</strong></p>
+                              {entry.description && (
+                                <p><small>{entry.description.substring(0, 60)}...</small></p>
+                              )}
+                            </div>
+                          )}
+                          {entry.type === "transport" && (
                             <div>
                               <p><strong>{entry.paymentType}</strong></p>
                               {entry.description && (
