@@ -437,37 +437,18 @@ function MiscPayment({
     "Welding Work",
     "Denting Work",
     "Glass Work",
-    "Seat Cover",
-    "Floor Mat",
-    "Accessories",
     "Cleaning Material",
     "Tools Purchase",
     "Emergency Repair",
     "Towing Charge",
-    "Driver Allowance",
-    "Conductor Allowance",
     "Food Expense",
     "Accommodation",
     "Medical Expense",
-    "Uniform Purchase",
-    "Safety Equipment",
-    "Fire Extinguisher",
-    "First Aid Kit",
-    "Communication Device",
-    "GPS Device",
-    "Entertainment System",
-    "CCTV Camera",
-    "Security System",
-    "Stationery",
-    "Office Supplies",
-    "Printing Cost",
-    "Photocopy Cost",
     "Legal Fee",
     "Consultant Fee",
     "Audit Fee",
     "Bank Charges",
     "Interest Payment",
-    "Loan EMI",
     "Rent Payment",
     "Electricity Bill",
     "Water Bill",
@@ -486,13 +467,11 @@ function MiscPayment({
     "Annual Maintenance",
     "Washing Expense",
     "Cleaning Service",
-    "Security Service",
     "Advertisement Cost",
     "Promotion Cost",
     "Donation",
     "Charity Payment",
     "Social Event",
-    "Staff Welfare",
     "Training Cost",
     "Conference Fee",
     "Seminar Fee",
@@ -500,26 +479,13 @@ function MiscPayment({
     "Subscription Fee",
     "Membership Fee",
     "License Fee",
-    "Software Cost",
-    "Hardware Cost",
-    "Equipment Purchase",
-    "Furniture Purchase",
-    "Fixture Purchase",
-    "Renovation Cost",
     "Repair Work",
     "Maintenance Work",
-    "Upgrade Cost",
-    "Modernization Cost",
-    "Safety Upgrade",
     "Compliance Cost",
     "Audit Cost",
     "Inspection Fee",
     "Certification Fee",
     "Testing Fee",
-    "Calibration Fee",
-    "Verification Fee",
-    "Validation Cost",
-    "Quality Check",
     "Emergency Fund",
     "Contingency Fund",
     "Miscellaneous",
@@ -652,7 +618,8 @@ function MiscPayment({
   const transportLegalItems = [
     "Challan", "Parking Fee", "Toll Tax", "Police Challan", "RTO Fee", 
     "Insurance Premium", "Permit Fee", "Registration Fee", "Fitness Certificate", 
-    "Pollution Certificate", "Route Permit", "Tax Payment", "Fine Payment", "Document Fee"
+    "Pollution Certificate", "Route Permit", "Tax Payment", "Fine Payment", "Document Fee",
+    "Loan EMI", "Loan Deductions"
   ];
 
   // Smart categorization function
@@ -679,7 +646,9 @@ function MiscPayment({
         lowerSearchTerm.includes('toll') || 
         lowerSearchTerm.includes('parking') || 
         lowerSearchTerm.includes('fine') || 
-        lowerSearchTerm.includes('tax')) {
+        lowerSearchTerm.includes('tax') ||
+        lowerSearchTerm.includes('loan') ||
+        lowerSearchTerm.includes('emi')) {
       return transportLegalItems;
     }
     
