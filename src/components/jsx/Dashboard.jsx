@@ -429,18 +429,18 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
       if (foodPayments.success && foodPayments.data) {
         const processedFoodPayments = foodPayments.data.map(entry => ({
           entryId: entry.entryId,
-          date: convertToDateString(entry.date),
+          date: entry.date || new Date().toISOString().split('T')[0], // Ensure valid date
           cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
           type: 'food',
           submittedBy: entry.submittedBy,
           entryStatus: entry.entryStatus || 'pending',
           approvedBy: entry.approvedBy || '',
           // Keep full data for other components
           id: entry.entryId,
-          timestamp: convertToTimeString(entry.timestamp),
+          timestamp: entry.timestamp || new Date().toLocaleTimeString(),
           paymentType: entry.paymentType,
           description: entry.description,
-          bankAmount: entry.bankAmount || 0,
           totalAmount: entry.totalAmount || 0
         }));
         combinedExpenseData = [...combinedExpenseData, ...processedFoodPayments];
@@ -465,18 +465,18 @@ function Dashboard({ totalEarnings, totalExpenses, profit, profitPercentage, set
       if (transportPayments.success && transportPayments.data) {
         const processedTransportPayments = transportPayments.data.map(entry => ({
           entryId: entry.entryId,
-          date: convertToDateString(entry.date),
+          date: entry.date || new Date().toISOString().split('T')[0], // Ensure valid date
           cashAmount: entry.cashAmount || 0,
+          bankAmount: entry.bankAmount || 0,
           type: 'transport',
           submittedBy: entry.submittedBy,
           entryStatus: entry.entryStatus || 'pending',
           approvedBy: entry.approvedBy || '',
           // Keep full data for other components
           id: entry.entryId,
-          timestamp: convertToTimeString(entry.timestamp),
+          timestamp: entry.timestamp || new Date().toLocaleTimeString(),
           paymentType: entry.paymentType,
           description: entry.description,
-          bankAmount: entry.bankAmount || 0,
           totalAmount: entry.totalAmount || 0
         }));
         combinedExpenseData = [...combinedExpenseData, ...processedTransportPayments];

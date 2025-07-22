@@ -25,6 +25,16 @@ const CashBook = ({ cashBookEntries, setCashBookEntries, allUsers }) => {
         return `${parts[2]}/${parts[1]}/${parts[0]}`;
       }
 
+      // Handle empty or null dates
+      if (!date || date === 'Invalid Date' || date === 'undefined') {
+        console.warn('Empty or invalid date found:', date);
+        return new Date().toLocaleDateString('en-IN', {
+          day: '2-digit',
+          month: '2-digit', 
+          year: 'numeric'
+        });
+      }
+
       // If it's an ISO string or timestamp, parse and format
       const dateObj = new Date(date);
       if (isNaN(dateObj.getTime())) {

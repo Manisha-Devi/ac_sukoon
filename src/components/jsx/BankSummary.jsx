@@ -139,6 +139,11 @@ function BankSummary({ fareData, expenseData, currentUser, cashDeposit, setCashD
 
       allData = allData.filter(entry => {
         const entryDate = new Date(entry.date);
+        // Skip entries with invalid dates
+        if (isNaN(entryDate.getTime())) {
+          console.warn('Invalid date found in entry:', entry);
+          return false;
+        }
         return entryDate >= fromDate && entryDate <= toDate;
       });
     }
