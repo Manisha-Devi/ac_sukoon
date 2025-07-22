@@ -1111,7 +1111,8 @@ function MiscPayment({
                         <div className="entry-header">
                           <span className={`entry-type ${entry.type}`}>
                             {entry.type === "service" ? "Service" : 
-                             entry.type === "employee" ? "Employee" : "Other"}
+                             entry.type === "employee" ? "Employee" : 
+                             entry.type === "other" ? "Other" : "Unknown"}
                           </span>
 
                           {entry.entryStatus === "pending" && (

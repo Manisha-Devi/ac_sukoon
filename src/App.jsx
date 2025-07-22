@@ -919,6 +919,7 @@ function App() {
             setCashBookEntries={setCashBookEntries}
             currentUser={user}
           />
+        ```text
         )}
         {activeTab === "basic-payment" && (
           <BasicPayment 
