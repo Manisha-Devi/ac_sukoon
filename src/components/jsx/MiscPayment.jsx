@@ -524,8 +524,8 @@ function MiscPayment({
             console.error("Background food update sync failed:", error);
           });
         } else if (isTransportLegal) {
-          // For now, store transport/legal items as 'other' type in backend
-          authService.updateOtherPayment({
+          // Use transportPayments API for transport/legal items
+          authService.updateTransportPayment({
             entryId: editingEntry.entryId,
             updatedData: {
               date: otherData.date,
@@ -600,8 +600,8 @@ function MiscPayment({
             console.error("Background food add sync failed:", error);
           });
         } else if (isTransportLegal) {
-          // For now, store transport/legal items as 'other' type in backend
-          authService.addOtherPayment({
+          // Use transportPayments API for transport/legal items
+          authService.addTransportPayment({
             entryId: newEntry.entryId,
             timestamp: timeOnly,
             date: otherData.date,
@@ -658,7 +658,7 @@ function MiscPayment({
             console.error("Background food delete sync failed:", error);
           });
       } else if (entryToDelete.type === 'transport') {
-        authService.deleteOtherPayment({ entryId: entryToDelete.entryId })
+        authService.deleteTransportPayment({ entryId: entryToDelete.entryId })
           .catch((error) => {
             console.error("Background transport delete sync failed:", error);
           });
