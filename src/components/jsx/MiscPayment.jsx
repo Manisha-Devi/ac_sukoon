@@ -1,7 +1,208 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "../css/MiscPayment.css";
 import authService from "../../services/authService.js";
 import SearchableSelect from "./SearchableSelect.jsx";
+
+// Smart SearchableSelect component with dynamic categorization
+const SmartSearchableSelect = ({ 
+  allOptions = [], 
+  getFilteredOptions,
+  value = '', 
+  onChange, 
+  placeholder = 'Type to search...', 
+  allowCustom = false,
+  name,
+  className = ''
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(value);
+  const [filteredOptions, setFilteredOptions] = useState(allOptions);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [showCategoryHint, setShowCategoryHint] = useState(false);
+  
+  const inputRef = useRef(null);
+  const listRef = useRef(null);
+
+  // Update search term when value prop changes
+  useEffect(() => {
+    setSearchTerm(value);
+  }, [value]);
+
+  // Smart filtering based on search term
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredOptions(allOptions);
+      setShowCategoryHint(false);
+    } else {
+      const smartFiltered = getFilteredOptions(searchTerm);
+      const finalFiltered = smartFiltered.filter(option => 
+        option.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredOptions(finalFiltered);
+      
+      // Show category hint if smart filtering detected a category
+      const lowerSearchTerm = searchTerm.toLowerCase();
+      setShowCategoryHint(
+        lowerSearchTerm.includes('food') || 
+        lowerSearchTerm.includes('transport') || 
+        lowerSearchTerm.includes('challan')
+      );
+    }
+    setFocusedIndex(-1);
+  }, [searchTerm, allOptions, getFilteredOptions]);
+
+  const handleInputChange = (e) => {
+    const newValue = e.target.value;
+    setSearchTerm(newValue);
+    
+    if (newValue.trim().length > 0) {
+      setIsOpen(true);
+    } else {
+      setIsOpen(false);
+    }
+    
+    if (allowCustom) {
+      onChange(newValue);
+    }
+  };
+
+  const handleOptionClick = (option) => {
+    setSearchTerm(option);
+    setIsOpen(false);
+    onChange(option);
+    inputRef.current?.blur();
+  };
+
+  const handleInputFocus = () => {
+    if (searchTerm.trim().length > 0) {
+      setIsOpen(true);
+    }
+  };
+
+  const handleInputBlur = (e) => {
+    const clickedElement = e.relatedTarget;
+    if (clickedElement && clickedElement.closest('.smart-searchable-dropdown')) {
+      return;
+    }
+    setIsOpen(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (!isOpen) {
+      if ((e.key === 'ArrowDown' || e.key === 'Enter') && searchTerm.trim().length > 0) {
+        setIsOpen(true);
+        return;
+      }
+    }
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setFocusedIndex(prev => 
+          prev < filteredOptions.length - 1 ? prev + 1 : 0
+        );
+        break;
+      
+      case 'ArrowUp':
+        e.preventDefault();
+        setFocusedIndex(prev => 
+          prev > 0 ? prev - 1 : filteredOptions.length - 1
+        );
+        break;
+      
+      case 'Enter':
+        e.preventDefault();
+        if (focusedIndex >= 0 && filteredOptions[focusedIndex]) {
+          handleOptionClick(filteredOptions[focusedIndex]);
+        } else if (allowCustom && searchTerm.trim()) {
+          setIsOpen(false);
+          onChange(searchTerm);
+        }
+        break;
+      
+      case 'Escape':
+        setIsOpen(false);
+        inputRef.current?.blur();
+        break;
+      
+      default:
+        break;
+    }
+  };
+
+  // Scroll focused option into view
+  useEffect(() => {
+    if (focusedIndex >= 0 && listRef.current) {
+      const focusedElement = listRef.current.children[focusedIndex];
+      if (focusedElement) {
+        focusedElement.scrollIntoView({
+          block: 'nearest',
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [focusedIndex]);
+
+  return (
+    <div className={`searchable-select smart-searchable-select ${className}`}>
+      <input
+        ref={inputRef}
+        type="text"
+        className="form-control searchable-input"
+        value={searchTerm}
+        onChange={handleInputChange}
+        onFocus={handleInputFocus}
+        onBlur={handleInputBlur}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        name={name}
+        autoComplete="off"
+      />
+      
+      {isOpen && (
+        <div className="searchable-dropdown smart-searchable-dropdown">
+          {showCategoryHint && (
+            <div className="category-hint">
+              <small className="text-muted">
+                🎯 Smart filter active - showing relevant category
+              </small>
+            </div>
+          )}
+          <ul ref={listRef} className="searchable-options">
+            {filteredOptions.length > 0 ? (
+              filteredOptions.map((option, index) => (
+                <li
+                  key={option}
+                  className={`searchable-option ${
+                    index === focusedIndex ? 'focused' : ''
+                  } ${option === value ? 'selected' : ''}`}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleOptionClick(option);
+                  }}
+                  onClick={() => handleOptionClick(option)}
+                  onMouseEnter={() => setFocusedIndex(index)}
+                >
+                  {option}
+                </li>
+              ))
+            ) : (
+              <li className="searchable-option no-results">
+                {allowCustom ? (
+                  <span>
+                    Press Enter to add "{searchTerm}"
+                  </span>
+                ) : (
+                  <span>No matches found</span>
+                )}
+              </li>
+            )}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Helper function to format date for display
 const formatDisplayDate = (dateStr) => {
@@ -445,6 +646,38 @@ function MiscPayment({
     "Insurance Premium", "Permit Fee", "Registration Fee", "Fitness Certificate", 
     "Pollution Certificate", "Route Permit", "Tax Payment", "Fine Payment", "Document Fee"
   ];
+
+  // Smart categorization function
+  const getFilteredPaymentOptions = (searchTerm) => {
+    if (!searchTerm) return otherPaymentDescriptions;
+
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    
+    // If user types "food" related keywords, show only food items
+    if (lowerSearchTerm.includes('food') || 
+        lowerSearchTerm.includes('lunch') || 
+        lowerSearchTerm.includes('breakfast') || 
+        lowerSearchTerm.includes('dinner') || 
+        lowerSearchTerm.includes('tea') || 
+        lowerSearchTerm.includes('drink')) {
+      return foodItems;
+    }
+    
+    // If user types "transport" or "challan" related keywords, show only transport items
+    if (lowerSearchTerm.includes('transport') || 
+        lowerSearchTerm.includes('challan') || 
+        lowerSearchTerm.includes('rto') || 
+        lowerSearchTerm.includes('police') || 
+        lowerSearchTerm.includes('toll') || 
+        lowerSearchTerm.includes('parking') || 
+        lowerSearchTerm.includes('fine') || 
+        lowerSearchTerm.includes('tax')) {
+      return transportLegalItems;
+    }
+    
+    // Otherwise, return all options
+    return otherPaymentDescriptions;
+  };
 
   // Check if selected payment type is a food item
   const isFoodItem = (paymentType) => {
@@ -1051,13 +1284,14 @@ function MiscPayment({
                   </div>
                    <div className="col-md-6 mb-3">
                     <label className="form-label">Payment Type</label>
-                    <SearchableSelect
-                      options={otherPaymentDescriptions}
+                    <SmartSearchableSelect
+                      allOptions={otherPaymentDescriptions}
+                      getFilteredOptions={getFilteredPaymentOptions}
                       value={otherData.paymentType}
                       onChange={(value) =>
                         setOtherData({ ...otherData, paymentType: value })
                       }
-                      placeholder="Type to search payment types..."
+                      placeholder="Type 'food', 'transport' or search payment types..."
                       allowCustom={true}
                       name="paymentType"
                       className="payment-type-selector"
